@@ -1,7 +1,5 @@
-CTL
-==============
-
-Computed Tomography Library
+CTL - Computed Tomography Library
+=================================
 
 [**Check out the documentation!**](https://web.stimulate.ovgu.de/abtheo/doc/html/index.html)
 
@@ -12,67 +10,60 @@ Install Qt
 
 1. Qt libraries:
 
-    `sudo apt install qt5-default`
+    ~~~~~~~~~~~~~{.sh}
+    sudo apt install qt5-default
+    ~~~~~~~~~~~~~
     
 2. Qt Creator (optional but recommended):
 
-    `sudo apt install qtcreator`
-
+    ~~~~~~~~~~~~~{.sh}
+    sudo apt install qtcreator
+    ~~~~~~~~~~~~~
 
 Install OpenCL
 --------------
 
-### example: set up NVIDIA OpenCL
+This is an example how to set up OpenCL for an NVIDIA GPU.
 
 1. install official NVIDIA driver using Driver Manager (tested with driver version 390.48 + GTX1080 Ti) --> reboot
     
 2. install clinfo (optional)
 
-    `sudo apt install clinfo`
-    
+    ~~~~~~~~~~~~~{.sh}
+    sudo apt install clinfo
+    ~~~~~~~~~~~~~
     Then, you can just type
-
-    `clinfo`
-    
+    ~~~~~~~~~~~~~{.sh}
+    clinfo
+    ~~~~~~~~~~~~~
     in order to get a summary of you OpenCL devices.
     
-3. get OpenCL headers
+3. install Nvidia OpenCL dev stuff
 
-    `sudo apt install opencl-headers`
-    
-4. install Nvidia OpenCL dev stuff
+    ~~~~~~~~~~~~~{.sh}
+    sudo apt install nvidia-opencl-dev
+    ~~~~~~~~~~~~~
 
-    `sudo apt install nvidia-opencl-dev`
-    
+4. get OpenCL headers (if not already there)
+
+    ~~~~~~~~~~~~~{.sh}
+    sudo apt install opencl-headers
+    ~~~~~~~~~~~~~
+
 No matter what kind of OpenCL device you want to use, at the end of the day
 there needs to be at least a symbolic link *libOpenCL.so* in the library folder
 (/usr/lib/) that points to a valid ICD loader.
 
-### the use of OpenCL libraries in code
-in Qt (.pro file):
+Compile a project
+-----------------
 
-    LIBS += -lOpenCL
-
-in source code:
-
-    #include <CL/cl.hpp>
-    
-### compile documentation
-
-in order to compile the docs 
-
-1. install Doxygen
-
-    `sudo apt install doxygen`
-
-2. be able to create the class hierarchy graphs
-
-    `sudo apt install graphviz`
-
-3. go to the source directory and type
-
-    `doxygen Doxyfile`
-
+~~~~~~~~~~~~~{.sh}
+cd /path/to/source (where the .pro file lives)
+mkdir build
+cd build
+qmake ..
+make
+~~~~~~~~~~~~~
 
 Teaser: Making projections
 --------------------------
