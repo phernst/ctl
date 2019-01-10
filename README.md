@@ -10,15 +10,15 @@ Install Qt
 
 1. Qt libraries:
 
-    ~~~~~~~~~~~~~{.sh}
+    ```console
     sudo apt install qt5-default
-    ~~~~~~~~~~~~~
+    ```
     
 2. Qt Creator (optional but recommended):
 
-    ~~~~~~~~~~~~~{.sh}
+    ```console
     sudo apt install qtcreator
-    ~~~~~~~~~~~~~
+    ```
 
 Install OpenCL
 --------------
@@ -29,26 +29,26 @@ This is an example how to set up OpenCL for an NVIDIA GPU.
     
 2. install clinfo (optional)
 
-    ~~~~~~~~~~~~~{.sh}
+    ```console
     sudo apt install clinfo
-    ~~~~~~~~~~~~~
+    ```
     Then, you can just type
-    ~~~~~~~~~~~~~{.sh}
+    ```console
     clinfo
-    ~~~~~~~~~~~~~
+    ```
     in order to get a summary of you OpenCL devices.
     
 3. install Nvidia OpenCL dev stuff
 
-    ~~~~~~~~~~~~~{.sh}
+    ```console
     sudo apt install nvidia-opencl-dev
-    ~~~~~~~~~~~~~
+    ```
 
 4. get OpenCL headers (if not already there)
 
-    ~~~~~~~~~~~~~{.sh}
+    ```console
     sudo apt install opencl-headers
-    ~~~~~~~~~~~~~
+    ```
 
 No matter what kind of OpenCL device you want to use, at the end of the day
 there needs to be at least a symbolic link *libOpenCL.so* in the library folder
@@ -57,18 +57,18 @@ there needs to be at least a symbolic link *libOpenCL.so* in the library folder
 Compile a project
 -----------------
 
-~~~~~~~~~~~~~{.sh}
-cd /path/to/source (where the .pro file lives)
+```console
+cd /path/to/source/where/the/.pro/file/lives
 mkdir build
 cd build
 qmake ..
 make
-~~~~~~~~~~~~~
+```
 
 Teaser: Making projections
 --------------------------
 
-~~~~~~~~~~~~~{.cpp}
+```cpp
 #include "acquisition/acquisitionsetup.h"
 #include "acquisition/systemblueprints.h"
 #include "acquisition/trajectories.h"
@@ -119,4 +119,4 @@ int main(int argc, char* argv[])
  *  include(path/to/ocl_config.pri)
  *  include(path/to/ocl_projectors.pri)
  */
- ~~~~~~~~~~~~~
+ ```
