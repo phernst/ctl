@@ -187,8 +187,8 @@ Matrix<3, 1> ProjectionMatrix::directionSourceToPixel(const Matrix<2, 1>& pixelC
  * The \a normalizationMode specifies the length of the returned vector:
  * \li `NoNormalization` (default): No normalization is performed. The length depend on the scaling of the ProjectionMatrix.
  * \li `NormalizeAsUnitVector`: The length equals to 1
- * \li `NormalizeByX`: The returned vector points from the source to the detector pixel and is units
- * of the pixels in x-/channel-direction. If you multiply with the physical pixel spacing in
+ * \li `NormalizeByX`: The returned vector points from the source to the detector pixel. This vector is in units
+ * of the pixel width in x-/channel-direction. If you multiply with the physical pixel spacing in
  * x-direction, you will obtain a vector with the actual physical length.
  * \li `NormalizeByY`: Same as NormalizeByX, but w.r.t. the y-/row-direction. However, NormalizeByX is
  * recommended, since it is considered to be faster.
