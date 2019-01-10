@@ -23,7 +23,7 @@ Install Qt
 Install OpenCL
 --------------
 
-This is an example how to set up OpenCL for an NVIDIA GPU.
+This is an example how to set up OpenCL for a NVIDIA GPU.
 
 1. install official NVIDIA driver using Driver Manager (tested with driver version 390.48 + GTX1080 Ti) --> reboot
     
