@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/binary">
+        <file>voxelHead.den</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,60 @@
+/*! \mainpage Welcome to Computed Tomography Library
+
+ \section intro_sec Computed Tomography Library (CTL)
+
+ Platform independent C++ toolkit for computed tomography simulations.
+
+ \section install_sec Installation (Debian-based platform)
+
+ \subsection step0 Step 0: install GCC (if no compiler installed)
+
+     apt install build-essential
+
+ \subsection step1 Step 1: install Qt libraries
+ 
+     apt install qt5-default
+
+ \subsection step2 Step 2: install OpenCL driver
+ e.g. in case of a Nvidia GPU:
+
+     apt install nvidia-opencl-dev
+
+ \subsection step3 Step 3: get OpenCL headers (if not already there)
+
+     apt install opencl-headers
+ 
+ \subsection step4 Step 4: compile a project
+
+     cd /path/to/source (where the .pro file lives)
+     mkdir build
+     cd build
+     qmake ..
+     make
+
+ \subsection step5 Step 5: use only modules that you need
+
+ The FACT Simulator provides several modules. According to your needs, you can select only a subset of modules.
+ Each module has a corresponding .pri file that you can include into your qmake project (.pro file) using the syntax
+
+     include(example_module.pri)
+
+ So far, the following modules are available:
+ \li ctl.pri: the core library
+ \li den_file_io.pri: .den file handling
+ \li ocl_config.pri: uniform OpenCL environment/configuration
+ \li ocl_projectors.pri: OpenCL based projectors
+ \li gui-widgets.pri: widgets for visualization purposes
+
+ \subsection step6 Install Qt3D for the GUI
+
+ ![Screenshot of a GUI that uses the AcquisitionVisualizerWidget (widget from the gui-widgets.pri module)](GUI-mockUp.png)
+
+ For the 3d visualization widgets you need to install the Qt3D module (Qt version >= 5.9 required):
+
+     apt install qt3d5-dev
+
+ As an IDE, Qt Creator is recommended:
+
+     apt install qtcreator
+
+ */

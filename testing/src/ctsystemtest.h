@@ -1,0 +1,30 @@
+#ifndef CTSYSTEMTEST_H
+#define CTSYSTEMTEST_H
+
+#include <QtTest>
+
+namespace CTL {
+    class CTsystem;
+}
+
+class CTsystemTest : public QObject
+{
+    Q_OBJECT
+
+public:
+    CTsystemTest() = default;
+
+private Q_SLOTS:
+    void initTestCase();
+    void cleanupTestCase();
+    void componentCount();
+    void validSystem();
+    void simpleSystem();
+    void renameCheck();
+    void testSystemBuilder();
+
+private:
+    CTL::CTsystem* _theTestSystem;
+};
+
+#endif // CTSYSTEMTEST_H
