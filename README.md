@@ -65,6 +65,7 @@ This is an example how to set up OpenCL for a NVIDIA GPU.
     clinfo
     ```
     in order to get a summary of your OpenCL devices.
+    You can make sure that the device you intend to use appears in the list.
 
 4. install OpenCL headers (might be already there)
 
