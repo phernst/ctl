@@ -3,9 +3,12 @@ CTL - Computed Tomography Library
 
 A C++11 toolkit for CT imaging with minimal dependencies.
 
-This early release enables to simluate freely adjustable X-ray imaging setups.
+This early release enables to simluate freely customizable cone-beam X-ray
+imaging setups.
 Typical settings like helical CT or C-arm CT with curved or flat panel
-detector are included as well.
+detector are included as well. Conversion of the geometric information to/from
+projection matrices allowes to easily collaborate with other tools supporting 
+them.
 
 **For more details:**
 [**check out the documentation!**](https://web.stimulate.ovgu.de/abtheo/doc/html/index.html)
