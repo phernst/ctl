@@ -4,7 +4,7 @@ CTL - Computed Tomography Library
 A C++11 toolkit for CT imaging with minimal dependencies.
 
 This early release enables to simluate freely adjustable X-ray imaging setups.
-Typical settings like helical CT or C-arm CT are with curved of flat panel
+Typical settings like helical CT or C-arm CT with curved or flat panel
 detector are included as well.
 
 **For more details:**
