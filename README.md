@@ -1,33 +1,58 @@
 CTL - Computed Tomography Library
 =================================
 
-[**Check out the documentation!**](https://web.stimulate.ovgu.de/abtheo/doc/html/index.html)
+A C++11 toolkit for CT imaging with minimal dependencies.
+
+This early release enables to simluate freely adjustable X-ray imaging setups.
+Typical settings like helical CT or C-arm CT are with curved of flat panel
+detector are included as well.
+
+**For more details:**
+[**check out the documentation!**](https://web.stimulate.ovgu.de/abtheo/doc/html/index.html)
 
 The following installation guide has been tested with Kubuntu 18.04 LTS.
+
+Install compiler and build tools (GCC, make, ...)
+---------------------------------------------------
+
+```console
+sudo apt install build-essential
+```
 
 Install Qt
 ----------
 
-1. Qt libraries:
+1. Qt libraries
 
     ```console
     sudo apt install qt5-default
     ```
     
-2. Qt Creator (optional but recommended):
-
+2. Qt3D (optional, for 3d visualization widgets)
+    
     ```console
-    sudo apt install qtcreator
+    sudo apt install qt3d5-dev
     ```
+    If you are on another platform, note that a Qt3D version is needed that 
+    requires a Qt version >= 5.9.
 
-Install OpenCL
---------------
+Install OpenCL 1.x
+------------------
 
 This is an example how to set up OpenCL for a NVIDIA GPU.
 
-1. install official NVIDIA driver using Driver Manager (tested with driver version 390.48 + GTX1080 Ti) --> reboot
+1. install official NVIDIA driver using Driver Manager
+(tested with driver version 390.48 + GTX1080 Ti) --> reboot
+
+2. install Nvidia OpenCL development package
+
+    ```console
+    sudo apt install nvidia-opencl-dev
+    ```
+    For other vendors (AMD, Intel, ...),  you need to search for an appropriate
+    package that provides you an OpenCL driver.
     
-2. install clinfo (optional)
+3. install clinfo (optional, for checking available OpenCL devices)
 
     ```console
     sudo apt install clinfo
@@ -36,23 +61,42 @@ This is an example how to set up OpenCL for a NVIDIA GPU.
     ```console
     clinfo
     ```
-    in order to get a summary of you OpenCL devices.
-    
-3. install Nvidia OpenCL dev stuff
+    in order to get a summary of your OpenCL devices.
 
-    ```console
-    sudo apt install nvidia-opencl-dev
-    ```
-
-4. get OpenCL headers (if not already there)
+4. install OpenCL headers (might be already there)
 
     ```console
     sudo apt install opencl-headers
     ```
 
-No matter what kind of OpenCL device you want to use, at the end of the day
-there needs to be at least a symbolic link *libOpenCL.so* in the library folder
-(/usr/lib/) that points to a valid ICD loader.
+No matter what kind of OpenCL device you want to use, you should end up with a 
+*libOpenCL.so* (usually symbolic link) in the library folder
+(/usr/lib/) that points to a valid ICD loader. The ICD loader should have been
+installed with your vendor driver. If this has not happend you will not be able
+to link against it (linker error when using `LIBS += -lOpenCL` in your qmake
+project file). Then, you can install an ICD loader by your own, e.g. the package
+*mesa-opencl-icd*.
+
+It might happen on some Debian platforms, that the *CL/cl.hpp* header is missing
+even when you have installed the 'opencl-headers' package. In this case, you can
+manually download the header file from the
+[khronos group](https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp).
+
+Use modules that you need
+-------------------------
+
+The CTL provides several modules. According to your needs, you can select only a
+subset of modules. Each module has a corresponding .pri file that you can
+include into your qmake project (.pro file) using the syntax
+`include(example_module.pri)` (see also the *examples* or *testing* folder).
+
+So far, the following modules are available:
+ * ctl.pri: the core library
+ * den_file_io.pri: .den file handling
+ * ocl_config.pri: uniform OpenCL environment/configuration
+ * ocl_projectors.pri: OpenCL based projectors
+ * gui-widgets.pri: widgets for visualization purposes
+
 
 Compile a project
 -----------------
