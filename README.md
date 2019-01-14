@@ -11,7 +11,7 @@ projection matrices allowes to easily collaborate with other tools supporting
 them.
 
 **For more details:**
-[**check out the documentation!**](https://web.stimulate.ovgu.de/abtheo/doc/html/index.html)
+[**check out the documentation!**](https://www.forschungscampus-stimulate.de/ctl/)
 
 The following installation guide has been tested with Kubuntu 18.04 LTS.
 
