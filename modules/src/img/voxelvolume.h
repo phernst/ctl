@@ -146,13 +146,13 @@ private:
  */
 
 template<typename T>
-bool VoxelVolume<T>::Dimensions::operator==(const VoxelVolume<T>::Dimensions& other) const
+bool VoxelVolume<T>::Dimensions::operator==(const Dimensions& other) const
 {
     return (x == other.x) && (y == other.y) && (z == other.z);
 }
 
 template<typename T>
-bool VoxelVolume<T>::Dimensions::operator!=(const VoxelVolume<T>::Dimensions& other) const
+bool VoxelVolume<T>::Dimensions::operator!=(const Dimensions& other) const
 {
     return (x != other.x) || (y != other.y) || (z != other.z);
 }
