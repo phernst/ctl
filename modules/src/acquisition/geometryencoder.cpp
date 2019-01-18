@@ -12,9 +12,27 @@ namespace CTL {
  * and the client have to make sure that the object \a system points to a valid objec before calling
  * encodeSingleViewGeometry().
  */
-GeometryEncoder::GeometryEncoder(SimpleCTsystem* system)
+GeometryEncoder::GeometryEncoder(const SimpleCTsystem* system)
     : _system(system)
 {
+}
+
+/*!
+ * Returns a pointer to the (constant) SimpleCTsystem that has been assigned to this instance.
+ */
+const SimpleCTsystem *GeometryEncoder::system() const
+{
+    return _system;
+}
+
+/*!
+ * Assignes \a system to this instance.
+ *
+ * This instance does not take ownership of \a system.
+ */
+void GeometryEncoder::assignSystem(const SimpleCTsystem *system)
+{
+    _system = system;
 }
 
 /*!
@@ -24,7 +42,34 @@ SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry() const
 {
     if(_system == nullptr)
         return {};
-    return encodeSingleViewGeometry(*_system);
+
+    SingleViewGeometry ret;
+
+    AbstractDetector* detector = _system->detector();
+    ret.reserve(detector->nbDetectorModules());
+
+    Vector3x1WCS sourcePos = finalSourcePosition();
+    Vector3x1WCS detectorPos = _system->gantry()->detectorPosition();
+    Matrix3x3 detectorRot = _system->gantry()->detectorRotation();
+
+    auto pixelDim = detector->pixelDimensions();
+    auto moduleSize = detector->nbPixelPerModule();
+    auto moduleLocs = detector->moduleLocations();
+
+    for(uint module = 0; module < detector->nbDetectorModules(); ++module)
+    {
+        auto modLoc = moduleLocs.at(module);
+
+        Vector3x1WCS modulePos = detectorPos + detectorRot.transposed() * modLoc.position;
+        Matrix3x3 moduleRot = modLoc.rotation;
+
+        Vector3x1CTS pPoint = principalPoint(modulePos - sourcePos, moduleRot * detectorRot);
+        Matrix3x3 K = intrinsicParameterMatrix(pPoint, moduleSize, pixelDim);
+
+        ret.append(computeIndividualModulePMat(sourcePos, moduleRot * detectorRot, K));
+    }
+
+    return ret;
 }
 
 /*!
@@ -57,31 +102,19 @@ FullGeometry GeometryEncoder::encodeFullGeometry(AcquisitionSetup setup)
  */
 SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry(const SimpleCTsystem& system)
 {
-    SingleViewGeometry ret;
+    GeometryEncoder geoEncoder(&system);
 
-    Vector3x1WCS sourcePos = sourcePosition(system);
-    Vector3x1WCS detectorPos = system.gantry()->detectorPosition();
-    Matrix3x3 detectorRot = system.gantry()->detectorRotation();
+    return geoEncoder.encodeSingleViewGeometry();
+}
 
-    AbstractDetector* detector = system.detector();
-
-    auto pixelDim = detector->pixelDimensions();
-    auto moduleSize = detector->nbPixelPerModule();
-
-    for(uint module = 0; module < detector->nbDetectorModules(); ++module)
-    {
-        auto modLoc = detector->moduleLocation(module);
-
-        Vector3x1WCS modulePos = detectorPos + detectorRot.transposed() * modLoc.position;
-        Matrix3x3 moduleRot = modLoc.rotation;
-
-        Vector3x1CTS pPoint = principalPoint(modulePos - sourcePos, moduleRot * detectorRot);
-        Matrix3x3 K = intrinsicParameterMatrix(pPoint, moduleSize, pixelDim);
-
-        ret.append(computeIndividualModulePMat(sourcePos, moduleRot * detectorRot, K));
-    }
-
-    return ret;
+/*!
+ * Computes the final position of the origin of the X-rays. This takes into account the location
+ * of the source component itself as well as the positioning of the focal spot.
+ */
+Vector3x1WCS GeometryEncoder::finalSourcePosition() const
+{
+    return _system->gantry()->sourcePosition()
+        + _system->gantry()->sourceRotation() * _system->source()->focalSpotPosition();
 }
 
 /*!
@@ -94,16 +127,6 @@ ProjectionMatrix GeometryEncoder::computeIndividualModulePMat(const Vector3x1WCS
 {
     auto pMat = ProjectionMatrix::compose(K, detectorRotation, sourcePosition);
     return pMat.normalized();
-}
-
-/*!
- * Computes the final position of the origin of the X-rays. This takes into account the location
- * of the source component itself as well as the positioning of the focal spot.
- */
-Vector3x1WCS GeometryEncoder::sourcePosition(const SimpleCTsystem& system)
-{
-    return system.gantry()->sourcePosition()
-        + system.gantry()->sourceRotation() * system.source()->focalSpotPosition();
 }
 
 /*!
@@ -137,16 +160,6 @@ Matrix3x3 GeometryEncoder::intrinsicParameterMatrix(const Vector3x1CTS& principa
     return Matrix3x3({ focalLengthMM / pixelDimensions.width(), 0.0, principalPointS,
                        0.0, focalLengthMM / pixelDimensions.height(), principalPointT,
                        0.0, 0.0, 1.0 });
-}
-
-SimpleCTsystem *GeometryEncoder::system() const
-{
-    return _system;
-}
-
-void GeometryEncoder::setSystem(SimpleCTsystem *system)
-{
-    _system = system;
 }
 
 } // namespace CTL

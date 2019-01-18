@@ -46,32 +46,31 @@ typedef Vector3x1 Vector3x1CTS; //!< Alias name for 3D (column) vectors in CT co
 class GeometryEncoder
 {
 public:
-    GeometryEncoder(SimpleCTsystem* system);
+    GeometryEncoder(const SimpleCTsystem* system);
 
+    void assignSystem(const SimpleCTsystem* system);
     SingleViewGeometry encodeSingleViewGeometry() const;
+    const SimpleCTsystem* system() const;
 
-    // other methods
+    // static methods
     static FullGeometry encodeFullGeometry(AcquisitionSetup setup);
     static SingleViewGeometry encodeSingleViewGeometry(const SimpleCTsystem& system);
 
-    SimpleCTsystem* system() const;
-    void setSystem(SimpleCTsystem* system);
-
 private:
     // methods
-    static ProjectionMatrix computeIndividualModulePMat(const Vector3x1WCS& sourcePosition,
+    Vector3x1WCS finalSourcePosition() const;
+
+    static ProjectionMatrix computeIndividualModulePMat(const Vector3x1WCS& finalSourcePosition,
                                                         const Matrix3x3& detectorRotation,
                                                         const Matrix3x3& K);
-
-    static Vector3x1WCS sourcePosition(const SimpleCTsystem& system);
     static Vector3x1CTS principalPoint(const Vector3x1WCS& sourceToDetectorVector,
-                                const Matrix3x3& rotation);
+                                       const Matrix3x3& rotation);
     static Matrix3x3 intrinsicParameterMatrix(const Vector3x1CTS& principalPoint,
                                               const QSize& nbPixel,
                                               const QSizeF& pixelDimensions);
 
     // member variables
-    SimpleCTsystem* _system;
+    const SimpleCTsystem* _system;
 };
 
 } // namespace CTL
