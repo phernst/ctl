@@ -104,38 +104,57 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
 
     try // exception handling
     {
+        // check for valid OpenCLConfig
         auto& oclConfig = OpenCLConfig::instance();
         if(!oclConfig.isValid())
             throw std::runtime_error("OpenCLConfig has not been initiated");
 
-        auto& usedDevice = oclConfig.devices()[_config.deviceID];
-        //qInfo().noquote() << "used device: " << QString::fromStdString(usedDevice.getInfo<CL_DEVICE_NAME>());
-
-        // allocate memory for result
-        ret.allocateMemory(nbViews);
-
-        // Create command queue.
+        // context and number of used devices
         auto& context = oclConfig.context();
-        cl::CommandQueue queue(context, usedDevice);
+        const auto nbUsedDevs = qMin(uint(_config.deviceIDs.size()), nbViews);
+        if(nbUsedDevs == 0)
+            throw std::runtime_error("no devices or no views for RayCasterProjector::project");
+        qDebug() << "number of used devices for RayCasterProjector: " << nbUsedDevs;
 
         // Create kernel
         auto* kernel = oclConfig.kernel(CL_KERNEL_NAME, _oclProgramName);
         if(kernel == nullptr)
             throw std::runtime_error("kernel pointer not valid");
 
-        // Prepare input data.
+        // allocate memory for result
+        ret.allocateMemory(nbViews);
+
+        // Create command queues
+        std::vector<cl::CommandQueue> queues;
+        queues.reserve(nbUsedDevs);
+        const auto& availDevices = oclConfig.devices();
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            queues.emplace_back(context, availDevices[_config.deviceIDs[dev]]);
+
+        // Prepare input data
         cl_uint2 raysPerPixel{ { _config.raysPerPixel[0], _config.raysPerPixel[1] } };
         cl_float3 volCorner = volumeCorner(volDim, voxelSize, volOffset);
-        cl_float3 source;
-        std::vector<cl_double16> QR(_viewDim.nbModules);
+        std::vector<cl_float3> sources(nbUsedDevs);
+        std::vector<std::vector<cl_double16>> QRs;
+        QRs.reserve(nbUsedDevs);
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            QRs.emplace_back(_viewDim.nbModules);
 
-        // Allocate device buffers and transfer input data to device.
+        // Allocate device buffers and transfer input data to device
+        // global constant buffers
         cl_mem_flags readCopyFlag = CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR;
         cl::Buffer raysPerPixelBuf(context, readCopyFlag, sizeof raysPerPixel, &raysPerPixel);
         cl::Buffer volCornerBuf(context, readCopyFlag, sizeof volCorner, &volCorner);
         cl::Buffer voxelSizeBuf(context, readCopyFlag, sizeof voxelSize, &voxelSize);
-        cl::Buffer sourceBuf(context, CL_MEM_READ_ONLY, sizeof source);
-        cl::Buffer QRBuf(context, CL_MEM_READ_ONLY, sizeof(cl_double16) * _viewDim.nbModules);
+        // device specific buffers
+        std::vector<cl::Buffer> sourceBufs;
+        sourceBufs.reserve(nbUsedDevs);
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            sourceBufs.emplace_back(context, CL_MEM_READ_ONLY, sizeof(cl_float3));
+        std::vector<cl::Buffer> QRBufs;
+        QRBufs.reserve(nbUsedDevs);
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            QRBufs.emplace_back(context, CL_MEM_READ_ONLY, sizeof(cl_double16) * _viewDim.nbModules);
 
         // Create volume
         std::unique_ptr<cl::Image3D> volumeImg;
@@ -148,82 +167,105 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
                                             volDim[0], volDim[1], volDim[2]));
             cl::size_t<3> zeroVecOrigin;
             zeroVecOrigin[0] = zeroVecOrigin[1] = zeroVecOrigin[2] = 0;
-            queue.enqueueWriteImage(*volumeImg, CL_FALSE, zeroVecOrigin, volDim, 0, 0, volumeDataPtr);
+            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+                queues[dev].enqueueWriteImage(*volumeImg, CL_FALSE, zeroVecOrigin, volDim, 0, 0, volumeDataPtr);
 
         }
         else // no interpolation, volume is cl::Buffer
         {
-//            volumeBuf.reset(new cl::Buffer(context, readCopyFlag,
-//                                           sizeof(float) * volDim[0] * volDim[1] * volDim[2],
-//                                           volumeDataPtr));
             volumeBuf.reset(new cl::Buffer(context, CL_MEM_READ_ONLY,
                                            sizeof(float) * volDim[0] * volDim[1] * volDim[2]));
-            queue.enqueueWriteBuffer(*volumeBuf, CL_FALSE, 0, sizeof(float) * volDim[0] * volDim[1] * volDim[2], volumeDataPtr);
+            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+                queues[dev].enqueueWriteBuffer(*volumeBuf, CL_FALSE, 0,
+                                               sizeof(float) * volDim[0] * volDim[1] * volDim[2],
+                                               volumeDataPtr);
             uint volumeDim[3] = { uint(volDim[0]), uint(volDim[1]), uint(volDim[2]) };
             volumeDimensionsBuf.reset(new cl::Buffer(context, readCopyFlag, sizeof volumeDim, volumeDim));
         }
 
-        // Create projection buffer
-        cl_mem_flags writeFlag = CL_MEM_WRITE_ONLY;
-        cl::Buffer projectionBuf(context, writeFlag, sizeof(float) * pixelPerView);
+        // Allocate output buffer: projection buffer for each device
+        std::vector<cl::Buffer> projectionBufs;
+        projectionBufs.reserve(nbUsedDevs);
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            projectionBufs.emplace_back(context, CL_MEM_WRITE_ONLY, sizeof(float) * pixelPerView);
 
-        // Set kernel parameters.
-        kernel->setArg(0, increment_mm);
-        kernel->setArg(1, raysPerPixelBuf);
-        kernel->setArg(2, sourceBuf);
-        kernel->setArg(3, volCornerBuf);
-        kernel->setArg(4, voxelSizeBuf);
-        kernel->setArg(5, QRBuf);
-        kernel->setArg(6, projectionBuf);
-        if(_config.interpolate)
+        // Set kernel parameters for each device
+        std::vector<cl::Kernel> kernels;
+        kernels.reserve(nbUsedDevs);
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            kernels.push_back(*kernel);
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
         {
-            kernel->setArg(7, *volumeImg);
-        }
-        else
-        {
-            kernel->setArg(7, *volumeBuf);
-            kernel->setArg(8, *volumeDimensionsBuf);
+            kernels[dev].setArg(0, increment_mm);
+            kernels[dev].setArg(1, raysPerPixelBuf);
+            kernels[dev].setArg(2, sourceBufs[dev]);
+            kernels[dev].setArg(3, volCornerBuf);
+            kernels[dev].setArg(4, voxelSizeBuf);
+            kernels[dev].setArg(5, QRBufs[dev]);
+            kernels[dev].setArg(6, projectionBufs[dev]);
+
+            if(_config.interpolate)
+            {
+                kernels[dev].setArg(7, *volumeImg);
+            }
+            else
+            {
+                kernels[dev].setArg(7, *volumeBuf);
+                kernels[dev].setArg(8, *volumeDimensionsBuf);
+            }
         }
 
-        cl::Event lastModule;
+        std::vector<cl::Event> lastModule(nbUsedDevs);
         SingleViewData* currentViewData;
         const SingleViewGeometry* currentViewPMats;
 
         // loop over all projections
+        uint dev = 0;
         for(uint view = 0; view < nbViews; ++view)
         {
-            //qInfo() << "projecting view " << view;
             currentViewPMats = &_pMats.at(view);
             currentViewData = &ret.view(view);
 
             // all modules have same source position --> use first module PMat (arbitrary)
-            source = determineSource(currentViewPMats->first());
-            queue.enqueueWriteBuffer(sourceBuf, CL_FALSE, 0, sizeof source, &source);
+            sources[dev] = determineSource(currentViewPMats->first());
+            queues[dev].enqueueWriteBuffer(sourceBufs[dev], CL_FALSE, 0, sizeof(cl_float3),
+                                           &sources[dev]);
 
             // individual module geometry: QR is only determined by M, where P=[M|p4]
             for(uint module = 0; module < _viewDim.nbModules; ++module)
-                QR[module] = decomposeM(currentViewPMats->at(module).M());
+                QRs[dev][module] = decomposeM(currentViewPMats->at(module).M());
 
-            queue.enqueueWriteBuffer(QRBuf, CL_FALSE, 0, sizeof(cl_double16) * _viewDim.nbModules, QR.data());
+            queues[dev].enqueueWriteBuffer(QRBufs[dev], CL_FALSE, 0,
+                                           sizeof(cl_double16) * _viewDim.nbModules,
+                                           QRs[dev].data());
 
             // Launch kernel on the compute device.
-            queue.enqueueNDRangeKernel(*kernel,
-                                       cl::NullRange,
-                                       cl::NDRange(_viewDim.nbChannels,
-                                                   _viewDim.nbRows,
-                                                   _viewDim.nbModules));
+            queues[dev].enqueueNDRangeKernel(kernels[dev],
+                                             cl::NullRange,
+                                             cl::NDRange(_viewDim.nbChannels,
+                                                         _viewDim.nbRows,
+                                                         _viewDim.nbModules));
 
             // Get result back to host.
             for(uint module = 0; module < _viewDim.nbModules; ++module)
-                queue.enqueueReadBuffer(projectionBuf, CL_FALSE,
-                                        sizeof(float) * pixelPerModule * module,
-                                        sizeof(float) * pixelPerModule,
-                                        currentViewData->module(module).rawData(), nullptr,
-                                        &lastModule);
-            lastModule.wait();
+                queues[dev].enqueueReadBuffer(projectionBufs[dev], CL_FALSE,
+                                              sizeof(float) * pixelPerModule * module,
+                                              sizeof(float) * pixelPerModule,
+                                              currentViewData->module(module).rawData(), nullptr,
+                                              &lastModule[dev]);
+
+            // increment to next device
+            dev = ++dev % nbUsedDevs;
+            if(dev == 0)
+                for(uint dev = 0; dev < nbUsedDevs; ++dev)
+                    lastModule[dev].wait();
 
             emit notifier()->projectionFinished(view);
         }
+        // wait for remaining devices
+        for(uint remainingDev = 0; remainingDev < dev; ++remainingDev)
+            lastModule[remainingDev].wait();
+
     } catch(const cl::Error& err)
     {
         qCritical() << "OpenCL error: " << err.what() << "(" << err.err() << ")";
@@ -258,11 +300,19 @@ void RayCasterProjector::initOpenCL()
         // general checks
         if(!oclConfig.isValid())
             throw std::runtime_error("OpenCLConfig is not valid");
-        if(_config.deviceID >= oclConfig.devices().size())
-            throw std::runtime_error("device ID is not available.\nID = " +
-                                     std::to_string(_config.deviceID) +
-                                     "\nnumber of devices = " +
-                                     std::to_string(oclConfig.devices().size()));
+        // check for invalid device IDs
+        for(auto devID : _config.deviceIDs)
+            if(devID >= oclConfig.devices().size())
+                throw std::runtime_error("device ID is not available.\nID = " +
+                                         std::to_string(devID) +
+                                         "\nnumber of devices = " +
+                                         std::to_string(oclConfig.devices().size()));
+        // if not deviceIDs specified, use all available devices
+        if(_config.deviceIDs.empty())
+        {
+            _config.deviceIDs.resize(oclConfig.devices().size());
+            std::iota(_config.deviceIDs.begin(), _config.deviceIDs.end(), 0);
+        }
 
         // check if required kernel is provided
         if(oclConfig.kernelExists(CL_KERNEL_NAME, _oclProgramName))

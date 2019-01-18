@@ -25,7 +25,7 @@ public:
     class Config : public AbstractProjectorConfig
     {
     public:
-        uint deviceID = 0; //!< used device in the OpenCLConfig device list
+        std::vector<uint> deviceIDs; //!< used device IDs in the OpenCLConfig device list (if empty: use all)
         uint raysPerPixel[2] = { 1, 1 }; //!< number of ray per pixel in channel (x) and row (y) direction
         float raySampling = 0.3f; //!< fraction of voxel size that is used to increment position on ray
         uint volumeUpSampling = 1; //!< factor that increases the number of voxels in each dimension
