@@ -121,8 +121,12 @@ inline SingleViewData::Dimensions AbstractDetector::viewDimensions() const
 }
 
 /*!
- * Returns a constant reference to the location of module \a module. Same as
- * moduleLocations().at(module).
+ * Returns the location of module \a module. Same as moduleLocations().at(module).
+ *
+ * Using this method is typically very inefficient, as it always requires computation of all module
+ * locations. In case you need multiple calls to this method, consider storing a local copy of the
+ * entire set of locations (using moduleLocations()) and querying individual module locations from
+ * that local copy using QVector::at().
  *
  * \sa moduleLocations()
  */
