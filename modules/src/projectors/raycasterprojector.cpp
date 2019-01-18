@@ -142,9 +142,21 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         // Allocate device buffers and transfer input data to device
         // global constant buffers
         cl_mem_flags readCopyFlag = CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR;
-        cl::Buffer raysPerPixelBuf(context, readCopyFlag, sizeof raysPerPixel, &raysPerPixel);
-        cl::Buffer volCornerBuf(context, readCopyFlag, sizeof volCorner, &volCorner);
-        cl::Buffer voxelSizeBuf(context, readCopyFlag, sizeof voxelSize, &voxelSize);
+
+        std::vector<cl::Buffer> raysPerPixelBuf;
+        raysPerPixelBuf.reserve(nbUsedDevs);
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            raysPerPixelBuf.emplace_back(context, readCopyFlag, sizeof raysPerPixel, &raysPerPixel);
+
+        std::vector<cl::Buffer> volCornerBuf;
+        volCornerBuf.reserve(nbUsedDevs);
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            volCornerBuf.emplace_back(context, readCopyFlag, sizeof volCorner, &volCorner);
+
+        std::vector<cl::Buffer> voxelSizeBuf;
+        voxelSizeBuf.reserve(nbUsedDevs);
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            voxelSizeBuf.emplace_back(context, readCopyFlag, sizeof voxelSize, &voxelSize);
 
         // device specific buffers
         std::vector<cl::Buffer> sourceBufs;
@@ -161,7 +173,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         // Create volume (redundant for each device)
         std::vector<cl::Image3D> volumeImg;
         std::vector<cl::Buffer> volumeBuf;
-        std::unique_ptr<cl::Buffer> volumeDimensionsBuf;
+        std::vector<cl::Buffer> volumeDimensionsBuf;
 
         if(_config.interpolate) // volume is cl::Image3D
         {
@@ -189,8 +201,10 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
                                                volumeDataPtr);
 
             uint volumeDim[3] = { uint(volDim[0]), uint(volDim[1]), uint(volDim[2]) };
-            volumeDimensionsBuf.reset(new cl::Buffer(context, readCopyFlag, sizeof volumeDim,
-                                                     volumeDim));
+            volumeDimensionsBuf.reserve(nbUsedDevs);
+            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+                volumeDimensionsBuf.emplace_back(context, readCopyFlag, sizeof volumeDim,
+                                                 volumeDim);
         }
 
         // Allocate output buffer: projection buffer for each device
@@ -201,14 +215,14 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
 
         // Set kernel arguments
         kernel->setArg(0, increment_mm);
-        kernel->setArg(1, raysPerPixelBuf);
-        kernel->setArg(3, volCornerBuf);
-        kernel->setArg(4, voxelSizeBuf);
 
-        // Set kernel arguments for each device specifically
+        // Set kernel arguments for each device
         auto setKernelArgs = [&](uint dev)
         {
+            kernel->setArg(1, raysPerPixelBuf[dev]);
             kernel->setArg(2, sourceBufs[dev]);
+            kernel->setArg(3, volCornerBuf[dev]);
+            kernel->setArg(4, voxelSizeBuf[dev]);
             kernel->setArg(5, QRBufs[dev]);
             kernel->setArg(6, projectionBufs[dev]);
             if(_config.interpolate)
@@ -218,7 +232,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
             else
             {
                 kernel->setArg(7, volumeBuf[dev]);
-                kernel->setArg(8, *volumeDimensionsBuf);
+                kernel->setArg(8, volumeDimensionsBuf[dev]);
             }
         };
 
