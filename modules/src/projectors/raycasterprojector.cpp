@@ -6,6 +6,7 @@
 
 #include <QDebug>
 #include <exception>
+#include <thread>
 
 const std::string CL_FILE_NAME_INTERP = "projectors/raycasterprojector_interp.cl"; //!< path to .cl file
 const std::string CL_FILE_NAME_NO_INTERP = "projectors/raycasterprojector_no_interp.cl"; //!< path to .cl file
@@ -208,10 +209,23 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         }
 
         // Allocate output buffer: projection buffer for each device
-        std::vector<cl::Buffer> projectionBufs;
-        projectionBufs.reserve(nbUsedDevs);
+        std::vector<float*> pinnedProjectionsPtr(nbUsedDevs);
+        std::vector<cl::Buffer> pinnedProjectionsBufs; // special host memory
+        std::vector<cl::Buffer> projectionDevBufs;
+        projectionDevBufs.reserve(nbUsedDevs);
+        pinnedProjectionsBufs.reserve(nbUsedDevs);
         for(uint dev = 0; dev < nbUsedDevs; ++dev)
-            projectionBufs.emplace_back(context, CL_MEM_WRITE_ONLY, sizeof(float) * pixelPerView);
+        {
+            const auto memSize = sizeof(float) * pixelPerView;
+            // create pinned memory
+            pinnedProjectionsBufs.emplace_back(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR,
+                                               memSize);
+            pinnedProjectionsPtr[dev] = static_cast<float*>(
+                        queues[dev].enqueueMapBuffer(pinnedProjectionsBufs[dev], CL_FALSE,
+                                                     CL_MAP_READ, 0, memSize));
+            // standard device buffer
+            projectionDevBufs.emplace_back(context, CL_MEM_WRITE_ONLY, memSize);
+        }
 
         // Set kernel arguments
         kernel->setArg(0, increment_mm);
@@ -224,7 +238,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
             kernel->setArg(3, volCornerBuf[dev]);
             kernel->setArg(4, voxelSizeBuf[dev]);
             kernel->setArg(5, QRBufs[dev]);
-            kernel->setArg(6, projectionBufs[dev]);
+            kernel->setArg(6, projectionDevBufs[dev]);
             if(_config.interpolate)
             {
                 kernel->setArg(7, volumeImg[dev]);
@@ -236,57 +250,70 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
             }
         };
 
-        std::vector<cl::Event> lastModule(nbUsedDevs);
-        SingleViewData* currentViewData;
-        const SingleViewGeometry* currentViewPMats;
+        // Set task for copy back to host memory
+        auto cpyProjections = [&](uint view, const float* pinnedProjections, const cl::Event* event)
+        {
+            event->wait();
+            for(uint module = 0; module < _viewDim.nbModules; ++module)
+            {
+                std::copy_n(pinnedProjections, pixelPerModule,
+                            ret.view(view).module(module).rawData());
+                pinnedProjections += pixelPerModule;
+            }
+        };
+
+        std::vector<std::thread> cpyThreads(nbUsedDevs);
+        std::vector<cl::Event> readViewFinished(nbUsedDevs);
 
         // loop over all projections
         uint device = 0;
         for(uint view = 0; view < nbViews; ++view)
         {
-            currentViewPMats = &_pMats.at(view);
-            currentViewData = &ret.view(view);
+            const auto& currentViewPMats = _pMats.at(view);
 
             // all modules have same source position --> use first module PMat (arbitrary)
-            sources[device] = determineSource(currentViewPMats->first());
+            sources[device] = determineSource(currentViewPMats.first());
             queues[device].enqueueWriteBuffer(sourceBufs[device], CL_FALSE, 0, sizeof(cl_float3),
                                               &sources[device]);
 
             // individual module geometry: QR is only determined by M, where P=[M|p4]
             for(uint module = 0; module < _viewDim.nbModules; ++module)
-                QRs[device][module] = decomposeM(currentViewPMats->at(module).M());
+                QRs[device][module] = decomposeM(currentViewPMats.at(module).M());
 
             queues[device].enqueueWriteBuffer(QRBufs[device], CL_FALSE, 0,
                                               sizeof(cl_double16) * _viewDim.nbModules,
                                               QRs[device].data());
 
-            // Launch kernel on the compute device.
+            // Launch kernel on the compute device
             setKernelArgs(device);
-            queues[device].enqueueNDRangeKernel(*kernel,
-                                                cl::NullRange,
+            queues[device].enqueueNDRangeKernel(*kernel, cl::NullRange,
                                                 cl::NDRange(_viewDim.nbChannels,
                                                             _viewDim.nbRows,
                                                             _viewDim.nbModules));
 
-            // Get result back to host.
-            for(uint module = 0; module < _viewDim.nbModules; ++module)
-                queues[device].enqueueReadBuffer(projectionBufs[device], CL_FALSE,
-                                                 sizeof(float) * pixelPerModule * module,
-                                                 sizeof(float) * pixelPerModule,
-                                                 currentViewData->module(module).rawData(), nullptr,
-                                                 &lastModule[device]);
+            // Get result back to host
+            queues[device].enqueueReadBuffer(projectionDevBufs[device], CL_FALSE, 0,
+                                             sizeof(float) * pixelPerView,
+                                             pinnedProjectionsPtr[device], nullptr,
+                                             &readViewFinished[device]);
+
+            cpyThreads[device] = std::thread(cpyProjections, view, pinnedProjectionsPtr[device],
+                                             &readViewFinished[device]);
 
             // increment to next device
             device = ++device % nbUsedDevs;
             if(device == 0)
                 for(uint dev = 0; dev < nbUsedDevs; ++dev)
-                    lastModule[dev].wait();
+                    cpyThreads[dev].join();
 
             emit notifier()->projectionFinished(view);
         }
         // wait for remaining devices
         for(uint remainingDev = 0; remainingDev < device; ++remainingDev)
-            lastModule[remainingDev].wait();
+            cpyThreads[remainingDev].join();
+
+        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            queues[dev].enqueueUnmapMemObject(pinnedProjectionsBufs[dev], pinnedProjectionsPtr[dev]);
 
     } catch(const cl::Error& err)
     {
