@@ -100,7 +100,6 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
     // determine ray step length in mm
     cl_float smallestVoxelSize = qMin(qMin(voxelSize.s[0], voxelSize.s[1]), voxelSize.s[2]);
     cl_float increment_mm = smallestVoxelSize * _config.raySampling;
-    //qDebug() << "ray step length in mm: " << increment_mm;
 
     try // exception handling
     {
@@ -146,41 +145,52 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         cl::Buffer raysPerPixelBuf(context, readCopyFlag, sizeof raysPerPixel, &raysPerPixel);
         cl::Buffer volCornerBuf(context, readCopyFlag, sizeof volCorner, &volCorner);
         cl::Buffer voxelSizeBuf(context, readCopyFlag, sizeof voxelSize, &voxelSize);
+
         // device specific buffers
         std::vector<cl::Buffer> sourceBufs;
         sourceBufs.reserve(nbUsedDevs);
         for(uint dev = 0; dev < nbUsedDevs; ++dev)
             sourceBufs.emplace_back(context, CL_MEM_READ_ONLY, sizeof(cl_float3));
+
         std::vector<cl::Buffer> QRBufs;
         QRBufs.reserve(nbUsedDevs);
         for(uint dev = 0; dev < nbUsedDevs; ++dev)
-            QRBufs.emplace_back(context, CL_MEM_READ_ONLY, sizeof(cl_double16) * _viewDim.nbModules);
+            QRBufs.emplace_back(context, CL_MEM_READ_ONLY,
+                                sizeof(cl_double16) * _viewDim.nbModules);
 
-        // Create volume
-        std::unique_ptr<cl::Image3D> volumeImg;
-        std::unique_ptr<cl::Buffer> volumeBuf;
+        // Create volume (redundant for each device)
+        std::vector<cl::Image3D> volumeImg;
+        std::vector<cl::Buffer> volumeBuf;
         std::unique_ptr<cl::Buffer> volumeDimensionsBuf;
 
         if(_config.interpolate) // volume is cl::Image3D
         {
-            volumeImg.reset(new cl::Image3D(context, CL_MEM_READ_ONLY, cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
-                                            volDim[0], volDim[1], volDim[2]));
+            volumeImg.reserve(nbUsedDevs);
+            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+                volumeImg.emplace_back(context, CL_MEM_READ_ONLY,
+                                       cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
+                                       volDim[0], volDim[1], volDim[2]);
             cl::size_t<3> zeroVecOrigin;
             zeroVecOrigin[0] = zeroVecOrigin[1] = zeroVecOrigin[2] = 0;
             for(uint dev = 0; dev < nbUsedDevs; ++dev)
-                queues[dev].enqueueWriteImage(*volumeImg, CL_FALSE, zeroVecOrigin, volDim, 0, 0, volumeDataPtr);
+                queues[dev].enqueueWriteImage(volumeImg[dev], CL_FALSE, zeroVecOrigin, volDim, 0, 0,
+                                              volumeDataPtr);
 
         }
         else // no interpolation, volume is cl::Buffer
         {
-            volumeBuf.reset(new cl::Buffer(context, CL_MEM_READ_ONLY,
-                                           sizeof(float) * volDim[0] * volDim[1] * volDim[2]));
+            volumeBuf.reserve(nbUsedDevs);
             for(uint dev = 0; dev < nbUsedDevs; ++dev)
-                queues[dev].enqueueWriteBuffer(*volumeBuf, CL_FALSE, 0,
+                volumeBuf.emplace_back(context, CL_MEM_READ_ONLY,
+                                       sizeof(float) * volDim[0] * volDim[1] * volDim[2]);
+            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+                queues[dev].enqueueWriteBuffer(volumeBuf[dev], CL_FALSE, 0,
                                                sizeof(float) * volDim[0] * volDim[1] * volDim[2],
                                                volumeDataPtr);
+
             uint volumeDim[3] = { uint(volDim[0]), uint(volDim[1]), uint(volDim[2]) };
-            volumeDimensionsBuf.reset(new cl::Buffer(context, readCopyFlag, sizeof volumeDim, volumeDim));
+            volumeDimensionsBuf.reset(new cl::Buffer(context, readCopyFlag, sizeof volumeDim,
+                                                     volumeDim));
         }
 
         // Allocate output buffer: projection buffer for each device
@@ -189,81 +199,79 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         for(uint dev = 0; dev < nbUsedDevs; ++dev)
             projectionBufs.emplace_back(context, CL_MEM_WRITE_ONLY, sizeof(float) * pixelPerView);
 
-        // Set kernel parameters for each device
-        std::vector<cl::Kernel> kernels;
-        kernels.reserve(nbUsedDevs);
-        for(uint dev = 0; dev < nbUsedDevs; ++dev)
-            kernels.push_back(*kernel);
-        for(uint dev = 0; dev < nbUsedDevs; ++dev)
-        {
-            kernels[dev].setArg(0, increment_mm);
-            kernels[dev].setArg(1, raysPerPixelBuf);
-            kernels[dev].setArg(2, sourceBufs[dev]);
-            kernels[dev].setArg(3, volCornerBuf);
-            kernels[dev].setArg(4, voxelSizeBuf);
-            kernels[dev].setArg(5, QRBufs[dev]);
-            kernels[dev].setArg(6, projectionBufs[dev]);
+        // Set kernel arguments
+        kernel->setArg(0, increment_mm);
+        kernel->setArg(1, raysPerPixelBuf);
+        kernel->setArg(3, volCornerBuf);
+        kernel->setArg(4, voxelSizeBuf);
 
+        // Set kernel arguments for each device specifically
+        auto setKernelArgs = [&](uint dev)
+        {
+            kernel->setArg(2, sourceBufs[dev]);
+            kernel->setArg(5, QRBufs[dev]);
+            kernel->setArg(6, projectionBufs[dev]);
             if(_config.interpolate)
             {
-                kernels[dev].setArg(7, *volumeImg);
+                kernel->setArg(7, volumeImg[dev]);
             }
             else
             {
-                kernels[dev].setArg(7, *volumeBuf);
-                kernels[dev].setArg(8, *volumeDimensionsBuf);
+                kernel->setArg(7, volumeBuf[dev]);
+                kernel->setArg(8, *volumeDimensionsBuf);
             }
-        }
+        };
 
         std::vector<cl::Event> lastModule(nbUsedDevs);
         SingleViewData* currentViewData;
         const SingleViewGeometry* currentViewPMats;
 
         // loop over all projections
-        uint dev = 0;
+        uint device = 0;
         for(uint view = 0; view < nbViews; ++view)
         {
             currentViewPMats = &_pMats.at(view);
             currentViewData = &ret.view(view);
 
             // all modules have same source position --> use first module PMat (arbitrary)
-            sources[dev] = determineSource(currentViewPMats->first());
-            queues[dev].enqueueWriteBuffer(sourceBufs[dev], CL_FALSE, 0, sizeof(cl_float3),
-                                           &sources[dev]);
+            sources[device] = determineSource(currentViewPMats->first());
+            queues[device].enqueueWriteBuffer(sourceBufs[device], CL_FALSE, 0, sizeof(cl_float3),
+                                              &sources[device]);
 
             // individual module geometry: QR is only determined by M, where P=[M|p4]
             for(uint module = 0; module < _viewDim.nbModules; ++module)
-                QRs[dev][module] = decomposeM(currentViewPMats->at(module).M());
+                QRs[device][module] = decomposeM(currentViewPMats->at(module).M());
 
-            queues[dev].enqueueWriteBuffer(QRBufs[dev], CL_FALSE, 0,
-                                           sizeof(cl_double16) * _viewDim.nbModules,
-                                           QRs[dev].data());
+            queues[device].enqueueWriteBuffer(QRBufs[device], CL_FALSE, 0,
+                                              sizeof(cl_double16) * _viewDim.nbModules,
+                                              QRs[device].data());
 
             // Launch kernel on the compute device.
-            queues[dev].enqueueNDRangeKernel(kernels[dev],
-                                             cl::NullRange,
-                                             cl::NDRange(_viewDim.nbChannels,
-                                                         _viewDim.nbRows,
-                                                         _viewDim.nbModules));
+            setKernelArgs(device);
+            queues[device].enqueueNDRangeKernel(*kernel,
+                                                cl::NullRange,
+                                                cl::NDRange(_viewDim.nbChannels,
+                                                            _viewDim.nbRows,
+                                                            _viewDim.nbModules));
 
             // Get result back to host.
             for(uint module = 0; module < _viewDim.nbModules; ++module)
-                queues[dev].enqueueReadBuffer(projectionBufs[dev], CL_FALSE,
-                                              sizeof(float) * pixelPerModule * module,
-                                              sizeof(float) * pixelPerModule,
-                                              currentViewData->module(module).rawData(), nullptr,
-                                              &lastModule[dev]);
+                queues[device].enqueueReadBuffer(projectionBufs[device], CL_FALSE,
+                                                 sizeof(float) * pixelPerModule * module,
+                                                 sizeof(float) * pixelPerModule,
+                                                 currentViewData->module(module).rawData(), nullptr,
+                                                 &lastModule[device]);
 
             // increment to next device
-            dev = ++dev % nbUsedDevs;
-            if(dev == 0)
+            device = ++device % nbUsedDevs;
+            if(device == 0)
                 for(uint dev = 0; dev < nbUsedDevs; ++dev)
                     lastModule[dev].wait();
 
             emit notifier()->projectionFinished(view);
         }
         // wait for remaining devices
-        for(uint remainingDev = 0; remainingDev < dev; ++remainingDev)
+        for(uint remainingDev = 0; remainingDev < device; ++remainingDev)
             lastModule[remainingDev].wait();
 
     } catch(const cl::Error& err)
