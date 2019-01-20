@@ -40,7 +40,7 @@ struct VolumeSpecs
 struct PtrWrapper
 {
     template<class T>
-    PtrWrapper(T* ptr) : ptr(ptr), size(sizeof(T)) {}
+    PtrWrapper(T* ptr) : ptr(ptr), size(sizeof(T)) { }
     void* ptr;
     size_t size;
 };
@@ -202,7 +202,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
                                                volumeDataPtr);
 
             uint volumeDim[3] = { uint(volDim[0]), uint(volDim[1]), uint(volDim[2]) };
-            volumeDimensionsBufs = mkInitBufs(volumeDim);
+            volumeDimensionsBufs = mkInitBufs(&volumeDim);
         }
 
         // Allocate output buffer: pinned (page-locked) projection buffer for each device
