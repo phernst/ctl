@@ -180,7 +180,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         {
             volumeImgs.reserve(nbUsedDevs);
             for(uint dev = 0; dev < nbUsedDevs; ++dev)
-                volumeImgs.emplace_back(context, CL_MEM_READ_ONLY,
+                volumeImgs.emplace_back(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                                         cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
                                         volDim[0], volDim[1], volDim[2]);
             cl::size_t<3> zeroVecOrigin;
@@ -196,7 +196,8 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
             const auto memSize = sizeof(float) * volDim[0] * volDim[1] * volDim[2];
             for(uint dev = 0; dev < nbUsedDevs; ++dev)
             {
-                volumeBufs.emplace_back(context, CL_MEM_READ_ONLY, memSize);
+                volumeBufs.emplace_back(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                                        memSize);
                 queues[dev].enqueueWriteBuffer(volumeBufs[dev], CL_FALSE, 0,
                                                memSize, volumeDataPtr);
             }
@@ -221,7 +222,8 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
                         queues[dev].enqueueMapBuffer(pinnedProjectionsBufs[dev], CL_FALSE,
                                                      CL_MAP_READ, 0, memSize));
             // standard device buffer
-            projectionDevBufs.emplace_back(context, CL_MEM_WRITE_ONLY, memSize);
+            projectionDevBufs.emplace_back(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY,
+                                           memSize);
         }
 
         // Set kernel arguments
@@ -469,7 +471,8 @@ std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, size_t memSize, co
     std::vector<cl::Buffer> ret;
     ret.reserve(nbBuffers);
     for(uint buf = 0; buf < nbBuffers; ++buf)
-        ret.emplace_back(OpenCLConfig::instance().context(), CL_MEM_READ_ONLY, memSize);
+        ret.emplace_back(OpenCLConfig::instance().context(),
+                         CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY, memSize);
     if(hostPtr)
     {
         for(uint buf = 0; buf < nbBuffers; ++buf)
