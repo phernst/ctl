@@ -150,10 +150,8 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         cl_uint2 raysPerPixel{ { _config.raysPerPixel[0], _config.raysPerPixel[1] } };
         cl_float3 volCorner = volumeCorner(volDim, voxelSize, volOffset);
         std::vector<cl_float3> sources(nbUsedDevs);
-        std::vector<std::vector<cl_double16>> QRs;
-        QRs.reserve(nbUsedDevs);
-        for(uint dev = 0; dev < nbUsedDevs; ++dev)
-            QRs.emplace_back(_viewDim.nbModules);
+        std::vector<std::vector<cl_double16>> QRs(nbUsedDevs,
+                                                  std::vector<cl_double16>(_viewDim.nbModules));
 
         // Input (read only) buffers for each device
         auto mkBufs = [nbUsedDevs](size_t size) {
