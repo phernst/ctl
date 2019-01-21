@@ -22,7 +22,8 @@ namespace {
 cl_double16 decomposeM(const Matrix3x3& M);
 cl_float3 determineSource(const ProjectionMatrix& P);
 cl_float3 volumeCorner(cl::size_t<3> volDim, cl_float3 voxelSize, cl_float3 volOffset);
-std::vector<cl::Buffer> createBuffers(uint nbBuffers, cl_mem_flags flag, size_t size, void* hostPtr);
+std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, size_t memSize, const void* hostPtr,
+                                              const std::vector<cl::CommandQueue>& queues);
 
 // helper classes
 struct VolumeSpecs
@@ -156,11 +157,10 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
 
         // Input (read only) buffers for each device
         auto mkBufs = [nbUsedDevs](size_t size) {
-            return createBuffers(nbUsedDevs, CL_MEM_READ_ONLY, size, nullptr);
+            return createReadOnlyBuffers(nbUsedDevs, size, nullptr, { });
         };
-        auto mkInitBufs = [nbUsedDevs](PtrWrapper ptrWrapper) {
-            return createBuffers(nbUsedDevs, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                                 ptrWrapper.size, ptrWrapper.ptr);
+        auto mkInitBufs = [nbUsedDevs, &queues](PtrWrapper ptrWrapper) {
+            return createReadOnlyBuffers(nbUsedDevs, ptrWrapper.size, ptrWrapper.ptr, queues);
         };
 
         // view/device specific buffers
@@ -171,11 +171,11 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         std::vector<cl::Buffer> raysPerPixelBufs = mkInitBufs(&raysPerPixel);
         std::vector<cl::Buffer> volCornerBufs = mkInitBufs(&volCorner);
         std::vector<cl::Buffer> voxelSizeBufs = mkInitBufs(&voxelSize);
+
         // the volume (Image3D or Buffer, dependent on wether interpolation is enabled)
         std::vector<cl::Image3D> volumeImgs;
         std::vector<cl::Buffer> volumeBufs;
         std::vector<cl::Buffer> volumeDimensionsBufs;
-
         if(_config.interpolate) // volume is cl::Image3D
         {
             volumeImgs.reserve(nbUsedDevs);
@@ -193,14 +193,14 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         else // no interpolation, volume is cl::Buffer
         {
             volumeBufs.reserve(nbUsedDevs);
+            const auto memSize = sizeof(float) * volDim[0] * volDim[1] * volDim[2];
             for(uint dev = 0; dev < nbUsedDevs; ++dev)
-                volumeBufs.emplace_back(context, CL_MEM_READ_ONLY,
-                                        sizeof(float) * volDim[0] * volDim[1] * volDim[2]);
-            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            {
+                volumeBufs.emplace_back(context, CL_MEM_READ_ONLY, memSize);
                 queues[dev].enqueueWriteBuffer(volumeBufs[dev], CL_FALSE, 0,
-                                               sizeof(float) * volDim[0] * volDim[1] * volDim[2],
-                                               volumeDataPtr);
-
+                                               memSize, volumeDataPtr);
+            }
+            // additional buffer with volume dimensions
             uint volumeDim[3] = { uint(volDim[0]), uint(volDim[1]), uint(volDim[2]) };
             volumeDimensionsBufs = mkInitBufs(&volumeDim);
         }
@@ -463,12 +463,18 @@ cl_float3 volumeCorner(cl::size_t<3> volDim, cl_float3 voxelSize, cl_float3 volO
                volOffset.s[2] - 0.5f * volDim[2] * voxelSize.s[2] } };
 }
 
-std::vector<cl::Buffer> createBuffers(uint nbBuffers, cl_mem_flags flag, size_t size, void* hostPtr)
+std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, size_t memSize, const void* hostPtr,
+                                              const std::vector<cl::CommandQueue>& queues)
 {
     std::vector<cl::Buffer> ret;
     ret.reserve(nbBuffers);
     for(uint buf = 0; buf < nbBuffers; ++buf)
-        ret.emplace_back(OpenCLConfig::instance().context(), flag, size, hostPtr);
+        ret.emplace_back(OpenCLConfig::instance().context(), CL_MEM_READ_ONLY, memSize);
+    if(hostPtr)
+    {
+        for(uint buf = 0; buf < nbBuffers; ++buf)
+            queues[buf].enqueueWriteBuffer(ret[buf], CL_FALSE, 0, memSize, hostPtr);
+    }
     return ret;
 }
 
