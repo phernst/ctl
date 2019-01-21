@@ -296,7 +296,8 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
                                              &readViewFinished[device]);
 
             // Increment to next device
-            device = ++device % nbUsedDevs;
+            ++device;
+            device = device % nbUsedDevs;
             // when device sub-loop finishes, wait for all "cpyThreads" and thus all device queues
             if(device == 0)
                 for(uint dev = 0; dev < nbUsedDevs; ++dev)
