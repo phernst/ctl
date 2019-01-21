@@ -397,7 +397,7 @@ void DenFileIOtest::processAbstractVolume(CTL::io::AbstractVolumeIO<float>* volI
     QCOMPARE(metaInfo.value(CTL::io::meta_info::dimZ).toInt(), 15);
 
     auto r = volIO->readSlice(fileName,4);
-    QCOMPARE(r(3,2), volume(2,3,4));
+    QCOMPARE(r(2,3), volume(2,3,4));
 }
 
 void DenFileIOtest::processAbstractProjDat(io::AbstractProjectionDataIO* projDatIO, const QString &fileName)
@@ -411,7 +411,7 @@ void DenFileIOtest::processAbstractProjDat(io::AbstractProjectionDataIO* projDat
     QCOMPARE(metaInfo.value(CTL::io::meta_info::dimZ).toUInt(), dims.nbModules * _testProjections.nbViews());
 
     auto r = projDatIO->readSingleView(fileName, 1, dims.nbModules);
-    QCOMPARE(r.module(0)(2,3), _testProjections.view(1).module(0)(2,3));
+    QCOMPARE(r.module(0)(3,2), _testProjections.view(1).module(0)(3,2));
 }
 
 void DenFileIOtest::processAbstractProjMat(io::AbstractProjectionMatrixIO* projMatIO, const QString &fileName)

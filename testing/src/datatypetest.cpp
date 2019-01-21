@@ -345,5 +345,5 @@ void DataTypeTest::testProjectionData()
     QCOMPARE(testProj.view(0).module(0)(0,0), 1.0f);
     QCOMPARE(testProj.view(0).module(2)(0,0), 201.0f);
     QCOMPARE(testProj.view(1).module(0)(0,0), 501.0f);
-    QCOMPARE(testProj.view(1).module(0)(1,2), 513.0f);
+    QCOMPARE(testProj.view(1).module(0)(2,1), 513.0f);
 }

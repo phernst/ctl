@@ -59,7 +59,7 @@ void ProjectionView::updateImage()
     for(int y = 0; y < Y; ++y)
         for(int x = 0; x < X; ++x)
         {
-            grayValue = (projection(y,x) - minGrayValue) * grayScale;
+            grayValue = (projection(x,y) - minGrayValue) * grayScale;
             image.setPixel(x,y,qMax(qMin(int(grayValue + .5f),255),0));
         }
 

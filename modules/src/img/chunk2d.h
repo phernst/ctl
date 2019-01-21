@@ -63,8 +63,8 @@ public:
     const T* rawData() const;
     uint width() const;
 
-    T& operator()(uint row, uint column);
-    const T& operator()(uint row, uint column) const;
+    T& operator()(uint x, uint y);
+    const T& operator()(uint x, uint y) const;
 
     bool operator==(const Chunk2D<T>& other) const;
     bool operator!=(const Chunk2D<T>& other) const;
@@ -264,10 +264,10 @@ void Chunk2D<T>::fill(const T& fillValue)
  * checks!
  */
 template <typename T>
-T& Chunk2D<T>::operator()(uint row, uint column)
+T& Chunk2D<T>::operator()(uint x, uint y)
 {
-    Q_ASSERT((row * _dim.width + column) < allocatedElements());
-    return _data[row * _dim.width + column];
+    Q_ASSERT((y * _dim.width + x) < allocatedElements());
+    return _data[y * _dim.width + x];
 }
 
 /*!
@@ -275,10 +275,10 @@ T& Chunk2D<T>::operator()(uint row, uint column)
  * boundary checks!
  */
 template <typename T>
-const T& Chunk2D<T>::operator()(uint row, uint column) const
+const T& Chunk2D<T>::operator()(uint x, uint y) const
 {
-    Q_ASSERT((row * _dim.width + column) < allocatedElements());
-    return _data[row * _dim.width + column];
+    Q_ASSERT((y * _dim.width + x) < allocatedElements());
+    return _data[y * _dim.width + x];
 }
 
 /*!
