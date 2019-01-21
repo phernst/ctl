@@ -13,6 +13,10 @@ them.
 **For more details:**
 [**check out the documentation!**](https://www.forschungscampus-stimulate.de/ctl/)
 
+Moreover, you may find useful information in the
+[Wiki](https://gitlab.com/tpfeiffe/ctl/wikis/home),
+especially if you want to contribute to the project as a developer.
+
 The following installation guide has been tested with Kubuntu 18.04 LTS.
 
 Install compiler and build tools (GCC, make, ...)
