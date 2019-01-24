@@ -43,8 +43,8 @@ Install Qt
     If you are on another platform, note that a Qt3D version is needed that 
     requires a Qt version >= 5.9.
 
-Install OpenCL 1.x
-------------------
+Install OpenCL 1.1/1.2
+----------------------
 
 This is an example how to set up OpenCL for a NVIDIA GPU.
 
@@ -56,7 +56,10 @@ This is an example how to set up OpenCL for a NVIDIA GPU.
     ```console
     sudo apt install nvidia-opencl-dev
     ```
-    For other vendors (AMD, Intel, ...),  you need to search for an appropriate
+    For other vendors
+    ([AMD](https://linuxconfig.org/install-opencl-for-the-amdgpu-open-source-drivers-on-debian-and-ubuntu),
+    [Intel](https://software.intel.com/en-us/intel-opencl/download),
+    ...),  you need to search for an appropriate
     package that provides you an OpenCL driver.
     
 3. install clinfo (optional, for checking available OpenCL devices)
