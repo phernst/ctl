@@ -11,7 +11,7 @@ class XrayLaser : public AbstractSource
     ADD_TO_COMPONENT_ENUM(310)
 
     // implementation of abstract interface
-    public: SampledDataSeries spectrum(float from, float to, uint nbSamples) const override;
+    public: IntervalDataSeries spectrum(float from, float to, uint nbSamples) const override;
     protected: double nominalPhotonFlux() const override;
 
 public:

@@ -33,11 +33,11 @@ XrayLaser::XrayLaser(const QJsonObject& json)
     XrayLaser::read(json);
 }
 
-SampledDataSeries XrayLaser::spectrum(float from, float to, uint nbSamples) const
+IntervalDataSeries XrayLaser::spectrum(float from, float to, uint nbSamples) const
 {
     static_cast<XrayLaserSpectrumModel*>(_spectrumModel.get())->setParameter(_energy);
-    SampledDataSeries spec(from, to, nbSamples, *_spectrumModel);
-    spec.normalize();
+    IntervalDataSeries spec = IntervalDataSeries::sampledFromModel(*_spectrumModel, from, to, nbSamples);
+    spec.normalizeByIntegral();
     return spec;
 }
 

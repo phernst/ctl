@@ -7,47 +7,54 @@ namespace CTL {
 // ____________________________
 // # AbstractXraySpectrumModel
 // ----------------------------
-void AbstractXraySpectrumModel::setParameter(const float& voltage) { _parameter = voltage; }
+void AbstractXraySpectrumModel::setParameter(QVariant energy) { _energy = energy.toFloat(); }
 
-const float& AbstractXraySpectrumModel::parameter() const { return _parameter; }
+QVariant AbstractXraySpectrumModel::parameter() const { return QVariant(_energy); }
 
 // _____________________________
 // # XraySpectrumTabulatedModel
 // -----------------------------
-QVariant XraySpectrumTabulatedModel::toVariant() const { return QVariant(); }
-
-void XraySpectrumTabulatedModel::fromVariant(const QVariant& variant)
+float XraySpectrumTabulatedModel::valueAt(float position) const
 {
-    return;
+    if(!hasTabulatedDataFor(_energy))
+        throw std::domain_error("No tabulated data available for parameter value: "
+                                + std::to_string(_energy));
+
+    // check if exact lookup is available --> return corresponding data
+    if(_lookupTables.contains(_energy))
+        return _lookupTables.value(_energy).valueAt(position);
+
+    // data needs to be interpolated for requested value of '_parameter'
+    auto parPosition = _lookupTables.upperBound(_energy);
+    // --> always gives next tabulated data, since no exact lookup available
+
+    auto tableLower = (parPosition - 1).value(); // tabulated data with voltage < _parameter
+    auto tableUpper = (parPosition).value(); // tabulated data with voltage > _parameter
+
+    auto lowerValue = tableLower.valueAt(position);
+    auto upperValue = tableUpper.valueAt(position);
+
+    // linear interpolation weighting
+    auto weightFactor
+        = (parPosition.key() - _energy) / (parPosition.key() - (parPosition - 1).key());
+
+    return lowerValue * weightFactor + upperValue * (1.0f - weightFactor);
 }
 
-void XraySpectrumTabulatedModel::setLookupTables(const QMap<float, TabulatedModelData>& tables)
-{
-    _lookupTables = tables;
-}
-
-void XraySpectrumTabulatedModel::addLookupTable(float voltage, const TabulatedModelData& table)
-{
-    _lookupTables.insert(voltage, table);
-}
-
-float XraySpectrumTabulatedModel::valueFromModel(float samplePoint, float spacing) const
+float XraySpectrumTabulatedModel::binIntegral(float position, float binWidth) const
 {
     //    qDebug() << "value at called with: " << _parameter << samplePoint << spacing;
 
-    if(!hasTabulatedDataFor(_parameter))
+    if(!hasTabulatedDataFor(_energy))
         throw std::domain_error("No tabulated data available for parameter value: "
-                                + std::to_string(_parameter));
-
-    const auto leftBinPosition = samplePoint - spacing / 2.0f;
-    const auto rightBinPosition = samplePoint + spacing / 2.0f;
+                                + std::to_string(_energy));
 
     // check if exact lookup is available --> return corresponding data
-    if(_lookupTables.contains(_parameter))
-        return _lookupTables.value(_parameter).trapezoidIntegral(leftBinPosition, rightBinPosition);
+    if(_lookupTables.contains(_energy))
+        return _lookupTables.value(_energy).binIntegral(position, binWidth);
 
     // data needs to be interpolated for requested value of '_parameter'
-    auto parPosition = _lookupTables.upperBound(_parameter);
+    auto parPosition = _lookupTables.upperBound(_energy);
     // --> always gives next tabulated data, since no exact lookup available
 
     auto tableLower = (parPosition - 1).value(); // tabulated data with voltage < _parameter
@@ -57,17 +64,34 @@ float XraySpectrumTabulatedModel::valueFromModel(float samplePoint, float spacin
     //    qDebug() << "call Integrate: [" << samplePoint-spacing/2.0 << "," <<
     //    samplePoint+spacing/2.0 << "] ";
 
-    auto lowerIntegral = tableLower.trapezoidIntegral(leftBinPosition, rightBinPosition);
-    auto upperIntegral = tableUpper.trapezoidIntegral(leftBinPosition, rightBinPosition);
+    auto lowerIntegral = tableLower.binIntegral(position, binWidth);
+    auto upperIntegral = tableUpper.binIntegral(position, binWidth);
 
     //    qDebug() << "lowerIntegral = " << lowerIntegral;
     //    qDebug() << "upperIntegral = " << upperIntegral;
 
     // linear interpolation weighting
     auto weightFactor
-        = (parPosition.key() - _parameter) / (parPosition.key() - (parPosition - 1).key());
+        = (parPosition.key() - _energy) / (parPosition.key() - (parPosition - 1).key());
 
     return lowerIntegral * weightFactor + upperIntegral * (1.0f - weightFactor);
+}
+
+QVariant XraySpectrumTabulatedModel::toVariant() const { return QVariant(); }
+
+void XraySpectrumTabulatedModel::fromVariant(const QVariant& variant)
+{
+    return;
+}
+
+void XraySpectrumTabulatedModel::setLookupTables(const QMap<float, TabulatedDataModel>& tables)
+{
+    _lookupTables = tables;
+}
+
+void XraySpectrumTabulatedModel::addLookupTable(float voltage, const TabulatedDataModel& table)
+{
+    _lookupTables.insert(voltage, table);
 }
 
 bool XraySpectrumTabulatedModel::hasTabulatedDataFor(float voltage) const
@@ -82,9 +106,18 @@ bool XraySpectrumTabulatedModel::hasTabulatedDataFor(float voltage) const
 // _____________________________
 // # XrayLaserSpectrumModel
 // -----------------------------
-float XrayLaserSpectrumModel::valueFromModel(float samplePoint, float spacing) const
+float XrayLaserSpectrumModel::valueAt(float position) const
 {
-    if((_parameter >= samplePoint - 0.5f*spacing) && (_parameter <= samplePoint + 0.5f*spacing))
+    if(qFuzzyCompare(position,_energy))
+        return 1.0f;
+    else
+        return 0.0f;
+}
+
+
+float XrayLaserSpectrumModel::binIntegral(float position, float binWidth) const
+{
+    if((_energy >= position - 0.5f*binWidth) && (_energy <= position + 0.5f*binWidth))
         return 1.0f;
     else
         return 0.0f;
@@ -96,47 +129,48 @@ void XrayLaserSpectrumModel::fromVariant(const QVariant&) { return; }
 
 
 // _____________________________
-// # GenericSpectrumModel
+// # FixedXraySpectrumModel
 // -----------------------------
-GenericSpectrumModel::GenericSpectrumModel(const TabulatedModelData &table)
-    : _lookupTable(table)
+FixedXraySpectrumModel::FixedXraySpectrumModel(const TabulatedDataModel &table)
 {
+    addLookupTable(0.0f, table);
 }
 
-void GenericSpectrumModel::setLookupTable(TabulatedModelData table)
+void FixedXraySpectrumModel::setLookupTable(const TabulatedDataModel& table)
 {
-    _lookupTable = std::move(table);
+    QMap<float, TabulatedDataModel> tmp;
+    tmp.insert(0.0f, table);
+    setLookupTables(tmp);
 }
 
-float GenericSpectrumModel::valueFromModel(float samplePoint, float spacing) const
+void FixedXraySpectrumModel::setParameter(QVariant)
 {
-    return _lookupTable.trapezoidIntegral(samplePoint - 0.5f*spacing, samplePoint + 0.5f*spacing);
 }
-
-QVariant GenericSpectrumModel::toVariant() const { return QVariant(); }
-
-void GenericSpectrumModel::fromVariant(const QVariant&) { return; }
-
 
 // _____________________________
 // # KramersLawSpectrumModel
 // -----------------------------
-float KramersLawSpectrumModel::valueFromModel(float samplePoint, float spacing) const
+float KramersLawSpectrumModel::valueAt(float position) const
+{
+    return (position<_energy) ? (_energy / position - 1.0f) : 0.0f;
+}
+
+float KramersLawSpectrumModel::binIntegral(float position, float binWidth) const
 {
     static const float LOW_END = 0.1f;
 
-    float bot = samplePoint - 0.5f*spacing;
-    float top = samplePoint + 0.5f*spacing;
+    float bot = position - 0.5f*binWidth;
+    float top = position + 0.5f*binWidth;
 
-    if((top < LOW_END) || (bot > _parameter))
+    if((top < LOW_END) || (bot > _energy))
         return 0.0f;
 
     if(bot < LOW_END)
         bot = LOW_END;
-    if(top > _parameter)
-        top = _parameter;
+    if(top > _energy)
+        top = _energy;
 
-    return _parameter * log(top / bot) - (top - bot);
+    return _energy * log(top / bot) - (top - bot);
 }
 
 QVariant KramersLawSpectrumModel::toVariant() const { return QVariant(); }

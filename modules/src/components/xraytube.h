@@ -15,7 +15,7 @@ class XrayTube : public AbstractSource
     ADD_TO_COMPONENT_ENUM(320)
 
     // implementation of abstract interface
-    public: SampledDataSeries spectrum(float from, float to, uint nbSamples) const override;
+    public: IntervalDataSeries spectrum(float from, float to, uint nbSamples) const override;
     protected: double nominalPhotonFlux() const override;
 
 public:
@@ -32,14 +32,14 @@ public:
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
-    void setSpectrumModel(AbstractSpectralModel *model) override;
+    void setSpectrumModel(AbstractXraySpectrumModel *model) override;
     void read(const QJsonObject& json) override;     // JSON
     void write(QJsonObject& json) const override;    // JSON
 
     // getter methods
     double tubeVoltage() const;
     double emissionCurrent() const;
-    SampledDataSeries spectrum() const; // convenience alternative
+    IntervalDataSeries spectrum() const; // convenience alternative
 
     // setter methods
     void setTubeVoltage(double voltage);
@@ -67,7 +67,7 @@ inline void XrayTube::setEmissionCurrent(double current) { _emissionCurrent = cu
 
 inline void XrayTube::setIntensityConstant(double value) { _intensityConstant = value; }
 
-inline void XrayTube::setSpectrumModel(AbstractSpectralModel *model)
+inline void XrayTube::setSpectrumModel(AbstractXraySpectrumModel *model)
 {
     if(!dynamic_cast<AbstractXraySpectrumModel*>(model))
         throw std::runtime_error("Spectral model could not be set: not of type AbstractXraySpectrumModel");

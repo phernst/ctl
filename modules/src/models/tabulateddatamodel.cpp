@@ -1,33 +1,37 @@
-#include "tabulatedmodeldata.h"
+#include "tabulateddatamodel.h"
 
 #include <QDebug>
 
 namespace CTL {
 
-TabulatedModelData::TabulatedModelData(const QMap<float, float>& table)
+TabulatedDataModel::TabulatedDataModel(const QMap<float, float>& table)
     : _data(table)
 {
 }
 
-void TabulatedModelData::setData(QMap<float, float> tables) { _data = std::move(tables); }
+void TabulatedDataModel::setData(QMap<float, float> tables) { _data = std::move(tables); }
 
-float TabulatedModelData::trapezoidIntegral(float from, float to) const
+float TabulatedDataModel::binIntegral(float position, float binWidth) const
 {
+    float from = position - 0.5f * binWidth;
+    float to = position + 0.5f * binWidth;
+
     float ret = 0.0;
 
     const auto lowerEndPosition = _data.lowerBound(from);
     const auto upperEndPosition = _data.lowerBound(to);
 
-    // check if integration interval is fully outside tabulated data
+    // check if integration interval is fully outside tabulated data --> return zero
     if(lowerEndPosition == _data.end() || to < _data.begin().key())
         return 0.0f;
 
-    // integration interval lies fully within two tabulated values
+    // integration interval lies fully within two tabulated values --> return value * binWidth
     if(lowerEndPosition == upperEndPosition && upperEndPosition != _data.begin())
-        return interpLin(0.5f * (from + to)) * (to - from);
+        return valueAt(position) * binWidth;
 
+    // if function reaches this point, multiple segments need to be integrated
     // compute contribution of lower end
-    float lowerEndValue = interpLin(from);
+    float lowerEndValue = valueAt(from);
     float lowerEndContr
         = 0.5f * (lowerEndValue + lowerEndPosition.value()) * (lowerEndPosition.key() - from);
 
@@ -63,7 +67,7 @@ float TabulatedModelData::trapezoidIntegral(float from, float to) const
 
     // compute contribution of upper end
     const auto lastSample = (upperEndPosition - 1);
-    float upperEndValue = interpLin(to);
+    float upperEndValue = valueAt(to);
     float upperEndContr = 0.5f * (lastSample.value() + upperEndValue) * (to - lastSample.key());
 
     ret += upperEndContr;
@@ -75,7 +79,7 @@ float TabulatedModelData::trapezoidIntegral(float from, float to) const
     return ret;
 }
 
-float TabulatedModelData::interpLin(float pos) const
+float TabulatedDataModel::valueAt(float pos) const
 {
     // check if data contains an entry for 'pos'
     if(_data.contains(pos))
@@ -96,5 +100,13 @@ float TabulatedModelData::interpLin(float pos) const
 
     return contribLower + contribUpper;
 }
+
+QVariant TabulatedDataModel::toVariant() const { return QVariant(); }
+
+void TabulatedDataModel::fromVariant(const QVariant& variant)
+{
+    return;
+}
+
 
 } // namespace CTL

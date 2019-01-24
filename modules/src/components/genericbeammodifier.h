@@ -21,7 +21,7 @@ class GenericBeamModifier : public AbstractBeamModifier
     ADD_TO_COMPONENT_ENUM(401)
 
     // implementation of abstract interface
-    public: SampledDataSeries modify(const SampledDataSeries& inputSpectrum,
+    public: IntervalDataSeries modify(const IntervalDataSeries& inputSpectrum,
                                      double theta = 0.0,
                                      double phi = 0.0) override;
 
@@ -53,7 +53,7 @@ inline GenericBeamModifier::GenericBeamModifier(const QJsonObject& json)
     GenericBeamModifier::read(json);
 }
 
-inline SampledDataSeries GenericBeamModifier::modify(const SampledDataSeries &inputSpectrum, double, double)
+inline IntervalDataSeries GenericBeamModifier::modify(const IntervalDataSeries &inputSpectrum, double, double)
 {
     return inputSpectrum;
 }

@@ -36,24 +36,30 @@ void SpectrumTest::initTestCase()
     _tube = new CTL::XrayTube();
     //_tube->setSpectrumModel(_model);
 
-    qInfo() << _tube->spectrum(0.0f, 120.0f, 100).normalized().values();
-    qInfo() << _tube->spectrum(0.0f, 120.0f, 100).normalized().samplePoints();
+    qInfo() << _tube->spectrum(0.0f, 120.0f, 100).normalizedByIntegral().values();
+    qInfo() << _tube->spectrum(0.0f, 120.0f, 100).normalizedByIntegral().samplingPoints();
 }
 
 void SpectrumTest::testXrayLaserSpectrum()
 {
     CTL::XrayLaser laser;
-    qInfo().noquote() << laser.spectrum(10.0, 110.0, 10).toMap();
+    auto spectrum = laser.spectrum(10.0, 110.0, 10);
+    qInfo().noquote() << spectrum.data();
+    QCOMPARE(spectrum.value(8), 0.5f);
+    QCOMPARE(spectrum.value(9), 0.5f);
     laser.setPhotonEnergy(55.0);
-    qInfo().noquote() << laser.spectrum(0.0, 100.0, 10).toMap();
+    spectrum = laser.spectrum(10.0, 110.0, 10);
+    qInfo().noquote() << spectrum.data();
+    QCOMPARE(spectrum.value(4), 1.0f);
+
 }
 
 void SpectrumTest::testSpectrumSampling()
 {
     _model->setParameter(1.5f);
-    QVERIFY2(verifySampledSpectrum(CTL::SampledDataSeries(0.0f, 100.0f, 10, *_model)), "spectrum 1 failed");
-    QVERIFY2(verifySampledSpectrum(CTL::SampledDataSeries(10.0f, 15.0f, 30, *_model)), "spectrum 2 failed");
-    QVERIFY2(verifySampledSpectrum(CTL::SampledDataSeries(50.0f, 90.0f, 50, *_model)), "spectrum 3 failed");
+    QVERIFY2(verifySampledSpectrum(CTL::IntervalDataSeries::sampledFromModel(*_model, 0.0f, 100.0f, 10)), "spectrum 1 failed");
+    QVERIFY2(verifySampledSpectrum(CTL::IntervalDataSeries::sampledFromModel(*_model, 10.0f, 15.0f, 30)), "spectrum 2 failed");
+    QVERIFY2(verifySampledSpectrum(CTL::IntervalDataSeries::sampledFromModel(*_model, 50.0f, 90.0f, 50)), "spectrum 3 failed");
 }
 
 void SpectrumTest::cleanupTestCase()
@@ -74,18 +80,18 @@ float SpectrumTest::calcAnalyticIntegral(float from, float to) const
                               + double(_n) * (d_to - d_from));
 }
 
-bool SpectrumTest::verifySampledSpectrum(const CTL::SampledDataSeries &sampledSpec) const
+bool SpectrumTest::verifySampledSpectrum(const CTL::IntervalDataSeries &sampledSpec) const
 {
     static const float eps = 1.0e-5f;
 
     uint errors = 0;
     for(uint i=0; i<sampledSpec.nbSamples(); ++i)
     {
-        float from = sampledSpec.samplePoint(i) - 0.5f * sampledSpec.spacing();
-        float to   = from + sampledSpec.spacing();
+        float from = sampledSpec.samplingPoint(i) - 0.5f * sampledSpec.binWidth();
+        float to   = from + sampledSpec.binWidth();
         if( fabs(calcAnalyticIntegral(from, to) - sampledSpec.value(i)) > eps * calcAnalyticIntegral(from, to))
         {
-            qInfo() << "deviation detected: [" << sampledSpec.samplePoint(i) << " keV] " <<  sampledSpec.value(i) <<
+            qInfo() << "deviation detected: [" << sampledSpec.samplingPoint(i) << " keV] " <<  sampledSpec.value(i) <<
                        " (analytic: " << calcAnalyticIntegral(from, to) << ")";
             ++errors;
         }

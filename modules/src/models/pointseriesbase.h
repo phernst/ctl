@@ -1,0 +1,122 @@
+#ifndef POINTSERIESBASE_H
+#define POINTSERIESBASE_H
+
+#include <QList>
+#include <QPointF>
+#include <vector>
+
+namespace CTL {
+
+class PointSeriesBase
+{
+public:
+    // getter methods
+    const QList<QPointF>& data() const;
+
+    // other methods
+    uint nbSamples() const;
+    void normalizeByMaxAbsVal();
+    void normalizeByMaxVal();
+    void scale(float factor);
+    uint size() const;
+    //void multiplyWith(const std::vector<float>& weights);
+
+    // Sampling points ("x values")
+    float samplingPoint(uint sampleNb) const;
+    std::vector<float> samplingPoints() const;
+
+    // Values ("y values")
+    float value(uint sampleNb) const;
+    std::vector<float> values() const;
+
+protected:
+    QList<QPointF> _data;
+
+    inline QList<QPointF>& rdata();
+
+    PointSeriesBase() = default;
+    inline PointSeriesBase(const QList<QPointF>& pointSeries);
+    inline PointSeriesBase(QList<QPointF>&& pointSeries);
+};
+
+inline PointSeriesBase::PointSeriesBase(const QList<QPointF>& pointSeries)
+    : _data(pointSeries)
+{
+}
+
+inline PointSeriesBase::PointSeriesBase(QList<QPointF>&& pointSeries)
+    : _data(std::move(pointSeries))
+{
+}
+
+inline const QList<QPointF>& PointSeriesBase::data() const
+{
+    return _data;
+}
+
+inline QList<QPointF> &PointSeriesBase::rdata()
+{
+    return _data;
+}
+
+inline uint PointSeriesBase::nbSamples() const
+{
+    return static_cast<uint>(_data.size());
+}
+
+inline void PointSeriesBase::normalizeByMaxAbsVal()
+{
+    auto maxEl = std::max_element(_data.begin(), _data.end(),
+                                  [] (const QPointF& a, const QPointF& b) {
+                                  return qAbs(a.y()) < qAbs(b.y()); });
+    scale(1.0f / maxEl->y());
+}
+
+inline void PointSeriesBase::normalizeByMaxVal()
+{
+    auto maxEl = std::max_element(_data.begin(), _data.end(),
+                                  [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); });
+    scale(1.0f / maxEl->y());
+}
+
+inline void PointSeriesBase::scale(float factor)
+{
+    for(auto& pt : _data)
+        pt.ry() *= factor;
+}
+
+inline uint PointSeriesBase::size() const
+{
+    return static_cast<uint>(_data.size());
+}
+
+inline float PointSeriesBase::samplingPoint(uint sampleNb) const
+{
+    return _data.at(sampleNb).x();
+}
+
+inline std::vector<float> PointSeriesBase::samplingPoints() const
+{
+    std::vector<float> ret;
+    ret.reserve(nbSamples());
+    for(const auto& pt : _data)
+        ret.push_back(pt.x());
+    return ret;
+}
+
+inline float PointSeriesBase::value(uint sampleNb) const
+{
+    return _data.at(sampleNb).y();
+}
+
+inline std::vector<float> PointSeriesBase::values() const
+{
+    std::vector<float> ret;
+    ret.reserve(nbSamples());
+    for(const auto& pt : _data)
+        ret.push_back(pt.y());
+    return ret;
+}
+
+}
+#endif // POINTSERIESBASE_H

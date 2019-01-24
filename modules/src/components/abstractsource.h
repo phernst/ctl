@@ -1,7 +1,8 @@
 #ifndef ABSTRACTSOURCE_H
 #define ABSTRACTSOURCE_H
 #include "mat/matrix_types.h"
-#include "models/sampleddataseries.h"
+#include "models/intervaldataseries.h"
+#include "models/xrayspectrummodels.h"
 #include "systemcomponent.h"
 #include <QJsonArray>
 #include <QSizeF>
@@ -58,7 +59,7 @@ class AbstractSource : public SystemComponent
     DECLARE_ELEMENTAL_TYPE
 
     // abstract interface
-    public:virtual SampledDataSeries spectrum(float from, float to, uint nbSamples) const = 0;
+    public:virtual IntervalDataSeries spectrum(float from, float to, uint nbSamples) const = 0;
     protected:virtual double nominalPhotonFlux() const = 0;
 
 public:
@@ -69,15 +70,15 @@ public:
                    const QString& name);
     AbstractSource(const QSizeF& focalSpotSize,
                    const Vector3x1& focalSpotPosition,
-                   AbstractSpectralModel* spectumModel,
+                   AbstractXraySpectrumModel* spectumModel,
                    const QString& name);
 
     // virtual methods
-    virtual void setSpectrumModel(AbstractSpectralModel* model);
+    virtual void setSpectrumModel(AbstractXraySpectrumModel* model);
     QString info() const override;
     void read(const QJsonObject& json) override; // JSON
     void write(QJsonObject& json) const override; // JSON
-    void setSpectrumModel(std::shared_ptr<AbstractSpectralModel> model);
+    void setSpectrumModel(std::shared_ptr<AbstractXraySpectrumModel> model);
 
     // getter methods
     double photonFlux() const;
@@ -100,7 +101,7 @@ protected:
     Vector3x1 _focalSpotPosition = Vector3x1(0.0);
     double _fluxModifier = 1.0;
 
-    std::shared_ptr<AbstractSpectralModel> _spectrumModel = nullptr;
+    std::shared_ptr<AbstractXraySpectrumModel> _spectrumModel = nullptr;
 };
 
 /*!
@@ -167,7 +168,7 @@ inline AbstractSource::AbstractSource(const QSizeF& focalSpotSize,
  */
 inline AbstractSource::AbstractSource(const QSizeF& focalSpotSize,
                                       const Vector3x1& focalSpotPosition,
-                                      AbstractSpectralModel* spectumModel,
+                                      AbstractXraySpectrumModel* spectumModel,
                                       const QString& name)
     : SystemComponent(name)
     , _focalSpotSize(focalSpotSize)
@@ -267,7 +268,7 @@ inline QString AbstractSource::info() const
  *
  * This instance manages ownership of \a model as a std::shared_ptr.
  */
-inline void AbstractSource::setSpectrumModel(AbstractSpectralModel* model)
+inline void AbstractSource::setSpectrumModel(AbstractXraySpectrumModel* model)
 {
     _spectrumModel.reset(model);
 }
@@ -275,7 +276,7 @@ inline void AbstractSource::setSpectrumModel(AbstractSpectralModel* model)
 /*!
  * Sets the spectrum model to \a model.
  */
-inline void AbstractSource::setSpectrumModel(std::shared_ptr<AbstractSpectralModel> model)
+inline void AbstractSource::setSpectrumModel(std::shared_ptr<AbstractXraySpectrumModel> model)
 {
     setSpectrumModel(model.get());
 }

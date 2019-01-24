@@ -13,7 +13,7 @@ class GenericSource : public AbstractSource
     ADD_TO_COMPONENT_ENUM(301)
 
     // implementation of abstract interface
-    public: SampledDataSeries spectrum(float from, float to, uint nbSamples) const override;
+    public: IntervalDataSeries spectrum(float from, float to, uint nbSamples) const override;
     protected: double nominalPhotonFlux() const override;
 
 public:
@@ -30,7 +30,7 @@ public:
     void write(QJsonObject& json) const override; // JSON
 
     // setter methods
-    void setSpectrum(const SampledDataSeries& spectrum, bool updateFlux = false);
+    void setSpectrum(const IntervalDataSeries& spectrum, bool updateFlux = false);
     void setPhotonFlux(double flux);
 
     // static methods
@@ -42,10 +42,10 @@ protected:
 
 inline SystemComponent* GenericSource::clone() const { return new GenericSource(*this); }
 
-inline SampledDataSeries GenericSource::spectrum(float from, float to, uint nbSamples) const
+inline IntervalDataSeries GenericSource::spectrum(float from, float to, uint nbSamples) const
 {
-    SampledDataSeries sampSpec(from, to, nbSamples, *_spectrumModel);
-    sampSpec.normalize();
+    IntervalDataSeries sampSpec = IntervalDataSeries::sampledFromModel(*_spectrumModel, from, to, nbSamples);
+    //sampSpec.normalize();
     return sampSpec;
 }
 

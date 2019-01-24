@@ -23,7 +23,7 @@ private:
 
     float calcIntensity(float energy) const;
     float calcAnalyticIntegral(float from, float to) const;
-    bool verifySampledSpectrum(const CTL::SampledDataSeries& sampledSpec) const;
+    bool verifySampledSpectrum(const CTL::IntervalDataSeries& sampledSpec) const;
 
     float _m;
     float _n;

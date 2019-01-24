@@ -48,10 +48,7 @@ HEADERS += \
     $$PWD/src/mat/matrix_types.h \
     $$PWD/src/mat/matrix_utils.h \
     $$PWD/src/mat/projectionmatrix.h \
-    $$PWD/src/models/abstractspectralmodel.h \
-    $$PWD/src/models/tabulatedmodeldata.h \
     $$PWD/src/models/xrayspectrummodels.h \
-    $$PWD/src/models/sampleddataseries.h \
     $$PWD/src/models/abstractdatamodel.h \
     $$PWD/src/projectors/abstractprojector.h \
     $$PWD/src/projectors/abstractprojectorconfig.h \
@@ -70,7 +67,11 @@ HEADERS += \
     $$PWD/src/acquisition/preparesteps.h \
     $$PWD/src/acquisition/simplectsystem.h \
     $$PWD/src/acquisition/systemblueprints.h \
-    $$PWD/src/acquisition/trajectories.h
+    $$PWD/src/acquisition/trajectories.h \
+    $$PWD/src/models/tabulateddatamodel.h \
+    $$PWD/src/models/xydataseries.h \
+    $$PWD/src/models/pointseriesbase.h \
+    $$PWD/src/models/intervaldataseries.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -92,8 +93,6 @@ SOURCES += \
     $$PWD/src/mat/matrix_utils.tpp \
     $$PWD/src/mat/matrix_algorithm.cpp \
     $$PWD/src/mat/projectionmatrix.cpp \
-    $$PWD/src/models/tabulatedmodeldata.cpp \
-    $$PWD/src/models/sampleddataseries.cpp \
     $$PWD/src/models/xrayspectrummodels.cpp \
     $$PWD/src/projectors/arealfocalspotextension.cpp \
     $$PWD/src/projectors/dynamicprojector.cpp \
@@ -106,4 +105,7 @@ SOURCES += \
     $$PWD/src/acquisition/preparationprotocols.cpp \
     $$PWD/src/acquisition/preparesteps.cpp \
     $$PWD/src/acquisition/simplectsystem.cpp \
-    $$PWD/src/acquisition/trajectories.cpp
+    $$PWD/src/acquisition/trajectories.cpp \
+    $$PWD/src/models/tabulateddatamodel.cpp \
+    $$PWD/src/models/xydataseries.cpp \
+    $$PWD/src/models/intervaldataseries.cpp

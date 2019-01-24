@@ -54,15 +54,15 @@ void GenericSource::read(const QJsonObject& json) { AbstractSource::read(json); 
  */
 void GenericSource::write(QJsonObject& json) const { AbstractSource::write(json); }
 
-void GenericSource::setSpectrum(const SampledDataSeries& spectrum, bool updateFlux)
+void GenericSource::setSpectrum(const IntervalDataSeries& spectrum, bool updateFlux)
 {
-    auto specModel = new GenericSpectrumModel;
+    auto specModel = new FixedXraySpectrumModel;
 
     QMap<float, float> dataMap;
     for(uint smp = 0; smp < spectrum.nbSamples(); ++smp)
-        dataMap.insert(spectrum.samplePoint(smp), spectrum.value(smp));
+        dataMap.insert(spectrum.data().at(smp).x(), spectrum.data().at(smp).y());
 
-    TabulatedModelData spectrumData;
+    TabulatedDataModel spectrumData;
     spectrumData.setData(std::move(dataMap));
 
     specModel->setLookupTable(std::move(spectrumData));

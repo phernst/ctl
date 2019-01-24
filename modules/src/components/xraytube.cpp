@@ -48,7 +48,7 @@ QString XrayTube::info() const
     return ret;
 }
 
-SampledDataSeries XrayTube::spectrum() const
+IntervalDataSeries XrayTube::spectrum() const
 {
     return spectrum(0.0f, _tubeVoltage, DEFAULT_SPECTRUM_RESOLUTION);
 }
@@ -60,14 +60,14 @@ QString XrayTube::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
-SampledDataSeries XrayTube::spectrum(float from, float to, uint nbSamples) const
+IntervalDataSeries XrayTube::spectrum(float from, float to, uint nbSamples) const
 {
     if(!_spectrumModel)
         throw std::runtime_error("No spectrum model set.");
 
     static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
-    SampledDataSeries spec(from, to, nbSamples, *_spectrumModel);
-    spec.normalize();
+    IntervalDataSeries spec = IntervalDataSeries::sampledFromModel(*_spectrumModel, from, to, nbSamples);
+    spec.normalizeByIntegral();
     return spec;
 }
 

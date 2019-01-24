@@ -14,17 +14,28 @@ class AbstractDataModel
     // abstract interface
     public:virtual QVariant toVariant() const = 0;
     public:virtual void fromVariant(const QVariant& variant) = 0;
-    protected:virtual float valueFromModel(float samplePoint, float spacing) const = 0;
+    public:virtual float valueAt(float position) const = 0;
 
 public:
     virtual ~AbstractDataModel() = default;
 
-    virtual float valueAt(float samplePoint, float spacing) const;
+    inline virtual QVariant parameter() const;
+    inline virtual void setParameter(QVariant parameter);
 };
 
-inline float AbstractDataModel::valueAt(float samplePoint, float spacing) const
+class AbstractDensityDataModel : public AbstractDataModel
 {
-    return valueFromModel(samplePoint, spacing);
+    // abstract interface
+    public:virtual float binIntegral(float position, float binWidth) const = 0;
+};
+
+QVariant AbstractDataModel::parameter() const
+{
+    return QVariant();
+}
+
+void AbstractDataModel::setParameter(QVariant)
+{
 }
 
 } // namespace CTL

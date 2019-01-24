@@ -1,75 +1,70 @@
 #ifndef XRAYSPECTRUMMODELS_H
 #define XRAYSPECTRUMMODELS_H
 
-#include "abstractspectralmodel.h"
-#include "tabulatedmodeldata.h"
+#include "abstractdatamodel.h"
+#include "tabulateddatamodel.h"
 
 namespace CTL {
 
-class AbstractXraySpectrumModel : public AbstractParameterizedSpectralModel<float>
+class AbstractXraySpectrumModel : public AbstractDensityDataModel
 {
 public:
-    void setParameter(const float& voltage) override;
-    const float& parameter() const override;
+    void setParameter(QVariant energy) override;
+    QVariant parameter() const override;
 
 protected:
-    float _parameter;
+    float _energy;
 };
 
 class XraySpectrumTabulatedModel : public AbstractXraySpectrumModel
 {
-public:
-    QVariant toVariant() const override;
-    void fromVariant(const QVariant& variant) override;
+    // abstract interfaces
+    public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
+    public: QVariant toVariant() const override;
+    public: void fromVariant(const QVariant& variant) override;
 
-    void addLookupTable(float voltage, const TabulatedModelData& table);
-    void setLookupTables(const QMap<float, TabulatedModelData>& tables);
+public:
+    void addLookupTable(float voltage, const TabulatedDataModel& table);
+    void setLookupTables(const QMap<float, TabulatedDataModel>& tables);
 
     bool hasTabulatedDataFor(float voltage) const;
 
-protected:
-    float valueFromModel(float samplePoint, float spacing) const override;
-
 private:
-    QMap<float, TabulatedModelData> _lookupTables;
+    QMap<float, TabulatedDataModel> _lookupTables;
+
 };
 
 class XrayLaserSpectrumModel : public AbstractXraySpectrumModel
 {
-public:
-    QVariant toVariant() const override;
-    void fromVariant(const QVariant&) override;
-
-protected:
-    float valueFromModel(float samplePoint, float spacing) const override;
+    // abstract interfaces
+    public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
+    public: QVariant toVariant() const override;
+    public: void fromVariant(const QVariant& variant) override;
 };
 
-class GenericSpectrumModel : public AbstractSpectralModel
+class FixedXraySpectrumModel : public XraySpectrumTabulatedModel
 {
 public:
-    GenericSpectrumModel() = default;
-    GenericSpectrumModel(const TabulatedModelData& table);
+    FixedXraySpectrumModel() = default;
+    FixedXraySpectrumModel(const TabulatedDataModel& table);
 
-    QVariant toVariant() const override;
-    void fromVariant(const QVariant& variant) override;
-
-    void setLookupTable(TabulatedModelData table);
-
-protected:
-    float valueFromModel(float samplePoint, float spacing) const override;
+    void setLookupTable(const TabulatedDataModel& table);
+    void setParameter(QVariant energy) override;
 
 private:
-    TabulatedModelData _lookupTable;
+    using XraySpectrumTabulatedModel::addLookupTable;
+    using XraySpectrumTabulatedModel::setLookupTables;
 };
 
 class KramersLawSpectrumModel : public AbstractXraySpectrumModel
 {
-public:
-    QVariant toVariant() const override;
-    void fromVariant(const QVariant& variant) override;
-
-protected:
-    float valueFromModel(float samplePoint, float spacing) const override;
+    // abstract interfaces
+    public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
+    public: QVariant toVariant() const override;
+    public: void fromVariant(const QVariant& variant) override;
 };
 
 } // namespace CTL

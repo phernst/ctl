@@ -2,7 +2,7 @@
 #define ABSTRACTBEAMMODIFIER_H
 
 #include "systemcomponent.h"
-#include "models/sampleddataseries.h"
+#include "models/intervaldataseries.h"
 
 /*
  * NOTE: This is header only.
@@ -39,7 +39,7 @@ class AbstractBeamModifier : public SystemComponent
     DECLARE_ELEMENTAL_TYPE
 
     // abstract interface
-    public:virtual SampledDataSeries modify(const SampledDataSeries& inputSpectrum,
+    public:virtual IntervalDataSeries modify(const IntervalDataSeries& inputSpectrum,
                                             double theta = 0.0,
                                             double phi = 0.0) = 0;
 
