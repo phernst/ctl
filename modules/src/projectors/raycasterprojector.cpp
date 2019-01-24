@@ -401,7 +401,7 @@ AbstractProjectorConfig* RayCasterProjector::Config::clone() const
  * factor for the volume.
  *
  * First, the optimization considers possible non-square (rectangular) detector pixels and tries to
- * sample them properly. Moreover, it presumes that inpolation will be used by the
+ * sample them properly. Moreover, it presumes that interpolation will be used by the
  * RayCasterProjector (`config.interpolate` is set to `true`). Therefore, it might set an
  * upsampling factor greater than 1 in order to have a similar voxel size as detector pixel size
  * (which would be optimal for the accuracy). If you do not want to use the interpolation, you
@@ -409,7 +409,8 @@ AbstractProjectorConfig* RayCasterProjector::Config::clone() const
  * (considered as 1).
  *
  * NOTE that the resulting Config can lead to a higher computational load or might lead to an
- * upsampled volume that does not fit into the OpenCL device memory.
+ * upsampled volume that does not fit into the OpenCL device memory. In such a case you may reset
+ * `config.volumeUpSampling` to 1.
  */
 RayCasterProjector::Config RayCasterProjector::Config::optimizedFor(const VolumeData &volume,
                                                                     const AbstractDetector &detector)
