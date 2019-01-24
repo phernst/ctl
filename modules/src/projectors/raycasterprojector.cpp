@@ -396,7 +396,7 @@ AbstractProjectorConfig* RayCasterProjector::Config::clone() const
 }
 
 /*!
- * Returns a RayCasterProjector::Config that is optimized w.r.t. a certain object.
+ * Returns a RayCasterProjector::Config that is optimized w.r.t. a certain volume and detector.
  * This includes the setting of the number of rays per pixel as well as a possible upsampling
  * factor for the volume.
  *
