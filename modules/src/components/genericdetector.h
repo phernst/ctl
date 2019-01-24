@@ -51,29 +51,6 @@ protected:
     QVector<ModuleLocation> _moduleLocations;
 };
 
-// use documentation of GenericComponent::clone()
-inline SystemComponent* GenericDetector::clone() const { return new GenericDetector(*this); }
-
-/*!
- * Returns the vector that stores the module locations.
- *
- * Each ModuleLocation object contains the position of the module in world coordinates as well as a
- * rotation matrix that represents the transformation from the module's coordinate system to the
- * CT-system (i.e. the coordinate system of the detector as a whole).
- */
-inline QVector<AbstractDetector::ModuleLocation> GenericDetector::moduleLocations() const
-{
-    return _moduleLocations;
-}
-
-/*!
- * Sets the module locations to \a moduleLocations.
- */
-inline void GenericDetector::setModuleLocations(QVector<AbstractDetector::ModuleLocation> moduleLocations)
-{
-    _moduleLocations = std::move(moduleLocations);
-}
-
 } // namespace CTL
 
 /*! \file */

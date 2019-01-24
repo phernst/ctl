@@ -401,4 +401,104 @@ SingleViewData SingleViewData::operator / (float divisor) const
     return ret;
 }
 
+/*!
+ * Returns true if all three dimensions of \a other are equal to those of this instance.
+ */
+bool SingleViewData::Dimensions::operator==(const Dimensions &other) const
+{
+    return (nbChannels == other.nbChannels) && (nbRows == other.nbRows)
+            && (nbModules == other.nbModules);
 }
+
+/*!
+ * Returns true if at least one dimensions of \a other is different from the value in this instance.
+ */
+bool SingleViewData::Dimensions::operator!=(const Dimensions &other) const
+{
+    return (nbChannels != other.nbChannels) || (nbRows != other.nbRows)
+            || (nbModules != other.nbModules);
+}
+
+/*!
+ * Returns a string containing the dimension values, joined by " x ".
+ */
+std::string SingleViewData::Dimensions::info() const
+{
+    return std::to_string(nbChannels) + " x " + std::to_string(nbRows) + " x "
+            + std::to_string(nbModules);
+}
+
+/*!
+ * Returns a constant reference to the stored data vector.
+ */
+const std::vector<SingleViewData::ModuleData>& SingleViewData::constData() const
+{
+    return _data;
+}
+
+/*!
+ * Returns a constant reference to the stored data vector.
+ */
+const std::vector<SingleViewData::ModuleData>& SingleViewData::data() const { return _data; }
+
+/*!
+ * Returns a reference to the stored data vector.
+ */
+std::vector<SingleViewData::ModuleData>& SingleViewData::data() { return _data; }
+
+/*!
+ * Returns the dimensions of the data. This contains module width (\c nbChannels), module height
+ * (\c nbRows) and the number of modules (\c nbModules).
+ */
+SingleViewData::Dimensions SingleViewData::dimensions() const
+{
+    return { _moduleDim.width, _moduleDim.height, nbModules() };
+}
+
+/*!
+ * Returns the number of elements (or pixels) per module.
+ *
+ * Same as: dimensions().nbChannels * dimensions().nbRows.
+ */
+uint SingleViewData::elementsPerModule() const
+{
+    return _moduleDim.width * _moduleDim.height;
+}
+
+/*!
+ * Returns a (modifiable) reference to the projection data of module \a i. Does not perform boundary
+ * checks.
+ */
+SingleViewData::ModuleData& SingleViewData::module(uint i)
+{
+    Q_ASSERT(i < nbModules());
+    return _data.at(i);
+}
+
+/*!
+ * Returns a constant reference to the projection data of module \a i. Does not perform boundary
+ * checks.
+ */
+const SingleViewData::ModuleData& SingleViewData::module(uint i) const
+{
+    Q_ASSERT(i < nbModules());
+    return _data.at(i);
+}
+
+/*!
+ * Returns the number of modules.
+ */
+uint SingleViewData::nbModules() const { return static_cast<uint>(_data.size()); }
+
+/*!
+ * Returns the total number of pixels in the data. This computes as
+ * \c nbChannels x \c nbRows x \c nbModules.
+ *
+ * Same as: nbModules() * elementsPerModule().
+ */
+size_t SingleViewData::totalPixelCount() const
+{
+    return static_cast<size_t>(nbModules()) * elementsPerModule();
+}
+
+} // namespace CTL

@@ -1,8 +1,7 @@
 #include "carmgantry.h"
 #include "mat/matrix_utils.h"
 
-namespace CTL
-{
+namespace CTL {
 
 /*!
  * Constructs a CarmGantry object based on the information specified in the QJsonObject \a json.
@@ -109,4 +108,47 @@ void CarmGantry::write(QJsonObject &json) const
     json.insert("location", QJsonValue::fromVariant(location().toVariant()));
 }
 
-}
+// use documentation of GenericComponent::clone()
+SystemComponent* CarmGantry::clone() const { return new CarmGantry(*this); }
+
+/*!
+ * Returns the nominal detector location. This ignores any (optional) detector displacement.
+ *
+ * Overrides the base class method and computes the detector location based on the C-arm
+ * parametrization (i.e. source location and C-arm span).
+ */
+mat::Location CarmGantry::nominalDetectorLocation() const { return detectorLocationCA(); }
+
+/*!
+ * Returns the nominal source location. This ignores any (optional) source displacement.
+ *
+ * Overrides the base class method and returns the source location like specified as part of the
+ * C-arm parametrization (i.e. source location and C-arm span).
+ *
+ * \sa location().
+ */
+mat::Location CarmGantry::nominalSourceLocation() const { return _location; }
+
+/*!
+ * Returns the current location of the gantry, i.e. the position (in world coordinates) of the
+ * source and its rotation.
+ */
+const mat::Location& CarmGantry::location() const { return _location; }
+
+/*!
+ * Returns the span of the C-arm, i.e. the distance between source and detector (in mm).
+ */
+double CarmGantry::cArmSpan() const { return _cArmSpan; }
+
+/*!
+ * Sets the location of the gantry to \a location. This contains the position (in world coordinates)
+ * of the source and its rotation.
+ */
+void CarmGantry::setLocation(const mat::Location& location) { _location = location; }
+
+/*!
+ * Sets the span of the C-arm, i.e. the distance between source and detector (in mm), to \a span.
+ */
+void CarmGantry::setCarmSpan(double span) { _cArmSpan = span; }
+
+} // namespace CTL

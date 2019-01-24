@@ -4,8 +4,13 @@
 #define __CL_ENABLE_EXCEPTIONS
 #define CL_USE_DEPRECATED_OPENCL_1_1_APIS
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
-#include "mat/matrix_types.h"
+#if defined(__APPLE__) || defined(__MACOSX)
+#include "OpenCL/cl.hpp"
+#else
 #include <CL/cl.hpp>
+#endif
+
+#include "mat/matrix_types.h"
 
 namespace CTL {
 namespace OCL {
@@ -38,27 +43,6 @@ private:
 
     cl_float3 volumeCorner() const;
 };
-
-inline void RayCaster::setDetectorSize(uint nbRows, uint nbColumns)
-{
-    detectorRows = cl_uint(nbRows);
-    detectorColumns = cl_uint(nbColumns);
-}
-
-inline void RayCaster::setIncrement(float incrementMM) { increment_mm = cl_float(incrementMM); }
-
-inline void RayCaster::setVolumeOffset(const float (&offset)[3])
-{
-    volOffset = { { offset[0], offset[1], offset[2] } };
-}
-
-inline void RayCaster::setVolumeInfo(const uint (&nbVoxel)[3], const float (&vSize)[3])
-{
-    volDim[0] = nbVoxel[0];
-    volDim[1] = nbVoxel[1];
-    volDim[2] = nbVoxel[2];
-    voxelSize = { { vSize[0], vSize[1], vSize[2] } };
-}
 
 } // namespace OCL
 } // namespace CTL

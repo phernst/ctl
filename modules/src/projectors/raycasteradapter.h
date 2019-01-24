@@ -33,11 +33,6 @@ protected:
     void applyRayCasterConfig(const Config& rcConfig);
 };
 
-inline AbstractProjectorConfig* RayCasterAdapter::Config::clone() const
-{
-    return new Config(*this);
-}
-
 } // namespace OCL
 } // namespace CTL
 

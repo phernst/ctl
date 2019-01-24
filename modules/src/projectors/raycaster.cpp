@@ -197,5 +197,26 @@ cl_float3 determineSource(const ProjectionMatrix& P)
                static_cast<float>(ret.get<2>()) } };
 }
 
+void RayCaster::setDetectorSize(uint nbRows, uint nbColumns)
+{
+    detectorRows = cl_uint(nbRows);
+    detectorColumns = cl_uint(nbColumns);
+}
+
+void RayCaster::setIncrement(float incrementMM) { increment_mm = cl_float(incrementMM); }
+
+void RayCaster::setVolumeOffset(const float (&offset)[3])
+{
+    volOffset = { { offset[0], offset[1], offset[2] } };
+}
+
+void RayCaster::setVolumeInfo(const uint (&nbVoxel)[3], const float (&vSize)[3])
+{
+    volDim[0] = nbVoxel[0];
+    volDim[1] = nbVoxel[1];
+    volDim[2] = nbVoxel[2];
+    voxelSize = { { vSize[0], vSize[1], vSize[2] } };
+}
+
 } // namespace OCL
 } // namespace CTL

@@ -140,6 +140,17 @@ ProjectionData ArealFocalSpotExtension::project(const VolumeData& volume)
 }
 
 /*!
+ * Sets the discretization of the focal spot to \a discretization. The focal spot will then be
+ * sampled with \c discretization.width() x \c discretization.height() sampling points. These
+ * sampling dimensions correspond to the width and height of the focal spot (or x and y direction
+ * in CT coordinates).
+ */
+void ArealFocalSpotExtension::setDiscretization(const QSize& discretization)
+{
+    _discretizationSteps = discretization;
+}
+
+/*!
  * Computes and returns the grid of (relative) sampling points.
  *
  * This discretizes the area of the focal spot, i.e. \f$\left[-\frac{1}{2},\frac{1}{2}\right]\times

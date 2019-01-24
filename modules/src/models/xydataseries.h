@@ -1,8 +1,8 @@
 #ifndef XYDATASERIES_H
 #define XYDATASERIES_H
 
-#include "pointseriesbase.h"
 #include "abstractdatamodel.h"
+#include "pointseriesbase.h"
 
 namespace CTL {
 
@@ -17,8 +17,13 @@ public:
     XYDataSeries(const QVector<float>& x, const QVector<float>& y);
 
     // factory methods
-    static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel, const QVector<float>& samplingPoints);
-    static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel, float from, float to, uint nbSamples, Sampling samplingPattern);
+    static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel,
+                                         const QVector<float>& samplingPoints);
+    static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel,
+                                         float from,
+                                         float to,
+                                         uint nbSamples,
+                                         Sampling samplingPattern);
 
     // setter methods
     void append(const QPointF& sample);
@@ -28,19 +33,10 @@ public:
     // other methods
     void remove(const QPointF& sample);
 
-    static QVector<float> linSpace (float from, float to, uint nbSamples);
-    static QVector<float> expSpace (float from, float to, uint nbSamples);
+    static QVector<float> linSpace(float from, float to, uint nbSamples);
+    static QVector<float> expSpace(float from, float to, uint nbSamples);
 };
 
-inline void XYDataSeries::append(const QPointF &sample) { _data.append(sample); }
-
-inline void XYDataSeries::append(float x, float y) { _data.append(QPointF(x,y)); }
-
-inline void XYDataSeries::append(const QList<QPointF> &series) { _data.append(series); }
-
-inline void XYDataSeries::remove(const QPointF &sample) { _data.removeOne(sample); }
-
-
-}
+} // namespace CTL
 
 #endif // XYDATASERIES_H

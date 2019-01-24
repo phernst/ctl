@@ -76,40 +76,6 @@ private:
     Matrix3x3 detectorRotationTG() const;
 };
 
-// use documentation of GenericComponent::clone()
-inline SystemComponent* TubularGantry::clone() const { return new TubularGantry(*this); }
-
-/*!
- * Returns the nominal detector location. This ignores any (optional) detector displacement.
- *
- * Overrides the base class method and computes the detector location based on the tubular gantry
- * parametrization (i.e. source-to-detector distance etc.).
- */
-inline mat::Location TubularGantry::nominalDetectorLocation() const { return detectorLocationTG(); }
-
-/*!
- * Returns the nominal source location. This ignores any (optional) source displacement.
- *
- * Overrides the base class method and computes the source location based on the tubular gantry
- * parametrization (i.e. source-to-detector distance etc.).
- */
-inline mat::Location TubularGantry::nominalSourceLocation() const { return sourceLocationTG(); }
-
-/*!
- * Sets the table pitch to \a position. Position value is expected in millimeters.
- */
-inline void TubularGantry::setPitchPosition(double position) { _pitchPosition = position; }
-
-/*!
- * Sets the gantry rotation to \a angle. Rotation angle is expected in radians.
- */
-inline void TubularGantry::setRotationAngle(double angle) { _rotationAngle = angle; }
-
-/*!
- * Sets the gantry tilt to \a angle. Tilt angle is expected in radians.
- */
-inline void TubularGantry::setTiltAngle(double angle) { _tiltAngle = angle; }
-
 } // namespace CTL
 
 /*! \file */

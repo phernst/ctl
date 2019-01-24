@@ -44,4 +44,53 @@ QString FlatPanelDetector::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
+// use documentation of GenericComponent::clone()
+SystemComponent* FlatPanelDetector::clone() const { return new FlatPanelDetector(*this); }
+
+
+QVector<AbstractDetector::ModuleLocation> FlatPanelDetector::moduleLocations() const
+{
+    return QVector<ModuleLocation>(1);
 }
+
+/*!
+ * Reads all member variables from the QJsonObject \a json.
+ */
+void FlatPanelDetector::read(const QJsonObject &json)
+{
+    AbstractDetector::read(json);
+}
+
+/*!
+ * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * and generic type-id.
+ */
+void FlatPanelDetector::write(QJsonObject &json) const
+{
+    AbstractDetector::write(json);
+}
+
+/*!
+ * Returns the location of the detector module.
+ *
+ * Convenience method: same as moduleLocations().first().
+ */
+AbstractDetector::ModuleLocation FlatPanelDetector::location() const
+{
+    return ModuleLocation();
+}
+
+/*!
+ * Returns the number of pixels in the detector module.
+ *
+ * Convenience method: same as nbPixelPerModule().
+ */
+const QSize& FlatPanelDetector::nbPixels() const { return _nbPixelPerModule; }
+
+const QSizeF FlatPanelDetector::panelDimensions() const
+{
+    return QSizeF(double(_nbPixelPerModule.width())*_pixelDimensions.width(),
+                  double(_nbPixelPerModule.height())*_pixelDimensions.height());
+}
+
+} // namespace CTL

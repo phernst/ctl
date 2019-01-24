@@ -49,12 +49,6 @@ private: // methods
     void initOpenCL();
 };
 
-// Use documentation of AbstractProjectorConfig::clone()
-inline AbstractProjectorConfig* RayCasterProjector::Config::clone() const
-{
-    return new Config(*this);
-}
-
 /*!
  * \class RayCasterProjector::Config
  * \brief Holds the configuration for RayCasterProjector objects.

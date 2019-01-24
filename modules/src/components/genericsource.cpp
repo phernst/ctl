@@ -73,4 +73,18 @@ void GenericSource::setSpectrum(const IntervalDataSeries& spectrum, bool updateF
         _totalFlux = spectrum.integral();
 }
 
+SystemComponent* GenericSource::clone() const { return new GenericSource(*this); }
+
+IntervalDataSeries GenericSource::spectrum(float from, float to, uint nbSamples) const
+{
+    IntervalDataSeries sampSpec = IntervalDataSeries::sampledFromModel(*_spectrumModel, from, to,
+                                                                       nbSamples);
+    //sampSpec.normalize();
+    return sampSpec;
+}
+
+double GenericSource::nominalPhotonFlux() const { return _totalFlux; }
+
+void GenericSource::setPhotonFlux(double flux) { _totalFlux = flux; }
+
 } // namespace CTL

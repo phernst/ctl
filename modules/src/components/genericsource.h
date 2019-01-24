@@ -2,8 +2,6 @@
 #define GENERICSOURCE_H
 
 #include "abstractsource.h"
-#include <QMap>
-
 #include "models/xrayspectrummodels.h"
 
 namespace CTL {
@@ -39,19 +37,6 @@ public:
 protected:
     double _totalFlux = 0.0f;
 };
-
-inline SystemComponent* GenericSource::clone() const { return new GenericSource(*this); }
-
-inline IntervalDataSeries GenericSource::spectrum(float from, float to, uint nbSamples) const
-{
-    IntervalDataSeries sampSpec = IntervalDataSeries::sampledFromModel(*_spectrumModel, from, to, nbSamples);
-    //sampSpec.normalize();
-    return sampSpec;
-}
-
-inline double GenericSource::nominalPhotonFlux() const { return _totalFlux; }
-
-inline void GenericSource::setPhotonFlux(double flux) { _totalFlux = flux; }
 
 } // namespace CTL
 

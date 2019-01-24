@@ -4,8 +4,7 @@
 #include "models/xrayspectrummodels.h"
 #include "abstractsource.h"
 
-namespace CTL
-{
+namespace CTL {
 
 const double DEFAULT_I_CONST = 1.0; // [PHOTONS / (mAs * cm^2)]
 const uint   DEFAULT_SPECTRUM_RESOLUTION = 40;
@@ -55,50 +54,6 @@ protected:
     double _intensityConstant = DEFAULT_I_CONST;
 };
 
-inline SystemComponent* XrayTube::clone() const { return new XrayTube(*this); }
-
-inline double XrayTube::tubeVoltage() const { return _tubeVoltage; }
-
-inline double XrayTube::emissionCurrent() const { return _emissionCurrent; }
-
-inline void XrayTube::setTubeVoltage(double voltage) { _tubeVoltage = voltage; }
-
-inline void XrayTube::setEmissionCurrent(double current) { _emissionCurrent = current; }
-
-inline void XrayTube::setIntensityConstant(double value) { _intensityConstant = value; }
-
-inline void XrayTube::setSpectrumModel(AbstractXraySpectrumModel *model)
-{
-    if(!dynamic_cast<AbstractXraySpectrumModel*>(model))
-        throw std::runtime_error("Spectral model could not be set: not of type AbstractXraySpectrumModel");
-
-    _spectrumModel.reset(model);
-}
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-inline void XrayTube::read(const QJsonObject &json)
-{
-    AbstractSource::read(json);
-
-    _tubeVoltage = json.value("tube voltage").toDouble();
-    _emissionCurrent = json.value("emission current").toDouble();
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-inline void XrayTube::write(QJsonObject &json) const
-{
-    AbstractSource::write(json);
-
-    json.insert("tube voltage", _tubeVoltage);
-    json.insert("emission current", _emissionCurrent);
-}
-
-
-}
+} // namespace CTL
 
 #endif // XRAYTUBE_H

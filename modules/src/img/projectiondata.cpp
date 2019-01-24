@@ -362,4 +362,96 @@ ProjectionData ProjectionData::operator / (float divisor) const
     return ret;
 }
 
+/*!
+ * Returns true if all three dimensions of \a other are equal to those of this instance.
+ */
+bool ProjectionData::Dimensions::operator==(const Dimensions &other) const
+{
+    return (nbChannels == other.nbChannels) && (nbRows == other.nbRows)
+            && (nbModules == other.nbModules) && (nbViews == other.nbViews);
 }
+
+/*!
+ * Returns true if at least one dimensions of \a other is different from the value in this instance.
+ */
+bool ProjectionData::Dimensions::operator!=(const Dimensions &other) const
+{
+    return (nbChannels != other.nbChannels) || (nbRows != other.nbRows)
+            || (nbModules != other.nbModules) || (nbViews != other.nbViews);
+}
+
+/*!
+ * Returns a string containing the dimension values, joined by " x ".
+ */
+std::string ProjectionData::Dimensions::info() const
+{
+    return std::to_string(nbChannels) + " x " + std::to_string(nbRows) + " x "
+            + std::to_string(nbModules) + " x " + std::to_string(nbViews);
+}
+
+/*!
+ * Returns the total number of elements for data with this dimensions.
+ */
+uint ProjectionData::Dimensions::totalNbElements() const
+{
+    return nbChannels * nbRows * nbModules * nbViews;
+}
+
+/*!
+ * Returns a constant reference to the stored data vector.
+ */
+const std::vector<SingleViewData>& ProjectionData::constData() const { return _data; }
+
+/*!
+ * Returns a constant reference to the stored data vector.
+ */
+const std::vector<SingleViewData>& ProjectionData::data() const { return _data; }
+
+/*!
+ * Returns a reference to the stored data vector.
+ */
+std::vector<SingleViewData>& ProjectionData::data() { return _data; }
+
+/*!
+ * Returns the dimensions of the data. This contains the number of views (\c nbViews), the number of
+ * modules in each view (\c nbModules) and the dimensions of individual modules, namely module width
+ * (\c nbChannels) and module height (\c nbRows).
+ */
+ProjectionData::Dimensions ProjectionData::dimensions() const
+{
+    return { _viewDim.nbChannels, _viewDim.nbRows, _viewDim.nbModules, nbViews() };
+}
+
+/*!
+ * Returns the number of views in the data.
+ */
+uint ProjectionData::nbViews() const { return static_cast<uint>(_data.size()); }
+
+/*!
+ * Returns a (modifiable) reference to the SingleViewData of view \a i.
+ */
+SingleViewData& ProjectionData::view(uint i)
+{
+    Q_ASSERT(i < nbViews());
+    return _data.at(i);
+}
+
+/*!
+ * Returns a constant reference to the SingleViewData of view \a i.
+ */
+const SingleViewData& ProjectionData::view(uint i) const
+{
+    Q_ASSERT(i < nbViews());
+    return _data.at(i);
+}
+
+/*!
+ * Returns the dimensions of the individual single views in the dataset. This contains the number of
+ * modules (\c nbModules) and the dimensions of individual modules (\c nbChannels and \c nbRows).
+ */
+SingleViewData::Dimensions ProjectionData::viewDimensions() const
+{
+    return _viewDim;
+}
+
+} // namespace CTL

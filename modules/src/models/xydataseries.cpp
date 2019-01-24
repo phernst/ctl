@@ -81,4 +81,12 @@ QVector<float> XYDataSeries::expSpace(float from, float to, uint nbSamples)
     return ret;
 }
 
-}
+void XYDataSeries::append(const QPointF &sample) { _data.append(sample); }
+
+void XYDataSeries::append(float x, float y) { _data.append(QPointF(x,y)); }
+
+void XYDataSeries::append(const QList<QPointF> &series) { _data.append(series); }
+
+void XYDataSeries::remove(const QPointF &sample) { _data.removeOne(sample); }
+
+} // namespace CTL

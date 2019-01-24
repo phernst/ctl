@@ -137,12 +137,6 @@ private:
     using CTsystem::operator<<;
 };
 
-// use documentation of CTsystem::clone()
-inline CTsystem* SimpleCTsystem::clone() const & { return new SimpleCTsystem(*this); }
-
-// use documentation of CTsystem::clone()
-inline CTsystem* SimpleCTsystem::clone() && { return new SimpleCTsystem(std::move(*this)); }
-
 } // namespace CTL
 
 /*! \file */

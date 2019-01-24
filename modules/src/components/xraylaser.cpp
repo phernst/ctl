@@ -84,4 +84,14 @@ QString XrayLaser::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
-}
+SystemComponent* XrayLaser::clone() const { return new XrayLaser(*this); }
+
+double XrayLaser::nominalPhotonFlux() const { return _power; }
+
+double XrayLaser::photonEnergy() const { return _energy; }
+
+void XrayLaser::setPhotonEnergy(double energy) { _energy = energy; }
+
+void XrayLaser::setPower(double power) { _power = power; }
+
+} // namespace CTL

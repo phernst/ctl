@@ -3,8 +3,7 @@
 
 #include "abstractsource.h"
 
-namespace CTL
-{
+namespace CTL {
 
 class XrayLaser : public AbstractSource
 {
@@ -49,17 +48,6 @@ private:
     using AbstractSource::setSpectrumModel;
 };
 
-inline SystemComponent* XrayLaser::clone() const { return new XrayLaser(*this); }
-
-inline double XrayLaser::nominalPhotonFlux() const { return _power; }
-
-inline double XrayLaser::photonEnergy() const { return _energy; }
-
-inline void XrayLaser::setPhotonEnergy(double energy) { _energy = energy; }
-
-inline void XrayLaser::setPower(double power) { _power = power; }
-
-
-}
+} // namespace CTL
 
 #endif // XRAYLASER_H

@@ -76,4 +76,47 @@ double XrayTube::nominalPhotonFlux() const
     return _emissionCurrent * _intensityConstant;
 }
 
+SystemComponent* XrayTube::clone() const { return new XrayTube(*this); }
+
+double XrayTube::tubeVoltage() const { return _tubeVoltage; }
+
+double XrayTube::emissionCurrent() const { return _emissionCurrent; }
+
+void XrayTube::setTubeVoltage(double voltage) { _tubeVoltage = voltage; }
+
+void XrayTube::setEmissionCurrent(double current) { _emissionCurrent = current; }
+
+void XrayTube::setIntensityConstant(double value) { _intensityConstant = value; }
+
+void XrayTube::setSpectrumModel(AbstractXraySpectrumModel *model)
+{
+    if(!dynamic_cast<AbstractXraySpectrumModel*>(model))
+        throw std::runtime_error("Spectral model could not be set: not of type AbstractXraySpectrumModel");
+
+    _spectrumModel.reset(model);
+}
+
+/*!
+ * Reads all member variables from the QJsonObject \a json.
+ */
+void XrayTube::read(const QJsonObject &json)
+{
+    AbstractSource::read(json);
+
+    _tubeVoltage = json.value("tube voltage").toDouble();
+    _emissionCurrent = json.value("emission current").toDouble();
+}
+
+/*!
+ * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * and generic type-id.
+ */
+void XrayTube::write(QJsonObject &json) const
+{
+    AbstractSource::write(json);
+
+    json.insert("tube voltage", _tubeVoltage);
+    json.insert("emission current", _emissionCurrent);
+}
+
 } // namespace CTL

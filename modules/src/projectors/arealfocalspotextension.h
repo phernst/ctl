@@ -78,17 +78,6 @@ protected:
     QVector<QPointF> discretizationGrid() const;
 };
 
-/*!
- * Sets the discretization of the focal spot to \a discretization. The focal spot will then be
- * sampled with \c discretization.width() x \c discretization.height() sampling points. These
- * sampling dimensions correspond to the width and height of the focal spot (or x and y direction
- * in CT coordinates).
- */
-inline void ArealFocalSpotExtension::setDiscretization(const QSize& discretization)
-{
-    _discretizationSteps = discretization;
-}
-
 } // namespace CTL
 
 /*! \file */

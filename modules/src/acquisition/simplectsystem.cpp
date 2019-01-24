@@ -189,4 +189,10 @@ void SimpleCTsystem::addBeamModifier(std::unique_ptr<AbstractBeamModifier> modif
     addComponent(std::move(modifier));
 }
 
+// use documentation of CTsystem::clone()
+CTsystem* SimpleCTsystem::clone() const & { return new SimpleCTsystem(*this); }
+
+// use documentation of CTsystem::clone()
+CTsystem* SimpleCTsystem::clone() && { return new SimpleCTsystem(std::move(*this)); }
+
 } // namespace CTL

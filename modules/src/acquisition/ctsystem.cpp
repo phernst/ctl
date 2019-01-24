@@ -196,4 +196,135 @@ QList<AbstractBeamModifier*> CTsystem::modifiers() const
     return ret;
 }
 
+/*!
+ * Reads all member variables from the QJsonObject \a json.
+ */
+void CTsystem::read(const QJsonObject &json)
+{
+    _name = json.value("name").toString();
+}
+
+/*!
+ * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * and generic type-id.
+ */
+void CTsystem::write(QJsonObject &json) const
+{
+    json.insert("name", _name);
+
+    QJsonArray componentArray;
+
+    for(const auto& comp : _componentList)
+    {
+        QJsonObject tmp;
+        comp->write(tmp);
+        componentArray.append(tmp);
+    }
+
+    json.insert("components", componentArray);
+}
+
+/*!
+ * Constructs a copy of the system and returns a base-class pointer to the new object.
+ */
+CTsystem* CTsystem::clone() const & { return new CTsystem(*this); }
+
+/*!
+ * Constructs a new CTsystem object and moves the content of this instance into the new
+ * object. Returns a base class pointer to the new instance.
+ */
+CTsystem* CTsystem::clone() && { return new CTsystem(std::move(*this)); }
+
+/*!
+ * Returns a constant reference to the list of components.
+ */
+const std::vector<CTsystem::ComponentPtr>& CTsystem::components() const { return _componentList; }
+
+/*!
+ * Returns the name of the system.
+ */
+const QString& CTsystem::name() const { return _name; }
+
+/*!
+ * Returns the number of components in the system.
+ *
+ * Same as components().size().
+ */
+uint CTsystem::nbComponents() const { return static_cast<uint>(_componentList.size()); }
+
+/*!
+ * Adds \a component to the system. Does nothing if \a component is \c null.
+ */
+void CTsystem::addComponent(CTsystem::ComponentPtr component)
+{
+    if(component)
+        _componentList.push_back(std::move(component));
+}
+
+/*!
+ * Adds \a component to the system. This CTsystem instance takes ownership of
+ * \a component.
+ *
+ * Does nothing if \a component is \c null.
+ */
+void CTsystem::addComponent(SystemComponent* component)
+{
+    if(component)
+        _componentList.push_back(ComponentPtr(component));
+}
+
+/*!
+ * Removes all components from the system.
+ */
+void CTsystem::clear()
+{
+    _componentList.clear();
+}
+
+/*!
+ * Sets the system's name to \a name.
+ */
+void CTsystem::rename(QString name) { _name = std::move(name); }
+
+/*!
+ * Removes the component \a component from the system.
+ */
+void CTsystem::removeComponent(SystemComponent *component)
+{
+    std::vector<ComponentPtr> newComponentList;
+    newComponentList.reserve(nbComponents());
+
+    // move all components except the component to be removed (i.e. 'component')
+    // to 'newComponentList'
+    for(auto& comp : _componentList)
+        if(comp.get() != component)
+            newComponentList.push_back(std::move(comp));
+
+    // swap-in 'newComponentList'
+    _componentList = std::move(newComponentList);
+}
+
+/*!
+ * Operator style alternative to add \a component to the system.
+ *
+ * Similar to addComponent() but also returns a reference to this instance.
+ */
+CTsystem& CTsystem::operator<<(CTsystem::ComponentPtr component)
+{
+    addComponent(std::move(component));
+    return *this;
+}
+
+/*!
+ * Operator style alternative to add \a component to the system. This CTsystem instance takes
+ * ownership of \a component.
+ *
+ * Similar to addComponent() but also returns a reference to this instance.
+ */
+CTsystem& CTsystem::operator<<(SystemComponent* component)
+{
+    addComponent(component);
+    return *this;
+}
+
 } // namespace CTL

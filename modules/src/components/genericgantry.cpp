@@ -118,4 +118,88 @@ void GenericGantry::write(QJsonObject &json) const
     json.insert("source location", QJsonValue::fromVariant(_sourceLocation.toVariant()));
 }
 
+
+// use documentation of GenericComponent::clone()
+SystemComponent* GenericGantry::clone() const { return new GenericGantry(*this); }
+
+/*!
+ * Returns the nominal detector location. This ignores any (optional) detector displacement.
+ *
+ * Override this method when sub-classing GenericGantry allows for customization of the
+ * parametrization of the components' locations.
+ *
+ * \sa detectorLocation().
+ */
+mat::Location GenericGantry::nominalDetectorLocation() const { return _detectorLocation; }
+
+/*!
+ * Returns the nominal source location. This ignores any (optional) source displacement.
+ *
+ * Override this method when sub-classing GenericGantry allows for customization of the
+ * parametrization of the components' locations.
+ *
+ * \sa sourceLocation().
+ */
+mat::Location GenericGantry::nominalSourceLocation() const { return _sourceLocation; }
+
+/*!
+ *  Sets the location (i.e. position and rotation) of the detector to \a location. Must not contain
+ * effects considered by the displacement.
+ */
+void GenericGantry::setDetectorLocation(const mat::Location& location)
+{
+    _detectorLocation = location;
+}
+
+/*!
+ *  Sets the location (i.e. position and rotation) of the source to \a location. Must not contain
+ * effects considered by the displacement.
+ */
+void GenericGantry::setSourceLocation(const mat::Location& location) { _sourceLocation = location; }
+
+/*!
+ * Convenience setter. Sets the position of the detector to \a detectorPosition.
+ *
+ * \sa setDetectorLocation()
+ */
+void GenericGantry::setDetectorPosition(const Vector3x1& detectorPosition)
+{
+    _detectorLocation.position = detectorPosition;
+}
+
+/*!
+ * Convenience setter. Sets the rotation of the detector to \a detectorRotation.
+ *
+ * The rotation matrix describes the transformation from WCS to CTS.
+ *
+ * \sa setDetectorLocation()
+ */
+void GenericGantry::setDetectorRotation(const Matrix3x3& detectorRotation)
+{
+    _detectorLocation.rotation = detectorRotation;
+}
+
+/*!
+ * Convenience setter. Sets the position of the source to \a sourcePosition.
+ *
+ * \sa setSourceLocation()
+ */
+void GenericGantry::setSourcePosition(const Vector3x1& sourcePosition)
+{
+    _sourceLocation.position = sourcePosition;
+}
+
+/*!
+ * Convenience setter. Sets the rotation of the source to \a sourceRotation.
+ *
+ * The rotation matrix describes the transformation from the intrinsic source coordinate system to
+ * the WCS.
+ *
+ * \sa setSourceLocation()
+ */
+void GenericGantry::setSourceRotation(const Matrix3x3& sourceRotation)
+{
+    _sourceLocation.rotation = sourceRotation;
+}
+
 } // namespace CTL
