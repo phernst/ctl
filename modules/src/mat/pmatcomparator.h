@@ -12,7 +12,7 @@
 #ifndef PMATCOMPARATOR_H
 #define PMATCOMPARATOR_H
 
-#include "projectionmatrix.h"
+#include "matrix_types.h"
 #include "img/voxelvolume.h"
 #include <float.h>
 #include <QSize>
@@ -32,10 +32,6 @@ public:
         double stdDeviation = 0.0;
         int64_t samples     = 0;
     };
-
-    typedef Matrix<3,1> Vector;
-    typedef uint Size3D[3];
-    typedef uint Size2D[2];
 
     static const uint DEFAULT_NB_VOXELS = 32;
 
@@ -63,15 +59,15 @@ public:
     void setAccuracy(double accuracy);
     template<typename T>
     void setVolumeDefFrom(const VoxelVolume<T>& volume);
-    void setVolumeGridSpacing(const Vector& voxelSize);
+    void setVolumeGridSpacing(const Vector3x1& voxelSize);
     void setVolumeGridSpacing(double voxelSizeX, double voxelSizeY, double voxelSizeZ);
-    void setVolumeOffSet(const Vector& offSet);
+    void setVolumeOffSet(const Vector3x1& offSet);
     void setVolumeOffSet(double offSetX, double offSetY, double offSetZ);
-    void setTotalVolumeSize(const Vector& totVolumeSize);
+    void setTotalVolumeSize(const Vector3x1& totVolumeSize);
     void setTotalVolumeSize(double totVolumeSizeX, double totVolumeSizeY, double totVolumeSizeZ);
-    Vector totalVolumeSize() const;
-    const Vector& volumeGridSpacing() const;
-    const Vector& volumeOffset() const;
+    Vector3x1 totalVolumeSize() const;
+    const Vector3x1& volumeGridSpacing() const;
+    const Vector3x1& volumeOffset() const;
 
     // detector settings
     const QSize& numberDetectorPixels() const;
@@ -79,10 +75,13 @@ public:
     void setNumberDetectorPixels(uint x, uint y);
 
 private:
+    typedef uint Size3D[3];
+    typedef uint Size2D[2];
+
     // volume
     Size3D _nbVoxels{ DEFAULT_NB_VOXELS, DEFAULT_NB_VOXELS, DEFAULT_NB_VOXELS };
-    Vector _voxelSize{ { 8.0, 8.0, 8.0 } };
-    Vector _offSet{ { 0.0, 0.0, 0.0 } };
+    Vector3x1 _voxelSize{ { 8.0, 8.0, 8.0 } };
+    Vector3x1 _offSet{ { 0.0, 0.0, 0.0 } };
 
     // detector
     Size2D _nbPixels{ 640, 480 };
