@@ -229,21 +229,5 @@ void PMatComparator::setNumberDetectorPixels(uint x, uint y)
     _nbPixels[1] = y;
 }
 
-template<typename T>
-void PMatComparator::setVolumeDefFrom(const VoxelVolume<T>& volume)
-{
-    _nbVoxels[0] = volume.dimensions().x;
-    _nbVoxels[1] = volume.dimensions().y;
-    _nbVoxels[2] = volume.dimensions().z;
-
-    _voxelSize(0) = volume.voxelSize().x;
-    _voxelSize(1) = volume.voxelSize().y;
-    _voxelSize(2) = volume.voxelSize().z;
-
-    _offSet(0) = volume.offset().x;
-    _offSet(1) = volume.offset().y;
-    _offSet(2) = volume.offset().z;
-}
-
 } // namespace mat
 } // namespace CTL
