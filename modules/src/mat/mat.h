@@ -5,6 +5,7 @@
 // + Matrix template class (+ MatrixBase + typedefs in "matrix_types.h")
 
 #include "matrix_algorithm.h"
+#include "pmatcomparator.h"
 
 constexpr long double operator"" _deg(long double deg)
 {

@@ -71,7 +71,8 @@ HEADERS += \
     $$PWD/src/models/tabulateddatamodel.h \
     $$PWD/src/models/xydataseries.h \
     $$PWD/src/models/pointseriesbase.h \
-    $$PWD/src/models/intervaldataseries.h
+    $$PWD/src/models/intervaldataseries.h \
+    $$PWD/src/mat/pmatcomparator.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -108,4 +109,5 @@ SOURCES += \
     $$PWD/src/acquisition/trajectories.cpp \
     $$PWD/src/models/tabulateddatamodel.cpp \
     $$PWD/src/models/xydataseries.cpp \
-    $$PWD/src/models/intervaldataseries.cpp
+    $$PWD/src/models/intervaldataseries.cpp \
+    $$PWD/src/mat/pmatcomparator.cpp

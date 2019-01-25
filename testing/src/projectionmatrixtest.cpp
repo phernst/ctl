@@ -105,3 +105,22 @@ void ProjectionMatrixTest::equalityTest()
     QVERIFY(P != 1.5 * P);
     QVERIFY(P == -(-P));
 }
+
+void ProjectionMatrixTest::comparatorTest()
+{
+    auto P1 = P.normalized();
+    auto P2 = P * 10000.0;
+    PMatComparator compare;
+    QVERIFY(qFuzzyIsNull(compare(P1, P2).maxError));
+
+    P1.shiftDetectorOrigin(0.1, 2.0);
+    auto result = compare(P1, P2);
+    QCOMPARE(result.meanError, result.maxError);
+    QCOMPARE(result.minError, result.maxError);
+    QVERIFY(result.maxError >= 2.0);
+    P1.changeDetectorResolution(2.0);
+    QVERIFY(compare(P1, P2).minError != compare(P1, P2).maxError);
+
+    compare.setAccuracy(2.0);
+    QCOMPARE(compare.volumeGridSpacing()(0), 4.0);
+}

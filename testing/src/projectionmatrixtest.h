@@ -21,6 +21,7 @@ private Q_SLOTS:
     void skewCoefficient();
     void projectionOntoDetector();
     void equalityTest();
+    void comparatorTest();
 
 private:
     CTL::mat::ProjectionMatrix P;
