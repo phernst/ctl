@@ -40,20 +40,23 @@ PMatComparator::Eval PMatComparator::operator()(const ProjectionMatrix& P1,
     Eval ret;
     uint X = _nbVoxels[0], Y = _nbVoxels[1], Z = _nbVoxels[2]; // abbreviation
 
-    // corner of the volume
-    Matrix<3, 3> resoScaling(0.0); // diagonal matrix
-    resoScaling.get<0, 0>() = 0.5 * _voxelSize.get<0>();
-    resoScaling.get<1, 1>() = 0.5 * _voxelSize.get<1>();
-    resoScaling.get<2, 2>() = 0.5 * _voxelSize.get<2>();
-    Vector3x1 volCenter({ double(X - 1), double(Y - 1), double(Z - 1) });
-    Vector3x1 volCorner = _offSet - resoScaling * volCenter;
-    double upperBoundX = double(_nbPixels[0]) - 0.5, upperBoundY = double(_nbPixels[1]) - 0.5;
+    // center of the voxel that is at the corner of the volume
+    Vector3x1 volCorner({ -0.5 * _voxelSize.get<0>() * double(X - 1),
+                          -0.5 * _voxelSize.get<1>() * double(Y - 1),
+                          -0.5 * _voxelSize.get<2>() * double(Z - 1) });
+    volCorner += _offSet;
+    // upper bound for projection pixel index (nbPixels - 1 + 0.5, this bound is because
+    // integer index is considered to be the center of a pixel)
+    const double upperBoundX = double(_nbPixels[0]) - 0.5;
+    const double upperBoundY = double(_nbPixels[1]) - 0.5;
 
     // temp variables within the following loop
     double norm;
     Vector3x1 p1_homo, p1_homoX, p1_homoY, p2_homo, p2_homoX, p2_homoY;
     Matrix<2, 1> diff, p1, p2;
-    Matrix<4, 1> r({ 0.0, 0.0, 0.0, 1.0 }); // 3d world coord of voxel center (homog. form)
+    // 3d world coord of voxel center (homog. form)
+    Matrix<4, 1> r({ 0.0, 0.0, 0.0, 1.0 });
+    // the projection matrices splitted into columns
     const Vector3x1 P1Column0 = P1.column<0>();
     const Vector3x1 P1Column1 = P1.column<1>();
     const Vector3x1 P1Column2 = P1.column<2>();

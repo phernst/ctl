@@ -33,7 +33,7 @@ public:
         double minError     = DBL_MAX;
         double maxError     = 0.0;
         double stdDeviation = 0.0;
-        int64_t samples     = 0;
+        uint64_t samples    = 0;
     };
 
     // discretization of test volume
