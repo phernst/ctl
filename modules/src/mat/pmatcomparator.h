@@ -36,6 +36,7 @@ public:
         int64_t samples     = 0;
     };
 
+    // discretization of test volume
     static const uint DEFAULT_NB_VOXELS = 32;
 
     // ctors

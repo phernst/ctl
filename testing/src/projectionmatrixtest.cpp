@@ -1,5 +1,6 @@
 #include "projectionmatrixtest.h"
 #include "mat/mat.h"
+#include "img/voxelvolume.h"
 
 using namespace CTL::mat;
 
@@ -123,4 +124,46 @@ void ProjectionMatrixTest::comparatorTest()
 
     compare.setAccuracy(2.0);
     QCOMPARE(compare.volumeGridSpacing()(0), 4.0);
+
+    compare.setAccuracy(1.0);
+    auto P3 = P;
+    auto P4 = P;
+    P4.shiftDetectorOrigin(42.0, 0.0);
+    QCOMPARE(compare(P3, P4).meanError, 42.0);
+
+    CTL::VoxelVolume<float> vol(12,24,48, 0.5,0.5,0.25);
+    vol.setVolumeOffset(0.0,0.0,-20.0);
+    compare.setNumberDetectorPixels(0, 0);
+    compare.setRestrictionToDetectorArea(false);
+    compare.setVolumeDefFrom(vol);
+    QCOMPARE(compare.totalVolumeSize().get<0>(), 6.0);
+    QCOMPARE(compare.totalVolumeSize().get<1>(), 12.0);
+    QCOMPARE(compare.totalVolumeSize().get<2>(), 12.0);
+    QCOMPARE(compare.volumeGridSpacing().get<0>(), 0.5);
+    QCOMPARE(compare.volumeGridSpacing().get<1>(), 0.5);
+    QCOMPARE(compare.volumeGridSpacing().get<2>(), 0.25);
+    QCOMPARE(compare.volumeOffset().get<0>(), 0.0);
+    QCOMPARE(compare.volumeOffset().get<1>(), 0.0);
+    QCOMPARE(compare.volumeOffset().get<2>(), -20.0);
+    QCOMPARE(compare(P3, P4).meanError, 42.0);
+
+    compare.setVolumeGridSpacing(1.0,2.0,3.0);
+    QCOMPARE(compare.totalVolumeSize().get<0>(), 6.0);
+    QCOMPARE(compare.totalVolumeSize().get<1>(), 12.0);
+    QCOMPARE(compare.totalVolumeSize().get<2>(), 12.0);
+    QCOMPARE(compare.volumeGridSpacing().get<0>(), 1.0);
+    QCOMPARE(compare.volumeGridSpacing().get<1>(), 2.0);
+    QCOMPARE(compare.volumeGridSpacing().get<2>(), 3.0);
+
+    compare.setTotalVolumeSize(12.0,12.0,24.0);
+    QCOMPARE(compare.totalVolumeSize().get<0>(), 12.0);
+    QCOMPARE(compare.totalVolumeSize().get<1>(), 12.0);
+    QCOMPARE(compare.totalVolumeSize().get<2>(), 24.0);
+    QCOMPARE(compare.volumeGridSpacing().get<0>(), 2.0);
+    QCOMPARE(compare.volumeGridSpacing().get<1>(), 2.0);
+    QCOMPARE(compare.volumeGridSpacing().get<2>(), 6.0);
+    QCOMPARE(compare.volumeOffset().get<0>(), 0.0);
+    QCOMPARE(compare.volumeOffset().get<1>(), 0.0);
+    QCOMPARE(compare.volumeOffset().get<2>(), -20.0);
+    QCOMPARE(compare(P3, P4).meanError, 42.0);
 }
