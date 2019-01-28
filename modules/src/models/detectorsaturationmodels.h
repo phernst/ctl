@@ -26,6 +26,30 @@ private:
     void setParFromMap(const QVariantMap& map);
 };
 
+class DetectorSaturationSplineModel : public AbstractDataModel
+{
+    public: QVariant toVariant() const override;
+    public: void fromVariant(const QVariant &variant) override;
+    public: float valueAt(float position) const override;
+
+public:
+    DetectorSaturationSplineModel(float lowerCap = 0.0f, float upperCap = FLT_MAX, float softening = 0.1f);
+
+//    QVariant parameter() const override;
+//    void setParameter(QVariant parameter) override;
+
+private:
+    float _a = 0.0f;
+    float _b = FLT_MAX;
+    float _soft = 0.0f;
+
+    void setParFromList(const QVariantList& map);
+    void setParFromMap(const QVariantMap& map);
+
+    float spline1(float x) const;
+    float spline2(float x) const;
+};
+
 }
 
 #endif // DETECTORSATURATIONMODELS_H

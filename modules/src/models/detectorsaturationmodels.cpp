@@ -85,4 +85,50 @@ void DetectorSaturationLinearModel::setParFromMap(const QVariantMap &map)
     _b = map.value("b", FLT_MAX).toFloat();
 }
 
+QVariant DetectorSaturationSplineModel::toVariant() const
+{
+    return QVariant();
+}
+
+void DetectorSaturationSplineModel::fromVariant(const QVariant &variant)
+{
+
+}
+
+float DetectorSaturationSplineModel::valueAt(float position) const
+{
+    float low  = _a * (1.0 - _soft);
+    float high = _b * (1.0 + _soft);
+
+    if(position < low)
+        return _a;
+    else if(position < _a * (1.0 + _soft))
+        return spline1(position);
+    else if(position < _b * (1.0 - _soft))
+        return position;
+    else if(position < high)
+        return spline2(position);
+    else
+        return _b;
+}
+
+DetectorSaturationSplineModel::DetectorSaturationSplineModel(float lowerCap, float upperCap, float softening)
+    : _a(lowerCap)
+    , _b(upperCap)
+    , _soft(softening)
+{
+}
+
+float DetectorSaturationSplineModel::spline1(float x) const
+{
+    const float s = _a*_soft;
+    return 1.0f/(4.0f*s)*(x*x) - (_a-s)/(2.0f*s)*x + (_a+s)*(_a+s)/(4.0f*s);
+}
+
+float DetectorSaturationSplineModel::spline2(float x) const
+{
+    const float s = _b*_soft;
+    return -1.0f/(4.0f*s)*(x*x) + (_b+s)/(2.0f*s)*(x) - (_b-s)*(_b-s)/(4.0f*s);
+}
+
 }
