@@ -4,13 +4,78 @@
 
 namespace CTL {
 
-TabulatedDataModel::TabulatedDataModel(const QMap<float, float>& table)
-    : _data(table)
+/*!
+ * Constructs a TabulatedDataModel with lookup values given by \a table.
+ */
+TabulatedDataModel::TabulatedDataModel(QMap<float, float> table)
+    : _data(std::move(table))
 {
 }
 
-void TabulatedDataModel::setData(QMap<float, float> tables) { _data = std::move(tables); }
+/*!
+ * Constructs a TabulatedDataModel with lookup values given by \a keys and \a values.
+ *
+ * Data with the same key will be overwritten and the entry occuring last in the vector will remain
+ * in the resulting tabulated data.
+ *
+ * Both vectors need to have the same length; throws an exception otherwise.
+ */
+TabulatedDataModel::TabulatedDataModel(const QVector<float>& keys, const QVector<float>& values)
+{
+    setData(keys, values);
+}
 
+/*!
+ * Returns a constant reference to the lookup table stored in this instance
+ */
+const QMap<float, float> &TabulatedDataModel::lookupTable() const { return _data; }
+
+/*!
+ * Sets the lookup table of this instance to \a table.
+ */
+void TabulatedDataModel::setData(QMap<float, float> table) { _data = std::move(table); }
+
+/*!
+ * Sets the lookup table of this instance to the values given by \a keys and \a values.
+ *
+ * Data with the same key will be overwritten and the entry occuring last in the vector will remain
+ * in the resulting tabulated data.
+ *
+ * Both vectors need to have the same length; throws an exception otherwise.
+ */
+void TabulatedDataModel::setData(const QVector<float>& keys, const QVector<float>& values)
+{
+    Q_ASSERT(keys.size() == values.size());
+    if(keys.size() != values.size())
+        throw std::domain_error("TabulatedDataModel::setData(): keys and values have different size.");
+
+    _data.clear();
+    for(int k = 0; k < keys.length(); ++k)
+        _data.insert(keys.at(k), values.at(k));
+}
+
+/*!
+ * Inserts the (\a key, \a value) pair into the lookup table of this instance.
+ *
+ * If an entry with the same key already exists, it will be overwritten.
+ */
+void TabulatedDataModel::insertDataPoint(float key, float value) { _data.insert(key, value); }
+
+/*!
+ * Returns the integral of the tabulated data over the interval
+ * \f$ \left[position-\frac{binWidth}{2},\,position+\frac{binWidth}{2}\right] \f$.
+ *
+ * This method uses trapezoid integration. The following figure provides an example of the procedure.
+ *
+ * \image html TabulatedDataModel.svg "Example of integration of lookup table data in a TabulatedDataModel."
+ *
+ * The table contains 10 data points (star symbols). Integration is shown for three different cases.
+ * Interval 1: The integration bin covers multiple tabulated values. In this case, the result is a
+ * sum over all partial intervals. If one (or both) integration border(s) is outside the range of
+ * tabulated values, the requested point is extrapolated linearly to zero (see left side of
+ * Interval 1). Interval 2: Integration bin lays between two tabulated values. Interval 3: Interval
+ * is fully outside the range of tabulated data. This bin integral returns zero.
+ */
 float TabulatedDataModel::binIntegral(float position, float binWidth) const
 {
     float from = position - 0.5f * binWidth;
@@ -79,6 +144,11 @@ float TabulatedDataModel::binIntegral(float position, float binWidth) const
     return ret;
 }
 
+/*!
+ * Returns a linearly interpolated value at position \a pos based on the data in the lookup table.
+ *
+ * Returns zero if \a pos is outside the range of the available tabulated data.
+ */
 float TabulatedDataModel::valueAt(float pos) const
 {
     // check if data contains an entry for 'pos'
