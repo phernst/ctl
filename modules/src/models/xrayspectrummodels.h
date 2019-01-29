@@ -13,7 +13,7 @@ public:
     QVariant parameter() const override;
 
 protected:
-    float _energy;
+    float _energy = 0.0f;
 };
 
 class XraySpectrumTabulatedModel : public AbstractXraySpectrumModel
