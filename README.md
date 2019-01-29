@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
     // configure a projector and project volume
     CTL::OCL::RayCasterProjector::Config rcConfig;  // config with standard settings
     CTL::OCL::RayCasterProjector myProjector;       // the projector
-    myProjector.configurate(myCarmSetup, rcConfig); // configurate step
+    myProjector.configure(myCarmSetup, rcConfig);   // configure projector
     auto projections = myProjector.project(volume); // project
     
     // save projections
