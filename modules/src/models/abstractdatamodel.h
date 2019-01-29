@@ -164,15 +164,11 @@ private:
  * TBD
  */
 #define REGISTER_TO_JSON_MODEL_PARSER(className)                                                   \
-    AbstractDataModel* ___make ## className(const QJsonObject& obj)                                \
-    {                                                                                              \
-        return new className(obj);                                                                 \
-    }                                                                                              \
-                                                                                                   \
     bool ___register ## className()                                                                \
     {                                                                                              \
-        JsonModelParser::instance().modelFactories().insert(className::Type,                       \
-                                                            &___make ## className);                \
+        static const auto factoryFunction = [](const QJsonObject& obj) -> AbstractDataModel*       \
+                                            { return new className(obj); };                        \
+        JsonModelParser::instance().modelFactories().insert(className::Type, factoryFunction);     \
         return true;                                                                               \
     }                                                                                              \
                                                                                                    \
