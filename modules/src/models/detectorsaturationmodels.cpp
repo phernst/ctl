@@ -3,6 +3,9 @@
 
 namespace CTL {
 
+REGISTER_TO_JSON_MODEL_PARSER(DetectorSaturationLinearModel)
+REGISTER_TO_JSON_MODEL_PARSER(DetectorSaturationSplineModel)
+
 // ### DetectorSaturationLinearModel ###
 
 /*!
@@ -14,6 +17,11 @@ DetectorSaturationLinearModel::DetectorSaturationLinearModel(float lowerCap,
     : _a(lowerCap)
     , _b(upperCap)
 {
+}
+
+DetectorSaturationLinearModel::DetectorSaturationLinearModel(const QJsonObject &obj)
+{
+    qWarning() << "not yet implemented";
 }
 
 /*!
@@ -175,6 +183,11 @@ AbstractDataModel* DetectorSaturationSplineModel::clone() const
  *  \end{align*}
  * \f$
  */
+DetectorSaturationSplineModel::DetectorSaturationSplineModel(const QJsonObject &obj)
+{
+    qWarning() << "not yet implemented";
+}
+
 float DetectorSaturationSplineModel::valueAt(float position) const
 {
     float spl1Start = _a - _softA;

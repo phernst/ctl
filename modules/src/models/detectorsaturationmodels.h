@@ -44,6 +44,7 @@ class DetectorSaturationLinearModel : public AbstractDataModel
     public: AbstractDataModel* clone() const override;
 
 public:
+    DetectorSaturationLinearModel(const QJsonObject& obj);
     DetectorSaturationLinearModel(float lowerCap = 0.0f, float upperCap = FLT_MAX);
 
     QVariant parameter() const override;
