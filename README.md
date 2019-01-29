@@ -149,7 +149,8 @@ int main(int argc, char* argv[])
         CTL::blueprints::GenericCarmCT(CTL::DetectorBinning::Binning4x4));
 
     // create an acquisition setup
-    CTL::AcquisitionSetup myCarmSetup(system);
+    const uint nbViews = 100;
+    CTL::AcquisitionSetup myCarmSetup(system, nbViews);
     myCarmSetup.addPreparationProtocol(CTL::protocols::WobbleTrajectory(200.0_deg, 750.0));
     if(!myCarmSetup.isValid())
         return -1;
