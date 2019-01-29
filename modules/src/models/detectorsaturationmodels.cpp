@@ -10,29 +10,6 @@ DetectorSaturationLinearModel::DetectorSaturationLinearModel(float lowerCap,
 {
 }
 
-QVariant DetectorSaturationLinearModel::toVariant() const
-{
-    QVariantMap ret;
-
-    ret.insert("name", "DetectorSaturationLinearModel");
-    ret.insert("parameters", parameter().toMap());
-
-    return ret;
-}
-
-void DetectorSaturationLinearModel::fromVariant(const QVariant &variant)
-{
-    auto map = variant.toMap();
-    if(!map.value("name").toString().compare("DetectorSaturationLinearModel"))
-    {
-        qWarning() << "DetectorSaturationLinearModel::fromVariant: Could not construct instance! "
-                      "reason: incompatible variant passed";
-        return;
-    }
-
-    setParameter(map.value("parameters").toMap());
-}
-
 float DetectorSaturationLinearModel::valueAt(float position) const
 {
     if(position < _a)
@@ -41,6 +18,11 @@ float DetectorSaturationLinearModel::valueAt(float position) const
         return _b;
     else
         return position;
+}
+
+AbstractDataModel* DetectorSaturationLinearModel::clone() const
+{
+    return new DetectorSaturationLinearModel(*this);
 }
 
 QVariant DetectorSaturationLinearModel::parameter() const
@@ -81,27 +63,9 @@ void DetectorSaturationLinearModel::setParFromMap(const QVariantMap &map)
     _b = map.value("b", FLT_MAX).toFloat();
 }
 
-QVariant DetectorSaturationSplineModel::toVariant() const
+AbstractDataModel* DetectorSaturationSplineModel::clone() const
 {
-    QVariantMap ret;
-
-    ret.insert("name", "DetectorSaturationSplineModel");
-    ret.insert("parameters", parameter().toMap());
-
-    return ret;
-}
-
-void DetectorSaturationSplineModel::fromVariant(const QVariant &variant)
-{
-    auto map = variant.toMap();
-    if(!map.value("name").toString().compare("DetectorSaturationSplineModel"))
-    {
-        qWarning() << "DetectorSaturationSplineModel::fromVariant: Could not construct instance! "
-                      "reason: incompatible variant passed";
-        return;
-    }
-
-    setParameter(map.value("parameters").toMap());
+    return new DetectorSaturationSplineModel(*this);
 }
 
 float DetectorSaturationSplineModel::valueAt(float position) const

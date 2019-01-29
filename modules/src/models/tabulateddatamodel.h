@@ -18,11 +18,12 @@ namespace CTL {
  */
 class TabulatedDataModel : public AbstractDensityDataModel
 {
+    ADD_TO_MODEL_ENUM(30)
+
     // abstract interfaces
     public: float valueAt(float position) const override;
     public: float binIntegral(float position, float binWidth) const override;
-    public: QVariant toVariant() const override;
-    public: void fromVariant(const QVariant& variant) override;
+    public: AbstractDataModel* clone() const override;
 
 public:
     TabulatedDataModel() = default;
@@ -37,6 +38,8 @@ public:
     void setData(const QVector<float>& keys, const QVector<float>& values);
 
     // other methods
+    QVariant toVariant() const override;
+    void fromVariant(const QVariant& variant) override;
     void insertDataPoint(float key, float value);
 
 private:

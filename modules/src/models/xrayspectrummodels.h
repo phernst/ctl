@@ -18,15 +18,19 @@ protected:
 
 class XraySpectrumTabulatedModel : public AbstractXraySpectrumModel
 {
+    ADD_TO_MODEL_ENUM(35)
+
     // abstract interfaces
     public: float valueAt(float position) const override;
     public: float binIntegral(float position, float binWidth) const override;
-    public: QVariant toVariant() const override;
-    public: void fromVariant(const QVariant& variant) override;
+    public: AbstractDataModel* clone() const override;
 
 public:
     void addLookupTable(float voltage, const TabulatedDataModel& table);
     void setLookupTables(const QMap<float, TabulatedDataModel>& tables);
+
+    QVariant toVariant() const override;
+    void fromVariant(const QVariant& variant) override;
 
     bool hasTabulatedDataFor(float voltage) const;
 
@@ -37,15 +41,18 @@ private:
 
 class XrayLaserSpectrumModel : public AbstractXraySpectrumModel
 {
+    ADD_TO_MODEL_ENUM(40)
+
     // abstract interfaces
     public: float valueAt(float position) const override;
     public: float binIntegral(float position, float binWidth) const override;
-    public: QVariant toVariant() const override;
-    public: void fromVariant(const QVariant& variant) override;
+    public: AbstractDataModel* clone() const override;
 };
 
 class FixedXraySpectrumModel : public XraySpectrumTabulatedModel
 {
+    ADD_TO_MODEL_ENUM(36)
+
 public:
     FixedXraySpectrumModel() = default;
     FixedXraySpectrumModel(const TabulatedDataModel& table);
@@ -59,11 +66,12 @@ private:
 
 class KramersLawSpectrumModel : public AbstractXraySpectrumModel
 {
+    ADD_TO_MODEL_ENUM(41)
+
     // abstract interfaces
     public: float valueAt(float position) const override;
     public: float binIntegral(float position, float binWidth) const override;
-    public: QVariant toVariant() const override;
-    public: void fromVariant(const QVariant& variant) override;
+    public: AbstractDataModel* clone() const override;
 };
 
 } // namespace CTL

@@ -1,7 +1,5 @@
 #include "tabulateddatamodel.h"
 
-#include <QDebug>
-
 namespace CTL {
 
 /*!
@@ -143,6 +141,8 @@ float TabulatedDataModel::binIntegral(float position, float binWidth) const
 
     return ret;
 }
+
+AbstractDataModel* TabulatedDataModel::clone() const { return new TabulatedDataModel(*this); }
 
 /*!
  * Returns a linearly interpolated value at position \a pos based on the data in the lookup table.

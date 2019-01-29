@@ -2,6 +2,7 @@
 #define ABSTRACTDATAMODEL_H
 
 #include <QVariant>
+#include <QDebug>
 
 /*
  * NOTE: This is header only.
@@ -22,15 +23,21 @@ namespace CTL {
 class AbstractDataModel
 {
     // abstract interface
-    public:virtual QVariant toVariant() const = 0;
-    public:virtual void fromVariant(const QVariant& variant) = 0;
     public:virtual float valueAt(float position) const = 0;
+    public:virtual AbstractDataModel* clone() const = 0;
 
 public:
+    enum { Type = 0, UserType = 65536 };
+
     virtual ~AbstractDataModel() = default;
 
+    virtual int type() const;
+
+    virtual void fromVariant(const QVariant& variant);
+    virtual QVariant toVariant() const;
     virtual QVariant parameter() const;
     virtual void setParameter(const QVariant& parameter);
+
 };
 
 /*!
@@ -46,7 +53,7 @@ public:
  * sub-classes of AbstractDensityDataModel.
  */
 class AbstractDensityDataModel : public AbstractDataModel
-{
+{   
     // abstract interface
     public:virtual float binIntegral(float position, float binWidth) const = 0;
 };
@@ -97,14 +104,47 @@ class AbstractDensityDataModel : public AbstractDataModel
  * \f$ \left[position-\frac{binWidth}{2},\,position+\frac{binWidth}{2}\right] \f$.
  */
 
+/*!
+ * \def ADD_TO_MODEL_ENUM(newIndex)
+ *
+ * Macro to add the model to the model enumeration with the index \a newIndex.
+ */
+#define ADD_TO_MODEL_ENUM(newIndex)                                                            \
+public:                                                                                            \
+    enum { Type = newIndex };                                                                      \
+    int type() const override { return Type; }                                                     \
+                                                                                                   \
+private:
+
 // implementations
-inline QVariant AbstractDataModel::parameter() const
+inline int AbstractDataModel::type() const { return Type; }
+
+inline QVariant AbstractDataModel::parameter() const { return QVariant(); }
+
+inline void AbstractDataModel::setParameter(const QVariant &) { }
+
+inline QVariant AbstractDataModel::toVariant() const
 {
-    return QVariant();
+    QVariantMap ret;
+
+    ret.insert("type-id", type());
+    ret.insert("name", typeid(*this).name());
+    ret.insert("parameters", parameter().toMap());
+
+    return ret;
 }
 
-inline void AbstractDataModel::setParameter(const QVariant &)
+inline void AbstractDataModel::fromVariant(const QVariant &variant)
 {
+    auto map = variant.toMap();
+    if(map.value("type-id").toInt() != type())
+    {
+        qWarning() << QString(typeid(*this).name()) + "::fromVariant: Could not construct instance! "
+                      "reason: incompatible variant passed";
+        return;
+    }
+
+    setParameter(map.value("parameters").toMap());
 }
 
 } // namespace CTL

@@ -77,6 +77,11 @@ float XraySpectrumTabulatedModel::binIntegral(float position, float binWidth) co
     return lowerIntegral * weightFactor + upperIntegral * (1.0f - weightFactor);
 }
 
+AbstractDataModel *XraySpectrumTabulatedModel::clone() const
+{
+    return new XraySpectrumTabulatedModel(*this);
+}
+
 QVariant XraySpectrumTabulatedModel::toVariant() const { return QVariant(); }
 
 void XraySpectrumTabulatedModel::fromVariant(const QVariant& variant)
@@ -123,9 +128,10 @@ float XrayLaserSpectrumModel::binIntegral(float position, float binWidth) const
         return 0.0f;
 }
 
-QVariant XrayLaserSpectrumModel::toVariant() const { return QVariant(); }
-
-void XrayLaserSpectrumModel::fromVariant(const QVariant&) { return; }
+AbstractDataModel *XrayLaserSpectrumModel::clone() const
+{
+    return new XrayLaserSpectrumModel(*this);
+}
 
 
 // _____________________________
@@ -169,8 +175,9 @@ float KramersLawSpectrumModel::binIntegral(float position, float binWidth) const
     return _energy * log(top / bot) - (top - bot);
 }
 
-QVariant KramersLawSpectrumModel::toVariant() const { return QVariant(); }
-
-void KramersLawSpectrumModel::fromVariant(const QVariant&) { return; }
+AbstractDataModel *KramersLawSpectrumModel::clone() const
+{
+    return new KramersLawSpectrumModel(*this);
+}
 
 } // namespace CTL

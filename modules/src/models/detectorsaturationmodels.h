@@ -8,9 +8,10 @@ namespace CTL {
 
 class DetectorSaturationLinearModel : public AbstractDataModel
 {
-    public: QVariant toVariant() const override;
-    public: void fromVariant(const QVariant &variant) override;
+    ADD_TO_MODEL_ENUM(10)
+
     public: float valueAt(float position) const override;
+    public: AbstractDataModel* clone() const override;
 
 public:
     DetectorSaturationLinearModel(float lowerCap = 0.0f, float upperCap = FLT_MAX);
@@ -28,9 +29,10 @@ private:
 
 class DetectorSaturationSplineModel : public AbstractDataModel
 {
-    public: QVariant toVariant() const override;
-    public: void fromVariant(const QVariant &variant) override;
+    ADD_TO_MODEL_ENUM(20)
+
     public: float valueAt(float position) const override;
+    public: AbstractDataModel* clone() const override;
 
 public:
     DetectorSaturationSplineModel(float lowerCap = 0.0f, float upperCap = FLT_MAX, float softening = 0.1f);
