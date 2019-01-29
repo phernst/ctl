@@ -3,11 +3,19 @@
 
 namespace CTL {
 
+REGISTER_TO_JSON_MODEL_PARSER(DetectorSaturationLinearModel)
+REGISTER_TO_JSON_MODEL_PARSER(DetectorSaturationSplineModel)
+
 DetectorSaturationLinearModel::DetectorSaturationLinearModel(float lowerCap,
                                                              float upperCap)
     : _a(lowerCap)
     , _b(upperCap)
 {
+}
+
+DetectorSaturationLinearModel::DetectorSaturationLinearModel(const QJsonObject &obj)
+{
+    qWarning() << "not yet implemented";
 }
 
 float DetectorSaturationLinearModel::valueAt(float position) const
@@ -66,6 +74,11 @@ void DetectorSaturationLinearModel::setParFromMap(const QVariantMap &map)
 AbstractDataModel* DetectorSaturationSplineModel::clone() const
 {
     return new DetectorSaturationSplineModel(*this);
+}
+
+DetectorSaturationSplineModel::DetectorSaturationSplineModel(const QJsonObject &obj)
+{
+    qWarning() << "not yet implemented";
 }
 
 float DetectorSaturationSplineModel::valueAt(float position) const

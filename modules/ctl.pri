@@ -73,7 +73,8 @@ HEADERS += \
     $$PWD/src/models/pointseriesbase.h \
     $$PWD/src/models/intervaldataseries.h \
     $$PWD/src/mat/pmatcomparator.h \
-    $$PWD/src/models/detectorsaturationmodels.h
+    $$PWD/src/models/detectorsaturationmodels.h \
+    $$PWD/src/models/jsonmodelparser.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \

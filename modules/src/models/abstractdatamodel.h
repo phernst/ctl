@@ -1,6 +1,7 @@
 #ifndef ABSTRACTDATAMODEL_H
 #define ABSTRACTDATAMODEL_H
 
+#include "jsonmodelparser.h"
 #include <QVariant>
 #include <QDebug>
 
@@ -109,12 +110,34 @@ class AbstractDensityDataModel : public AbstractDataModel
  *
  * Macro to add the model to the model enumeration with the index \a newIndex.
  */
-#define ADD_TO_MODEL_ENUM(newIndex)                                                            \
+#define ADD_TO_MODEL_ENUM(newIndex)                                                                \
 public:                                                                                            \
     enum { Type = newIndex };                                                                      \
     int type() const override { return Type; }                                                     \
                                                                                                    \
 private:
+
+/*!
+ * \def REGISTER_TO_JSON_MODEL_PARSER(className)
+ *
+ * TBD
+ */
+#define REGISTER_TO_JSON_MODEL_PARSER(className)                                                   \
+    namespace {                                                                                    \
+    AbstractDataModel* ___make ## className(const QJsonObject& obj)                                \
+    {                                                                                              \
+        return new className(obj);                                                                 \
+    }                                                                                              \
+                                                                                                   \
+    bool ___register ## className()                                                                \
+    {                                                                                              \
+        JsonModelParser::instance().modelFactories().insert(className::Type,                       \
+                                                            &___make ## className);                \
+        return true;                                                                               \
+    }                                                                                              \
+                                                                                                   \
+    const bool ___ ## className ## _registeredForJsonParser = ___register ## className();          \
+    }
 
 // implementations
 inline int AbstractDataModel::type() const { return Type; }
