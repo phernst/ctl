@@ -10,7 +10,7 @@ namespace {
 SystemComponent* parseComponentFromJson(const QJsonObject& object)
 {
     SystemComponent* ret;
-    auto typeID = static_cast<int>(object.value("type-id").toDouble(-1.0));
+    auto typeID = object.value("type-id").toInt(-1);
 
     switch(typeID)
     {
@@ -64,7 +64,7 @@ SystemComponent* parseComponentFromJson(const QJsonObject& object)
 SystemComponent* parseGenericComponentFromJson(const QJsonObject& object)
 {
     SystemComponent* ret;
-    auto genericTypeID = static_cast<int>(object.value("generic type-id").toDouble());
+    auto genericTypeID = object.value("generic type-id").toInt();
 
     switch(genericTypeID)
     {
