@@ -123,7 +123,6 @@ private:
  * TBD
  */
 #define REGISTER_TO_JSON_MODEL_PARSER(className)                                                   \
-    namespace {                                                                                    \
     AbstractDataModel* ___make ## className(const QJsonObject& obj)                                \
     {                                                                                              \
         return new className(obj);                                                                 \
@@ -136,8 +135,7 @@ private:
         return true;                                                                               \
     }                                                                                              \
                                                                                                    \
-    const bool ___ ## className ## _registeredForJsonParser = ___register ## className();          \
-    }
+    const bool ___ ## className ## _registeredForJsonParser = ___register ## className();
 
 // implementations
 inline int AbstractDataModel::type() const { return Type; }
