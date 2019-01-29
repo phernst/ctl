@@ -143,10 +143,6 @@ void FixedXraySpectrumModel::setLookupTable(const TabulatedDataModel& table)
     setLookupTables(tmp);
 }
 
-void FixedXraySpectrumModel::setParameter(QVariant)
-{
-}
-
 // _____________________________
 // # KramersLawSpectrumModel
 // -----------------------------

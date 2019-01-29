@@ -51,7 +51,6 @@ public:
     FixedXraySpectrumModel(const TabulatedDataModel& table);
 
     void setLookupTable(const TabulatedDataModel& table);
-    void setParameter(QVariant energy) override;
 
 private:
     using XraySpectrumTabulatedModel::addLookupTable;
