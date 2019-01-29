@@ -59,6 +59,32 @@ void TabulatedDataModel::setData(const QVector<float>& keys, const QVector<float
  */
 void TabulatedDataModel::insertDataPoint(float key, float value) { _data.insert(key, value); }
 
+QVariantList TabulatedDataModel::dataAsVariantList() const
+{
+    QVariantList list;
+
+    auto i = _data.constBegin();
+    while (i != _data.constEnd())
+    {
+        list.append(QVariant(QVariantList{i.key(),i.value()}));
+        ++i;
+    }
+
+    return list;
+}
+
+void TabulatedDataModel::setDataFromVariantList(const QVariantList& list)
+{
+    _data.clear();
+    foreach(const QVariant& var, list)
+    {
+        auto dataPoint = var.toList();
+        if(dataPoint.size() < 2)
+            continue;
+        _data.insert(dataPoint.at(0).toFloat(), dataPoint.at(1).toFloat());
+    }
+}
+
 /*!
  * Returns the integral of the tabulated data over the interval
  * \f$ \left[position-\frac{binWidth}{2},\,position+\frac{binWidth}{2}\right] \f$.
@@ -171,11 +197,18 @@ float TabulatedDataModel::valueAt(float pos) const
     return contribLower + contribUpper;
 }
 
-QVariant TabulatedDataModel::toVariant() const { return QVariant(); }
+QVariant TabulatedDataModel::toVariant() const
+{
+    auto variant = AbstractDataModel::toVariant().toMap();
+    variant.insert("data", dataAsVariantList());
+
+    return variant;
+}
 
 void TabulatedDataModel::fromVariant(const QVariant& variant)
 {
-    return;
+    AbstractDataModel::fromVariant(variant);
+    setDataFromVariantList(variant.toMap().value("data").toList());
 }
 
 

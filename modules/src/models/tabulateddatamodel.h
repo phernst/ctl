@@ -44,6 +44,9 @@ public:
 
 private:
     QMap<float, float> _data;
+
+    QVariantList dataAsVariantList() const;
+    void setDataFromVariantList(const QVariantList& list);
 };
 
 } // namespace CTL
