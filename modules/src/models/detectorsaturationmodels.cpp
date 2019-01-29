@@ -30,7 +30,7 @@ void DetectorSaturationLinearModel::fromVariant(const QVariant &variant)
         return;
     }
 
-    setParameter(variant);
+    setParameter(map.value("parameters").toMap());
 }
 
 float DetectorSaturationLinearModel::valueAt(float position) const
@@ -101,7 +101,7 @@ void DetectorSaturationSplineModel::fromVariant(const QVariant &variant)
         return;
     }
 
-    setParameter(variant);
+    setParameter(map.value("parameters").toMap());
 }
 
 float DetectorSaturationSplineModel::valueAt(float position) const
