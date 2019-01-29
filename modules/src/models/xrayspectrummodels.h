@@ -9,7 +9,7 @@ namespace CTL {
 class AbstractXraySpectrumModel : public AbstractDensityDataModel
 {
 public:
-    void setParameter(QVariant energy) override;
+    void setParameter(const QVariant& parameter) override;
     QVariant parameter() const override;
 
 protected:

@@ -30,7 +30,7 @@ public:
     virtual ~AbstractDataModel() = default;
 
     virtual QVariant parameter() const;
-    virtual void setParameter(QVariant parameter);
+    virtual void setParameter(const QVariant& parameter);
 };
 
 /*!
@@ -82,7 +82,7 @@ class AbstractDensityDataModel : public AbstractDataModel
  */
 
 /*!
- * \fn void AbstractDataModel::setParameter(QVariant parameter);
+ * \fn void AbstractDataModel::setParameter(const QVariant& parameter);
  *
  * Passes \a parameter to this instance.
  *
@@ -103,7 +103,7 @@ inline QVariant AbstractDataModel::parameter() const
     return QVariant();
 }
 
-inline void AbstractDataModel::setParameter(QVariant)
+inline void AbstractDataModel::setParameter(const QVariant &)
 {
 }
 

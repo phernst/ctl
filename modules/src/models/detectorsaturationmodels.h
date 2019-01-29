@@ -16,7 +16,7 @@ public:
     DetectorSaturationLinearModel(float lowerCap = 0.0f, float upperCap = FLT_MAX);
 
     QVariant parameter() const override;
-    void setParameter(QVariant parameter) override;
+    void setParameter(const QVariant& parameter) override;
 
 private:
     float _a = 0.0f;
@@ -37,7 +37,7 @@ public:
     DetectorSaturationSplineModel(float lowerCap, float upperCap, float softLower, float softUpper);
 
     QVariant parameter() const override;
-    void setParameter(QVariant parameter) override;
+    void setParameter(const QVariant& parameter) override;
 
 private:
     float _a = 0.0f;

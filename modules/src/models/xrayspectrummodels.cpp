@@ -7,7 +7,7 @@ namespace CTL {
 // ____________________________
 // # AbstractXraySpectrumModel
 // ----------------------------
-void AbstractXraySpectrumModel::setParameter(QVariant energy) { _energy = energy.toFloat(); }
+void AbstractXraySpectrumModel::setParameter(const QVariant &parameter) { _energy = parameter.toFloat(); }
 
 QVariant AbstractXraySpectrumModel::parameter() const { return QVariant(_energy); }
 

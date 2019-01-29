@@ -52,7 +52,7 @@ QVariant DetectorSaturationLinearModel::parameter() const
     return ret;
 }
 
-void DetectorSaturationLinearModel::setParameter(QVariant parameter)
+void DetectorSaturationLinearModel::setParameter(const QVariant &parameter)
 {
     if(parameter.canConvert(QMetaType::QVariantMap))
         setParFromMap(parameter.toMap());
@@ -151,7 +151,7 @@ QVariant DetectorSaturationSplineModel::parameter() const
     return map;
 }
 
-void DetectorSaturationSplineModel::setParameter(QVariant parameter)
+void DetectorSaturationSplineModel::setParameter(const QVariant &parameter)
 {
     if(parameter.canConvert(QMetaType::QVariantMap))
         setParFromMap(parameter.toMap());
