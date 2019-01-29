@@ -7,9 +7,18 @@ namespace CTL {
 // ____________________________
 // # AbstractXraySpectrumModel
 // ----------------------------
-void AbstractXraySpectrumModel::setParameter(const QVariant &parameter) { _energy = parameter.toFloat(); }
+void AbstractXraySpectrumModel::setParameter(const QVariant &parameter)
+{
+    if(parameter.canConvert(QMetaType::Float))
+        _energy = parameter.toFloat();
+    else
+        _energy = parameter.toMap().value("energy").toFloat();
+}
 
-QVariant AbstractXraySpectrumModel::parameter() const { return QVariant(_energy); }
+QVariant AbstractXraySpectrumModel::parameter() const
+{
+    return QVariantMap{std::make_pair(QString("energy"), _energy)};
+}
 
 // _____________________________
 // # XraySpectrumTabulatedModel
@@ -82,11 +91,47 @@ AbstractDataModel *XraySpectrumTabulatedModel::clone() const
     return new XraySpectrumTabulatedModel(*this);
 }
 
-QVariant XraySpectrumTabulatedModel::toVariant() const { return QVariant(); }
+QVariant XraySpectrumTabulatedModel::toVariant() const
+{
+    auto variant = AbstractDataModel::toVariant().toMap();
+    QVariantList dataList;
+
+    auto i = _lookupTables.constBegin();
+    while (i != _lookupTables.constEnd())
+    {
+        QVariantMap map;
+        map.insert("table voltage", i.key());
+        map.insert("table data", i.value().toVariant());
+
+        dataList.append(map);
+        ++i;
+    }
+
+    variant.insert("lookup tables", dataList);
+
+    return variant;
+}
 
 void XraySpectrumTabulatedModel::fromVariant(const QVariant& variant)
 {
-    return;
+    AbstractDataModel::fromVariant(variant);
+
+    _lookupTables.clear();
+
+    // populate lookup table
+    auto lookupTableData = variant.toMap().value("lookup tables").toList();
+    foreach(const QVariant& var, lookupTableData)
+    {
+        // each "var" represents a lookup table for a certain tube voltage
+        auto varAsMap = var.toMap();
+        auto voltage = varAsMap.value("table voltage").toFloat();
+        auto tableData = varAsMap.value("table data");
+
+        TabulatedDataModel table;
+        table.fromVariant(tableData);
+
+        addLookupTable(voltage, table);
+    }
 }
 
 void XraySpectrumTabulatedModel::setLookupTables(const QMap<float, TabulatedDataModel>& tables)
