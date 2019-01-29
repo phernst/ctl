@@ -129,7 +129,7 @@ inline QVariant AbstractDataModel::toVariant() const
 
     ret.insert("type-id", type());
     ret.insert("name", typeid(*this).name());
-    ret.insert("parameters", parameter().toMap());
+    ret.insert("parameters", parameter());
 
     return ret;
 }
