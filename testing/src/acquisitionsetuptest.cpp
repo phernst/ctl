@@ -52,14 +52,14 @@ void AcquisitionSetupTest::testSystemValidityCheck()
     CTL::AcquisitionSetup setup(_testSetup);
 
     CTL::protocols::HelicalTrajectory helTraj(10.0);
-    CTL::protocols::WobbleTrajectory wobbleTraj(100, 3.0, 400.0);
+    CTL::protocols::WobbleTrajectory wobbleTraj(3.0, 400.0);
 
     QVERIFY(setup.isValid());
 
-    setup.addPreparationProtocol(helTraj);
+    setup.applyPreparationProtocol(helTraj);
     QVERIFY(setup.isValid());
 
-    setup.addPreparationProtocol(wobbleTraj);
+    setup.applyPreparationProtocol(wobbleTraj);
     QVERIFY(!setup.isValid());  // expect: false --> wobbleTraj not applicable to TubularGantry system
 }
 

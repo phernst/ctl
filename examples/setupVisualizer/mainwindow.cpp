@@ -78,7 +78,7 @@ void MainWindow::on__PB_circTraj_clicked()
     // create acquisition
     CTL::AcquisitionSetup acqProt(carmSys);
     acqProt.setNbViews(nbProj);
-    acqProt.addPreparationProtocol(CTL::protocols::ShortScanTrajectory(srcToIso));
+    acqProt.applyPreparationProtocol(CTL::protocols::ShortScanTrajectory(srcToIso));
 
     // show animation
     _avWid->setAcquisitionSetup(std::move(acqProt));
@@ -111,7 +111,8 @@ void MainWindow::on__PB_helicalTraj_clicked()
     // create acquisition
     CTL::AcquisitionSetup acqProt(tubeSys);
     acqProt.setNbViews(nbProj);
-    acqProt.addPreparationProtocol(CTL::protocols::HelicalTrajectory(angleIncr, pitch, -0.5*(pitch*nbProj)));
+    acqProt.applyPreparationProtocol(CTL::protocols::HelicalTrajectory(angleIncr, pitch,
+                                                                       -0.5*(pitch*nbProj)));
 
     // show animation
     _avWid->setAcquisitionSetup(std::move(acqProt));
@@ -145,7 +146,8 @@ void MainWindow::on__PB_wobbleTraj_clicked()
     // create acquisition
     CTL::AcquisitionSetup acqProt(carmSys);
     acqProt.setNbViews(nbProj);
-    acqProt.addPreparationProtocol(CTL::protocols::WobbleTrajectory(200.0_deg, srcToIso, 0.0, wobbleAmpl, nbWobbles));
+    acqProt.applyPreparationProtocol(CTL::protocols::WobbleTrajectory(200.0_deg, srcToIso, 0.0,
+                                                                      wobbleAmpl, nbWobbles));
 
     // show animation
     _avWid->setAcquisitionSetup(std::move(acqProt));

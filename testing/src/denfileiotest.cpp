@@ -68,7 +68,7 @@ void DenFileIOtest::testPmatReader()
     // create an acquisition setup (here: helical scan protocol)
     AcquisitionSetup mySetup(system);
     mySetup.setNbViews(1);
-    mySetup.addPreparationProtocol(protocols::HelicalTrajectory(10.0_deg, 0.0));
+    mySetup.applyPreparationProtocol(protocols::HelicalTrajectory(10.0_deg, 0.0));
 
     auto geo = GeometryEncoder::encodeFullGeometry(mySetup);
 

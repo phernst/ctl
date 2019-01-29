@@ -156,7 +156,8 @@ AcquisitionSetup MainWindow::currentSetup() const
 
     AcquisitionSetup acqSetup(_CTSystem);
     acqSetup.setNbViews(nbViews);
-    acqSetup.addPreparationProtocol(protocols::HelicalTrajectory(angleIncrement, tableFeed, startPitch, startAngle));
+    acqSetup.applyPreparationProtocol(protocols::HelicalTrajectory(angleIncrement, tableFeed,
+                                                                   startPitch, startAngle));
 
     return acqSetup;
 }

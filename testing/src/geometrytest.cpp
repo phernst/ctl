@@ -36,7 +36,7 @@ void GeometryTest::testGeometryEncoder()
     // test tube acquisition
     AcquisitionSetup testSetupTube(*_tubeTestSystem);
     testSetupTube.setNbViews(10);
-    testSetupTube.addPreparationProtocol(protocols::HelicalTrajectory(3.6_deg, 1.0));
+    testSetupTube.applyPreparationProtocol(protocols::HelicalTrajectory(3.6_deg, 1.0));
 
     auto geo = GeometryEncoder::encodeFullGeometry(testSetupTube);
     verifyPmatDiff(loadedTubeGeo, geo);
@@ -44,7 +44,7 @@ void GeometryTest::testGeometryEncoder()
     // test c-arm wobble acquisition
     AcquisitionSetup testSetupCarm(*_cArmTestSystem);
     testSetupCarm.setNbViews(30);
-    testSetupCarm.addPreparationProtocol(protocols::WobbleTrajectory(200.0_deg, 750.0, 0.0_deg, 20.0_deg, 5.0));
+    testSetupCarm.applyPreparationProtocol(protocols::WobbleTrajectory(200.0_deg, 750.0, 0.0_deg, 20.0_deg, 5.0));
 
     geo = GeometryEncoder::encodeFullGeometry(testSetupCarm);
     verifyPmatDiff(loadedCarmGeo, geo);
@@ -56,7 +56,7 @@ void GeometryTest::testGeometryDecoder()
 
     AcquisitionSetup testSetupTube(*_tubeTestSystem);
     testSetupTube.setNbViews(10);
-    testSetupTube.addPreparationProtocol(protocols::HelicalTrajectory(3.6_deg, 1.0));
+    testSetupTube.applyPreparationProtocol(protocols::HelicalTrajectory(3.6_deg, 1.0));
 
     auto geo = GeometryEncoder::encodeFullGeometry(testSetupTube);
 
@@ -68,7 +68,7 @@ void GeometryTest::testGeometryDecoder()
     // test c-arm wobble acquisition
     AcquisitionSetup testSetupCarm(*_cArmTestSystem);
     testSetupCarm.setNbViews(30);
-    testSetupCarm.addPreparationProtocol(
+    testSetupCarm.applyPreparationProtocol(
                 protocols::WobbleTrajectory(200.0_deg, 750.0, 0.0_deg, 20.0_deg, 5.0));
 
     geo = GeometryEncoder::encodeFullGeometry(testSetupCarm);

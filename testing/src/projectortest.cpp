@@ -47,7 +47,7 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
 
     AcquisitionSetup setup(theSystem);
     setup.setNbViews(1);
-    setup.addPreparationProtocol(protocols::WobbleTrajectory(0.0, 750.0, projAngle, 0.0));
+    setup.applyPreparationProtocol(protocols::WobbleTrajectory(0.0, 750.0, projAngle, 0.0));
 
     auto rcConfig = OCL::RayCasterProjector::Config();
     // rcConfig.interpolate = false;

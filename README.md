@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     // create an acquisition setup
     const uint nbViews = 100;
     CTL::AcquisitionSetup myCarmSetup(system, nbViews);
-    myCarmSetup.addPreparationProtocol(CTL::protocols::WobbleTrajectory(200.0_deg, 750.0));
+    myCarmSetup.applyPreparationProtocol(CTL::protocols::WobbleTrajectory(200.0_deg, 750.0));
     if(!myCarmSetup.isValid())
         return -1;
 

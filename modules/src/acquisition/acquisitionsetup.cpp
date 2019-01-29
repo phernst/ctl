@@ -9,25 +9,15 @@ AcquisitionSetup::View::View(double time)
 {
 }
 
-AcquisitionSetup::AcquisitionSetup(const CTsystem& system)
+AcquisitionSetup::AcquisitionSetup(const CTsystem& system, uint nbViews)
 {
     this->resetSystem(system);
-}
-
-AcquisitionSetup::AcquisitionSetup(CTsystem&& system)
-{
-    this->resetSystem(std::move(system));
-}
-
-AcquisitionSetup::AcquisitionSetup(const CTsystem& system, uint nbViews)
-    : AcquisitionSetup(system)
-{
     this->setNbViews(nbViews);
 }
 
 AcquisitionSetup::AcquisitionSetup(CTsystem&& system, uint nbViews)
-    : AcquisitionSetup(std::move(system))
 {
+    this->resetSystem(std::move(system));
     this->setNbViews(nbViews);
 }
 
@@ -46,8 +36,12 @@ AcquisitionSetup& AcquisitionSetup::operator=(const AcquisitionSetup& other)
 
 void AcquisitionSetup::addView(AcquisitionSetup::View view) { _views.push_back(std::move(view)); }
 
-void AcquisitionSetup::addPreparationProtocol(const AbstractPreparationProtocol& preparation)
+void AcquisitionSetup::applyPreparationProtocol(const AbstractPreparationProtocol& preparation)
 {
+    if(this->nbViews() == 0)
+        qWarning() << "AcquisitionSetup::applyPreparationProtocol: trying to apply protocol to "
+                      "setup with number of views = 0. This has no effect!";
+
     for(uint view = 0, nbViews = this->nbViews(); view < nbViews; ++view)
     {
         auto prepareSteps = preparation.prepareSteps(view, *this);

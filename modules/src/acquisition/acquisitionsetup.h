@@ -29,10 +29,8 @@ public:
     };
 
     AcquisitionSetup() = default;
-    AcquisitionSetup(const CTsystem& system);
-    AcquisitionSetup(CTsystem&& system);
-    AcquisitionSetup(const CTsystem& system, uint nbViews);
-    AcquisitionSetup(CTsystem&& system, uint nbViews);
+    AcquisitionSetup(const CTsystem& system, uint nbViews = 0);
+    AcquisitionSetup(CTsystem&& system, uint nbViews = 0);
 
     // cp/mv cstor/assignment
     AcquisitionSetup(const AcquisitionSetup& other);
@@ -41,7 +39,7 @@ public:
     AcquisitionSetup& operator=(AcquisitionSetup&& other) = default;
 
     void addView(View view);
-    void addPreparationProtocol(const AbstractPreparationProtocol& preparation);
+    void applyPreparationProtocol(const AbstractPreparationProtocol& preparation);
     bool isValid() const;
     uint nbViews() const;
     void prepareView(uint viewNb);
