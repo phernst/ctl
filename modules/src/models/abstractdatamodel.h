@@ -32,6 +32,7 @@ public:
     virtual ~AbstractDataModel() = default;
 
     virtual int type() const;
+    virtual bool isIntegrable() const;
 
     virtual void fromVariant(const QVariant& variant);
     virtual QVariant toVariant() const;
@@ -56,6 +57,9 @@ class AbstractIntegrableDataModel : public AbstractDataModel
 {   
     // abstract interface
     public:virtual float binIntegral(float position, float binWidth) const = 0;
+
+public:
+    bool isIntegrable() const final;
 };
 
 
@@ -95,6 +99,25 @@ class AbstractIntegrableDataModel : public AbstractDataModel
  *
  * Encapsulate all necessary information into the passed QVariant and re-implement this method
  * within your sub-class to parse it into your required format.
+ */
+
+/*!
+ * \fn bool AbstractDataModel::isIntegrable() const
+ *
+ * Returns true if this instance allows integration of data.
+ *
+ * Note that this is usually only the case for classes derived from the AbstractIntegrableDataModel
+ * class. If your subclass allows for integration of data, consider making it a subclass of
+ * AbstractIntegrableDataModel instead.
+ */
+
+/*!
+ * \fn bool AbstractIntegrableDataModel::isIntegrable() const
+ *
+ * Returns true if this instance allows integration of data.
+ *
+ * This is true by default for AbstractIntegrableDataModel subclasses as these must implement the
+ * binIntegral() method.
  */
 
 /*!
@@ -146,6 +169,10 @@ inline void AbstractDataModel::fromVariant(const QVariant &variant)
 
     setParameter(map.value("parameters").toMap());
 }
+
+inline bool AbstractDataModel::isIntegrable() const { return false; }
+
+inline bool AbstractIntegrableDataModel::isIntegrable() const { return true; }
 
 } // namespace CTL
 
