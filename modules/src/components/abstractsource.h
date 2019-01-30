@@ -78,13 +78,14 @@ public:
     QString info() const override;
     void read(const QJsonObject& json) override; // JSON
     void write(QJsonObject& json) const override; // JSON
-    void setSpectrumModel(std::shared_ptr<AbstractXraySpectrumModel> model);
+    void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
 
     // getter methods
     double photonFlux() const;
     double fluxModifier() const;
     const QSizeF& focalSpotSize() const;
     const Vector3x1& focalSpotPosition() const;
+    const AbstractXraySpectrumModel* spectrumModel() const;
 
     // setter methods
     void setFluxModifier(double modifier);
@@ -101,7 +102,7 @@ protected:
     Vector3x1 _focalSpotPosition = Vector3x1(0.0);
     double _fluxModifier = 1.0;
 
-    std::shared_ptr<AbstractXraySpectrumModel> _spectrumModel = nullptr;
+    DataModelPtr _spectrumModel;
 };
 
 /*!
@@ -173,7 +174,7 @@ inline AbstractSource::AbstractSource(const QSizeF& focalSpotSize,
     : SystemComponent(name)
     , _focalSpotSize(focalSpotSize)
     , _focalSpotPosition(focalSpotPosition)
-    , _spectrumModel(spectumModel)
+    , _spectrumModel(std::unique_ptr<AbstractDataModel>(spectumModel))
 {
 }
 
@@ -191,6 +192,14 @@ inline const QSizeF& AbstractSource::focalSpotSize() const { return _focalSpotSi
  * Definition of the focal spot position is in CT coordinates.
  */
 inline const Vector3x1& AbstractSource::focalSpotPosition() const { return _focalSpotPosition; }
+
+/*!
+ * Returns a pointer to the spectrum model of this instance.
+ */
+inline const AbstractXraySpectrumModel *AbstractSource::spectrumModel() const
+{
+    return static_cast<AbstractXraySpectrumModel*>(_spectrumModel.ptr.get());
+}
 
 /*!
  * Sets the focal spot size \a size.
@@ -235,7 +244,7 @@ inline void AbstractSource::setFocalSpotPosition(double x, double y, double z)
  *
  * \sa setSpectrumModel().
  */
-inline bool AbstractSource::hasSpectrumModel() const { return (_spectrumModel != nullptr); }
+inline bool AbstractSource::hasSpectrumModel() const { return (_spectrumModel.ptr != nullptr); }
 
 /*!
  * Returns a formatted string with information about the object.
@@ -270,15 +279,15 @@ inline QString AbstractSource::info() const
  */
 inline void AbstractSource::setSpectrumModel(AbstractXraySpectrumModel* model)
 {
-    _spectrumModel.reset(model);
+    _spectrumModel.ptr.reset(model);
 }
 
 /*!
  * Sets the spectrum model to \a model.
  */
-inline void AbstractSource::setSpectrumModel(std::shared_ptr<AbstractXraySpectrumModel> model)
+inline void AbstractSource::setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model)
 {
-    setSpectrumModel(model.get());
+    _spectrumModel.ptr = std::move(model);
 }
 
 /*!
@@ -300,7 +309,7 @@ inline void AbstractSource::read(const QJsonObject& json)
 
     _focalSpotSize = fsQSize;
     _focalSpotPosition = fsPosVec;
-    _spectrumModel->fromVariant(specMod);
+    _spectrumModel.ptr->fromVariant(specMod);
 }
 
 /*!
@@ -320,7 +329,7 @@ inline void AbstractSource::write(QJsonObject& json) const
     fsSize.insert("width", _focalSpotSize.width());
     fsSize.insert("height", _focalSpotSize.height());
 
-    QJsonValue specMod = QJsonValue::fromVariant(_spectrumModel->toVariant());
+    QJsonValue specMod = QJsonValue::fromVariant(_spectrumModel.ptr->toVariant());
 
     json.insert("focal spot position", fsPos);
     json.insert("focal spot size", fsSize);

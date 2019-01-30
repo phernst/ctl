@@ -27,16 +27,18 @@ XrayLaser::XrayLaser(const QString &name)
 
 XrayLaser::XrayLaser(const QJsonObject& json)
     : AbstractSource(defaultName())
-
 {
-    _spectrumModel.reset(new XrayLaserSpectrumModel);
+    _spectrumModel.ptr.reset((new XrayLaserSpectrumModel));
     XrayLaser::read(json);
 }
 
 IntervalDataSeries XrayLaser::spectrum(float from, float to, uint nbSamples) const
 {
-    static_cast<XrayLaserSpectrumModel*>(_spectrumModel.get())->setParameter(_energy);
-    IntervalDataSeries spec = IntervalDataSeries::sampledFromModel(*_spectrumModel, from, to, nbSamples);
+    if(!hasSpectrumModel())
+        throw std::runtime_error("No spectrum model set.");
+
+    static_cast<XrayLaserSpectrumModel*>(_spectrumModel.ptr.get())->setParameter(_energy);
+    IntervalDataSeries spec = IntervalDataSeries::sampledFromModel(*spectrumModel(), from, to, nbSamples);
     spec.normalizeByIntegral();
     return spec;
 }

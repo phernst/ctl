@@ -77,9 +77,12 @@ SystemComponent* GenericSource::clone() const { return new GenericSource(*this);
 
 IntervalDataSeries GenericSource::spectrum(float from, float to, uint nbSamples) const
 {
-    IntervalDataSeries sampSpec = IntervalDataSeries::sampledFromModel(*_spectrumModel, from, to,
+    if(!hasSpectrumModel())
+        throw std::runtime_error("No spectrum model set.");
+
+    IntervalDataSeries sampSpec = IntervalDataSeries::sampledFromModel(*spectrumModel(), from, to,
                                                                        nbSamples);
-    //sampSpec.normalize();
+    sampSpec.normalizeByIntegral();
     return sampSpec;
 }
 
