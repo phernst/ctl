@@ -4,6 +4,7 @@
 #include "systemcomponent.h"
 #include "mat/matrix_utils.h"   // for definition of mat::Location
 #include "img/singleviewdata.h" // for definition of SingleViewData::Dimensions
+#include "models/abstractdatamodel.h"
 
 #include <QJsonArray>
 #include <QSize>
@@ -51,6 +52,7 @@ class AbstractDetector : public SystemComponent
 
 public:
     typedef mat::Location ModuleLocation;
+    enum SaturationModelType { Extinction, Intensity, Undefined };
 
     // abstract interface
     public:virtual QVector<ModuleLocation> moduleLocations() const = 0;
@@ -65,13 +67,20 @@ public:
     void read(const QJsonObject& json) override;  // JSON
     void write(QJsonObject& json) const override; // JSON
 
+    // setter methods
+    void setSaturationModel(AbstractDataModel* model, SaturationModelType type);
+    void setSaturationModel(std::unique_ptr<AbstractDataModel> model, SaturationModelType type);
+
     // getter methods
     uint nbDetectorModules() const;
     const QSize& nbPixelPerModule() const;
     const QSizeF& pixelDimensions() const;
     ModuleLocation moduleLocation(uint module) const;
+    const AbstractDataModel* saturationModel() const;
+    SaturationModelType saturationModelType() const;
 
     // other methods
+    bool hasSaturationModel() const;
     QSizeF moduleDimensions() const;
     SingleViewData::Dimensions viewDimensions() const;
 
@@ -80,6 +89,9 @@ protected:
 
     QSize _nbPixelPerModule;
     QSizeF _pixelDimensions;
+
+    DataModelPtr _saturationModel;
+    SaturationModelType _saturationModelType = Undefined;
 };
 
 /*!
@@ -111,6 +123,10 @@ inline QSizeF AbstractDetector::moduleDimensions() const
                 _nbPixelPerModule.height()*_pixelDimensions.height() };
 }
 
+/*!
+ * Returns the dimensions of a single view that would be acquired by this instance. This contains
+ * number of channels (per module), number of rows (per module) and number of modules.
+ */
 inline SingleViewData::Dimensions AbstractDetector::viewDimensions() const
 {
     SingleViewData::Dimensions ret;
@@ -134,6 +150,31 @@ inline AbstractDetector::ModuleLocation AbstractDetector::moduleLocation(uint mo
 {
     Q_ASSERT(module < nbDetectorModules());
     return moduleLocations().at(module);
+}
+
+/*!
+ * Returns a pointer to the saturation model of this instance.
+ */
+inline const AbstractDataModel* AbstractDetector::saturationModel() const
+{
+    return _saturationModel.ptr.get();
+}
+
+/*!
+ * Returns the type of the saturation model, i.e. whether it refers to extinction or intensity
+ * values.
+ */
+inline AbstractDetector::SaturationModelType AbstractDetector::saturationModelType() const
+{
+    return _saturationModelType;
+}
+
+/*!
+ * Returns true if this instance has a saturation model.
+ */
+inline bool AbstractDetector::hasSaturationModel() const
+{
+    return (_saturationModel.ptr != nullptr);
 }
 
 /*!
@@ -216,6 +257,27 @@ inline void AbstractDetector::write(QJsonObject &json) const
 
     json.insert("pixel per module", nbPixels);
     json.insert("pixel dimensions", pixelDim);
+}
+
+/*!
+ * Sets the saturation model to \a model. The argument \a type must specify whether the passed model
+ * refers to extinction values or intensities.
+ */
+inline void AbstractDetector::setSaturationModel(AbstractDataModel *model, AbstractDetector::SaturationModelType type)
+{
+    _saturationModel.ptr.reset(model);
+    _saturationModelType = type;
+}
+
+/*!
+ * Sets the saturation model to \a model. The argument \a type must specify whether the passed model
+ * refers to extinction values or intensities.
+ */
+inline void AbstractDetector::setSaturationModel(std::unique_ptr<AbstractDataModel> model,
+                                          SaturationModelType type)
+{
+    _saturationModel.ptr = std::move(model);
+    _saturationModelType = type;
 }
 
 /*!
