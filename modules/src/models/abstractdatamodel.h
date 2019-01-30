@@ -69,6 +69,16 @@ class AbstractDensityDataModel : public AbstractDataModel
     public:virtual float binIntegral(float position, float binWidth) const = 0;
 };
 
+// factory function `makeDataModel`
+template <typename ModelType, typename... ConstructorArguments>
+auto makeDataModel(ConstructorArguments&&... arguments) ->
+    typename std::enable_if<std::is_convertible<ModelType*, AbstractDataModel*>::value,
+                            std::unique_ptr<ModelType>>::type
+{
+    return std::unique_ptr<ModelType>(
+        new ModelType(std::forward<ConstructorArguments>(arguments)...));
+}
+
 /*!
  * \fn float AbstractDataModel::valueAt(float position) const
  *
