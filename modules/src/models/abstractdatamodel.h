@@ -33,13 +33,7 @@ public:
     template <class ModelType>
     struct RegisterToJsonParser
     {
-        RegisterToJsonParser()
-        {
-            static auto factoryFunction = [](const QJsonObject& json) {
-                return std::unique_ptr<AbstractDataModel>(new ModelType(json));
-            };
-            JsonModelParser::instance().modelFactories().insert(ModelType::Type, factoryFunction);
-        }
+        RegisterToJsonParser();
     };
 
     virtual ~AbstractDataModel() = default;
@@ -182,6 +176,27 @@ inline void AbstractDataModel::fromVariant(const QVariant& variant)
     setParameter(map.value("parameters").toMap());
 }
 
+template<class ModelType>
+AbstractDataModel::RegisterToJsonParser<ModelType>::RegisterToJsonParser()
+{
+    auto factoryFunction = [](const QJsonObject& json)
+    {
+        return std::unique_ptr<AbstractDataModel>(new ModelType(json));
+    };
+    JsonModelParser::instance().modelFactories().insert(ModelType::Type, factoryFunction);
+}
+
 } // namespace CTL
+
+/*! \file */
+///@{
+/*!
+* \fn std::unique_ptr<ModelType> CTL::makeDataModel(ConstructorArguments&&... arguments)
+* \relates AbstractDataModel
+* Global (free) make function that creates a new AbstractDataModel from the constructor \a arguments.
+* The component is returned as a `std::unique_ptr<ModelType>`, whereas `ModelType` is the
+* template argument of this function that needs to be specified.
+*/
+///@}
 
 #endif // ABSTRACTDATAMODEL_H
