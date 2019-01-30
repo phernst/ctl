@@ -2,6 +2,7 @@
 #define ABSTRACTDATAMODEL_H
 
 #include "jsonmodelparser.h"
+#include <QDebug>
 #include <QVariant>
 #include <QDebug>
 #include <memory>
@@ -51,6 +52,18 @@ class AbstractDataModel
 public:
     enum { Type = 0, UserType = 65536 };
 
+    template <class ModelType>
+    struct RegisterToJsonParser
+    {
+        RegisterToJsonParser()
+        {
+            static auto factoryFunction = [](const QJsonObject& json) {
+                return std::unique_ptr<AbstractDataModel>(new ModelType(json));
+            };
+            JsonModelParser::instance().modelFactories().insert(ModelType::Type, factoryFunction);
+        }
+    };
+
     virtual ~AbstractDataModel() = default;
 
     virtual int type() const;
@@ -60,7 +73,6 @@ public:
     virtual QVariant toVariant() const;
     virtual QVariant parameter() const;
     virtual void setParameter(const QVariant& parameter);
-
 };
 
 class AbstractIntegrableDataModel : public AbstractDataModel
@@ -159,27 +171,25 @@ public:                                                                         
 private:
 
 /*!
- * \def REGISTER_TO_JSON_MODEL_PARSER(className)
+ * \def REGISTER_TO_JSON_MODEL_PARSER(dataModelClassName_woNamespace)
  *
- * TBD
+ * Declares a global variable for a certain data model. Its initialization registers this data model
+ * to the JsonModelParser. The argument of this macro must be the name of the concrete data model
+ * that should be registered. The name must not contain any namespace, which can be achieved by
+ * using this macro inside the according namespace.
+ *
+ * The name of the globar variable is `JSON_MODEL_PARSER_KNOWS_<dataModelClassName_woNamespace>`.
  */
-#define REGISTER_TO_JSON_MODEL_PARSER(className)                                                   \
-    bool ___register ## className()                                                                \
-    {                                                                                              \
-        static const auto factoryFunction = [](const QJsonObject& obj) -> AbstractDataModel*       \
-                                            { return new className(obj); };                        \
-        JsonModelParser::instance().modelFactories().insert(className::Type, factoryFunction);     \
-        return true;                                                                               \
-    }                                                                                              \
-                                                                                                   \
-    const bool ___ ## className ## _registeredForJsonParser = ___register ## className();
+#define REGISTER_TO_JSON_MODEL_PARSER(dataModelClassName_woNamespace)                              \
+    CTL::AbstractDataModel::RegisterToJsonParser<dataModelClassName_woNamespace>                   \
+    JSON_MODEL_PARSER_KNOWS_ ## dataModelClassName_woNamespace;
 
 // implementations
 inline int AbstractDataModel::type() const { return Type; }
 
 inline QVariant AbstractDataModel::parameter() const { return QVariant(); }
 
-inline void AbstractDataModel::setParameter(const QVariant &) { }
+inline void AbstractDataModel::setParameter(const QVariant&) {}
 
 inline QVariant AbstractDataModel::toVariant() const
 {
@@ -192,13 +202,14 @@ inline QVariant AbstractDataModel::toVariant() const
     return ret;
 }
 
-inline void AbstractDataModel::fromVariant(const QVariant &variant)
+inline void AbstractDataModel::fromVariant(const QVariant& variant)
 {
     auto map = variant.toMap();
     if(map.value("type-id").toInt() != type())
     {
-        qWarning() << QString(typeid(*this).name()) + "::fromVariant: Could not construct instance! "
-                      "reason: incompatible variant passed";
+        qWarning() << QString(typeid(*this).name())
+                + "::fromVariant: Could not construct instance! "
+                  "reason: incompatible variant passed";
         return;
     }
 

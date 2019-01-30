@@ -3,6 +3,7 @@
 
 #include <QJsonObject>
 #include <QMap>
+#include <memory>
 
 /*
  * NOTE: This is header only.
@@ -16,7 +17,7 @@ class JsonModelParser
 {
 public:
     // define tye: pointer to function that creates a data model from a QJsonObject
-    typedef AbstractDataModel* (*ModelFactoryFunction)(const QJsonObject&);
+    typedef std::unique_ptr<AbstractDataModel> (*ModelFactoryFunction)(const QJsonObject&);
 
     static JsonModelParser& instance();
 
@@ -24,7 +25,7 @@ public:
     QMap<int, ModelFactoryFunction>& modelFactories();
 
     // function that parses the QJsonObject in order to create a concrete data model
-    AbstractDataModel* parse(const QJsonObject& object) const;
+    std::unique_ptr<AbstractDataModel> parse(const QJsonObject& json) const;
 
 private:
     // private ctor & non-copyable
@@ -47,12 +48,12 @@ inline QMap<int, JsonModelParser::ModelFactoryFunction>& JsonModelParser::modelF
     return _modelFactories;
 }
 
-inline AbstractDataModel* JsonModelParser::parse(const QJsonObject& object) const
+inline std::unique_ptr<AbstractDataModel> JsonModelParser::parse(const QJsonObject& json) const
 {
-    if(!object.contains("type-id"))
+    if(!json.contains("type-id"))
         return nullptr;
-    auto typeID = object.value("type-id").toInt();
-    return _modelFactories[typeID](object);
+    auto typeID = json.value("type-id").toInt();
+    return _modelFactories[typeID](json);
 }
 
 } // namespace CTL
