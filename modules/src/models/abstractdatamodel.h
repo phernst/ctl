@@ -41,18 +41,18 @@ public:
 };
 
 /*!
- * \class AbstractDensityDataModel
- * \brief The AbstractDensityDataModel class is the base class for data models that handle density
- * data.
+ * \class AbstractIntegrableDataModel
+ * \brief The AbstractIntegrableDataModel class is the base class for data models that provide a
+ * means to integrate the contained data.
  *
  * Sub-classes must implement the method to sample a value at a given position (valueAt()) and a
- * method that computes the integral of the density function over a given interval (binIntegral()).
+ * method that computes the integral of the data over a given interval (binIntegral()).
  *
  * Parameters can be set by passing a QVariant that contains all necessary information.
  * Re-implement the setParameter() method to parse the QVariant into your required format within
  * sub-classes of AbstractDensityDataModel.
  */
-class AbstractDensityDataModel : public AbstractDataModel
+class AbstractIntegrableDataModel : public AbstractDataModel
 {   
     // abstract interface
     public:virtual float binIntegral(float position, float binWidth) const = 0;
@@ -89,7 +89,7 @@ class AbstractDensityDataModel : public AbstractDataModel
  */
 
 /*!
- * \fn void AbstractDataModel::setParameter(const QVariant& parameter);
+ * \fn void AbstractDataModel::setParameter(const QVariant& parameter)
  *
  * Passes \a parameter to this instance.
  *
@@ -98,7 +98,7 @@ class AbstractDensityDataModel : public AbstractDataModel
  */
 
 /*!
- * \fn float AbstractDensityDataModel::binIntegral(float position, float binWidth) const
+ * \fn float AbstractIntegrableDataModel::binIntegral(float position, float binWidth) const
  *
  * Returns the integral of the density over the interval
  * \f$ \left[position-\frac{binWidth}{2},\,position+\frac{binWidth}{2}\right] \f$.

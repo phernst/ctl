@@ -7,7 +7,7 @@ IntervalDataSeries::IntervalDataSeries()
 
 }
 
-IntervalDataSeries IntervalDataSeries::sampledFromModel(const AbstractDensityDataModel &dataModel, float from, float to, uint nbSamples)
+IntervalDataSeries IntervalDataSeries::sampledFromModel(const AbstractIntegrableDataModel &dataModel, float from, float to, uint nbSamples)
 {
     Q_ASSERT(from <= to);
     Q_ASSERT(nbSamples > 0);

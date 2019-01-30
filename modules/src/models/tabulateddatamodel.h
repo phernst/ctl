@@ -16,7 +16,7 @@ namespace CTL {
  * Re-implement the setParameter() method to parse the QVariant into your required format within
  * sub-classes of TabulatedDataModel.
  */
-class TabulatedDataModel : public AbstractDensityDataModel
+class TabulatedDataModel : public AbstractIntegrableDataModel
 {
     ADD_TO_MODEL_ENUM(30)
 

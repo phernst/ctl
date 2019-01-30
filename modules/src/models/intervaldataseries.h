@@ -12,7 +12,7 @@ public:
     IntervalDataSeries();
 
     // factory methods
-    static IntervalDataSeries sampledFromModel(const AbstractDensityDataModel& dataModel, float from, float to, uint nbSamples);
+    static IntervalDataSeries sampledFromModel(const AbstractIntegrableDataModel& dataModel, float from, float to, uint nbSamples);
 
     // other methods
     float integral() const;

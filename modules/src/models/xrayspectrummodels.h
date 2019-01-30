@@ -6,7 +6,7 @@
 
 namespace CTL {
 
-class AbstractXraySpectrumModel : public AbstractDensityDataModel
+class AbstractXraySpectrumModel : public AbstractIntegrableDataModel
 {
 public:
     void setParameter(const QVariant& parameter) override;
