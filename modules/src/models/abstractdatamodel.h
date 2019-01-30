@@ -92,6 +92,16 @@ struct DataModelPtr
     std::unique_ptr<AbstractDataModel> ptr;
 };
 
+// factory function `makeDataModel`
+template <typename ModelType, typename... ConstructorArguments>
+auto makeDataModel(ConstructorArguments&&... arguments) ->
+    typename std::enable_if<std::is_convertible<ModelType*, AbstractDataModel*>::value,
+                            std::unique_ptr<ModelType>>::type
+{
+    return std::unique_ptr<ModelType>(
+        new ModelType(std::forward<ConstructorArguments>(arguments)...));
+}
+
 /*!
  * \fn float AbstractDataModel::valueAt(float position) const
  *
