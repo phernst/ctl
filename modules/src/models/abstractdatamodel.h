@@ -69,6 +69,18 @@ class AbstractIntegrableDataModel : public AbstractDataModel
  */
 
 /*!
+ * \fn AbstractDataModel* AbstractDataModel::clone() const
+ *
+ * Creates a copy of this instance and returns a base class pointer to the new object.
+ */
+
+/*!
+ * \fn int AbstractDataModel::type() const
+ *
+ * Returns the type id of this instance.
+ */
+
+/*!
  * \fn QVariant AbstractDataModel::toVariant() const
  *
  * Encodes all information required to describe this instance into a QVariant.
