@@ -3,6 +3,7 @@
 
 #include <QVariant>
 #include <QDebug>
+#include <memory>
 
 /*
  * NOTE: This is header only.
@@ -34,6 +35,12 @@ namespace CTL {
  * sub-classes of AbstractDensityDataModel.
  */
 
+/*!
+ * \class DataModelPtr
+ * \brief Helper class to provide unique_ptr like behavior for subclasses of AbstractDataModel with
+ * option to copy by means of deep copying (provided by clone()).
+ */
+
 class AbstractDataModel
 {
     // abstract interface
@@ -61,6 +68,16 @@ class AbstractIntegrableDataModel : public AbstractDataModel
     public:virtual float binIntegral(float position, float binWidth) const = 0;
 };
 
+struct DataModelPtr
+{
+    DataModelPtr(std::unique_ptr<AbstractDataModel> model = nullptr);
+    DataModelPtr(const DataModelPtr& other);
+    DataModelPtr(DataModelPtr&& other) = default;
+    DataModelPtr& operator=(const DataModelPtr& other);
+    DataModelPtr& operator=(DataModelPtr&& other) = default;
+
+    std::unique_ptr<AbstractDataModel> ptr;
+};
 
 /*!
  * \fn float AbstractDataModel::valueAt(float position) const
@@ -175,6 +192,23 @@ inline bool AbstractDataModel::isIntegrable() const
 {
     return dynamic_cast<const AbstractIntegrableDataModel*>(this);
 }
+
+inline DataModelPtr::DataModelPtr(std::unique_ptr<AbstractDataModel> model)
+    : ptr(std::move(model))
+{
+}
+
+inline DataModelPtr::DataModelPtr(const DataModelPtr& other)
+    : ptr(other.ptr ? other.ptr->clone() : nullptr)
+{
+}
+
+inline DataModelPtr& DataModelPtr::operator=(const DataModelPtr &other)
+{
+    ptr.reset(other.ptr ? other.ptr->clone() : nullptr);
+    return *this;
+}
+
 
 
 } // namespace CTL
