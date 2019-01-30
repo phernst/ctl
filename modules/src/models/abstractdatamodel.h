@@ -20,26 +20,6 @@ namespace CTL {
  * Re-implement the setParameter() method to parse the QVariant into your required format within
  * sub-classes of AbstractDataModel.
  */
-class AbstractDataModel
-{
-    // abstract interface
-    public:virtual float valueAt(float position) const = 0;
-    public:virtual AbstractDataModel* clone() const = 0;
-
-public:
-    enum { Type = 0, UserType = 65536 };
-
-    virtual ~AbstractDataModel() = default;
-
-    virtual int type() const;
-    virtual bool isIntegrable() const;
-
-    virtual void fromVariant(const QVariant& variant);
-    virtual QVariant toVariant() const;
-    virtual QVariant parameter() const;
-    virtual void setParameter(const QVariant& parameter);
-
-};
 
 /*!
  * \class AbstractIntegrableDataModel
@@ -53,13 +33,32 @@ public:
  * Re-implement the setParameter() method to parse the QVariant into your required format within
  * sub-classes of AbstractDensityDataModel.
  */
+
+class AbstractDataModel
+{
+    // abstract interface
+    public:virtual float valueAt(float position) const = 0;
+    public:virtual AbstractDataModel* clone() const = 0;
+
+public:
+    enum { Type = 0, UserType = 65536 };
+
+    virtual ~AbstractDataModel() = default;
+
+    virtual int type() const;
+    virtual bool isIntegrable() const final;
+
+    virtual void fromVariant(const QVariant& variant);
+    virtual QVariant toVariant() const;
+    virtual QVariant parameter() const;
+    virtual void setParameter(const QVariant& parameter);
+
+};
+
 class AbstractIntegrableDataModel : public AbstractDataModel
 {   
     // abstract interface
     public:virtual float binIntegral(float position, float binWidth) const = 0;
-
-public:
-    bool isIntegrable() const final;
 };
 
 
@@ -70,7 +69,7 @@ public:
  */
 
 /*!
- * \fn QVariant AbstractDataModel::toVariant() const const
+ * \fn QVariant AbstractDataModel::toVariant() const
  *
  * Encodes all information required to describe this instance into a QVariant.
  * Required to provide de-/serialization functionality.
@@ -104,20 +103,10 @@ public:
 /*!
  * \fn bool AbstractDataModel::isIntegrable() const
  *
- * Returns true if this instance allows integration of data.
+ * Returns true if this instance allows integration of data (i.e. it provides the binIntegral()
+ * method).
  *
- * Note that this is usually only the case for classes derived from the AbstractIntegrableDataModel
- * class. If your subclass allows for integration of data, consider making it a subclass of
- * AbstractIntegrableDataModel instead.
- */
-
-/*!
- * \fn bool AbstractIntegrableDataModel::isIntegrable() const
- *
- * Returns true if this instance allows integration of data.
- *
- * This is true by default for AbstractIntegrableDataModel subclasses as these must implement the
- * binIntegral() method.
+ * Same as dynamic_cast<const AbstractIntegrableDataModel*>(this).
  */
 
 /*!
@@ -170,9 +159,11 @@ inline void AbstractDataModel::fromVariant(const QVariant &variant)
     setParameter(map.value("parameters").toMap());
 }
 
-inline bool AbstractDataModel::isIntegrable() const { return false; }
+inline bool AbstractDataModel::isIntegrable() const
+{
+    return dynamic_cast<const AbstractIntegrableDataModel*>(this);
+}
 
-inline bool AbstractIntegrableDataModel::isIntegrable() const { return true; }
 
 } // namespace CTL
 
