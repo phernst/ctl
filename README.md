@@ -123,6 +123,14 @@ make
 Teaser: Making projections
 --------------------------
 
+The following example code uses a predefined C-arm system and a predefined
+trajectory (a trajectory is a specific acquisition protocol) in order to
+project a volume, which is read from a file. This serves to show how the CTL
+may work out of the box. However, CT systems or acquisition protocols (or even
+preparations of single views) can be freely configured. Moreover, certain
+projector extensions can "decorate" the used forward projector in order to
+include further geometric/physical/measuring effects.
+
 ```cpp
 #include "acquisition/acquisitionsetup.h"
 #include "acquisition/systemblueprints.h"
@@ -140,18 +148,21 @@ int main(int argc, char* argv[])
     // as a template argument - here for DEN files
     CTL::io::BaseTypeIO<CTL::io::DenFileIO> io;
 
-    // volume
+    // load volume
     auto volume = io.readVolume<float>("path/to/volume.den");
     volume.setVoxelSize(1.0f, 1.0f, 1.0f); // not encoded in DEN files
 
-    // use of a predef system
-    auto system = CTL::CTsystemBuilder::createFromBlueprint(
-        CTL::blueprints::GenericCarmCT(CTL::DetectorBinning::Binning4x4));
+    // use of a predefined system from "acquisition/systemblueprints.h"
+    auto system = CTL::CTsystemBuilder::createFromBlueprint(CTL::blueprints::GenericCarmCT());
 
     // create an acquisition setup
-    const uint nbViews = 100;
+    uint nbViews = 100;
     CTL::AcquisitionSetup myCarmSetup(system, nbViews);
-    myCarmSetup.applyPreparationProtocol(CTL::protocols::WobbleTrajectory(200.0_deg, 750.0));
+    // add a predefined trajectory to the setup from "acquisition/trajectories.h"
+    double angleSpan = 200.0_deg; // floating-point literal _deg from "mat/mat.h" to convert to rad
+    double sourceToIsocenter = 750.0; // mm is the standard unit for length dimensions
+    myCarmSetup.applyPreparationProtocol(CTL::protocols::WobbleTrajectory(angleSpan,
+                                                                          sourceToIsocenter));
     if(!myCarmSetup.isValid())
         return -1;
 
@@ -160,9 +171,10 @@ int main(int argc, char* argv[])
     CTL::OCL::RayCasterProjector myProjector;       // the projector
     myProjector.configure(myCarmSetup, rcConfig);   // configure projector
     auto projections = myProjector.project(volume); // project
-    
+
     // save projections
     io.write(projections, "path/to/projections.den");
+
     return 0;
 }
 
