@@ -20,8 +20,7 @@ namespace CTL {
 class ProjectorExtension : public AbstractProjector
 {
 public:
-    ProjectorExtension() = default;
-    ProjectorExtension(AbstractProjector* projector);
+    ProjectorExtension(AbstractProjector* projector = nullptr);
     ProjectorExtension(std::unique_ptr<AbstractProjector> projector);
 
     ~ProjectorExtension() override;
