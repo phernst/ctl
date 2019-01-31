@@ -19,6 +19,7 @@ private:
     AcquisitionSetup _setup;
 
     void processExtinctions(ProjectionData* projections);
+    void processIntensities(ProjectionData* projections);
 };
 
 

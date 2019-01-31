@@ -1,5 +1,6 @@
 #include "detectorsaturationextension.h"
 #include "components/abstractdetector.h"
+#include "components/abstractsource.h"
 
 #include <future>
 
@@ -18,8 +19,17 @@ ProjectionData DetectorSaturationExtension::project(const VolumeData &volume)
 
     auto saturationModelType = _setup.system()->detector()->saturationModelType();
 
-    if(saturationModelType == AbstractDetector::Extinction)
+    switch (saturationModelType) {
+    case AbstractDetector::Extinction:
         processExtinctions(&ret);
+        break;
+    case AbstractDetector::Intensity:
+        processIntensities(&ret);
+        break;
+    case AbstractDetector::Undefined:
+        qWarning() << "DetectorSaturationExtension::project(): Undefined saturation model!";
+        break;
+    }
 
     return ret;
 }
@@ -46,6 +56,37 @@ void DetectorSaturationExtension::processExtinctions(ProjectionData *projections
 //                pix = saturationModel->valueAt(pix);    // pass pixel value through saturation model
 }
 
+void DetectorSaturationExtension::processIntensities(ProjectionData *projections)
+{
+    auto saturationModel = _setup.system()->detector()->saturationModel();
+    auto sourcePtr = _setup.system()->source();
 
+    auto processView = [saturationModel](SingleViewData* view, int i0)
+    {
+        float intensity;
+        for(auto& module : view->data())
+            for(auto& pix : module.data())
+            {
+                // transform extinction to intensity
+                intensity = i0 * exp(-pix);
+                // pass intensity through saturation model
+                intensity = saturationModel->valueAt(intensity);
+                // back-transform to extinction and overwrite projection pixel value
+                pix = log(i0 / intensity);
+            }
+    };
+
+    std::vector<std::future<void>> futures;
+
+    int v = 0;
+    float i0;
+    for(auto& view : projections->data())
+    {
+        _setup.prepareView(v++);
+        i0 = sourcePtr->photonFlux();
+
+        futures.emplace_back(std::async(processView, &view, i0));
+    }
+}
 
 }
