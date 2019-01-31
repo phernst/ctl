@@ -170,7 +170,7 @@ inline void ProjectorExtension::use(std::unique_ptr<AbstractProjector> other)
 /*! \file */
 ///@{
 /*!
- * \fn std::unique_ptr<ProjectorExtensionType> CTL::makeExtension(AbstractProjector* projector)
+ * \fn std::unique_ptr<ProjectorExtensionType> CTL::makeExtension(AbstractProjector* projector = nullptr)
  * \relates ProjectorExtension
  * Global (free) make function that creates a new ProjectorExtension by taking over the ownership of
  * a \a projector. The \a projector will be the nested projector of the returned ProjectorExtension.
