@@ -46,8 +46,9 @@ void DetectorSaturationExtension::processExtinctions(ProjectionData *projections
     };
 
     std::vector<std::future<void>> futures;
+    futures.reserve(_setup.nbViews());
     for(auto& view : projections->data())
-        futures.emplace_back(std::async(processView, &view));
+        futures.push_back(std::async(processView, &view));
 
 //    //sequential
 //    for(auto& view : projections->data())
@@ -77,7 +78,7 @@ void DetectorSaturationExtension::processIntensities(ProjectionData *projections
     };
 
     std::vector<std::future<void>> futures;
-
+    futures.reserve(_setup.nbViews());
     int v = 0;
     float i0;
     for(auto& view : projections->data())
@@ -85,7 +86,7 @@ void DetectorSaturationExtension::processIntensities(ProjectionData *projections
         _setup.prepareView(v++);
         i0 = sourcePtr->photonFlux();
 
-        futures.emplace_back(std::async(processView, &view, i0));
+        futures.push_back(std::async(processView, &view, i0));
     }
 }
 
