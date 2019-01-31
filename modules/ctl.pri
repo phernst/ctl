@@ -73,7 +73,8 @@ HEADERS += \
     $$PWD/src/models/pointseriesbase.h \
     $$PWD/src/models/intervaldataseries.h \
     $$PWD/src/mat/pmatcomparator.h \
-    $$PWD/src/models/detectorsaturationmodels.h
+    $$PWD/src/models/detectorsaturationmodels.h \
+    $$PWD/src/projectors/detectorsaturationextension.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -112,4 +113,5 @@ SOURCES += \
     $$PWD/src/models/xydataseries.cpp \
     $$PWD/src/models/intervaldataseries.cpp \
     $$PWD/src/mat/pmatcomparator.cpp \
-    $$PWD/src/models/detectorsaturationmodels.cpp
+    $$PWD/src/models/detectorsaturationmodels.cpp \
+    $$PWD/src/projectors/detectorsaturationextension.cpp
