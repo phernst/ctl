@@ -39,17 +39,9 @@ private:
     AbstractProjector* _projector; //!< The nested projector object.
 };
 
-// factory function `makeExtension` (3 overloads for each ctor)
+// factory function `makeExtension` (2 overloads, one for each ctor)
 template <typename ProjectorExtensionType>
-auto makeExtension() ->
-typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorExtension*>::value,
-                        std::unique_ptr<ProjectorExtensionType>>::type
-{
-    return std::unique_ptr<ProjectorExtensionType>(new ProjectorExtensionType());
-}
-
-template <typename ProjectorExtensionType>
-auto makeExtension(AbstractProjector* projector) ->
+auto makeExtension(AbstractProjector* projector = nullptr) ->
 typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorExtension*>::value,
                         std::unique_ptr<ProjectorExtensionType>>::type
 {
@@ -177,14 +169,6 @@ inline void ProjectorExtension::use(std::unique_ptr<AbstractProjector> other)
 
 /*! \file */
 ///@{
-/*!
- * \fn std::unique_ptr<ProjectorExtensionType> CTL::makeExtension()
- * \relates ProjectorExtension
- * Global (free) make function that creates a new ProjectorExtension.
- * The component is returned as a `std::unique_ptr<ProjectorExtensionType>`, whereas
- * `ProjectorExtensionType` is the template argument of this function that needs to be specified.
- */
-
 /*!
  * \fn std::unique_ptr<ProjectorExtensionType> CTL::makeExtension(AbstractProjector* projector)
  * \relates ProjectorExtension
