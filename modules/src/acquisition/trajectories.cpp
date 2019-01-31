@@ -237,6 +237,37 @@ double ShortScanTrajectory::fanAngle(const AcquisitionSetup &setup) const
     return 2.0 * tan(0.5*relevantWidth / gantry->cArmSpan());
 }
 
+AxialScanTrajectory::AxialScanTrajectory(double startAngle)
+    : _startAngle(startAngle)
+{
+}
+
+std::vector<std::shared_ptr<AbstractPrepareStep>>
+AxialScanTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setup) const
+{
+    float angleIncrement = (setup.nbViews() > 1) ? 360.0_deg / (setup.nbViews() - 1)
+                                                 : 0.0;
+    std::vector<std::shared_ptr<AbstractPrepareStep>> ret;
+
+    auto gantryPrep = std::make_shared<prepare::TubularGantryParam>();
+
+    gantryPrep->setRotationAngle(viewNb * angleIncrement + _startAngle);
+
+    ret.push_back(gantryPrep);
+
+    qDebug() << "AxialScanTrajectory --- add prepare steps for view: " << viewNb
+             << "\n-rotation: " << viewNb * angleIncrement + _startAngle;
+
+    return ret;
+}
+
+bool AxialScanTrajectory::isApplicableTo(const AcquisitionSetup &setup) const
+{
+    prepare::TubularGantryParam tmp;
+    return tmp.isApplicableTo(*setup.system());
+}
+
+void AxialScanTrajectory::setStartAngle(double startAngle) { _startAngle = startAngle; }
 
 } // namespace protocols
 } // namespace CTL

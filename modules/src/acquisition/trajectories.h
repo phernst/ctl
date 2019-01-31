@@ -92,6 +92,20 @@ private:
     double fanAngle(const AcquisitionSetup& setup) const;
 };
 
+class AxialScanTrajectory : public AbstractPreparationProtocol
+{
+public:
+    AxialScanTrajectory(double startAngle = 0.0_deg);
+
+    std::vector<std::shared_ptr<AbstractPrepareStep>> prepareSteps(uint viewNb, const AcquisitionSetup& setup) const override;
+    bool isApplicableTo(const AcquisitionSetup& setup) const override;
+
+    void setStartAngle(double startAngle);
+
+private:
+    double _startAngle = 0.0;
+};
+
 } // namespace protocols
 } // namespace CTL
 
