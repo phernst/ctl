@@ -3,6 +3,7 @@
 
 #include "abstractprojector.h"
 #include <memory>
+#include <QDebug>
 
 /*
  * NOTE: This is header only.
@@ -63,8 +64,11 @@ typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorEx
  * Note that the constructed object takes over the ownership of \a projector.
  */
 inline ProjectorExtension::ProjectorExtension(AbstractProjector* projector)
-    : _projector(projector)
+    : _projector( (projector==this) ? nullptr : projector )
 {
+    if(projector==this)
+        qWarning() << "ProjectorExtension::ProjectorExtension(): Tried to pass the object itself "
+                      "to the constructor. Nested projector is set to nullptr.";
     if(_projector)
         QObject::connect(_projector->notifier(), &ProjectorNotifier::projectionFinished,
                          this->notifier(), &ProjectorNotifier::projectionFinished);
@@ -93,11 +97,16 @@ inline ProjectorExtension::~ProjectorExtension() { delete _projector; }
  * Re-implement this method to retrieve all information required for the purpose of the desired
  * extension. Make sure to delegate this call to the nested projector object at the end of the
  * method.
+ *
+ * Throws std::runtime_error if the nested projector object is unset.
  */
 inline void ProjectorExtension::configure(const AcquisitionSetup& setup,
                                      const AbstractProjectorConfig& config)
 {
     Q_ASSERT(_projector);
+    if(!_projector)
+        throw std::runtime_error("ProjectorExtension::configure(): no nested projector set.");
+
     _projector->configure(setup, config);
 }
 
@@ -108,10 +117,15 @@ inline void ProjectorExtension::configure(const AcquisitionSetup& setup,
  * Re-implement this method to modify the projections in order to realize the desired
  * functionality of your extension. Make sure to delegate this call to the nested projector
  * object at the end of the method.
+ *
+ * Throws std::runtime_error if the nested projector object is unset.
  */
 inline ProjectionData ProjectorExtension::project(const VolumeData& volume)
 {
     Q_ASSERT(_projector);
+    if(!_projector)
+        throw std::runtime_error("ProjectorExtension::project(): no nested projector set.");
+
     return _projector->project(volume);
 }
 
@@ -149,7 +163,12 @@ inline void ProjectorExtension::reset()
  */
 inline void ProjectorExtension::use(AbstractProjector* other)
 {
-    Q_ASSERT(other);
+    if(other == this)
+    {
+        qWarning() << "ProjectorExtension::use(): Tried to 'use' the object itself. Nested projector"
+                      " is set to nullptr.";
+        other = nullptr;
+    }
     delete _projector;
     _projector = other;
     if(_projector)
