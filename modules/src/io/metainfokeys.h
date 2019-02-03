@@ -5,7 +5,6 @@
 
 namespace CTL {
 namespace io {
-
 namespace meta_info {
 
 const QString dimX = QStringLiteral("size 1");
@@ -30,11 +29,10 @@ namespace type_hint {
     const QString volume = QStringLiteral("volume data");
     const QString projection = QStringLiteral("projection data");
     const QString projMatrix = QStringLiteral("projection matrix");
-}
+} // namespace type_hint
 
-}
-
-}
-}
+} // namespace meta_info
+} // namespace io
+} // namespace CTL
 
 #endif // METAINFOKEYS_H

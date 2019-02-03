@@ -177,6 +177,23 @@ bool BaseTypeIO<FileIOImplementer>::write(const VoxelVolume<T>& data,
 }
 
 template <class FileIOImplementer>
+bool BaseTypeIO<FileIOImplementer>::write(const SingleViewData& data,
+                                          const QString& fileName,
+                                          QVariantMap supplementaryMetaInfo) const
+{
+    QVariantMap metaInfo;
+    metaInfo.insert(meta_info::dimChans, QVariant(data.dimensions().nbChannels));
+    metaInfo.insert(meta_info::dimRows, QVariant(data.dimensions().nbRows));
+    metaInfo.insert(meta_info::dimMods, QVariant(data.dimensions().nbModules));
+    metaInfo.insert(meta_info::dimViews, 1);
+    metaInfo.insert(meta_info::typeHint, meta_info::type_hint::projection);
+
+    metaInfo = fusedMetaInfo(metaInfo, std::move(supplementaryMetaInfo));
+
+    return _implementer.write(data.toVector(), metaInfo, fileName);
+}
+
+template <class FileIOImplementer>
 bool BaseTypeIO<FileIOImplementer>::write(const ProjectionData& data,
                                           const QString& fileName,
                                           QVariantMap supplementaryMetaInfo) const
@@ -191,6 +208,32 @@ bool BaseTypeIO<FileIOImplementer>::write(const ProjectionData& data,
     metaInfo = fusedMetaInfo(metaInfo, std::move(supplementaryMetaInfo));
 
     return _implementer.write(data.toVector(), metaInfo, fileName);
+}
+
+template <class FileIOImplementer>
+bool BaseTypeIO<FileIOImplementer>::write(const SingleViewGeometry& data,
+                                          const QString& fileName,
+                                          QVariantMap supplementaryMetaInfo) const
+{
+    const auto nbModules = uint(data.size());
+
+    QVariantMap metaInfo;
+    metaInfo.insert(meta_info::dimChans, QVariant(4u));
+    metaInfo.insert(meta_info::dimRows, QVariant(3u));
+    metaInfo.insert(meta_info::dimMods, QVariant(nbModules));
+    metaInfo.insert(meta_info::dimViews, QVariant(1u));
+    metaInfo.insert(meta_info::typeHint, meta_info::type_hint::projMatrix);
+
+    metaInfo = fusedMetaInfo(metaInfo, std::move(supplementaryMetaInfo));
+
+    std::vector<double> dataVec;
+    dataVec.reserve(12u * nbModules);
+
+    for(uint module = 0; module < nbModules; ++module)
+        dataVec.insert(dataVec.end(), data[module].constBegin(),
+                       data[module].constEnd());
+
+    return _implementer.write(dataVec, metaInfo, fileName);
 }
 
 template <class FileIOImplementer>
@@ -240,8 +283,6 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
             throw std::runtime_error("Aborted loading: missing file meta information!");
 #endif
         }
-
-
 
         if(!nbModules)
             throw std::domain_error("Aborted loading: number of modules is zero!");
@@ -410,6 +451,16 @@ BaseTypeIO<FileIOImplementer>::ProjectionDataIO::write(const ProjectionData &dat
     return io.write(data, fileName, std::move(supplementaryMetaInfo));
 }
 
+template<class FileIOImplementer>
+bool
+BaseTypeIO<FileIOImplementer>::ProjectionDataIO::write(const SingleViewData &data,
+                                                       const QString &fileName,
+                                                       QVariantMap supplementaryMetaInfo) const
+{
+    BaseTypeIO<FileIOImplementer> io;
+    return io.write(data, fileName, std::move(supplementaryMetaInfo));
+}
+
 // ProjectionMatrixIO
 template<class FileIOImplementer>
 QVariantMap
@@ -419,9 +470,6 @@ BaseTypeIO<FileIOImplementer>::ProjectionMatrixIO::metaInfo(const QString &fileN
     QVariantMap metaInfo = io.metaInfo(fileName);
     // remove meta info that makes no sense in this context but has been possibly set due to a lack
     // of information provided by the file format
-    metaInfo.remove(meta_info::dimChans);
-    metaInfo.remove(meta_info::dimMods);
-    metaInfo.remove(meta_info::dimRows);
     metaInfo.remove(meta_info::voxSizeX);
     metaInfo.remove(meta_info::voxSizeY);
     metaInfo.remove(meta_info::voxSizeZ);
@@ -457,6 +505,16 @@ BaseTypeIO<FileIOImplementer>::ProjectionMatrixIO::readSingleViewGeometry(const 
 template<class FileIOImplementer>
 bool
 BaseTypeIO<FileIOImplementer>::ProjectionMatrixIO::write(const FullGeometry &data,
+                                                         const QString &fileName,
+                                                         QVariantMap supplementaryMetaInfo) const
+{
+    BaseTypeIO<FileIOImplementer> io;
+    return io.write(data, fileName, std::move(supplementaryMetaInfo));
+}
+
+template<class FileIOImplementer>
+bool
+BaseTypeIO<FileIOImplementer>::ProjectionMatrixIO::write(const SingleViewGeometry &data,
                                                          const QString &fileName,
                                                          QVariantMap supplementaryMetaInfo) const
 {

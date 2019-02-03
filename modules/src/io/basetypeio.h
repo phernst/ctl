@@ -39,11 +39,14 @@ public:
     template <typename T>
     bool write(const VoxelVolume<T>& data, const QString& fileName,
                QVariantMap supplementaryMetaInfo = {}) const;
+    bool write(const SingleViewData& data, const QString& fileName,
+               QVariantMap supplementaryMetaInfo = {}) const;
     bool write(const ProjectionData& data, const QString& fileName,
+               QVariantMap supplementaryMetaInfo = {}) const;
+    bool write(const SingleViewGeometry& data, const QString& fileName,
                QVariantMap supplementaryMetaInfo = {}) const;
     bool write(const FullGeometry& data, const QString& fileName,
                QVariantMap supplementaryMetaInfo = {}) const;
-    // TBD: write SingleViewData and SingleViewGeometry ?
 
     // ### IMPLEMENTATION OF ABSTRACT TYPES ###
     class MetaInfoReader : public AbstractMetaInfoReader
@@ -72,6 +75,8 @@ public:
                                               uint nbModules = 0) const override;
         public: bool write(const ProjectionData& data, const QString& fileName,
                            QVariantMap supplementaryMetaInfo = {}) const override;
+        public: bool write(const SingleViewData& data, const QString& fileName,
+                           QVariantMap supplementaryMetaInfo = {}) const override;
     };
 
     class ProjectionMatrixIO : public AbstractProjectionMatrixIO
@@ -82,6 +87,8 @@ public:
         public: SingleViewGeometry readSingleViewGeometry(const QString& fileName, uint viewNb,
                                                           uint nbModules = 0) const override;
         public: bool write(const FullGeometry& data, const QString& fileName,
+                           QVariantMap supplementaryMetaInfo = {}) const override;
+        public: bool write(const SingleViewGeometry& data, const QString& fileName,
                            QVariantMap supplementaryMetaInfo = {}) const override;
     };
 

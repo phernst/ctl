@@ -36,7 +36,8 @@ class AbstractProjectionDataIO : public AbstractMetaInfoReader
                                                  uint nbModules = 0) const = 0;
     public:virtual bool write(const ProjectionData& data, const QString& fileName,
                               QVariantMap supplementaryMetaInfo = {}) const = 0;
-    // write SingleView data?
+    public:virtual bool write(const SingleViewData& data, const QString& fileName,
+                              QVariantMap supplementaryMetaInfo = {}) const = 0;
 };
 
 class AbstractProjectionMatrixIO : public AbstractMetaInfoReader
@@ -47,7 +48,8 @@ class AbstractProjectionMatrixIO : public AbstractMetaInfoReader
                                                              uint nbModules = 0) const = 0;
     public:virtual bool write(const FullGeometry& data, const QString& fileName,
                               QVariantMap supplementaryMetaInfo = {}) const = 0;
-    // write SingleViewGeometry data?
+    public:virtual bool write(const SingleViewGeometry& data, const QString& fileName,
+                              QVariantMap supplementaryMetaInfo = {}) const = 0;
 };
 
 } // namespace io
