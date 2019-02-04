@@ -35,8 +35,50 @@ void AcquisitionSetupTest::testProtocolValidityChecks_data()
             << (BasePtr) new CTL::protocols::FlyingFocalSpot{std::vector<CTL::Vector3x1>(10)} << true;
     QTest::newRow("ffsProtFail")
             << (BasePtr) new CTL::protocols::FlyingFocalSpot(std::vector<CTL::Vector3x1>{}) << false;
+    QTest::newRow("ffsProtAlternating")
+            << (BasePtr) new CTL::protocols::FlyingFocalSpot({ { {1.0, 0.0, 0.0} },
+                                                               { {0.0, 0.0, 1.0} } }, true) << true;
+    QTest::newRow("ffsProtFail2")
+            << (BasePtr) new CTL::protocols::FlyingFocalSpot({ { {1.0, 0.0, 0.0} },
+                                                               { {0.0, 0.0, 1.0} } }, false) << false;
     QTest::newRow("tubeCurrent")
             << (BasePtr) new CTL::protocols::TubeCurrentModulation(std::vector<double>{}) << false;
+}
+
+void AcquisitionSetupTest::testFlyingFocalSpotProtocol()
+{
+    CTL::AcquisitionSetup setup(_testSetup);
+
+    const auto pos1 = CTL::Vector3x1( {1.0, 0.0, 0.0} );
+    const auto pos2 = CTL::Vector3x1( {0.0, 0.0, 1.0} );
+    const auto pos3 = CTL::Vector3x1( {0.0,  1.0, 1.0} );
+    const auto pos4 = CTL::Vector3x1( {1.0, -1.0, 0.0} );
+
+    setup.applyPreparationProtocol(CTL::protocols::FlyingFocalSpot::twoAlternatingSpots(pos1, pos2));
+    setup.prepareView(0);
+    QVERIFY(setup.system()->source()->focalSpotPosition() == pos1);
+    setup.prepareView(1);
+    QVERIFY(setup.system()->source()->focalSpotPosition() == pos2);
+    setup.prepareView(7);
+    QVERIFY(setup.system()->source()->focalSpotPosition() == pos2);
+
+    setup.clearViews();
+    setup.applyPreparationProtocol(CTL::protocols::FlyingFocalSpot::fourAlternatingSpots(pos1, pos2, pos3, pos4));
+    setup.prepareView(0);
+    QVERIFY(setup.system()->source()->focalSpotPosition() == pos1);
+    setup.prepareView(5);
+    QVERIFY(setup.system()->source()->focalSpotPosition() == pos2);
+    setup.prepareView(7);
+    QVERIFY(setup.system()->source()->focalSpotPosition() == pos4);
+
+    setup.clearViews();
+    setup.applyPreparationProtocol(CTL::protocols::FlyingFocalSpot({pos1, pos2, pos3}, true));
+    setup.prepareView(0);
+    QVERIFY(setup.system()->source()->focalSpotPosition() == pos1);
+    setup.prepareView(5);
+    QVERIFY(setup.system()->source()->focalSpotPosition() == pos3);
+    setup.prepareView(7);
+    QVERIFY(setup.system()->source()->focalSpotPosition() == pos2);
 }
 
 AcquisitionSetupTest::AcquisitionSetupTest()

@@ -15,6 +15,7 @@ private Q_SLOTS:
     void testSystemValidityCheck();
     void testProtocolValidityChecks();
     void testProtocolValidityChecks_data();
+    void testFlyingFocalSpotProtocol();
 
 private:
     CTL::AcquisitionSetup _testSetup;
