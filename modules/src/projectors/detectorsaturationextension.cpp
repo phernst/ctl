@@ -6,20 +6,22 @@
 
 namespace CTL {
 
-void DetectorSaturationExtension::configure(const AcquisitionSetup &setup, const AbstractProjectorConfig &config)
+void DetectorSaturationExtension::configure(const AcquisitionSetup& setup,
+                                            const AbstractProjectorConfig& config)
 {
     _setup = setup;
 
     ProjectorExtension::configure(setup, config);
 }
 
-ProjectionData DetectorSaturationExtension::project(const VolumeData &volume)
+ProjectionData DetectorSaturationExtension::project(const VolumeData& volume)
 {
     auto ret = ProjectorExtension::project(volume);
 
     auto saturationModelType = _setup.system()->detector()->saturationModelType();
 
-    switch (saturationModelType) {
+    switch(saturationModelType)
+    {
     case AbstractDetector::Extinction:
         processExtinctions(&ret);
         break;
@@ -34,7 +36,7 @@ ProjectionData DetectorSaturationExtension::project(const VolumeData &volume)
     return ret;
 }
 
-void DetectorSaturationExtension::processExtinctions(ProjectionData *projections)
+void DetectorSaturationExtension::processExtinctions(ProjectionData* projections)
 {
     auto saturationModel = _setup.system()->detector()->saturationModel();
 
@@ -49,20 +51,14 @@ void DetectorSaturationExtension::processExtinctions(ProjectionData *projections
     futures.reserve(_setup.nbViews());
     for(auto& view : projections->data())
         futures.push_back(std::async(processView, &view));
-
-//    //sequential
-//    for(auto& view : projections->data())
-//        for(auto& module : view.data())
-//            for(auto& pix : module.data())
-//                pix = saturationModel->valueAt(pix);    // pass pixel value through saturation model
 }
 
-void DetectorSaturationExtension::processIntensities(ProjectionData *projections)
+void DetectorSaturationExtension::processIntensities(ProjectionData* projections)
 {
     auto saturationModel = _setup.system()->detector()->saturationModel();
     auto sourcePtr = _setup.system()->source();
 
-    auto processView = [saturationModel](SingleViewData* view, int i0)
+    auto processView = [saturationModel](SingleViewData* view, float i0)
     {
         float intensity;
         for(auto& module : view->data())
@@ -90,4 +86,4 @@ void DetectorSaturationExtension::processIntensities(ProjectionData *projections
     }
 }
 
-}
+} // namespace CTL
