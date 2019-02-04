@@ -53,11 +53,18 @@ void AcquisitionSetup::applyPreparationProtocol(const AbstractPreparationProtoco
     qDebug() << "-nbViews: " << _views.size();
 }
 
-void AcquisitionSetup::clearViews()
+void AcquisitionSetup::clearViews(bool keepTimeStamps)
 {
-    uint prevNbViews = nbViews();
-    _views.clear();
-    setNbViews(prevNbViews);
+    if(keepTimeStamps)
+    {
+        removeAllPrepareSteps();
+    }
+    else
+    {
+        uint prevNbViews = nbViews();
+        _views.clear();
+        setNbViews(prevNbViews);
+    }
 }
 
 void AcquisitionSetup::prepareView(uint viewNb)
@@ -67,6 +74,12 @@ void AcquisitionSetup::prepareView(uint viewNb)
 
     for(const auto& step : _views[viewNb].prepareSteps)
         step->prepare(_system.get());
+}
+
+void AcquisitionSetup::removeAllPrepareSteps()
+{
+    for(auto& view : _views)
+        view.prepareSteps.clear();
 }
 
 bool AcquisitionSetup::resetSystem(const CTsystem& system)

@@ -40,10 +40,11 @@ public:
 
     void addView(View view);
     void applyPreparationProtocol(const AbstractPreparationProtocol& preparation);
-    void clearViews();
+    void clearViews(bool keepTimeStamps = false);
     bool isValid() const;
     uint nbViews() const;
     void prepareView(uint viewNb);
+    void removeAllPrepareSteps();
     bool resetSystem(const CTsystem& system);
     bool resetSystem(CTsystem&& system);
     void setNbViews(uint nbViews);
