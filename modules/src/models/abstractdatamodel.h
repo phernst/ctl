@@ -1,7 +1,6 @@
 #ifndef ABSTRACTDATAMODEL_H
 #define ABSTRACTDATAMODEL_H
 
-#include "jsonmodelparser.h"
 #include <QDebug>
 #include <QVariant>
 #include <memory>
