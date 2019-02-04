@@ -1,11 +1,11 @@
 #ifndef ABSTRACTDATAMODEL_H
 #define ABSTRACTDATAMODEL_H
 
-#include "jsonmodelparser.h"
 #include <QDebug>
 #include <QVariant>
-#include <QDebug>
 #include <memory>
+
+#include "io/jsonserializer.h"
 
 /*
  * NOTE: This is header only.
@@ -118,6 +118,7 @@ auto makeDataModel(ConstructorArguments&&... arguments) ->
  * \fn QVariant AbstractDataModel::toVariant() const
  *
  * Encodes all information required to describe this instance into a QVariant.
+
  * Required to provide de-/serialization functionality.
  */
 
@@ -172,21 +173,23 @@ public:                                                                         
     enum { Type = newIndex };                                                                      \
     int type() const override { return Type; }                                                     \
                                                                                                    \
-private:
+private:                                                                                           \
+    friend class AbstractDataModel;
 
 /*!
- * \def REGISTER_TO_JSON_MODEL_PARSER(dataModelClassName_woNamespace)
+ * \def DECLARE_JSON_COMPATIBLE_MODEL(dataModelClassName_woNamespace)
  *
  * Declares a global variable for a certain data model. Its initialization registers this data model
  * to the JsonModelParser. The argument of this macro must be the name of the concrete data model
  * that should be registered. The name must not contain any namespace, which can be achieved by
  * using this macro inside the according namespace.
  *
- * The name of the globar variable is `JSON_MODEL_PARSER_KNOWS_<dataModelClassName_woNamespace>`.
+ * The name of the globar variable is `JSON_PARSER_KNOWS_MODEL_<dataModelClassName_woNamespace>`.
  */
-#define REGISTER_TO_JSON_MODEL_PARSER(dataModelClassName_woNamespace)                              \
+#define DECLARE_JSON_COMPATIBLE_MODEL(dataModelClassName_woNamespace)                              \
     CTL::AbstractDataModel::RegisterToJsonParser<dataModelClassName_woNamespace>                   \
-    JSON_MODEL_PARSER_KNOWS_ ## dataModelClassName_woNamespace;
+    JSON_PARSER_KNOWS_MODEL_ ## dataModelClassName_woNamespace;
+
 
 // implementations
 inline int AbstractDataModel::type() const { return Type; }
@@ -246,11 +249,13 @@ inline DataModelPtr& DataModelPtr::operator=(const DataModelPtr &other)
 template<class ModelType>
 AbstractDataModel::RegisterToJsonParser<ModelType>::RegisterToJsonParser()
 {
-    auto factoryFunction = [](const QJsonObject& json)
+    auto factoryFunction = [](const QVariant& variant) -> AbstractDataModel*
     {
-        return std::unique_ptr<AbstractDataModel>(new ModelType(json));
+        auto a = new ModelType();   // requires a default constructor (can also be declared private)
+        a->fromVariant(variant);
+        return a;
     };
-    JsonModelParser::instance().modelFactories().insert(ModelType::Type, factoryFunction);
+    JsonSerializer::instance().modelFactories().insert(ModelType::Type, factoryFunction);
 }
 
 } // namespace CTL
@@ -265,5 +270,6 @@ AbstractDataModel::RegisterToJsonParser<ModelType>::RegisterToJsonParser()
 * template argument of this function that needs to be specified.
 */
 ///@}
+
 
 #endif // ABSTRACTDATAMODEL_H
