@@ -19,11 +19,6 @@ DetectorSaturationLinearModel::DetectorSaturationLinearModel(float lowerCap,
 {
 }
 
-DetectorSaturationLinearModel::DetectorSaturationLinearModel(const QJsonObject &obj)
-{
-    qWarning() << "not yet implemented";
-}
-
 /*!
  * Returns the value from the model at \a position.
  *
@@ -183,11 +178,6 @@ AbstractDataModel* DetectorSaturationSplineModel::clone() const
  *  \end{align*}
  * \f$
  */
-DetectorSaturationSplineModel::DetectorSaturationSplineModel(const QJsonObject &obj)
-{
-    qWarning() << "not yet implemented";
-}
-
 float DetectorSaturationSplineModel::valueAt(float position) const
 {
     float spl1Start = _a - _softA;

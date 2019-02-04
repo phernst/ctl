@@ -74,7 +74,7 @@ HEADERS += \
     $$PWD/src/models/intervaldataseries.h \
     $$PWD/src/mat/pmatcomparator.h \
     $$PWD/src/models/detectorsaturationmodels.h \
-    $$PWD/src/projectors/detectorsaturationextension.h
+    $$PWD/src/projectors/detectorsaturationextension.h \
     $$PWD/src/io/jsonserializer.h
 
 SOURCES += \
@@ -115,5 +115,5 @@ SOURCES += \
     $$PWD/src/models/intervaldataseries.cpp \
     $$PWD/src/mat/pmatcomparator.cpp \
     $$PWD/src/models/detectorsaturationmodels.cpp \
-    $$PWD/src/projectors/detectorsaturationextension.cpp
+    $$PWD/src/projectors/detectorsaturationextension.cpp \
     $$PWD/src/io/jsonserializer.cpp
