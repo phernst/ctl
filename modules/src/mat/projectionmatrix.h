@@ -107,14 +107,9 @@ public:
     };
 
     ProjectionMatrix() = default;
-    explicit ProjectionMatrix(double fillValue)
-        : Matrix<3, 4>(fillValue)
-    {
-    }
-    ProjectionMatrix(const Matrix<3, 4>& other)
-        : Matrix<3, 4>(other)
-    {
-    }
+    ProjectionMatrix(const Matrix<3, 4>& other);
+    using Matrix<3, 4>::Matrix;
+    using Matrix<3, 4>::operator=;
 
     // # factories
     static ProjectionMatrix compose(const Matrix<3, 3>& M, const Matrix<3, 1>& p4);
@@ -154,6 +149,11 @@ public:
     Matrix<2, 1> projectOntoDetector(double X, double Y, double Z) const;
     Matrix<2, 1> projectOntoDetector(const Matrix<3, 1>& worldCoordinate) const;
 };
+
+inline ProjectionMatrix::ProjectionMatrix(const Matrix<3, 4>& other)
+    : Matrix<3, 4>(other)
+{
+}
 
 } // namespace mat
 } // namespace CTL

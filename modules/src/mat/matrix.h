@@ -1,6 +1,6 @@
 /******************************************************************************
 ** 'Matrix' template class for basic matrix calculations
-** by Robert Frysch | June 05, 2018
+** by Robert Frysch | Feb 04, 2019
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -91,20 +91,11 @@ class Matrix : public MatrixBase<Rows, Cols>
 {
 public:
     Matrix() = default;
-    explicit Matrix(double fillValue)
-        : MatrixBase<Rows, Cols>(fillValue)
-    {
-    }
-    Matrix(const double (&initArray)[Rows * Cols])
-        : MatrixBase<Rows, Cols>(initArray)
-    {
-    }
+    explicit Matrix(double fillValue);
+    Matrix(const double (&initArray)[Rows * Cols]);
     template<typename... Doubles,
              typename = typename std::enable_if<sizeof...(Doubles) == Rows * Cols>::type>
-    Matrix(Doubles... matrixElements)
-        : Matrix({ matrixElements... })
-    {
-    }
+    Matrix(Doubles... matrixElements);
 
     // factory function that copies (+ cast if necessary) the 'NthMat' matrix from
     // a Container (stack of matrices)

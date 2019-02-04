@@ -21,7 +21,7 @@ MatrixBase<Rows, Cols>::MatrixBase(double fillValue)
 }
 
 template <uint Rows, uint Cols>
-MatrixBase<Rows, Cols>::MatrixBase(const double (&initArray)[Rows * Cols])
+inline MatrixBase<Rows, Cols>::MatrixBase(const double (&initArray)[Rows * Cols])
 {
     std::copy_n(initArray, Rows * Cols, _m);
 }
@@ -181,6 +181,26 @@ bool MatrixBase<Rows, Cols>::operator!=(const MatrixBase<Rows, Cols>& other) con
 }
 
 // ### Matrix ###
+// ctors
+template <uint Rows, uint Cols>
+Matrix<Rows, Cols>::Matrix(double fillValue)
+    : MatrixBase<Rows, Cols>(fillValue)
+{
+}
+
+template <uint Rows, uint Cols>
+inline Matrix<Rows, Cols>::Matrix(const double (&initArray)[Rows * Cols])
+    : MatrixBase<Rows, Cols>(initArray)
+{
+}
+
+template <uint Rows, uint Cols>
+template<typename... Doubles, typename>
+inline Matrix<Rows, Cols>::Matrix(Doubles... matrixElements)
+    : Matrix({ matrixElements... })
+{
+}
+
 // factory
 template <uint Rows, uint Cols>
 template <class Container>
