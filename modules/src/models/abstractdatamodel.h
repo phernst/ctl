@@ -32,7 +32,7 @@ namespace CTL {
  *
  * Parameters can be set by passing a QVariant that contains all necessary information.
  * Re-implement the setParameter() method to parse the QVariant into your required format within
- * sub-classes of AbstractDensityDataModel.
+ * sub-classes of AbstractIntegrableDataModel.
  */
 
 /*!
@@ -150,7 +150,7 @@ struct DataModelPtr
  *
  * Macro to add the model to the model enumeration with the index \a newIndex.
  */
-#define ADD_TO_MODEL_ENUM(newIndex)                                                            \
+#define ADD_TO_MODEL_ENUM(newIndex)                                                                \
 public:                                                                                            \
     enum { Type = newIndex };                                                                      \
     int type() const override { return Type; }                                                     \

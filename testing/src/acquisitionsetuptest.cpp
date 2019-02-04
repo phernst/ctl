@@ -36,11 +36,11 @@ void AcquisitionSetupTest::testProtocolValidityChecks_data()
     QTest::newRow("ffsProtFail")
             << (BasePtr) new CTL::protocols::FlyingFocalSpot(std::vector<CTL::Vector3x1>{}) << false;
     QTest::newRow("ffsProtAlternating")
-            << (BasePtr) new CTL::protocols::FlyingFocalSpot({ { {1.0, 0.0, 0.0} },
-                                                               { {0.0, 0.0, 1.0} } }, true) << true;
+            << (BasePtr) new CTL::protocols::FlyingFocalSpot({ { 1.0, 0.0, 0.0 },
+                                                               { 0.0, 0.0, 1.0 } }, true) << true;
     QTest::newRow("ffsProtFail2")
-            << (BasePtr) new CTL::protocols::FlyingFocalSpot({ { {1.0, 0.0, 0.0} },
-                                                               { {0.0, 0.0, 1.0} } }, false) << false;
+            << (BasePtr) new CTL::protocols::FlyingFocalSpot({ { 1.0, 0.0, 0.0 },
+                                                               { 0.0, 0.0, 1.0 } }, false) << false;
     QTest::newRow("tubeCurrent")
             << (BasePtr) new CTL::protocols::TubeCurrentModulation(std::vector<double>{}) << false;
 }
@@ -49,10 +49,10 @@ void AcquisitionSetupTest::testFlyingFocalSpotProtocol()
 {
     CTL::AcquisitionSetup setup(_testSetup);
 
-    const auto pos1 = CTL::Vector3x1( {1.0, 0.0, 0.0} );
-    const auto pos2 = CTL::Vector3x1( {0.0, 0.0, 1.0} );
-    const auto pos3 = CTL::Vector3x1( {0.0,  1.0, 1.0} );
-    const auto pos4 = CTL::Vector3x1( {1.0, -1.0, 0.0} );
+    const auto pos1 = CTL::Vector3x1(1.0, 0.0, 0.0);
+    const auto pos2 = CTL::Vector3x1(0.0, 0.0, 1.0);
+    const auto pos3 = CTL::Vector3x1(0.0, 1.0, 1.0);
+    const auto pos4 = CTL::Vector3x1(1.0,-1.0, 0.0);
 
     setup.applyPreparationProtocol(CTL::protocols::FlyingFocalSpot::twoAlternatingSpots(pos1, pos2));
     setup.prepareView(0);
