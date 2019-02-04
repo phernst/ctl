@@ -25,18 +25,6 @@ namespace mat {
  */
 
 /*!
- * \fn ProjectionMatrix::ProjectionMatrix(double fillValue)
- *
- * Constructs a projection matrix by initializing each matrix entry with \a fillValue.
- */
-
-/*!
- * \fn ProjectionMatrix::ProjectionMatrix(const Matrix<3, 4>& other)
- *
- * Constructs a projection matrix from an \a other Matrix<3,4> (base class object).
- */
-
-/*!
  * Composes a ProjectionMatrix from sub-blocks \a M and \a p4: \f$P = \left[\begin{array}{cc}
  * M & \mathbf{p}_{4}\end{array}\right]\f$
  */

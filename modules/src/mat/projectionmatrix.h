@@ -150,6 +150,10 @@ public:
     Matrix<2, 1> projectOntoDetector(const Matrix<3, 1>& worldCoordinate) const;
 };
 
+
+/*!
+ * Constructs a projection matrix from an \a other Matrix<3,4> (base class object).
+ */
 inline ProjectionMatrix::ProjectionMatrix(const Matrix<3, 4>& other)
     : Matrix<3, 4>(other)
 {
