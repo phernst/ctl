@@ -40,6 +40,7 @@ public:
 
     void addView(View view);
     void applyPreparationProtocol(const AbstractPreparationProtocol& preparation);
+    void clearViews();
     bool isValid() const;
     uint nbViews() const;
     void prepareView(uint viewNb);

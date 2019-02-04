@@ -53,6 +53,13 @@ void AcquisitionSetup::applyPreparationProtocol(const AbstractPreparationProtoco
     qDebug() << "-nbViews: " << _views.size();
 }
 
+void AcquisitionSetup::clearViews()
+{
+    uint prevNbViews = nbViews();
+    _views.clear();
+    setNbViews(prevNbViews);
+}
+
 void AcquisitionSetup::prepareView(uint viewNb)
 {
     if(!_system)
