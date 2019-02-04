@@ -76,7 +76,7 @@ WobbleTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setup) const
     auto gantryPrep = std::make_shared<prepare::CarmGantryParam>();
 
     const uint nbViews = setup.nbViews();
-    const Vector3x1 initialSrcPos({ 0.0, 0.0, -_sourceToIsocenter });
+    const Vector3x1 initialSrcPos(0.0, 0.0, -_sourceToIsocenter);
     const Matrix3x3 fixedRotMat = mat::rotationMatrix(M_PI_2 + _startAngle, Qt::ZAxis)
         * mat::rotationMatrix(-M_PI_2, Qt::XAxis);
     const double angleIncrement = (nbViews > 1) ? _angleSpan / double(nbViews - 1) : 0.0;
@@ -130,7 +130,7 @@ CirclePlusLineTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setu
     const uint nbViews = setup.nbViews();
     const uint nbViewsLine   = static_cast<uint>(std::floor(nbViews * _fractionOfViewsForLine));
     const uint nbViewsCircle = nbViews - nbViewsLine;
-    const Vector3x1 initialSrcPos({ 0.0, 0.0, -_sourceToIsocenter });
+    const Vector3x1 initialSrcPos(0.0, 0.0, -_sourceToIsocenter);
     const Matrix3x3 fixedRotMat = mat::rotationMatrix(M_PI_2 + _startAngle, Qt::ZAxis)
         * mat::rotationMatrix(-M_PI_2, Qt::XAxis);
 
@@ -189,7 +189,7 @@ std::vector<std::shared_ptr<AbstractPrepareStep> > ShortScanTrajectory::prepareS
     qDebug() << "short scan angle span: " << angleSpan;
 
     const uint nbViews = setup.nbViews();
-    const Vector3x1 initialSrcPos({ 0.0, 0.0, -_sourceToIsocenter });
+    const Vector3x1 initialSrcPos(0.0, 0.0, -_sourceToIsocenter);
     const Matrix3x3 fixedRotMat = mat::rotationMatrix(M_PI_2 + _startAngle, Qt::ZAxis)
         * mat::rotationMatrix(-M_PI_2, Qt::XAxis);
     const double angleIncrement = (nbViews > 1) ? angleSpan / double(nbViews - 1) : 0.0;

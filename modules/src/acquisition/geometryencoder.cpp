@@ -153,13 +153,13 @@ Matrix3x3 GeometryEncoder::intrinsicParameterMatrix(const Vector3x1CTS& principa
 {
     double focalLengthMM = fabs(principalPoint(2));
     double principalPointS
-        = -principalPoint(0) / pixelDimensions.width() + 0.5 * double(nbPixel.width() - 1);
+        = -principalPoint.get<0>() / pixelDimensions.width() + 0.5 * double(nbPixel.width() - 1);
     double principalPointT
-        = -principalPoint(1) / pixelDimensions.height() + 0.5 * double(nbPixel.height() - 1);
+        = -principalPoint.get<1>() / pixelDimensions.height() + 0.5 * double(nbPixel.height() - 1);
 
-    return Matrix3x3({ focalLengthMM / pixelDimensions.width(), 0.0, principalPointS,
-                       0.0, focalLengthMM / pixelDimensions.height(), principalPointT,
-                       0.0, 0.0, 1.0 });
+    return Matrix3x3(focalLengthMM / pixelDimensions.width(), 0.0, principalPointS,
+                     0.0, focalLengthMM / pixelDimensions.height(), principalPointT,
+                     0.0, 0.0, 1.0);
 }
 
 } // namespace CTL

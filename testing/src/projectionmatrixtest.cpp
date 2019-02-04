@@ -6,12 +6,11 @@ using namespace CTL::mat;
 
 // clang-format off
 static const ProjectionMatrix Pinit =
-ProjectionMatrix::compose(Matrix<3,3>(
-                          { 1000.0,    0.0, 300.0,
+ProjectionMatrix::compose({ 1000.0,    0.0, 300.0,
                                0.0, 1000.0, 250.0,
-                               0.0,    0.0,   1.0 }),
+                               0.0,    0.0,   1.0 },
                           rotationMatrix(-90.0_deg, Qt::XAxis),
-                          Matrix<3,1>({ 0.0, 300.0, 0.0 }));
+                          { 0.0, 300.0, 0.0 });
 // clang-format on
 
 // print infos at beginning
@@ -44,7 +43,7 @@ void ProjectionMatrixTest::principalRay()
 
 void ProjectionMatrixTest::sourcePosition()
 {
-    QVERIFY(qFuzzyIsNull((Matrix<3, 1>({ 0.0, 300.0, 0.0 }) - P.sourcePosition()).norm()));
+    QVERIFY(qFuzzyIsNull((Matrix<3, 1>(0.0, 300.0, 0.0) - P.sourcePosition()).norm()));
 }
 
 void ProjectionMatrixTest::resampleDetector()
@@ -63,18 +62,17 @@ void ProjectionMatrixTest::shiftOrigin()
 
 void ProjectionMatrixTest::skewCoefficient()
 {
-    auto homoMat = ProjectionMatrix::compose(Matrix<3,3>(
-                                            { 1000.0,    0.5, 300.0,
-                                                 0.0, 1000.0, 250.0,
-                                                 0.0,    0.0,   1.0 }),
-                                            Matrix<3,1>(0.0));
+    auto homoMat = ProjectionMatrix::compose( { 1000.0,    0.5, 300.0,
+                                                   0.0, 1000.0, 250.0,
+                                                   0.0,    0.0,   1.0 },
+                                             Matrix<3,1>(0.0));
     QCOMPARE(homoMat.skewCoefficient(), 0.5);
     QCOMPARE(P.skewCoefficient(), 0.0);
 }
 
 void ProjectionMatrixTest::projectionOntoDetector()
 {
-    Matrix<3, 1> testVec({ 1.0, 4.0, 8.0 });
+    Matrix<3, 1> testVec(1.0, 4.0, 8.0);
     auto res1 = P * vertcat(testVec, Matrix<1, 1>(1.0));
     res1 /= res1(2);
 
@@ -91,10 +89,10 @@ void ProjectionMatrixTest::equalityTest()
                        1.0, 2.0, 3.0 );
     Matrix<2, 3> minusMatA( -1.0, -2.0, -3.0,
                             -1.0, -2.0, -3.0 );
-    Matrix<2, 3> matB{ 1.0, 2.0, 3.0,
-                       1.0, 2.0, 3.0 };
-    Matrix<2, 3> matC{ 1.0, 2.0, 3.0,
-                       1.0, 2.01, 3.0 };
+    Matrix<2, 3> matB( 1.0, 2.0, 3.0,
+                       1.0, 2.0, 3.0 );
+    Matrix<2, 3> matC( 1.0, 2.0, 3.0,
+                       1.0, 2.01, 3.0 );
     Matrix<2, 3> minusMatC = -matC;
     // clang-format on
 

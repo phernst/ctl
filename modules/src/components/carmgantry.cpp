@@ -28,7 +28,7 @@ CarmGantry::CarmGantry(double cArmSpan, const QString &name)
  */
 Vector3x1 CarmGantry::detectorPositionCA() const
 {
-    const Vector3x1 detectorOffset = _location.rotation * Vector3x1( {0.0, 0.0, -_cArmSpan} );
+    const Vector3x1 detectorOffset = _location.rotation * Vector3x1(0.0, 0.0, -_cArmSpan);
 
     return _location.position - detectorOffset;
 }

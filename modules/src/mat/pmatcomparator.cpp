@@ -41,9 +41,9 @@ PMatComparator::Eval PMatComparator::operator()(const ProjectionMatrix& P1,
     uint X = _nbVoxels[0], Y = _nbVoxels[1], Z = _nbVoxels[2]; // abbreviation
 
     // center of the voxel that is at the corner of the volume
-    Vector3x1 volCorner({ -0.5 * _voxelSize.get<0>() * double(X - 1),
-                          -0.5 * _voxelSize.get<1>() * double(Y - 1),
-                          -0.5 * _voxelSize.get<2>() * double(Z - 1) });
+    Vector3x1 volCorner{ -0.5 * _voxelSize.get<0>() * double(X - 1),
+                         -0.5 * _voxelSize.get<1>() * double(Y - 1),
+                         -0.5 * _voxelSize.get<2>() * double(Z - 1) };
     volCorner += _offSet;
     // upper bound for projection pixel index (nbPixels - 1 + 0.5, this bound is because
     // integer index is considered to be the center of a pixel)

@@ -158,7 +158,7 @@ QVector<AbstractDetector::ModuleLocation> CylindricalDetector::moduleLocations()
 
     const double radius = curvatureRadius(); // the radius of the cylinder
     // starting point in the middle of the detector (in CT coordinates)
-    const Vector3x1 pt({ 0.0, 0.0, radius });
+    const Vector3x1 pt(0.0, 0.0, radius);
 
     ModuleLocation tmp;
     Matrix3x3 rotMat;

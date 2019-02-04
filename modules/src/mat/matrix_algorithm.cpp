@@ -18,13 +18,12 @@ PairMat3x3 QRdecomposition(const Matrix3x3 &A)
         qWarning() << "QR decomposition: matrix is close to singular";
 
     const auto B = Btmp.transposed();
-    const Matrix3x3 R(
-      { d.get<0>(), B.get<1,0>(), B.get<2,0>(),
-               0.0,   d.get<1>(), B.get<2,1>(),
-               0.0,          0.0,   d.get<2>()  });
+    const Matrix3x3 R{ d.get<0>(), B.get<1,0>(), B.get<2,0>(),
+                              0.0,   d.get<1>(), B.get<2,1>(),
+                              0.0,          0.0,   d.get<2>() };
 
-    Vector3x1 u1({ B.get<0,0>(), B.get<0,1>(), B.get<0,2>() });
-    Vector3x1 u2({          0.0, B.get<1,1>(), B.get<1,2>() });
+    Vector3x1 u1{ B.get<0,0>(), B.get<0,1>(), B.get<0,2>() };
+    Vector3x1 u2{          0.0, B.get<1,1>(), B.get<1,2>() };
     u1 /= u1.norm();
     u2 /= u2.norm();
     Q1 = eye<3>() - 2.0*u1*u1.transposed();
@@ -138,10 +137,9 @@ bool qrdcmp(Matrix3x3 & a, double *d)
 
 Matrix3x3 mirror(const Matrix3x3 &a)
 {
-    return {{
-        a.get<2,2>(), a.get<1,2>(), a.get<0,2>(),
-        a.get<2,1>(), a.get<1,1>(), a.get<0,1>(),
-        a.get<2,0>(), a.get<1,0>(), a.get<0,0>()  }};
+    return { a.get<2,2>(), a.get<1,2>(), a.get<0,2>(),
+             a.get<2,1>(), a.get<1,1>(), a.get<0,1>(),
+             a.get<2,0>(), a.get<1,0>(), a.get<0,0>() };
 }
 
 void positiveDiag4RQ(PairMat3x3 *qr)

@@ -228,7 +228,7 @@ inline void AbstractGantry::setDetectorDisplacementPosition(const Vector3x1& pos
  */
 inline void AbstractGantry::setDetectorDisplacementPosition(double x, double y, double z)
 {
-    _detectorDisplacement.position = Vector3x1({ x, y, z });
+    _detectorDisplacement.position = Vector3x1(x, y, z);
 }
 
 /*!
@@ -249,7 +249,7 @@ inline void AbstractGantry::setSourceDisplacementPosition(const Vector3x1& posit
  */
 inline void AbstractGantry::setSourceDisplacementPosition(double x, double y, double z)
 {
-    _sourceDisplacement.position = Vector3x1({ x, y, z });
+    _sourceDisplacement.position = Vector3x1(x, y, z);
 }
 
 /*!

@@ -16,15 +16,15 @@ inline Matrix3x3 rotationMatrix(double angle, Qt::Axis axis)
 {
     double __s = sin(angle), __c = cos(angle);
     switch(axis) {
-    case Qt::XAxis: return Matrix3x3( { 1.0,  0.0,  0.0,
-                                        0.0,  __c, -__s,
-                                        0.0,  __s,  __c } );
-    case Qt::YAxis: return Matrix3x3( { __c,  0.0,  __s,
-                                        0.0,  1.0,  0.0,
-                                       -__s,  0.0,  __c } );
-    case Qt::ZAxis: return Matrix3x3( { __c, -__s,  0.0,
-                                        __s,  __c,  0.0,
-                                        0.0,  0.0,  1.0 } );
+    case Qt::XAxis: return Matrix3x3{ 1.0,  0.0,  0.0,
+                                      0.0,  __c, -__s,
+                                      0.0,  __s,  __c };
+    case Qt::YAxis: return Matrix3x3{ __c,  0.0,  __s,
+                                      0.0,  1.0,  0.0,
+                                     -__s,  0.0,  __c };
+    case Qt::ZAxis: return Matrix3x3{ __c, -__s,  0.0,
+                                      __s,  __c,  0.0,
+                                      0.0,  0.0,  1.0 };
     }
     return mat::eye<3>();
 }

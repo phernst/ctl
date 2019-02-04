@@ -84,8 +84,8 @@ private:
 
     // volume
     Size3D _nbVoxels{ DEFAULT_NB_VOXELS, DEFAULT_NB_VOXELS, DEFAULT_NB_VOXELS };
-    Vector3x1 _voxelSize{ { 8.0, 8.0, 8.0 } };
-    Vector3x1 _offSet{ { 0.0, 0.0, 0.0 } };
+    Vector3x1 _voxelSize{ 8.0, 8.0, 8.0 };
+    Vector3x1 _offSet{ 0.0, 0.0, 0.0 };
 
     // detector
     Size2D _nbPixels{ 640, 480 };
