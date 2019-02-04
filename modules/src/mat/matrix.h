@@ -99,6 +99,12 @@ public:
         : MatrixBase<Rows, Cols>(initArray)
     {
     }
+    template<typename... Doubles,
+             typename = typename std::enable_if<sizeof...(Doubles) == Rows * Cols>::type>
+    Matrix(Doubles... matrixElements)
+        : Matrix({ matrixElements... })
+    {
+    }
 
     // factory function that copies (+ cast if necessary) the 'NthMat' matrix from
     // a Container (stack of matrices)

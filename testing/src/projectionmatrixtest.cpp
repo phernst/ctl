@@ -87,14 +87,14 @@ void ProjectionMatrixTest::projectionOntoDetector()
 void ProjectionMatrixTest::equalityTest()
 {
     // clang-format off
-    Matrix<2, 3> matA({ 1.0, 2.0, 3.0,
-                        1.0, 2.0, 3.0 });
-    Matrix<2, 3> minusMatA({ -1.0, -2.0, -3.0,
-                             -1.0, -2.0, -3.0 });
-    Matrix<2, 3> matB({ 1.0, 2.0, 3.0,
-                        1.0, 2.0, 3.0 });
-    Matrix<2, 3> matC({ 1.0, 2.0, 3.0,
-                        1.0, 2.01, 3.0 });
+    Matrix<2, 3> matA( 1.0, 2.0, 3.0,
+                       1.0, 2.0, 3.0 );
+    Matrix<2, 3> minusMatA( -1.0, -2.0, -3.0,
+                            -1.0, -2.0, -3.0 );
+    Matrix<2, 3> matB{ 1.0, 2.0, 3.0,
+                       1.0, 2.0, 3.0 };
+    Matrix<2, 3> matC{ 1.0, 2.0, 3.0,
+                       1.0, 2.01, 3.0 };
     Matrix<2, 3> minusMatC = -matC;
     // clang-format on
 
