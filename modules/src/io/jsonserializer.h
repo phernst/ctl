@@ -10,6 +10,7 @@ namespace CTL {
 class AbstractDataModel;
 class AbstractPrepareStep;
 class SystemComponent;
+class CTsystem;
 class SerializationInterface;
 
 class JsonSerializer
@@ -32,9 +33,12 @@ public:
     // actual serialization method
     static void serialize(const SerializationInterface& serializableObject, const QString& fileName);
 
+    static void serialize(const CTsystem& system, const QString& fileName);
+
     static SystemComponent* deserializeComponent(const QString& fileName);
     static AbstractDataModel* deserializeDataModel(const QString& fileName);
     static AbstractPrepareStep* deserializePrepareStep(const QString& fileName);
+    static CTsystem* deserializeSystem(const QString& fileName);
 
 private:
     // private ctor & non-copyable

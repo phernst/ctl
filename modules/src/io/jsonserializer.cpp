@@ -1,4 +1,5 @@
 #include "jsonserializer.h"
+#include "acquisition/ctsystem.h"
 #include "components/systemcomponent.h"
 #include "models/abstractdatamodel.h"
 
@@ -55,6 +56,15 @@ void JsonSerializer::serialize(const SerializationInterface &serializableObject,
     saveFile.close();
 }
 
+void JsonSerializer::serialize(const CTsystem &system, const QString &fileName)
+{
+    QFile saveFile(fileName);
+    saveFile.open(QIODevice::WriteOnly);
+    QJsonDocument doc(convertVariantToJsonObject(system.toVariant()));
+    saveFile.write(doc.toJson());
+    saveFile.close();
+}
+
 SystemComponent* JsonSerializer::deserializeComponent(const QString &fileName)
 {
     return parseComponent(variantFromJsonFile(fileName));
@@ -68,6 +78,21 @@ AbstractDataModel* JsonSerializer::deserializeDataModel(const QString &fileName)
 AbstractPrepareStep* JsonSerializer::deserializePrepareStep(const QString &fileName)
 {
     return parsePrepareStep(variantFromJsonFile(fileName));
+}
+
+CTsystem* JsonSerializer::deserializeSystem(const QString &fileName)
+{
+    auto ret = new CTsystem();
+
+    auto varMap = variantFromJsonFile(fileName).toMap();
+
+    ret->rename(varMap.value("name").toString());
+
+    QVariantList componentVariantList = varMap.value("components").toList();
+    for(const auto& comp : componentVariantList)
+        ret->addComponent(parseComponent(comp));
+
+    return ret;
 }
 
 QVariant JsonSerializer::variantFromJsonFile(const QString &fileName)
