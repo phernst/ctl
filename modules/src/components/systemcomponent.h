@@ -4,7 +4,7 @@
 #include <QJsonObject>
 #include <QString>
 #include <memory>
-#include "io/jsonserializer.h"
+#include "io/serializationinterface.h"
 
 namespace CTL {
 /*!

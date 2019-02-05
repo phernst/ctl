@@ -75,7 +75,8 @@ HEADERS += \
     $$PWD/src/mat/pmatcomparator.h \
     $$PWD/src/models/detectorsaturationmodels.h \
     $$PWD/src/projectors/detectorsaturationextension.h \
-    $$PWD/src/io/jsonserializer.h
+    $$PWD/src/io/jsonserializer.h \
+    $$PWD/src/io/serializationinterface.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \

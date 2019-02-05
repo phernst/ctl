@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <memory>
 
-#include "io/jsonserializer.h"
+#include "io/serializationinterface.h"
 
 /*
  * NOTE: This is header only.
