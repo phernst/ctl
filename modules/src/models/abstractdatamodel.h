@@ -82,15 +82,6 @@ struct DataModelPtr
     DataModelPtr(DataModelPtr&& other) = default;
     DataModelPtr& operator=(const DataModelPtr& other);
     DataModelPtr& operator=(DataModelPtr&& other) = default;
-// factory function `makeDataModel`
-template <typename ModelType, typename... ConstructorArguments>
-auto makeDataModel(ConstructorArguments&&... arguments) ->
-    typename std::enable_if<std::is_convertible<ModelType*, AbstractDataModel*>::value,
-                            std::unique_ptr<ModelType>>::type
-{
-    return std::unique_ptr<ModelType>(
-        new ModelType(std::forward<ConstructorArguments>(arguments)...));
-}
 
     std::unique_ptr<AbstractDataModel> ptr;
 };
