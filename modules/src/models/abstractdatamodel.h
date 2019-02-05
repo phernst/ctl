@@ -1,11 +1,11 @@
 #ifndef ABSTRACTDATAMODEL_H
 #define ABSTRACTDATAMODEL_H
 
+#include "io/jsonserializer.h"
+#include "io/serializationinterface.h"
 #include <QDebug>
 #include <QVariant>
 #include <memory>
-
-#include "io/serializationinterface.h"
 
 /*
  * NOTE: This is header only.
@@ -169,7 +169,7 @@ public:                                                                         
                                                                                                    \
 private:                                                                                           \
     template<class>                                                                                \
-    friend struct SerializationInterface::RegisterWithJsonSerializer;
+    friend struct JsonSerializer::RegisterWithJsonSerializer;
 
 
 // implementations

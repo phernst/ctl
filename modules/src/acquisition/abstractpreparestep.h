@@ -188,7 +188,7 @@ public:                                                                         
                                                                                                    \
 private:                                                                                           \
     template<class>                                                                                \
-    friend struct SerializationInterface::RegisterWithJsonSerializer;
+    friend struct JsonSerializer::RegisterWithJsonSerializer;
 } // namespace CTL
 
 #endif // ABSTRACTPREPARESTEP_H

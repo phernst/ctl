@@ -3,7 +3,6 @@
 
 #include <QVariant>
 #include <QMap>
-#include <memory>
 
 namespace CTL {
 
@@ -16,15 +15,21 @@ class SerializationInterface;
 class JsonSerializer
 {
 public:
+    template<class SerializableType>
+    struct RegisterWithJsonSerializer
+    {
+        RegisterWithJsonSerializer();
+    };
+
     // define type: pointer to function that creates CTL objects from a QVariant
     typedef SerializationInterface* (*SerializableFactoryFunction)(const QVariant&);
 
     static JsonSerializer& instance();  // singleton getter
 
     // maps with registered CTL type factories
-    QMap<int, SerializableFactoryFunction>& componentFactories();
-    QMap<int, SerializableFactoryFunction>& modelFactories();
-    QMap<int, SerializableFactoryFunction>& prepareStepFactories();
+    const QMap<int, SerializableFactoryFunction>& componentFactories() const;
+    const QMap<int, SerializableFactoryFunction>& modelFactories() const;
+    const QMap<int, SerializableFactoryFunction>& prepareStepFactories() const;
 
     // only for convenience
     static void serialize(const AbstractDataModel& model, const QString& fileName);
@@ -62,6 +67,37 @@ private:
     QMap<int, SerializableFactoryFunction> _modelFactories;
     QMap<int, SerializableFactoryFunction> _prepareStepFactories;
 };
+
+template<class SerializableType>
+JsonSerializer::RegisterWithJsonSerializer<SerializableType>::RegisterWithJsonSerializer()
+{
+    auto factoryFunction = [](const QVariant& variant) -> SerializationInterface*
+    {
+        auto a = new SerializableType();   // requires a default constructor (can also be declared private)
+        a->fromVariant(variant);
+        return a;
+    };
+    if(std::is_convertible<SerializableType*, SystemComponent*>::value)
+        JsonSerializer::instance()._componentFactories.insert(SerializableType::Type, factoryFunction);
+    else if(std::is_convertible<SerializableType*, AbstractDataModel*>::value)
+        JsonSerializer::instance()._modelFactories.insert(SerializableType::Type, factoryFunction);
+    else if(std::is_convertible<SerializableType*, AbstractPrepareStep*>::value)
+        JsonSerializer::instance()._prepareStepFactories.insert(SerializableType::Type, factoryFunction);
+}
+
+/*!
+ * \def DECLARE_JSON_COMPATIBLE_TYPE(componentClassName_woNamespace)
+ *
+ * Declares a global variable for a certain serializable class. Its initialization registers this
+ * class with the JsonSerializer. The argument of this macro must be the name of the concrete
+ * class that should be registered. The name must not contain any namespace, which can be
+ * achieved by using this macro inside the according namespace.
+ *
+ * The global variable name is `JSON_SERIALIZER_KNOWS_<className_woNamespace>`.
+ */
+#define DECLARE_JSON_COMPATIBLE_TYPE(className_woNamespace)                                        \
+    CTL::JsonSerializer::RegisterWithJsonSerializer<className_woNamespace>                         \
+    JSON_SERIALIZER_KNOWS_ ## className_woNamespace;
 
 } // namespace CTL
 

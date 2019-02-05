@@ -18,17 +18,17 @@ JsonSerializer& JsonSerializer::instance()
     return jsonModelParser;
 }
 
-QMap<int, JsonSerializer::SerializableFactoryFunction>& JsonSerializer::componentFactories()
+const QMap<int, JsonSerializer::SerializableFactoryFunction> &JsonSerializer::componentFactories() const
 {
     return _componentFactories;
 }
 
-QMap<int, JsonSerializer::SerializableFactoryFunction>& JsonSerializer::modelFactories()
+const QMap<int, JsonSerializer::SerializableFactoryFunction>& JsonSerializer::modelFactories() const
 {
     return _modelFactories;
 }
 
-QMap<int, JsonSerializer::SerializableFactoryFunction>& JsonSerializer::prepareStepFactories()
+const QMap<int, JsonSerializer::SerializableFactoryFunction> &JsonSerializer::prepareStepFactories() const
 {
     return _prepareStepFactories;
 }

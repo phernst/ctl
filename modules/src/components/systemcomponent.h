@@ -1,10 +1,11 @@
 #ifndef SYSTEMCOMPONENT_H
 #define SYSTEMCOMPONENT_H
 
+#include "io/jsonserializer.h"
+#include "io/serializationinterface.h"
 #include <QJsonObject>
 #include <QString>
 #include <memory>
-#include "io/serializationinterface.h"
 
 namespace CTL {
 /*!
@@ -172,7 +173,7 @@ public:                                                                         
                                                                                                    \
 private:                                                                                           \
     template<class>                                                                                \
-    friend struct SerializationInterface::RegisterWithJsonSerializer;
+    friend struct JsonSerializer::RegisterWithJsonSerializer;
 
 
 /*!
