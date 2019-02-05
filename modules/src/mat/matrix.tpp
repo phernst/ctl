@@ -1,6 +1,6 @@
 /******************************************************************************
 ** Template implementation for "matrix.h"
-** by Robert Frysch | November 12, 2018
+** by Robert Frysch | Feb 05, 2018
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -197,7 +197,7 @@ inline Matrix<Rows, Cols>::Matrix(const double (&initArray)[Rows * Cols])
 template <uint Rows, uint Cols>
 template<typename... Doubles, typename>
 inline Matrix<Rows, Cols>::Matrix(Doubles... matrixElements)
-    : Matrix({ static_cast<double>(matrixElements)... })
+    : MatrixBase<Rows, Cols>({ static_cast<double>(matrixElements)... })
 {
 }
 
