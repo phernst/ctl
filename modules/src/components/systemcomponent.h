@@ -188,8 +188,14 @@ public:                                                                         
     enum { Type = newIndex };                                                                      \
     int type() const override { return Type; }                                                     \
                                                                                                    \
-private:
+private:                                                                                           \
+    template<class>                                                                                \
+    friend struct SystemComponent::RegisterToJsonParser;
 
+/*
+    template<class ModelType>                                                                      \
+    friend SystemComponent::RegisterToJsonParser<ModelType>::RegisterToJsonParser();
+*/
 
 /*!
  * \def DECLARE_JSON_COMPATIBLE_COMPONENT(componentClassName_woNamespace)
