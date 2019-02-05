@@ -21,7 +21,9 @@ public:
 
     static JsonSerializer& instance();
     // add a model factory function
+    QMap<int, ComponentFactoryFunction>& componentFactories();
     QMap<int, ModelFactoryFunction>& modelFactories();
+    QMap<int, PrepareStepFactoryFunction>& prepareStepFactories();
 
     // function that parses the QJsonObject in order to create a concrete system component, data
     // model, or prepare step
@@ -47,9 +49,19 @@ inline JsonSerializer& JsonSerializer::instance()
     return jsonModelParser;
 }
 
+inline QMap<int, JsonSerializer::ComponentFactoryFunction>& JsonSerializer::componentFactories()
+{
+    return _componentFactories;
+}
+
 inline QMap<int, JsonSerializer::ModelFactoryFunction>& JsonSerializer::modelFactories()
 {
     return _modelFactories;
+}
+
+inline QMap<int, JsonSerializer::PrepareStepFactoryFunction>& JsonSerializer::prepareStepFactories()
+{
+    return _prepareStepFactories;
 }
 
 inline AbstractDataModel* JsonSerializer::parseDataModel(const QVariant &variant) const
