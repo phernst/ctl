@@ -6,6 +6,15 @@
 namespace CTL {
 namespace prepare {
 
+DECLARE_JSON_COMPATIBLE_TYPE(GenericDetectorParam)
+DECLARE_JSON_COMPATIBLE_TYPE(GenericGantryParam)
+DECLARE_JSON_COMPATIBLE_TYPE(CarmGantryParam)
+DECLARE_JSON_COMPATIBLE_TYPE(TubularGantryParam)
+DECLARE_JSON_COMPATIBLE_TYPE(GantryDisplacementParam)
+DECLARE_JSON_COMPATIBLE_TYPE(SourceParam)
+DECLARE_JSON_COMPATIBLE_TYPE(XrayLaserParam)
+DECLARE_JSON_COMPATIBLE_TYPE(XrayTubeParam)
+
 // ### ###  ### ###
 // ### GANTRIES ###
 // ### ###  ### ###
