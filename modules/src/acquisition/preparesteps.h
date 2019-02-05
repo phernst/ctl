@@ -16,6 +16,8 @@ namespace prepare {
 
 class TubularGantryParam : public AbstractPrepareStep
 {
+    ADD_TO_PREPARESTEP_ENUM(220)
+
 public:
     void setRotationAngle(double rotation) { _newRotationAngle = {true, rotation}; }
     void setPitchPosition(double pitch)    { _newPitchPosition = {true, pitch}; }
@@ -24,6 +26,8 @@ public:
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem *system) const override;
     bool isApplicableTo(const CTsystem &system) const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
 private:
     std::pair<bool,double> _newRotationAngle = {false, 0.0};
@@ -33,6 +37,8 @@ private:
 
 class CarmGantryParam : public AbstractPrepareStep
 {
+    ADD_TO_PREPARESTEP_ENUM(210)
+
 public:
     void setLocation(const mat::Location& location) { _newLocation = {true, location}; }
     void setCarmSpan(double span)                   { _newCarmSpan = {true, span}; }
@@ -40,6 +46,8 @@ public:
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem *system) const override;
     bool isApplicableTo(const CTsystem &system) const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
 private:
     std::pair<bool,mat::Location> _newLocation = {false, mat::Location()};
@@ -48,6 +56,8 @@ private:
 
 class GenericGantryParam : public AbstractPrepareStep
 {
+    ADD_TO_PREPARESTEP_ENUM(201)
+
 public:
     void setDetectorLocation(const mat::Location& location) { _newDetectorLocation = {true, location}; }
     void setSourceLocation(const mat::Location& location)   { _newSourceLocation   = {true, location}; }
@@ -55,6 +65,8 @@ public:
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem *system) const override;
     bool isApplicableTo(const CTsystem &system) const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
 private:
     std::pair<bool,mat::Location> _newDetectorLocation = {false, mat::Location()};
@@ -63,6 +75,8 @@ private:
 
 class GantryDisplacementParam : public AbstractPrepareStep
 {
+    ADD_TO_PREPARESTEP_ENUM(230)
+
 public:
     void setDetectorDisplacement(const mat::Location& displacement) { _newDetectorDisplacement = {true, displacement}; }
     void setSourceDisplacement(const mat::Location& displacement)   { _newSourceDisplacement   = {true, displacement}; }
@@ -73,6 +87,8 @@ public:
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem *system) const override;
     bool isApplicableTo(const CTsystem &system) const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
 private:
     std::pair<bool,mat::Location> _newDetectorDisplacement = {false, mat::Location()};
@@ -87,6 +103,8 @@ private:
 
 class SourceParam : public AbstractPrepareStep
 {
+    ADD_TO_PREPARESTEP_ENUM(300)
+
 public:
     void setFluxModifier(double modifier)                { _newFluxModifier = {true, modifier}; }
     void setFocalSpotSize(const QSizeF &size)            { _newFocalSpotSize = {true, size}; }
@@ -95,6 +113,8 @@ public:
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem *system) const override;
     bool isApplicableTo(const CTsystem &system) const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
 protected:
     std::pair<bool,double> _newFluxModifier    = {false, 0.0};
@@ -104,6 +124,8 @@ protected:
 
 class XrayLaserParam : public SourceParam
 {
+    ADD_TO_PREPARESTEP_ENUM(310)
+
 public:
     void setPhotonEnergy(double energy) { _newPhotonEnergy = {true, energy}; }
     void setPower(double power)         { _newPower = {true, power}; }
@@ -111,6 +133,8 @@ public:
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem *system) const override;
     bool isApplicableTo(const CTsystem &system) const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
 private:
     std::pair<bool,double> _newPhotonEnergy = {false, 0.0};
@@ -119,6 +143,8 @@ private:
 
 class XrayTubeParam : public SourceParam
 {
+    ADD_TO_PREPARESTEP_ENUM(320)
+
 public:
     void setTubeVoltage(double voltage)     { _newTubeVoltage = {true, voltage}; }
     void setEmissionCurrent(double current) { _newEmissionCurrent = {true, current}; }
@@ -126,11 +152,12 @@ public:
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem *system) const override;
     bool isApplicableTo(const CTsystem &system) const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
 private:
     std::pair<bool,double> _newTubeVoltage     = {false, 0.0};
     std::pair<bool,double> _newEmissionCurrent = {false, 0.0};
-
 };
 
 
@@ -138,14 +165,18 @@ private:
 // ### DETECTOR ###
 // ### ###  ### ###
 
-class GenericDetectorParam : public SourceParam
+class GenericDetectorParam : public AbstractPrepareStep
 {
+    ADD_TO_PREPARESTEP_ENUM(101)
+
 public:
     void setModuleLocations(QVector<mat::Location> moduleLocations) { _newModuleLocations = {true, moduleLocations}; }
 
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem *system) const override;
     bool isApplicableTo(const CTsystem &system) const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
 private:
     std::pair<bool,QVector<mat::Location>> _newModuleLocations = {false, QVector<mat::Location>()};

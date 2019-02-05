@@ -30,7 +30,33 @@ void TubularGantryParam::prepare(SimpleCTsystem* system) const
 bool TubularGantryParam::isApplicableTo(const CTsystem& system) const
 {
     return system.isSimple() &&
-           dynamic_cast<TubularGantry*>(system.gantries().first());
+            dynamic_cast<TubularGantry*>(system.gantries().first());
+}
+
+void TubularGantryParam::fromVariant(const QVariant &variant)
+{
+    QVariantMap varMap = variant.toMap();
+
+    if(varMap.contains("rotation angle"))
+        _newRotationAngle = { true, varMap.value("rotation angle").toDouble() };
+    if(varMap.contains("pitch position"))
+        _newPitchPosition = { true, varMap.value("pitch position").toDouble() };
+    if(varMap.contains("tilt angle"))
+        _newTiltAngle = { true, varMap.value("tilt angle").toDouble() };
+}
+
+QVariant TubularGantryParam::toVariant() const
+{
+    QVariantMap ret = AbstractPrepareStep::toVariant().toMap();
+
+    if(_newRotationAngle.first)
+        ret.insert("rotation angle",_newRotationAngle.second);
+    if(_newPitchPosition.first)
+        ret.insert("pitch position",_newPitchPosition.second);
+    if(_newTiltAngle.first)
+        ret.insert("tilt angle",_newTiltAngle.second);
+
+    return ret;
 }
 
 void CarmGantryParam::prepare(SimpleCTsystem* system) const
@@ -55,6 +81,32 @@ bool CarmGantryParam::isApplicableTo(const CTsystem& system) const
            dynamic_cast<CarmGantry*>(system.gantries().first());
 }
 
+void CarmGantryParam::fromVariant(const QVariant &variant)
+{
+    QVariantMap varMap = variant.toMap();
+
+    if(varMap.contains("location"))
+    {
+        mat::Location loc;
+        loc.fromVariant(varMap.value("location"));
+        _newLocation = { true, loc };
+    }
+    if(varMap.contains("c-arm span"))
+        _newCarmSpan = { true, varMap.value("c-arm span").toDouble() };
+}
+
+QVariant CarmGantryParam::toVariant() const
+{
+    QVariantMap ret = AbstractPrepareStep::toVariant().toMap();
+
+    if(_newLocation.first)
+        ret.insert("location",_newLocation.second.toVariant());
+    if(_newCarmSpan.first)
+        ret.insert("c-arm span",_newCarmSpan.second);
+
+    return ret;
+}
+
 void GenericGantryParam::prepare(SimpleCTsystem* system) const
 {
     auto gantryPtr = static_cast<GenericGantry*>(system->gantry());
@@ -77,6 +129,36 @@ bool GenericGantryParam::isApplicableTo(const CTsystem& system) const
 {
     return system.isSimple() &&
            dynamic_cast<GenericGantry*>(system.gantries().first());
+}
+
+void GenericGantryParam::fromVariant(const QVariant &variant)
+{
+    QVariantMap varMap = variant.toMap();
+
+    if(varMap.contains("detector location"))
+    {
+        mat::Location loc;
+        loc.fromVariant(varMap.value("detector location"));
+        _newDetectorLocation = { true, loc };
+    }
+    if(varMap.contains("source location"))
+    {
+        mat::Location loc;
+        loc.fromVariant(varMap.value("source location"));
+        _newSourceLocation = { true, loc };
+    }
+}
+
+QVariant GenericGantryParam::toVariant() const
+{
+    QVariantMap ret = AbstractPrepareStep::toVariant().toMap();
+
+    if(_newDetectorLocation.first)
+        ret.insert("detector location", _newDetectorLocation.second.toVariant());
+    if(_newSourceLocation.first)
+        ret.insert("source location", _newSourceLocation.second.toVariant());
+
+    return ret;
 }
 
 void GantryDisplacementParam::prepare(SimpleCTsystem* system) const
@@ -122,6 +204,52 @@ bool GantryDisplacementParam::isApplicableTo(const CTsystem& system) const
     return system.isSimple();
 }
 
+void GantryDisplacementParam::fromVariant(const QVariant &variant)
+{
+    QVariantMap varMap = variant.toMap();
+
+    if(varMap.contains("detector displacement"))
+    {
+        mat::Location loc;
+        loc.fromVariant(varMap.value("detector displacement"));
+        _newDetectorDisplacement = { true, loc };
+    }
+    if(varMap.contains("source displacement"))
+    {
+        mat::Location loc;
+        loc.fromVariant(varMap.value("source displacement"));
+        _newSourceDisplacement = { true, loc };
+    }
+    if(varMap.contains("detector displacement increment"))
+    {
+        mat::Location loc;
+        loc.fromVariant(varMap.value("detector displacement increment"));
+        _detectorDisplacementIncrement = { true, loc };
+    }
+    if(varMap.contains("source displacement increment"))
+    {
+        mat::Location loc;
+        loc.fromVariant(varMap.value("source displacement increment"));
+        _sourceDisplacementIncrement = { true, loc };
+    }
+}
+
+QVariant GantryDisplacementParam::toVariant() const
+{
+    QVariantMap ret = AbstractPrepareStep::toVariant().toMap();
+
+    if(_newDetectorDisplacement.first)
+        ret.insert("detector displacement", _newDetectorDisplacement.second.toVariant());
+    if(_newSourceDisplacement.first)
+        ret.insert("source displacement", _newSourceDisplacement.second.toVariant());
+    if(_detectorDisplacementIncrement.first)
+        ret.insert("detector displacement increment", _detectorDisplacementIncrement.second.toVariant());
+    if(_sourceDisplacementIncrement.first)
+        ret.insert("source displacement increment", _sourceDisplacementIncrement.second.toVariant());
+
+    return ret;
+}
+
 // ### ### ### ###
 // ### SOURCES ###
 // ### ### ### ###
@@ -149,6 +277,57 @@ bool SourceParam::isApplicableTo(const CTsystem& system) const
     return system.isSimple();
 }
 
+void SourceParam::fromVariant(const QVariant &variant)
+{
+    QVariantMap varMap = variant.toMap();
+
+    if(varMap.contains("focal spot position"))
+    {
+        auto fsPos = varMap.value("focal spot position").toList();
+        Vector3x1 fsPosVec(fsPos.at(0).toDouble(),
+                           fsPos.at(1).toDouble(),
+                           fsPos.at(2).toDouble());
+
+        _newSpotPosition = { true, fsPosVec };
+    }
+    if(varMap.contains("focal spot size"))
+    {
+        auto fsSize = varMap.value("focal spot size").toMap();
+        QSizeF fsQSize;
+        fsQSize.setWidth(fsSize.value("width").toDouble());
+        fsQSize.setHeight(fsSize.value("height").toDouble());
+
+        _newFocalSpotSize = { true, fsQSize };
+    }
+    if(varMap.contains("flux modifier"))
+        _newFluxModifier = { true, varMap.value("flux modifier").toDouble() };
+}
+
+QVariant SourceParam::toVariant() const
+{
+    QVariantMap ret = AbstractPrepareStep::toVariant().toMap();
+
+    if(_newSpotPosition.first)
+    {
+        QVariantList fsPos;
+        fsPos.append(_newSpotPosition.second.get<0>());
+        fsPos.append(_newSpotPosition.second.get<1>());
+        fsPos.append(_newSpotPosition.second.get<2>());
+        ret.insert("focal spot position", fsPos);
+    }
+    if(_newFocalSpotSize.first)
+    {
+        QVariantMap fsSize;
+        fsSize.insert("width", _newFocalSpotSize.second.width());
+        fsSize.insert("height", _newFocalSpotSize.second.height());
+        ret.insert("focal spot size", fsSize);
+    }
+    if(_newFluxModifier.first)
+        ret.insert("flux modifier",_newFluxModifier.second);
+
+    return ret;
+}
+
 void XrayLaserParam::prepare(SimpleCTsystem* system) const
 {
     SourceParam::prepare(system);
@@ -169,6 +348,30 @@ bool XrayLaserParam::isApplicableTo(const CTsystem& system) const
 {
     return system.isSimple() &&
            dynamic_cast<XrayLaser*>(system.sources().first());
+}
+
+void XrayLaserParam::fromVariant(const QVariant &variant)
+{
+    SourceParam::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+
+    if(varMap.contains("photon energy"))
+        _newPhotonEnergy = { true, varMap.value("photon energy").toDouble() };
+    if(varMap.contains("power"))
+        _newPower = { true, varMap.value("power").toDouble() };
+}
+
+QVariant XrayLaserParam::toVariant() const
+{
+    QVariantMap ret = SourceParam::toVariant().toMap();
+
+    if(_newPhotonEnergy.first)
+        ret.insert("photon energy",_newPhotonEnergy.second);
+    if(_newPower.first)
+        ret.insert("power",_newPower.second);
+
+    return ret;
 }
 
 void XrayTubeParam::prepare(SimpleCTsystem* system) const
@@ -193,6 +396,30 @@ bool XrayTubeParam::isApplicableTo(const CTsystem& system) const
            dynamic_cast<XrayTube*>(system.sources().first());
 }
 
+void XrayTubeParam::fromVariant(const QVariant &variant)
+{
+    SourceParam::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+
+    if(varMap.contains("tube voltage"))
+        _newTubeVoltage = { true, varMap.value("tube voltage").toDouble() };
+    if(varMap.contains("emission current"))
+        _newEmissionCurrent = { true, varMap.value("emission current").toDouble() };
+}
+
+QVariant XrayTubeParam::toVariant() const
+{
+    QVariantMap ret = SourceParam::toVariant().toMap();
+
+    if(_newTubeVoltage.first)
+        ret.insert("tube voltage",_newTubeVoltage.second);
+    if(_newEmissionCurrent.first)
+        ret.insert("emission current",_newEmissionCurrent.second);
+
+    return ret;
+}
+
 void GenericDetectorParam::prepare(SimpleCTsystem* system) const
 {
     auto detectorPtr = static_cast<GenericDetector*>(system->detector());
@@ -210,6 +437,43 @@ bool GenericDetectorParam::isApplicableTo(const CTsystem& system) const
     return system.isSimple() &&
            dynamic_cast<GenericDetector*>(system.detectors().first());
 }
+
+void GenericDetectorParam::fromVariant(const QVariant &variant)
+{
+    QVariantMap varMap = variant.toMap();
+
+    if(varMap.contains("module locations"))
+    {
+        QVariantList moduleList = varMap.value("module locations").toList();
+        QVector<mat::Location> modLocs;
+        modLocs.reserve(moduleList.size());
+        for(const auto& mod : moduleList)
+        {
+            mat::Location loc;
+            loc.fromVariant(mod);
+            modLocs.append(loc);
+        }
+
+        _newModuleLocations = { true, std::move(modLocs) };
+    }
+}
+
+QVariant GenericDetectorParam::toVariant() const
+{
+    QVariantMap ret;
+
+    if(_newModuleLocations.first)
+    {
+        QVariantList moduleList;
+        moduleList.reserve(_newModuleLocations.second.size());
+        for(const auto& mod : _newModuleLocations.second)
+            moduleList.append(mod.toVariant());
+        ret.insert("module locations", moduleList);
+    }
+
+    return ret;
+}
+
 
 } // namespace prepare
 } // namespace CTL

@@ -3,6 +3,9 @@
 
 #include <memory>
 #include <vector>
+#include <QDebug>
+
+#include "io/serializationinterface.h"
 
 typedef unsigned int uint;
 
@@ -35,13 +38,19 @@ class SimpleCTsystem;
  * In the prepare() method, the actual preparation of the system state is performed. Note that this
  * is not necessarily limited to changes to a single component within the system.
  */
-class AbstractPrepareStep
+class AbstractPrepareStep : public SerializationInterface
 {
     // abstract interface
     public:virtual void prepare(SimpleCTsystem* system) const = 0;
     public:virtual bool isApplicableTo(const CTsystem& system) const = 0;
 
 public:
+    enum { Type = 0, UserType = 65536 };
+
+    virtual int type() const;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
+
     virtual ~AbstractPrepareStep() = default;
 };
 
@@ -126,6 +135,60 @@ inline bool AbstractPreparationProtocol::isApplicableTo(const AcquisitionSetup&)
  * Default (virtual) destructor.
  */
 
+/*!
+ * Returns the type id of the prepare step.
+ *
+ * List of all default types:
+ *
+ * Type                          | Type-ID
+ * ------------------------------|--------------
+ * AbstractPrepareStep::Type     |   0
+ * GenericDetectorParam::Type    | 101
+ * GenericGantryParam::Type      | 201
+ * CarmGantryParam::Type         | 210
+ * TubularGantryParam::Type      | 220
+ * GantryDisplacementParam::Type | 230
+ * SourceParam::Type             | 300
+ * XrayLaserParam::Type          | 310
+ * XrayTubeParam::Type           | 320
+ */
+inline int AbstractPrepareStep::type() const { return Type; }
+
+inline void AbstractPrepareStep::fromVariant(const QVariant &variant)
+{
+    auto varMap = variant.toMap();
+    if(varMap.value("type-id").toInt() != type())
+    {
+        qWarning() << QString(typeid(*this).name())
+                + "::fromVariant: Could not construct instance! "
+                  "reason: incompatible variant passed";
+        return;
+    }
+}
+
+inline QVariant AbstractPrepareStep::toVariant() const
+{
+    QVariantMap ret;
+
+    ret.insert("type-id", type());
+    ret.insert("name", typeid(*this).name());
+
+    return ret;
+}
+
+/*!
+ * \def ADD_TO_PREPARESTEP_ENUM(newIndex)
+ *
+ * Macro to add the component to the component enumeration with the index \a newIndex.
+ */
+#define ADD_TO_PREPARESTEP_ENUM(newIndex)                                                          \
+public:                                                                                            \
+    enum { Type = newIndex };                                                                      \
+    int type() const override { return Type; }                                                     \
+                                                                                                   \
+private:                                                                                           \
+    template<class>                                                                                \
+    friend struct SerializationInterface::RegisterWithJsonSerializer;
 } // namespace CTL
 
 #endif // ABSTRACTPREPARESTEP_H
