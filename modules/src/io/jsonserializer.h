@@ -10,26 +10,32 @@ namespace CTL {
 class AbstractDataModel;
 class AbstractPrepareStep;
 class SystemComponent;
+//class SerializationInterface;
 
 class JsonSerializer
 {
 public:
-    // define tye: pointer to function that creates a data model from a QJsonObject
+    // define types: pointer to function that creates CTL objects from a QVariant
     typedef AbstractDataModel* (*ModelFactoryFunction)(const QVariant&);
     typedef AbstractPrepareStep* (*PrepareStepFactoryFunction)(const QVariant&);
     typedef SystemComponent* (*ComponentFactoryFunction)(const QVariant&);
+//    typedef SerializationInterface* (*SerializableFactoryFunction)(const QVariant&);
 
-    static JsonSerializer& instance();
-    // add a model factory function
+    static JsonSerializer& instance();  // singleton getter
+
+    // maps with registered CTL type factories
     QMap<int, ComponentFactoryFunction>& componentFactories();
     QMap<int, ModelFactoryFunction>& modelFactories();
     QMap<int, PrepareStepFactoryFunction>& prepareStepFactories();
 
-    // function that parses the QJsonObject in order to create a concrete system component, data
-    // model, or prepare step
-    SystemComponent* parseComponent(const QVariant& json) const;
-    AbstractDataModel* parseDataModel(const QVariant& variant) const;
-    AbstractPrepareStep* parsePrepareStep(const QVariant& json) const;
+
+    void serializeComponent(const SystemComponent& component, const QString& fileName) const;
+    void serializeDataModel(const AbstractDataModel& model, const QString& fileName) const;
+    void serializePrepareStep(const AbstractPrepareStep& prepStep, const QString& fileName) const;
+
+    SystemComponent* deserializeComponent(const QString& fileName) const;
+    AbstractDataModel* deserializeDataModel(const QString& fileName) const;
+    AbstractPrepareStep* deserializePrepareStep(const QString& fileName) const;
 
 private:
     // private ctor & non-copyable
@@ -37,41 +43,45 @@ private:
     JsonSerializer(const JsonSerializer&) = delete;
     JsonSerializer& operator=(const JsonSerializer&) = delete;
 
+    // methods
+    QJsonObject convertVariantToJsonObject(const QVariant& variant) const;
+    void serializeVariant(const QVariant& variant, const QString& fileName) const;
+    QVariant variantFromJsonFile(const QString& fileName) const;
+
+    // functions that parse the QVariant in order to create a concrete system component, data
+    // model, or prepare step
+    SystemComponent* parseComponent(const QVariant& variant) const;
+    AbstractDataModel* parseDataModel(const QVariant& variant) const;
+    AbstractPrepareStep* parsePrepareStep(const QVariant& variant) const;
+
     // map that maps a type ID to the factory function of a data model
     QMap<int, ComponentFactoryFunction> _componentFactories;
     QMap<int, ModelFactoryFunction> _modelFactories;
     QMap<int, PrepareStepFactoryFunction> _prepareStepFactories;
 };
 
-inline JsonSerializer& JsonSerializer::instance()
-{
-    static JsonSerializer jsonModelParser;
-    return jsonModelParser;
-}
+//class SerializationInterface
+//{
+//public:
+//    template<class ModelType>
+//    struct RegisterWithJsonSerializer
+//    {
+//        RegisterWithJsonSerializer();
+//    };
 
-inline QMap<int, JsonSerializer::ComponentFactoryFunction>& JsonSerializer::componentFactories()
-{
-    return _componentFactories;
-}
+//};
 
-inline QMap<int, JsonSerializer::ModelFactoryFunction>& JsonSerializer::modelFactories()
-{
-    return _modelFactories;
-}
-
-inline QMap<int, JsonSerializer::PrepareStepFactoryFunction>& JsonSerializer::prepareStepFactories()
-{
-    return _prepareStepFactories;
-}
-
-inline AbstractDataModel* JsonSerializer::parseDataModel(const QVariant &variant) const
-{
-    auto varMap = variant.toMap();
-    if(!varMap.contains("type-id"))
-        return nullptr;
-    auto typeID = varMap.value("type-id").toInt();
-    return _modelFactories[typeID](variant);
-}
+//template<class ModelType>
+//SerializationInterface::RegisterWithJsonSerializer<ModelType>::RegisterWithJsonSerializer()
+//{
+//    auto factoryFunction = [](const QVariant& variant) -> SerializationInterface*
+//    {
+//        auto a = new ModelType();   // requires a default constructor (can also be declared private)
+//        a->fromVariant(variant);
+//        return a;
+//    };
+//    JsonSerializer::instance().componentFactories().insert(ModelType::Type, factoryFunction);
+//}
 
 } // namespace CTL
 
