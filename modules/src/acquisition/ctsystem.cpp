@@ -225,6 +225,26 @@ void CTsystem::write(QJsonObject &json) const
 }
 
 /*!
+ * Writes all components to a QVariant. This uses SerializationInterface::toVariant() of individual
+ * components in the system.
+ */
+QVariant CTsystem::toVariant() const
+{
+    QVariantMap ret;
+
+    ret.insert("name", _name);
+
+    QVariantList componentVariantList;
+
+    for(const auto& comp : _componentList)
+        componentVariantList.append(comp->toVariant());
+
+    ret.insert("components", componentVariantList);
+
+    return ret;
+}
+
+/*!
  * Constructs a copy of the system and returns a base-class pointer to the new object.
  */
 CTsystem* CTsystem::clone() const & { return new CTsystem(*this); }

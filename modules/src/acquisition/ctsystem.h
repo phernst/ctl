@@ -100,6 +100,8 @@ public:
     virtual QString info() const;
     virtual QString overview() const;
 
+    QVariant toVariant() const; // serialization
+
     // getter methods
     QList<AbstractDetector*> detectors() const;
     QList<AbstractGantry*> gantries() const;
