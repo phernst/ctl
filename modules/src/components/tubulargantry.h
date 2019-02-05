@@ -70,6 +70,8 @@ protected:
     double _tiltAngle;
 
 private:
+    TubularGantry() = default;
+
     // methods
     Matrix3x3 totalGantryRotation() const;
     mat::Location sourceLocationTG() const;

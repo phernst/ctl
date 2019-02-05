@@ -102,6 +102,9 @@ public:
     void setSourceDisplacementPosition(const Vector3x1& position);
     void setSourceDisplacementPosition(double x, double y, double z);
 
+protected:
+    AbstractGantry() = default;
+
 private:
     mat::Location _detectorDisplacement;
     mat::Location _sourceDisplacement;

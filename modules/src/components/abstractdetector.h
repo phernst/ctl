@@ -89,6 +89,7 @@ public:
     SingleViewData::Dimensions viewDimensions() const;
 
 protected:
+    AbstractDetector() = default;
     AbstractDetector(const QString& name);
 
     QSize _nbPixelPerModule;

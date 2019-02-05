@@ -46,6 +46,8 @@ public:
     // static methods
     static QString defaultName();
 
+private:
+    FlatPanelDetector() = default;
 };
 
 } // namespace CTL
