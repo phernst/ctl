@@ -8,7 +8,7 @@ namespace CTL {
 class SerializationInterface
 {
 public:
-    template<class ModelType>
+    template<class SerializableType>
     struct RegisterWithJsonSerializer
     {
         RegisterWithJsonSerializer();
@@ -19,21 +19,21 @@ public:
 
 };
 
-template<class ModelType>
-SerializationInterface::RegisterWithJsonSerializer<ModelType>::RegisterWithJsonSerializer()
+template<class SerializableType>
+SerializationInterface::RegisterWithJsonSerializer<SerializableType>::RegisterWithJsonSerializer()
 {
     auto factoryFunction = [](const QVariant& variant) -> SerializationInterface*
     {
-        auto a = new ModelType();   // requires a default constructor (can also be declared private)
+        auto a = new SerializableType();   // requires a default constructor (can also be declared private)
         a->fromVariant(variant);
         return a;
     };
-    if(std::is_convertible<ModelType*, SystemComponent*>::value)
-        JsonSerializer::instance().componentFactories().insert(ModelType::Type, factoryFunction);
-    else if(std::is_convertible<ModelType*, AbstractDataModel*>::value)
-        JsonSerializer::instance().modelFactories().insert(ModelType::Type, factoryFunction);
-    else if(std::is_convertible<ModelType*, AbstractPrepareStep*>::value)
-        JsonSerializer::instance().prepareStepFactories().insert(ModelType::Type, factoryFunction);
+    if(std::is_convertible<SerializableType*, SystemComponent*>::value)
+        JsonSerializer::instance().componentFactories().insert(SerializableType::Type, factoryFunction);
+    else if(std::is_convertible<SerializableType*, AbstractDataModel*>::value)
+        JsonSerializer::instance().modelFactories().insert(SerializableType::Type, factoryFunction);
+    else if(std::is_convertible<SerializableType*, AbstractPrepareStep*>::value)
+        JsonSerializer::instance().prepareStepFactories().insert(SerializableType::Type, factoryFunction);
 }
 
 }
