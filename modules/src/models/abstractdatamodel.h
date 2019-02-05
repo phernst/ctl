@@ -174,7 +174,8 @@ public:                                                                         
     int type() const override { return Type; }                                                     \
                                                                                                    \
 private:                                                                                           \
-    friend class AbstractDataModel;
+    template<class>                                                                                \
+    friend struct AbstractDataModel::RegisterWithJsonSerializer;
 
 /*!
  * \def DECLARE_JSON_COMPATIBLE_MODEL(dataModelClassName_woNamespace)
