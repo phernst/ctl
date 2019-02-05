@@ -1,4 +1,6 @@
 #include "jsonserializer.h"
+
+#include "acquisition/abstractpreparestep.h"
 #include "acquisition/ctsystem.h"
 #include "components/systemcomponent.h"
 #include "models/abstractdatamodel.h"
@@ -38,7 +40,7 @@ void JsonSerializer::serialize(const AbstractDataModel &model, const QString &fi
 
 void JsonSerializer::serialize(const AbstractPrepareStep &prepStep, const QString &fileName)
 {
-    // serialize(static_cast<const SerializationInterface&>(prepStep), fileName);
+    serialize(static_cast<const SerializationInterface&>(prepStep), fileName);
 }
 
 void JsonSerializer::serialize(const SystemComponent &component, const QString &fileName)
@@ -131,9 +133,14 @@ AbstractDataModel* JsonSerializer::parseDataModel(const QVariant &variant)
 
 AbstractPrepareStep* JsonSerializer::parsePrepareStep(const QVariant &variant)
 {
-    /* TO BE DONE */
-
-    return nullptr;
+    auto varMap = variant.toMap();
+    if(!varMap.contains("type-id"))
+        return nullptr;
+    auto typeID = varMap.value("type-id").toInt();
+    const auto& factoryMap = instance().prepareStepFactories();
+    if(!factoryMap.contains(typeID))
+        return nullptr;
+    return dynamic_cast<AbstractPrepareStep*>(factoryMap[typeID](variant));
 }
 
 QJsonObject JsonSerializer::convertVariantToJsonObject(const QVariant &variant)
