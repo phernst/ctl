@@ -43,7 +43,7 @@ namespace CTL {
  * option to copy by means of deep copying (provided by clone()).
  */
 
-class AbstractDataModel
+class AbstractDataModel : public SerializationInterface
 {
     // abstract interface
     public:virtual float valueAt(float position) const = 0;
@@ -52,19 +52,13 @@ class AbstractDataModel
 public:
     enum { Type = 0, UserType = 65536 };
 
-    template <class ModelType>
-    struct RegisterWithJsonSerializer
-    {
-        RegisterWithJsonSerializer();
-    };
-
     virtual ~AbstractDataModel() = default;
 
     virtual int type() const;
     virtual bool isIntegrable() const final;
 
-    virtual void fromVariant(const QVariant& variant);
-    virtual QVariant toVariant() const;
+    virtual void fromVariant(const QVariant& variant) override;
+    virtual QVariant toVariant() const override;
     virtual QVariant parameter() const;
     virtual void setParameter(const QVariant& parameter);
 };
@@ -175,7 +169,7 @@ public:                                                                         
                                                                                                    \
 private:                                                                                           \
     template<class>                                                                                \
-    friend struct AbstractDataModel::RegisterWithJsonSerializer;
+    friend struct SerializationInterface::RegisterWithJsonSerializer;
 
 /*!
  * \def DECLARE_JSON_COMPATIBLE_MODEL(dataModelClassName_woNamespace)
@@ -188,7 +182,7 @@ private:                                                                        
  * The global variable name is `JSON_SERIALIZER_KNOWS_MODEL_<dataModelClassName_woNamespace>`.
  */
 #define DECLARE_JSON_COMPATIBLE_MODEL(dataModelClassName_woNamespace)                              \
-    CTL::AbstractDataModel::RegisterWithJsonSerializer<dataModelClassName_woNamespace>             \
+    CTL::SerializationInterface::RegisterWithJsonSerializer<dataModelClassName_woNamespace>        \
     JSON_SERIALIZER_KNOWS_MODEL_ ## dataModelClassName_woNamespace;
 
 
@@ -243,20 +237,6 @@ inline DataModelPtr& DataModelPtr::operator=(const DataModelPtr &other)
 {
     ptr.reset(other.ptr ? other.ptr->clone() : nullptr);
     return *this;
-}
-
-
-
-template<class ModelType>
-AbstractDataModel::RegisterWithJsonSerializer<ModelType>::RegisterWithJsonSerializer()
-{
-    auto factoryFunction = [](const QVariant& variant) -> AbstractDataModel*
-    {
-        auto a = new ModelType();   // requires a default constructor (can also be declared private)
-        a->fromVariant(variant);
-        return a;
-    };
-    JsonSerializer::instance().modelFactories().insert(ModelType::Type, factoryFunction);
 }
 
 } // namespace CTL

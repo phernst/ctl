@@ -48,17 +48,11 @@ namespace CTL {
  * \sa elementalType()
  */
 
-class SystemComponent
+class SystemComponent : public SerializationInterface
 {
 
 public:
     enum { Type = 0, UserType = 65536 };
-
-    template <class ModelType>
-    struct RegisterWithJsonSerializer
-    {
-        RegisterWithJsonSerializer();
-    };
 
     // ctors etc.
     SystemComponent(const QString& name = defaultName());
@@ -75,8 +69,8 @@ public:
     virtual QString info() const;
     virtual SystemComponent* clone() const;
 
-    virtual void fromVariant(const QVariant& variant); // de-serialization
-    virtual QVariant toVariant() const; // serialization
+    virtual void fromVariant(const QVariant& variant) override; // de-serialization
+    virtual QVariant toVariant() const override; // serialization
 
     // deprecated
     virtual void read(const QJsonObject& json); // JSON
@@ -149,18 +143,6 @@ inline int SystemComponent::type() const { return Type; }
  */
 inline int SystemComponent::elementalType() const { return Type; }
 
-template<class ModelType>
-SystemComponent::RegisterWithJsonSerializer<ModelType>::RegisterWithJsonSerializer()
-{
-    auto factoryFunction = [](const QVariant& variant) -> SystemComponent*
-    {
-        auto a = new ModelType();   // requires a default constructor (can also be declared private)
-        a->fromVariant(variant);
-        return a;
-    };
-    JsonSerializer::instance().componentFactories().insert(ModelType::Type, factoryFunction);
-}
-
 } // namespace CTL
 
 /*! \file */
@@ -190,12 +172,8 @@ public:                                                                         
                                                                                                    \
 private:                                                                                           \
     template<class>                                                                                \
-    friend struct SystemComponent::RegisterWithJsonSerializer;
+    friend struct SerializationInterface::RegisterWithJsonSerializer;
 
-/*
-    template<class ModelType>                                                                      \
-    friend SystemComponent::RegisterWithJsonSerializer<ModelType>::RegisterWithJsonSerializer();
-*/
 
 /*!
  * \def DECLARE_JSON_COMPATIBLE_COMPONENT(componentClassName_woNamespace)
@@ -208,7 +186,7 @@ private:                                                                        
  * The global variable name is `JSON_SERIALIZER_KNOWS_COMP_<componentClassName_woNamespace>`.
  */
 #define DECLARE_JSON_COMPATIBLE_COMPONENT(componentClassName_woNamespace)                        \
-    CTL::SystemComponent::RegisterWithJsonSerializer<componentClassName_woNamespace>             \
+    CTL::SerializationInterface::RegisterWithJsonSerializer<componentClassName_woNamespace>             \
     JSON_SERIALIZER_KNOWS_COMP_ ## componentClassName_woNamespace;
 
 

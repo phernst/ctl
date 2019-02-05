@@ -15,61 +15,62 @@ JsonSerializer& JsonSerializer::instance()
     return jsonModelParser;
 }
 
-QMap<int, JsonSerializer::ComponentFactoryFunction>& JsonSerializer::componentFactories()
+QMap<int, JsonSerializer::SerializableFactoryFunction>& JsonSerializer::componentFactories()
 {
     return _componentFactories;
 }
 
-QMap<int, JsonSerializer::ModelFactoryFunction>& JsonSerializer::modelFactories()
+QMap<int, JsonSerializer::SerializableFactoryFunction>& JsonSerializer::modelFactories()
 {
     return _modelFactories;
 }
 
-QMap<int, JsonSerializer::PrepareStepFactoryFunction>& JsonSerializer::prepareStepFactories()
+QMap<int, JsonSerializer::SerializableFactoryFunction>& JsonSerializer::prepareStepFactories()
 {
     return _prepareStepFactories;
 }
 
-void JsonSerializer::serializeComponent(const SystemComponent& component, const QString &fileName) const
+void JsonSerializer::serialize(const AbstractDataModel &model, const QString &fileName)
 {
-    serializeVariant(component.toVariant(), fileName);
+    serialize(static_cast<const SerializationInterface&>(model), fileName);
 }
 
-void JsonSerializer::serializeDataModel(const AbstractDataModel& model, const QString &fileName) const
+void JsonSerializer::serialize(const AbstractPrepareStep &prepStep, const QString &fileName)
 {
-    serializeVariant(model.toVariant(), fileName);
+    // serialize(static_cast<const SerializationInterface&>(prepStep), fileName);
 }
 
-void JsonSerializer::serializePrepareStep(const AbstractPrepareStep &prepStep, const QString &fileName) const
+void JsonSerializer::serialize(const SystemComponent &component, const QString &fileName)
 {
-    /* TO BE DONE */
+    serialize(static_cast<const SerializationInterface&>(component), fileName);
 }
 
-SystemComponent* JsonSerializer::deserializeComponent(const QString &fileName) const
-{
-    return parseComponent(variantFromJsonFile(fileName));
-}
-
-AbstractDataModel* JsonSerializer::deserializeDataModel(const QString &fileName) const
-{
-    return parseDataModel(variantFromJsonFile(fileName));
-}
-
-AbstractPrepareStep* JsonSerializer::deserializePrepareStep(const QString &fileName) const
-{
-    return parsePrepareStep(variantFromJsonFile(fileName));
-}
-
-void JsonSerializer::serializeVariant(const QVariant& variant, const QString& fileName) const
+void JsonSerializer::serialize(const SerializationInterface &serializableObject,
+                               const QString& fileName)
 {
     QFile saveFile(fileName);
     saveFile.open(QIODevice::WriteOnly);
-    QJsonDocument doc(convertVariantToJsonObject(variant));
+    QJsonDocument doc(convertVariantToJsonObject(serializableObject.toVariant()));
     saveFile.write(doc.toJson());
     saveFile.close();
 }
 
-QVariant JsonSerializer::variantFromJsonFile(const QString &fileName) const
+SystemComponent* JsonSerializer::deserializeComponent(const QString &fileName)
+{
+    return parseComponent(variantFromJsonFile(fileName));
+}
+
+AbstractDataModel* JsonSerializer::deserializeDataModel(const QString &fileName)
+{
+    return parseDataModel(variantFromJsonFile(fileName));
+}
+
+AbstractPrepareStep* JsonSerializer::deserializePrepareStep(const QString &fileName)
+{
+    return parsePrepareStep(variantFromJsonFile(fileName));
+}
+
+QVariant JsonSerializer::variantFromJsonFile(const QString &fileName)
 {
     QFile loadFile(fileName);
     loadFile.open(QIODevice::ReadOnly);
@@ -79,36 +80,38 @@ QVariant JsonSerializer::variantFromJsonFile(const QString &fileName) const
     return doc.toVariant();
 }
 
-SystemComponent* JsonSerializer::parseComponent(const QVariant &variant) const
+SystemComponent* JsonSerializer::parseComponent(const QVariant &variant)
 {
     auto varMap = variant.toMap();
     if(!varMap.contains("type-id"))
         return nullptr;
     auto typeID = varMap.value("type-id").toInt();
-    if(!_componentFactories.contains(typeID))
+    const auto& factoryMap = instance().componentFactories();
+    if(!factoryMap.contains(typeID))
         return nullptr;
-    return _componentFactories[typeID](variant);
+    return dynamic_cast<SystemComponent*>(factoryMap[typeID](variant));
 }
 
-AbstractDataModel* JsonSerializer::parseDataModel(const QVariant &variant) const
+AbstractDataModel* JsonSerializer::parseDataModel(const QVariant &variant)
 {
     auto varMap = variant.toMap();
     if(!varMap.contains("type-id"))
         return nullptr;
     auto typeID = varMap.value("type-id").toInt();
-    if(!_modelFactories.contains(typeID))
+    const auto& factoryMap = instance().modelFactories();
+    if(!factoryMap.contains(typeID))
         return nullptr;
-    return _modelFactories[typeID](variant);
+    return dynamic_cast<AbstractDataModel*>(factoryMap[typeID](variant));
 }
 
-AbstractPrepareStep* JsonSerializer::parsePrepareStep(const QVariant &variant) const
+AbstractPrepareStep* JsonSerializer::parsePrepareStep(const QVariant &variant)
 {
     /* TO BE DONE */
 
     return nullptr;
 }
 
-QJsonObject JsonSerializer::convertVariantToJsonObject(const QVariant &variant) const
+QJsonObject JsonSerializer::convertVariantToJsonObject(const QVariant &variant)
 {
     QJsonObject ret;
 
@@ -119,6 +122,15 @@ QJsonObject JsonSerializer::convertVariantToJsonObject(const QVariant &variant) 
                       "information.";
 
     return ret;
+}
+
+void SerializationInterface::fromVariant(const QVariant&)
+{
+}
+
+QVariant SerializationInterface::toVariant() const
+{
+    return QVariant();
 }
 
 } // namespace CTL
