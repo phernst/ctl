@@ -116,4 +116,5 @@ SOURCES += \
     $$PWD/src/mat/pmatcomparator.cpp \
     $$PWD/src/models/detectorsaturationmodels.cpp \
     $$PWD/src/projectors/detectorsaturationextension.cpp \
-    $$PWD/src/io/jsonserializer.cpp
+    $$PWD/src/io/jsonserializer.cpp \
+    $$PWD/src/components/genericbeammodifier.cpp
