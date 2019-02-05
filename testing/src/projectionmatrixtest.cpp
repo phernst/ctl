@@ -21,6 +21,11 @@ void ProjectionMatrixTest::initTestCase()
     qDebug().noquote() << "use projection matrix:\n"
                        << QString::fromStdString(P.info());
     */
+
+    // using integers for element-wise initialization
+    ProjectionMatrix tempTestInit(1, 1, 2, 3,
+                                  5, 8, 13, 21,
+                                  34, 55, 89, 144);
 }
 
 // do some scaling of the original PMat before each test
