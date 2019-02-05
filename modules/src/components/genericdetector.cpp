@@ -2,6 +2,8 @@
 
 namespace CTL {
 
+DECLARE_JSON_COMPATIBLE_COMPONENT(GenericDetector)
+
 GenericDetector::GenericDetector(const QJsonObject& json)
     : AbstractDetector(defaultName())
 {

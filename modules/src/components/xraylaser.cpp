@@ -1,8 +1,9 @@
 #include "xraylaser.h"
 #include "models/xrayspectrummodels.h"
 
-namespace CTL
-{
+namespace CTL {
+
+DECLARE_JSON_COMPATIBLE_COMPONENT(XrayLaser)
 
 XrayLaser::XrayLaser(const QSizeF &focalSpotSize,
                      const Vector3x1 &focalSpotPosition,

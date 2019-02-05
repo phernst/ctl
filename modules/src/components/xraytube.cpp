@@ -2,6 +2,8 @@
 
 namespace CTL {
 
+DECLARE_JSON_COMPATIBLE_COMPONENT(XrayTube)
+
 XrayTube::XrayTube(const QSizeF &focalSpotSize,
                    const Vector3x1 &focalSpotPosition,
                    double tubeVoltage,
