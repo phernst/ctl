@@ -15,10 +15,7 @@ class SerializationInterface;
 class JsonSerializer
 {
 public:
-    // define types: pointer to function that creates CTL objects from a QVariant
-    typedef AbstractDataModel* (*ModelFactoryFunction)(const QVariant&);
-    typedef AbstractPrepareStep* (*PrepareStepFactoryFunction)(const QVariant&);
-    typedef SystemComponent* (*ComponentFactoryFunction)(const QVariant&);
+    // define type: pointer to function that creates CTL objects from a QVariant
     typedef SerializationInterface* (*SerializableFactoryFunction)(const QVariant&);
 
     static JsonSerializer& instance();  // singleton getter
