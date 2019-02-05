@@ -32,6 +32,10 @@ public:
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
+
+    // deprecated
     void read(const QJsonObject& json) override;     // JSON
     void write(QJsonObject& json) const override;    // JSON
 
@@ -101,6 +105,23 @@ inline void GenericBeamModifier::read(const QJsonObject &json)
 inline void GenericBeamModifier::write(QJsonObject &json) const
 {
     AbstractBeamModifier::write(json);
+}
+
+/*!
+ * Reads all member variables from the QJsonObject \a json.
+ */
+inline void GenericBeamModifier::fromVariant(const QVariant& variant)
+{
+    AbstractBeamModifier::fromVariant(variant);
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+inline QVariant GenericBeamModifier::toVariant() const
+{
+    return AbstractBeamModifier::toVariant();
 }
 
 } // namespace CTL

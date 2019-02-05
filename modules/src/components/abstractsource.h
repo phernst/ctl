@@ -76,9 +76,12 @@ public:
     // virtual methods
     virtual void setSpectrumModel(AbstractXraySpectrumModel* model);
     QString info() const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
+
+    // deprecated
     void read(const QJsonObject& json) override; // JSON
     void write(QJsonObject& json) const override; // JSON
-    void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
 
     // getter methods
     double photonFlux() const;
@@ -96,6 +99,7 @@ public:
 
     // other methods
     bool hasSpectrumModel() const;
+    void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
 
 protected:
     QSizeF _focalSpotSize = QSizeF(0.0, 0.0);
@@ -334,6 +338,55 @@ inline void AbstractSource::write(QJsonObject& json) const
     json.insert("focal spot position", fsPos);
     json.insert("focal spot size", fsSize);
     json.insert("spectrum model", specMod);
+}
+
+/*!
+ * Reads all member variables from the QJsonObject \a json.
+ */
+inline void AbstractSource::fromVariant(const QVariant& variant)
+{
+    SystemComponent::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+    auto fsPos = varMap.value("focal spot position").toList();
+    Vector3x1 fsPosVec({ fsPos.at(0).toDouble(), fsPos.at(1).toDouble(), fsPos.at(2).toDouble() });
+
+    auto fsSize = varMap.value("focal spot size").toMap();
+    QSizeF fsQSize;
+    fsQSize.setWidth(fsSize.value("width").toDouble());
+    fsQSize.setHeight(fsSize.value("height").toDouble());
+
+    QVariant specMod = varMap.value("spectrum model");
+
+    _focalSpotSize = fsQSize;
+    _focalSpotPosition = fsPosVec;
+    _spectrumModel.ptr->fromVariant(specMod);
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+inline QVariant AbstractSource::toVariant() const
+{
+    QVariantMap ret = SystemComponent::toVariant().toMap();
+
+    QVariantList fsPos;
+    fsPos.append(_focalSpotPosition.get<0>());
+    fsPos.append(_focalSpotPosition.get<1>());
+    fsPos.append(_focalSpotPosition.get<2>());
+
+    QVariantMap fsSize;
+    fsSize.insert("width", _focalSpotSize.width());
+    fsSize.insert("height", _focalSpotSize.height());
+
+    QVariant specMod = _spectrumModel.ptr->toVariant();
+
+    ret.insert("focal spot position", fsPos);
+    ret.insert("focal spot size", fsSize);
+    ret.insert("spectrum model", specMod);
+
+    return ret;
 }
 
 /*!

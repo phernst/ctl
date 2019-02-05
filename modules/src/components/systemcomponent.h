@@ -4,6 +4,7 @@
 #include <QJsonObject>
 #include <QString>
 #include <memory>
+#include "io/jsonserializer.h"
 
 namespace CTL {
 /*!
@@ -53,9 +54,15 @@ class SystemComponent
 public:
     enum { Type = 0, UserType = 65536 };
 
+    template <class ModelType>
+    struct RegisterToJsonParser
+    {
+        RegisterToJsonParser();
+    };
+
     // ctors etc.
     SystemComponent(const QString& name = defaultName());
-    SystemComponent(const QJsonObject& json);
+    SystemComponent(const QJsonObject& json); // deprecated
     SystemComponent(const SystemComponent&) = default;
     SystemComponent(SystemComponent&&) = default;
     SystemComponent& operator=(const SystemComponent&) = default;
@@ -67,6 +74,11 @@ public:
     virtual int elementalType() const;
     virtual QString info() const;
     virtual SystemComponent* clone() const;
+
+    virtual void fromVariant(const QVariant& variant); // de-serialization
+    virtual QVariant toVariant() const; // serialization
+
+    // deprecated
     virtual void read(const QJsonObject& json); // JSON
     virtual void write(QJsonObject& json) const; // JSON
 
@@ -137,6 +149,18 @@ inline int SystemComponent::type() const { return Type; }
  */
 inline int SystemComponent::elementalType() const { return Type; }
 
+template<class ModelType>
+SystemComponent::RegisterToJsonParser<ModelType>::RegisterToJsonParser()
+{
+    auto factoryFunction = [](const QVariant& variant) -> SystemComponent*
+    {
+        auto a = new ModelType();   // requires a default constructor (can also be declared private)
+        a->fromVariant(variant);
+        return a;
+    };
+    JsonSerializer::instance().componentFactories().insert(ModelType::Type, factoryFunction);
+}
+
 } // namespace CTL
 
 /*! \file */
@@ -165,6 +189,22 @@ public:                                                                         
     int type() const override { return Type; }                                                     \
                                                                                                    \
 private:
+
+
+/*!
+ * \def DECLARE_JSON_COMPATIBLE_COMPONENT(componentClassName_woNamespace)
+ *
+ * Declares a global variable for a certain system component. Its initialization registers this
+ * component to the JsonSerializer. The argument of this macro must be the name of the concrete
+ * component that should be registered. The name must not contain any namespace, which can be
+ * achieved by using this macro inside the according namespace.
+ *
+ * The name of the globar variable is `JSON_PARSER_KNOWS_COMP_<componentClassName_woNamespace>`.
+ */
+#define DECLARE_JSON_COMPATIBLE_COMPONENT(componentClassName_woNamespace)                              \
+    CTL::SystemComponent::RegisterToJsonParser<componentClassName_woNamespace>                   \
+    JSON_PARSER_KNOWS_COMP_ ## componentClassName_woNamespace;
+
 
 /*!
  * \fn std::unique_ptr<ComponentType> CTL::makeComponent(ConstructorArguments&&... arguments)

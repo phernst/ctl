@@ -72,6 +72,10 @@ public:
 
     // virtual methods
     QString info() const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
+
+    // deprecated
     void read(const QJsonObject& json) override; // JSON
     void write(QJsonObject& json) const override; // JSON
 
@@ -320,6 +324,32 @@ inline void AbstractGantry::write(QJsonObject& json) const
     json.insert("detector displacement",
                 QJsonValue::fromVariant(_detectorDisplacement.toVariant()));
     json.insert("source displacement", QJsonValue::fromVariant(_sourceDisplacement.toVariant()));
+}
+
+/*!
+ * Reads all member variables from the QJsonObject \a json.
+ */
+inline void AbstractGantry::fromVariant(const QVariant& variant)
+{
+    SystemComponent::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+    _detectorDisplacement.fromVariant(varMap.value("detector displacement"));
+    _sourceDisplacement.fromVariant(varMap.value("source displacement"));
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+inline QVariant AbstractGantry::toVariant() const
+{
+    QVariantMap ret = SystemComponent::toVariant().toMap();
+
+    ret.insert("detector displacement", _detectorDisplacement.toVariant());
+    ret.insert("source displacement", _sourceDisplacement.toVariant());
+
+    return ret;
 }
 
 } // namespace CTL

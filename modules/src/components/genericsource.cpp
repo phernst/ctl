@@ -54,6 +54,29 @@ void GenericSource::read(const QJsonObject& json) { AbstractSource::read(json); 
  */
 void GenericSource::write(QJsonObject& json) const { AbstractSource::write(json); }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void GenericSource::fromVariant(const QVariant& variant)
+{
+    AbstractSource::fromVariant(variant);
+
+    _totalFlux = variant.toMap().value("photon flux").toDouble();
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant GenericSource::toVariant() const
+{
+    QVariantMap ret = AbstractSource::toVariant().toMap();
+
+    ret.insert("photon flux", _totalFlux);
+
+    return ret;
+}
+
 void GenericSource::setSpectrum(const IntervalDataSeries& spectrum, bool updateFlux)
 {
     auto specModel = new FixedXraySpectrumModel;

@@ -64,6 +64,10 @@ public:
 
     // virtual methods
     QString info() const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
+
+    // deprecated
     void read(const QJsonObject& json) override;  // JSON
     void write(QJsonObject& json) const override; // JSON
 
@@ -257,6 +261,46 @@ inline void AbstractDetector::write(QJsonObject &json) const
 
     json.insert("pixel per module", nbPixels);
     json.insert("pixel dimensions", pixelDim);
+}
+
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+inline void AbstractDetector::fromVariant(const QVariant& variant)
+{
+    SystemComponent::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+
+    auto nbPixels = varMap.value("pixel per module").toMap();
+    _nbPixelPerModule.setWidth(nbPixels.value("channels").toInt());
+    _nbPixelPerModule.setHeight(nbPixels.value("rows").toInt());
+
+    auto pixelDim = varMap.value("pixel dimensions").toMap();
+    _pixelDimensions.setWidth(pixelDim.value("width").toDouble());
+    _pixelDimensions.setHeight(pixelDim.value("height").toDouble());
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+inline QVariant AbstractDetector::toVariant() const
+{
+    QVariantMap ret = SystemComponent::toVariant().toMap();
+
+    QVariantMap nbPixels;
+    nbPixels.insert("channels",_nbPixelPerModule.width());
+    nbPixels.insert("rows", _nbPixelPerModule.height());
+
+    QVariantMap pixelDim;
+    pixelDim.insert("width",_pixelDimensions.width());
+    pixelDim.insert("height", _pixelDimensions.height());
+
+    ret.insert("pixel per module", nbPixels);
+    ret.insert("pixel dimensions", pixelDim);
+
+    return ret;
 }
 
 /*!

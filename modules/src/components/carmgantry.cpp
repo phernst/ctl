@@ -108,6 +108,32 @@ void CarmGantry::write(QJsonObject &json) const
     json.insert("location", QJsonValue::fromVariant(location().toVariant()));
 }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void CarmGantry::fromVariant(const QVariant& variant)
+{
+    AbstractGantry::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+    _cArmSpan = varMap.value("c-arm span").toDouble();
+    _location.fromVariant(varMap.value("location"));
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant CarmGantry::toVariant() const
+{
+    QVariantMap ret = AbstractGantry::toVariant().toMap();
+
+    ret.insert("c-arm span", _cArmSpan);
+    ret.insert("location", location().toVariant());
+
+    return ret;
+}
+
 // use documentation of GenericComponent::clone()
 SystemComponent* CarmGantry::clone() const { return new CarmGantry(*this); }
 

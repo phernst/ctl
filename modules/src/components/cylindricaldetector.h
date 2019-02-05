@@ -49,6 +49,10 @@ public:
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
+
+    // deprecated
     void read(const QJsonObject& json) override;     // JSON
     void write(QJsonObject& json) const override;    // JSON
 

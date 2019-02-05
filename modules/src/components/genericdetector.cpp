@@ -103,6 +103,43 @@ void GenericDetector::write(QJsonObject &json) const
     json.insert("module locations", modLocs);
 }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void GenericDetector::fromVariant(const QVariant& variant)
+{
+    AbstractDetector::fromVariant(variant);
+
+    _moduleLocations.clear();
+    QVariantMap varMap = variant.toMap();
+    auto locations = varMap.value("module locations").toList();
+    for(const auto& var : locations)
+    {
+        mat::Location loc;
+        loc.fromVariant(var);
+
+        _moduleLocations.append(loc);
+    }
+
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant GenericDetector::toVariant() const
+{
+    QVariantMap ret = AbstractDetector::toVariant().toMap();
+
+    QVariantList modLocs;
+    for(const auto& mod : _moduleLocations)
+        modLocs.append(mod.toVariant());
+
+    ret.insert("module locations", modLocs);
+
+    return ret;
+}
+
 // use documentation of GenericComponent::clone()
 SystemComponent* GenericDetector::clone() const { return new GenericDetector(*this); }
 

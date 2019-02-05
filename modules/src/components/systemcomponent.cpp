@@ -74,6 +74,28 @@ void SystemComponent::write(QJsonObject& json) const
     json.insert("name", _name);
 }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void SystemComponent::fromVariant(const QVariant& variant)
+{
+    _name = variant.toMap().value("name").toString();
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant SystemComponent::toVariant()const
+{
+    QVariantMap ret;
+    ret.insert("type-id", this->type());
+    ret.insert("generic type-id", this->elementalType());
+    ret.insert("name", _name);
+
+    return ret;
+}
+
 std::unique_ptr<SystemComponent> makeComponentFromJson(const QJsonObject& object,
                                                        bool fallbackToGenericType)
 {

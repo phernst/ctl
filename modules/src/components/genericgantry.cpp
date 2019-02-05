@@ -118,6 +118,31 @@ void GenericGantry::write(QJsonObject &json) const
     json.insert("source location", QJsonValue::fromVariant(_sourceLocation.toVariant()));
 }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void GenericGantry::fromVariant(const QVariant& variant)
+{
+    AbstractGantry::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+    _detectorLocation.fromVariant(varMap.value("detector location"));
+    _sourceLocation.fromVariant(varMap.value("source location"));
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant GenericGantry::toVariant() const
+{
+    QVariantMap ret = AbstractGantry::toVariant().toMap();
+
+    ret.insert("detector location", _detectorLocation.toVariant());
+    ret.insert("source location", _sourceLocation.toVariant());
+
+    return ret;
+}
 
 // use documentation of GenericComponent::clone()
 SystemComponent* GenericGantry::clone() const { return new GenericGantry(*this); }

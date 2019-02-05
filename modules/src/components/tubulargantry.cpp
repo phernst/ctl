@@ -216,6 +216,38 @@ void TubularGantry::write(QJsonObject &json) const
     json.insert("tilt angle", _tiltAngle);
 }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void TubularGantry::fromVariant(const QVariant& variant)
+{
+    AbstractGantry::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+    _sourceToDetectorDistance = varMap.value("source-detector distance").toDouble();
+    _sourceToIsoCenterDistance = varMap.value("source-isocenter distance").toDouble();
+    _rotationAngle = varMap.value("rotation angle").toDouble();
+    _pitchPosition = varMap.value("pitch position").toDouble();
+    _tiltAngle = varMap.value("tilt angle").toDouble();
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant TubularGantry::toVariant() const
+{
+    QVariantMap ret = AbstractGantry::toVariant().toMap();
+
+    ret.insert("source-detector distance", _sourceToDetectorDistance);
+    ret.insert("source-isocenter distance", _sourceToIsoCenterDistance);
+    ret.insert("rotation angle", _rotationAngle);
+    ret.insert("pitch position", _pitchPosition);
+    ret.insert("tilt angle", _tiltAngle);
+
+    return ret;
+}
+
 // use documentation of GenericComponent::clone()
 SystemComponent* TubularGantry::clone() const { return new TubularGantry(*this); }
 

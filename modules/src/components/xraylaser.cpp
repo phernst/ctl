@@ -79,6 +79,32 @@ void XrayLaser::write(QJsonObject &json) const
     json.insert("power", _power);
 }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void XrayLaser::fromVariant(const QVariant& variant)
+{
+    AbstractSource::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+    _energy = varMap.value("energy").toDouble();
+    _power  = varMap.value("power").toDouble();
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant XrayLaser::toVariant() const
+{
+    QVariantMap ret = AbstractSource::toVariant().toMap();
+
+    ret.insert("energy", _energy);
+    ret.insert("power", _power);
+
+    return ret;
+}
+
 QString XrayLaser::defaultName()
 {
     static const QString defName(QStringLiteral("X-ray laser"));

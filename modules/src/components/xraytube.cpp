@@ -119,4 +119,30 @@ void XrayTube::write(QJsonObject &json) const
     json.insert("emission current", _emissionCurrent);
 }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void XrayTube::fromVariant(const QVariant& variant)
+{
+    AbstractSource::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+    _tubeVoltage = varMap.value("tube voltage").toDouble();
+    _emissionCurrent = varMap.value("emission current").toDouble();
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant XrayTube::toVariant() const
+{
+    QVariantMap ret = AbstractSource::toVariant().toMap();
+
+    ret.insert("tube voltage", _tubeVoltage);
+    ret.insert("emission current", _emissionCurrent);
+
+    return ret;
+}
+
 } // namespace CTL

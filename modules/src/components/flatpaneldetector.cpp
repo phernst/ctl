@@ -71,6 +71,23 @@ void FlatPanelDetector::write(QJsonObject &json) const
 }
 
 /*!
+ * Reads all member variables from the QJsonObject \a json.
+ */
+void FlatPanelDetector::fromVariant(const QVariant& variant)
+{
+    AbstractDetector::fromVariant(variant);
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant FlatPanelDetector::toVariant() const
+{
+    return AbstractDetector::toVariant();
+}
+
+/*!
  * Returns the location of the detector module.
  *
  * Convenience method: same as moduleLocations().first().

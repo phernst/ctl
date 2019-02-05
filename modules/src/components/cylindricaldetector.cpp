@@ -228,6 +228,32 @@ void CylindricalDetector::write(QJsonObject &json) const
 }
 
 /*!
+ * Reads all member variables from the QJsonObject \a json.
+ */
+void CylindricalDetector::fromVariant(const QVariant& variant)
+{
+    AbstractDetector::fromVariant(variant);
+
+    QVariantMap varMap = variant.toMap();
+    _angulationPerModule = varMap.value("angulation per module").toDouble();
+    _moduleSpacing = varMap.value("module spacing").toDouble();
+}
+
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant CylindricalDetector::toVariant() const
+{
+    QVariantMap ret = AbstractDetector::toVariant().toMap();
+
+    ret.insert("angulation per module", _angulationPerModule);
+    ret.insert("module spacing", _moduleSpacing);
+
+    return ret;
+}
+
+/*!
  * Returns the angulation of module \a module (in radians) with respect to the center of the
  * detector.
  */
