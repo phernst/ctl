@@ -3,8 +3,8 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_MODEL(DetectorSaturationLinearModel);
-DECLARE_JSON_COMPATIBLE_MODEL(DetectorSaturationSplineModel);
+DECLARE_JSON_COMPATIBLE_TYPE(DetectorSaturationLinearModel);
+DECLARE_JSON_COMPATIBLE_TYPE(DetectorSaturationSplineModel);
 
 // ### DetectorSaturationLinearModel ###
 

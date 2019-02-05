@@ -4,7 +4,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_COMPONENT(TubularGantry)
+DECLARE_JSON_COMPATIBLE_TYPE(TubularGantry)
 
 /*!
  * Constructs a TubularGantry object based on the information specified in the QJsonObject \a json.

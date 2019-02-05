@@ -8,7 +8,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_COMPONENT(CylindricalDetector)
+DECLARE_JSON_COMPATIBLE_TYPE(CylindricalDetector)
 
 CylindricalDetector::CylindricalDetector(const QJsonObject &json)
     : AbstractDetector(defaultName())
@@ -239,6 +239,7 @@ void CylindricalDetector::fromVariant(const QVariant& variant)
     QVariantMap varMap = variant.toMap();
     _angulationPerModule = varMap.value("angulation per module").toDouble();
     _moduleSpacing = varMap.value("module spacing").toDouble();
+    _nbModules = varMap.value("number of modules").toUInt();
 }
 
 /*!
@@ -251,6 +252,7 @@ QVariant CylindricalDetector::toVariant() const
 
     ret.insert("angulation per module", _angulationPerModule);
     ret.insert("module spacing", _moduleSpacing);
+    ret.insert("number of modules", _nbModules);
 
     return ret;
 }

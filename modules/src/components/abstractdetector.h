@@ -217,6 +217,7 @@ inline QString AbstractDetector::info() const
     // clang-format off
     ret +=
        typeInfoString(typeid(this)) +
+       "\tNb. of modules: "            + QString::number(nbDetectorModules()) + "\n"
        "\tNb. of pixels per module: "  + QString::number(_nbPixelPerModule.width()) + " x " +
                                          QString::number(_nbPixelPerModule.height()) + "\n"
        "\tPixel dimensions: "          + QString::number(_pixelDimensions.width()) + " mm x " +

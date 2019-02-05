@@ -2,7 +2,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_COMPONENT(GenericBeamModifier)
+DECLARE_JSON_COMPATIBLE_TYPE(GenericBeamModifier)
 
 /*!
  * Constructs a GenericBeamModifier object named \a name.

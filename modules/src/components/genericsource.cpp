@@ -4,7 +4,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_COMPONENT(GenericSource)
+DECLARE_JSON_COMPATIBLE_TYPE(GenericSource)
 
 GenericSource::GenericSource(const QJsonObject& json)
     : AbstractSource(defaultName())

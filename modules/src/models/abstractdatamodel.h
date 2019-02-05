@@ -171,20 +171,6 @@ private:                                                                        
     template<class>                                                                                \
     friend struct SerializationInterface::RegisterWithJsonSerializer;
 
-/*!
- * \def DECLARE_JSON_COMPATIBLE_MODEL(dataModelClassName_woNamespace)
- *
- * Declares a global variable for a certain data model. Its initialization registers this data model
- * with the JsonSerializer. The argument of this macro must be the name of the concrete data model
- * that should be registered. The name must not contain any namespace, which can be achieved by
- * using this macro inside the according namespace.
- *
- * The global variable name is `JSON_SERIALIZER_KNOWS_MODEL_<dataModelClassName_woNamespace>`.
- */
-#define DECLARE_JSON_COMPATIBLE_MODEL(dataModelClassName_woNamespace)                              \
-    CTL::SerializationInterface::RegisterWithJsonSerializer<dataModelClassName_woNamespace>        \
-    JSON_SERIALIZER_KNOWS_MODEL_ ## dataModelClassName_woNamespace;
-
 
 // implementations
 inline int AbstractDataModel::type() const { return Type; }

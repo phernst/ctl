@@ -3,7 +3,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_COMPONENT(SystemComponent)
+DECLARE_JSON_COMPATIBLE_TYPE(SystemComponent)
 
 /*!
  * Constructs a component with the name \a name. If no name is passed, it defaults to

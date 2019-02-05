@@ -2,7 +2,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_COMPONENT(FlatPanelDetector)
+DECLARE_JSON_COMPATIBLE_TYPE(FlatPanelDetector)
 
 FlatPanelDetector::FlatPanelDetector(const QJsonObject &json)
     : AbstractDetector(defaultName())
