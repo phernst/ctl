@@ -55,9 +55,9 @@ public:
     enum { Type = 0, UserType = 65536 };
 
     template <class ModelType>
-    struct RegisterToJsonParser
+    struct RegisterWithJsonSerializer
     {
-        RegisterToJsonParser();
+        RegisterWithJsonSerializer();
     };
 
     // ctors etc.
@@ -150,7 +150,7 @@ inline int SystemComponent::type() const { return Type; }
 inline int SystemComponent::elementalType() const { return Type; }
 
 template<class ModelType>
-SystemComponent::RegisterToJsonParser<ModelType>::RegisterToJsonParser()
+SystemComponent::RegisterWithJsonSerializer<ModelType>::RegisterWithJsonSerializer()
 {
     auto factoryFunction = [](const QVariant& variant) -> SystemComponent*
     {
@@ -190,26 +190,26 @@ public:                                                                         
                                                                                                    \
 private:                                                                                           \
     template<class>                                                                                \
-    friend struct SystemComponent::RegisterToJsonParser;
+    friend struct SystemComponent::RegisterWithJsonSerializer;
 
 /*
     template<class ModelType>                                                                      \
-    friend SystemComponent::RegisterToJsonParser<ModelType>::RegisterToJsonParser();
+    friend SystemComponent::RegisterWithJsonSerializer<ModelType>::RegisterWithJsonSerializer();
 */
 
 /*!
  * \def DECLARE_JSON_COMPATIBLE_COMPONENT(componentClassName_woNamespace)
  *
  * Declares a global variable for a certain system component. Its initialization registers this
- * component to the JsonSerializer. The argument of this macro must be the name of the concrete
+ * component with the JsonSerializer. The argument of this macro must be the name of the concrete
  * component that should be registered. The name must not contain any namespace, which can be
  * achieved by using this macro inside the according namespace.
  *
- * The name of the globar variable is `JSON_PARSER_KNOWS_COMP_<componentClassName_woNamespace>`.
+ * The global variable name is `JSON_SERIALIZER_KNOWS_COMP_<componentClassName_woNamespace>`.
  */
-#define DECLARE_JSON_COMPATIBLE_COMPONENT(componentClassName_woNamespace)                              \
-    CTL::SystemComponent::RegisterToJsonParser<componentClassName_woNamespace>                   \
-    JSON_PARSER_KNOWS_COMP_ ## componentClassName_woNamespace;
+#define DECLARE_JSON_COMPATIBLE_COMPONENT(componentClassName_woNamespace)                        \
+    CTL::SystemComponent::RegisterWithJsonSerializer<componentClassName_woNamespace>             \
+    JSON_SERIALIZER_KNOWS_COMP_ ## componentClassName_woNamespace;
 
 
 /*!

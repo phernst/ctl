@@ -53,9 +53,9 @@ public:
     enum { Type = 0, UserType = 65536 };
 
     template <class ModelType>
-    struct RegisterToJsonParser
+    struct RegisterWithJsonSerializer
     {
-        RegisterToJsonParser();
+        RegisterWithJsonSerializer();
     };
 
     virtual ~AbstractDataModel() = default;
@@ -180,15 +180,15 @@ private:                                                                        
  * \def DECLARE_JSON_COMPATIBLE_MODEL(dataModelClassName_woNamespace)
  *
  * Declares a global variable for a certain data model. Its initialization registers this data model
- * to the JsonModelParser. The argument of this macro must be the name of the concrete data model
+ * with the JsonSerializer. The argument of this macro must be the name of the concrete data model
  * that should be registered. The name must not contain any namespace, which can be achieved by
  * using this macro inside the according namespace.
  *
- * The name of the globar variable is `JSON_PARSER_KNOWS_MODEL_<dataModelClassName_woNamespace>`.
+ * The global variable name is `JSON_SERIALIZER_KNOWS_MODEL_<dataModelClassName_woNamespace>`.
  */
 #define DECLARE_JSON_COMPATIBLE_MODEL(dataModelClassName_woNamespace)                              \
-    CTL::AbstractDataModel::RegisterToJsonParser<dataModelClassName_woNamespace>                   \
-    JSON_PARSER_KNOWS_MODEL_ ## dataModelClassName_woNamespace;
+    CTL::AbstractDataModel::RegisterWithJsonSerializer<dataModelClassName_woNamespace>             \
+    JSON_SERIALIZER_KNOWS_MODEL_ ## dataModelClassName_woNamespace;
 
 
 // implementations
@@ -247,7 +247,7 @@ inline DataModelPtr& DataModelPtr::operator=(const DataModelPtr &other)
 
 
 template<class ModelType>
-AbstractDataModel::RegisterToJsonParser<ModelType>::RegisterToJsonParser()
+AbstractDataModel::RegisterWithJsonSerializer<ModelType>::RegisterWithJsonSerializer()
 {
     auto factoryFunction = [](const QVariant& variant) -> AbstractDataModel*
     {
