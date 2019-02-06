@@ -187,7 +187,7 @@ void AcquisitionSetup::fromVariant(const QVariant &variant)
     auto varMap = variant.toMap();
 
     CTsystem system;
-    system.fromVariant(varMap.value("system"));
+    system.fromVariant(varMap.value("CT system"));
     this->resetSystem(std::move(system));
 
     QVariantList viewVarList = varMap.value("views").toList();
