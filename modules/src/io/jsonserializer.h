@@ -76,14 +76,27 @@ JsonSerializer::RegisterWithJsonSerializer<SerializableType>::RegisterWithJsonSe
         a->fromVariant(variant);
         return a;
     };
+
+    auto& serializer = JsonSerializer::instance();
     if(std::is_convertible<SerializableType*, SystemComponent*>::value)
-        JsonSerializer::instance()._componentFactories.insert(SerializableType::Type, factoryFunction);
+    {
+        Q_ASSERT(!serializer._componentFactories.contains(SerializableType::Type));
+        serializer._componentFactories.insert(SerializableType::Type, factoryFunction);
+    }
     else if(std::is_convertible<SerializableType*, AbstractDataModel*>::value)
-        JsonSerializer::instance()._modelFactories.insert(SerializableType::Type, factoryFunction);
+    {
+        Q_ASSERT(!serializer._modelFactories.contains(SerializableType::Type));
+        serializer._modelFactories.insert(SerializableType::Type, factoryFunction);
+    }
     else if(std::is_convertible<SerializableType*, AbstractPrepareStep*>::value)
-        JsonSerializer::instance()._prepareStepFactories.insert(SerializableType::Type, factoryFunction);
+    {
+        Q_ASSERT(!serializer._prepareStepFactories.contains(SerializableType::Type));
+        serializer._prepareStepFactories.insert(SerializableType::Type, factoryFunction);
+    }
     else
+    {
         Q_ASSERT_X(false, "RegisterWithJsonSerializer", "try a registration of an unknown type");
+    }
 }
 
 /*!
