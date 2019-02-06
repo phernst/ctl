@@ -44,6 +44,7 @@ public:
     static AbstractPrepareStep* deserializePrepareStep(const QString& fileName);
     static CTsystem* deserializeSystem(const QString& fileName);
 
+    static AbstractDataModel* parseDataModel(const QVariant& variant);
 private:
     // private ctor & non-copyable
     JsonSerializer() = default;
@@ -58,7 +59,6 @@ private:
     // functions that parse the QVariant in order to create a concrete system component, data
     // model, or prepare step
     static SystemComponent* parseComponent(const QVariant& variant);
-    static AbstractDataModel* parseDataModel(const QVariant& variant);
     static AbstractPrepareStep* parsePrepareStep(const QVariant& variant);
 
     // map that maps a type ID to the factory function of a data model

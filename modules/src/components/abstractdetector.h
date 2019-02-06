@@ -281,6 +281,12 @@ inline void AbstractDetector::fromVariant(const QVariant& variant)
     auto pixelDim = varMap.value("pixel dimensions").toMap();
     _pixelDimensions.setWidth(pixelDim.value("width").toDouble());
     _pixelDimensions.setHeight(pixelDim.value("height").toDouble());
+
+    QVariant saturationModel = varMap.value("saturation model");
+    _saturationModel.ptr.reset(JsonSerializer::parseDataModel(saturationModel));
+
+    int satModTypeVal = varMap.value("saturation model type").toMap().value("enum value").toInt();
+    _saturationModelType = SaturationModelType(satModTypeVal);
 }
 
 /*!
@@ -299,8 +305,17 @@ inline QVariant AbstractDetector::toVariant() const
     pixelDim.insert("width",_pixelDimensions.width());
     pixelDim.insert("height", _pixelDimensions.height());
 
+    QVariant saturationModel = hasSaturationModel() ? _saturationModel.ptr->toVariant()
+                                                    : QVariant();
+
+    QVariantMap satModelType;
+    satModelType.insert("enum value", _saturationModelType);
+    satModelType.insert("meaning", "0: Extinction, 1: Intensity, 2: Undefined");
+
     ret.insert("pixel per module", nbPixels);
     ret.insert("pixel dimensions", pixelDim);
+    ret.insert("saturation model", saturationModel);
+    ret.insert("saturation model type", satModelType);
 
     return ret;
 }
