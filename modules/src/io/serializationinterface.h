@@ -67,6 +67,8 @@ inline QVariant SerializationInterface::toVariant() const
  * - AbstractDataModel
  * - AbstractPrepareStep
  * - SystemComponent
+ * Note that \a newIndex within one of the top three categories has to be unique for each class that
+ * uses this macro.
  */
 #define CTL_TYPE_ID(newIndex)                                                                      \
 public:                                                                                            \
