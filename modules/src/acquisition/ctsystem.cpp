@@ -253,7 +253,7 @@ QVariant CTsystem::toVariant() const
     QVariantList componentVariantList;
 
     for(const auto& comp : _componentList)
-        componentVariantList.append(comp->toVariant());
+        componentVariantList.append(comp ? comp->toVariant() : QVariant());
 
     ret.insert("components", componentVariantList);
 

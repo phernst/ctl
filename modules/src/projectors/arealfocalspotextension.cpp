@@ -107,8 +107,8 @@ ProjectionData ArealFocalSpotExtension::project(const VolumeData& volume)
             auto intensityMod = std::make_shared<prepare::SourceParam>();
             intensityMod->setFluxModifier(xraySource->fluxModifier() / nbSamplingPts);
 
-            tmpSetup.view(view).prepareSteps.push_back(displacer);
-            tmpSetup.view(view).prepareSteps.push_back(intensityMod);
+            tmpSetup.view(view).addPrepareStep(displacer);
+            tmpSetup.view(view).addPrepareStep(intensityMod);
         }
 
         // re-configure projector

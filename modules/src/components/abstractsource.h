@@ -380,7 +380,7 @@ inline QVariant AbstractSource::toVariant() const
     fsSize.insert("width", _focalSpotSize.width());
     fsSize.insert("height", _focalSpotSize.height());
 
-    QVariant specMod = _spectrumModel->toVariant();
+    QVariant specMod = _spectrumModel.ptr ? _spectrumModel->toVariant() : QVariant();
 
     ret.insert("focal spot position", fsPos);
     ret.insert("focal spot size", fsSize);

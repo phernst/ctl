@@ -43,7 +43,7 @@ ProjectionData DynamicProjector::project(AbstractDynamicVoxelVolume* volume)
 
     for(uint view = 0, nbViews = _setup.nbViews(); view < nbViews; ++view)
     {
-        volume->setTime(_setup.view(view).timeStamp);
+        volume->setTime(_setup.view(view).timeStamp());
         _setup.prepareView(view);
 
         _projector->configure({ *_setup.system(), 1 }, *_projectorConfig);
