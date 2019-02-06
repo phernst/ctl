@@ -47,7 +47,7 @@ QVariant AcquisitionSetup::View::toVariant() const
     QVariantMap ret;
 
     QVariantList prepareStepVarList;
-    prepareStepVarList.reserve(_prepareSteps.size());
+    prepareStepVarList.reserve(int(_prepareSteps.size()));
     for(const auto& prep : _prepareSteps)
         prepareStepVarList.append(prep->toVariant());
 
@@ -224,7 +224,7 @@ QVariant AcquisitionSetup::toVariant() const
     QVariantMap ret;
 
     QVariantList viewVarList;
-    viewVarList.reserve(_views.size());
+    viewVarList.reserve(int(_views.size()));
     for(const auto& v : _views)
         viewVarList.append(v.toVariant());
 
