@@ -38,7 +38,7 @@ inline QVariant SerializationInterface::toVariant() const
  * it overrides the function `int type() const` so that it returns the \a newIndex.
  *
  * Moreover, the `JsonSerializer::RegisterWithJsonSerializer` class is declared a as a firend class.
- * This allows access to a possible private constructor of the class using this macro.
+ * This allows access to a possible private default constructor of the class using this macro.
  *
  * The usage of the macro should be in a class definition as follows:
  * \code
@@ -53,6 +53,20 @@ inline QVariant SerializationInterface::toVariant() const
  * // ...
  * };
  * \endcode
+ *
+ * or further subclasses can be typed like
+ * \code
+ * class MySubSerializableClass : public MySerializableClass
+ * {
+ *     CTL_TYPE_ID(43)
+ * // ...
+ * };
+ * \endcode
+ *
+ * So far, the JsonSerializer can only mangage the serialization of the following three (base) types
+ * - AbstractDataModel
+ * - AbstractPrepareStep
+ * - SystemComponent
  */
 #define CTL_TYPE_ID(newIndex)                                                                      \
 public:                                                                                            \
