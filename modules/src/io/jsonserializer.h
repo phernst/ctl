@@ -11,14 +11,14 @@ class JsonSerializer : public AbstractSerializer
 {
     // implementation of serialization interface
     public: void serialize(const SerializationInterface& serializableObject,
-                   const QString& fileName) const override;
+                           const QString& fileName) const override;
 
     // implementation of deserialization interface
-    public: SystemComponent* deserializeComponent(const QString& fileName) const override;
-    public: AbstractDataModel* deserializeDataModel(const QString& fileName) const override;
-    public: AbstractPrepareStep* deserializePrepareStep(const QString& fileName) const override;
-    public: CTsystem* deserializeSystem(const QString& fileName) const override;
-    public: AcquisitionSetup* deserializeAquisitionSetup(const QString& fileName) const override;
+    public: std::unique_ptr<SystemComponent> deserializeComponent(const QString& fileName) const override;
+    public: std::unique_ptr<AbstractDataModel> deserializeDataModel(const QString& fileName) const override;
+    public: std::unique_ptr<AbstractPrepareStep> deserializePrepareStep(const QString& fileName) const override;
+    public: std::unique_ptr<CTsystem> deserializeSystem(const QString& fileName) const override;
+    public: std::unique_ptr<AcquisitionSetup> deserializeAquisitionSetup(const QString& fileName) const override;
 
 private:
     // methods

@@ -25,11 +25,11 @@ public:
                                   const QString& fileName) const = 0;
 
     // deserialization interface
-    public:virtual SystemComponent* deserializeComponent(const QString& fileName) const = 0;
-    public:virtual AbstractDataModel* deserializeDataModel(const QString& fileName) const = 0;
-    public:virtual AbstractPrepareStep* deserializePrepareStep(const QString& fileName) const = 0;
-    public:virtual CTsystem* deserializeSystem(const QString& fileName) const = 0;
-    public:virtual AcquisitionSetup* deserializeAquisitionSetup(const QString& fileName) const = 0;
+    public:virtual std::unique_ptr<SystemComponent> deserializeComponent(const QString& fileName) const = 0;
+    public:virtual std::unique_ptr<AbstractDataModel> deserializeDataModel(const QString& fileName) const = 0;
+    public:virtual std::unique_ptr<AbstractPrepareStep> deserializePrepareStep(const QString& fileName) const = 0;
+    public:virtual std::unique_ptr<CTsystem> deserializeSystem(const QString& fileName) const = 0;
+    public:virtual std::unique_ptr<AcquisitionSetup> deserializeAquisitionSetup(const QString& fileName) const = 0;
 };
 
 inline void AbstractSerializer::serialize(const AbstractDataModel& model, const QString& fileName) const

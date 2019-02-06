@@ -22,24 +22,29 @@ void JsonSerializer::serialize(const SerializationInterface& serializableObject,
     saveFile.close();
 }
 
-SystemComponent* JsonSerializer::deserializeComponent(const QString& fileName) const
+std::unique_ptr<SystemComponent> JsonSerializer::deserializeComponent(const QString& fileName) const
 {
-    return SerializationHelper::parseComponent(variantFromJsonFile(fileName));
+    return std::unique_ptr<SystemComponent>(
+        SerializationHelper::parseComponent(variantFromJsonFile(fileName)));
 }
 
-AbstractDataModel* JsonSerializer::deserializeDataModel(const QString& fileName) const
+std::unique_ptr<AbstractDataModel>
+JsonSerializer::deserializeDataModel(const QString& fileName) const
 {
-    return SerializationHelper::parseDataModel(variantFromJsonFile(fileName));
+    return std::unique_ptr<AbstractDataModel>(
+        SerializationHelper::parseDataModel(variantFromJsonFile(fileName)));
 }
 
-AbstractPrepareStep* JsonSerializer::deserializePrepareStep(const QString& fileName) const
+std::unique_ptr<AbstractPrepareStep>
+JsonSerializer::deserializePrepareStep(const QString& fileName) const
 {
-    return SerializationHelper::parsePrepareStep(variantFromJsonFile(fileName));
+    return std::unique_ptr<AbstractPrepareStep>(
+        SerializationHelper::parsePrepareStep(variantFromJsonFile(fileName)));
 }
 
-CTsystem* JsonSerializer::deserializeSystem(const QString& fileName) const
+std::unique_ptr<CTsystem> JsonSerializer::deserializeSystem(const QString& fileName) const
 {
-    auto ret = new CTsystem;
+    std::unique_ptr<CTsystem> ret(new CTsystem);
 
     auto variant = variantFromJsonFile(fileName);
     ret->fromVariant(variant);
@@ -47,9 +52,10 @@ CTsystem* JsonSerializer::deserializeSystem(const QString& fileName) const
     return ret;
 }
 
-AcquisitionSetup* JsonSerializer::deserializeAquisitionSetup(const QString& fileName) const
+std::unique_ptr<AcquisitionSetup>
+JsonSerializer::deserializeAquisitionSetup(const QString& fileName) const
 {
-    auto ret = new AcquisitionSetup;
+    std::unique_ptr<AcquisitionSetup> ret(new AcquisitionSetup);
 
     auto variant = variantFromJsonFile(fileName);
     ret->fromVariant(variant);

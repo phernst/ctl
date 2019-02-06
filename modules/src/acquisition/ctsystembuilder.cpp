@@ -4,7 +4,7 @@
 
 namespace CTL {
 
-CTsystem CTsystemBuilder::createFromBlueprint(const AbstractCTsystemBlueprint &systemBlueprint)
+CTsystem CTsystemBuilder::createFromBlueprint(const AbstractCTsystemBlueprint& systemBlueprint)
 {
     CTsystem ret(systemBlueprint.systemName());
 
@@ -26,10 +26,9 @@ CTsystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
     JsonSerializer serializer;
     auto deserializedSys = serializer.deserializeSystem(fileName);
 
-    CTsystem system(*std::move(deserializedSys));
-    delete deserializedSys;
+    CTsystem ret(std::move(*deserializedSys));
 
-    return system;
+    return ret;
 }
 
-}
+} // namespace CTL
