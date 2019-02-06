@@ -162,7 +162,7 @@ inline AbstractDetector::ModuleLocation AbstractDetector::moduleLocation(uint mo
  */
 inline const AbstractDataModel* AbstractDetector::saturationModel() const
 {
-    return _saturationModel.ptr.get();
+    return _saturationModel.get();
 }
 
 /*!
@@ -326,7 +326,7 @@ inline QVariant AbstractDetector::toVariant() const
  */
 inline void AbstractDetector::setSaturationModel(AbstractDataModel *model, AbstractDetector::SaturationModelType type)
 {
-    _saturationModel.ptr.reset(model);
+    _saturationModel.reset(model);
     _saturationModelType = type;
 }
 

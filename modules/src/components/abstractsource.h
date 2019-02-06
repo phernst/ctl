@@ -202,7 +202,7 @@ inline const Vector3x1& AbstractSource::focalSpotPosition() const { return _foca
  */
 inline const AbstractXraySpectrumModel *AbstractSource::spectrumModel() const
 {
-    return static_cast<AbstractXraySpectrumModel*>(_spectrumModel.ptr.get());
+    return static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get());
 }
 
 /*!
@@ -283,7 +283,7 @@ inline QString AbstractSource::info() const
  */
 inline void AbstractSource::setSpectrumModel(AbstractXraySpectrumModel* model)
 {
-    _spectrumModel.ptr.reset(model);
+    _spectrumModel.reset(model);
 }
 
 /*!
@@ -313,7 +313,7 @@ inline void AbstractSource::read(const QJsonObject& json)
 
     _focalSpotSize = fsQSize;
     _focalSpotPosition = fsPosVec;
-    _spectrumModel.ptr->fromVariant(specMod);
+    _spectrumModel->fromVariant(specMod);
 }
 
 /*!
@@ -333,7 +333,7 @@ inline void AbstractSource::write(QJsonObject& json) const
     fsSize.insert("width", _focalSpotSize.width());
     fsSize.insert("height", _focalSpotSize.height());
 
-    QJsonValue specMod = QJsonValue::fromVariant(_spectrumModel.ptr->toVariant());
+    QJsonValue specMod = QJsonValue::fromVariant(_spectrumModel->toVariant());
 
     json.insert("focal spot position", fsPos);
     json.insert("focal spot size", fsSize);
@@ -360,7 +360,7 @@ inline void AbstractSource::fromVariant(const QVariant& variant)
 
     _focalSpotSize = fsQSize;
     _focalSpotPosition = fsPosVec;
-    _spectrumModel.ptr.reset(JsonSerializer::parseDataModel(specMod));
+    _spectrumModel.reset(JsonSerializer::parseDataModel(specMod));
 }
 
 /*!
@@ -380,7 +380,7 @@ inline QVariant AbstractSource::toVariant() const
     fsSize.insert("width", _focalSpotSize.width());
     fsSize.insert("height", _focalSpotSize.height());
 
-    QVariant specMod = _spectrumModel.ptr->toVariant();
+    QVariant specMod = _spectrumModel->toVariant();
 
     ret.insert("focal spot position", fsPos);
     ret.insert("focal spot size", fsSize);

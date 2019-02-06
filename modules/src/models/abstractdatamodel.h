@@ -74,6 +74,12 @@ struct DataModelPtr
     DataModelPtr& operator=(const DataModelPtr& other);
     DataModelPtr& operator=(DataModelPtr&& other) = default;
 
+    AbstractDataModel* operator->() const;
+    AbstractDataModel& operator*() const;
+
+    AbstractDataModel* get() const;
+    void reset(AbstractDataModel* model = nullptr);
+
     std::unique_ptr<AbstractDataModel> ptr;
 };
 
@@ -195,14 +201,34 @@ inline DataModelPtr::DataModelPtr(std::unique_ptr<AbstractDataModel> model)
 }
 
 inline DataModelPtr::DataModelPtr(const DataModelPtr& other)
-    : ptr(other.ptr ? other.ptr->clone() : nullptr)
+    : ptr(other.ptr ? other->clone() : nullptr)
 {
 }
 
 inline DataModelPtr& DataModelPtr::operator=(const DataModelPtr &other)
 {
-    ptr.reset(other.ptr ? other.ptr->clone() : nullptr);
-    return *this;
+    ptr.reset(other.ptr ? other->clone() : nullptr);
+        return *this;
+}
+
+inline AbstractDataModel* DataModelPtr::operator->() const
+{
+    return ptr.get();
+}
+
+inline AbstractDataModel& DataModelPtr::operator*() const
+{
+    return *ptr;
+}
+
+inline AbstractDataModel* DataModelPtr::get() const
+{
+    return ptr.get();
+}
+
+inline void DataModelPtr::reset(AbstractDataModel* model)
+{
+    ptr.reset(model);
 }
 
 } // namespace CTL
