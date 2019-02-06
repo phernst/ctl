@@ -40,18 +40,12 @@ public:
                   const Vector3x1& detectorPosition,
                   const Matrix3x3& detectorRotation,
                   const QString& name = defaultName());
-    GenericGantry(const QJsonObject& json);
-
 
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
-
-    // deprecated
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
 
     // setter methods
     void setDetectorLocation(const mat::Location& location);

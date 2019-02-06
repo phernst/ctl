@@ -6,12 +6,6 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(GenericSource)
 
-GenericSource::GenericSource(const QJsonObject& json)
-    : AbstractSource(defaultName())
-{
-    GenericSource::read(json);
-}
-
 GenericSource::GenericSource(const QString& name)
     : AbstractSource(name)
 {
@@ -44,17 +38,6 @@ QString GenericSource::info() const
 
     return ret;
 }
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-void GenericSource::read(const QJsonObject& json) { AbstractSource::read(json); }
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-void GenericSource::write(QJsonObject& json) const { AbstractSource::write(json); }
 
 /*!
  * Reads all member variables from the QVariant \a variant.

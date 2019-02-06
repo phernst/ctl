@@ -5,15 +5,6 @@ namespace CTL {
 DECLARE_SERIALIZABLE_TYPE(GenericGantry)
 
 /*!
- * Constructs a GenericGantry object based on the information specified in the QJsonObject \a json.
- */
-GenericGantry::GenericGantry(const QJsonObject& json)
-    : AbstractGantry(defaultName())
-{
-    GenericGantry::read(json);
-}
-
-/*!
  * Constructs a GenericGantry object named \a name.
  */
 GenericGantry::GenericGantry(const QString &name)
@@ -102,22 +93,6 @@ QString GenericGantry::defaultName()
     static const QString defName(QStringLiteral("Generic gantry"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
-}
-
-void GenericGantry::read(const QJsonObject &json)
-{
-    AbstractGantry::read(json);
-
-    _detectorLocation.fromVariant(json.value("detector location").toVariant());
-    _sourceLocation.fromVariant(json.value("source location").toVariant());
-}
-
-void GenericGantry::write(QJsonObject &json) const
-{
-    AbstractGantry::write(json);
-
-    json.insert("detector location", QJsonValue::fromVariant(_detectorLocation.toVariant()));
-    json.insert("source location", QJsonValue::fromVariant(_sourceLocation.toVariant()));
 }
 
 /*!

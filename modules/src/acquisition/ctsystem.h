@@ -130,10 +130,6 @@ public:
     CTsystem& operator<<(ComponentPtr component);
     CTsystem& operator<<(SystemComponent* component);
 
-    // JSON
-    virtual void read(const QJsonObject& json);
-    virtual void write(QJsonObject& json) const;
-
 private:
     QString _name; //!< The name of the system.
     std::vector<ComponentPtr> _componentList; //!< The list of components.

@@ -32,7 +32,7 @@ class CTsystemBuilder
 {
 public:
     static CTsystem createFromBlueprint(const AbstractCTsystemBlueprint& systemBlueprint);
-    static CTsystem createFromJSON(const QJsonObject& json);
+    static CTsystem createFromJSONFile(const QString& fileName);
 };
 
 } // namespace CTL

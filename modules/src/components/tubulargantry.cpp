@@ -7,15 +7,6 @@ namespace CTL {
 DECLARE_SERIALIZABLE_TYPE(TubularGantry)
 
 /*!
- * Constructs a TubularGantry object based on the information specified in the QJsonObject \a json.
- */
-TubularGantry::TubularGantry(const QJsonObject& json)
-    : AbstractGantry(defaultName())
-{
-    TubularGantry::read(json);
-}
-
-/*!
  * Constructs a TubularGantry with the dimensions \a sourceToDetectorDistance and \a
  * sourceToIsoCenterDistance. Optionally, the system configuration can be specified by \a
  * rotationAngle, \a pitchPosition and \a tiltAngle. If unspecified, these values default to zero.
@@ -194,28 +185,6 @@ QString TubularGantry::defaultName()
     static const QString defName(QStringLiteral("Tubular gantry"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
-}
-
-void TubularGantry::read(const QJsonObject &json)
-{
-    AbstractGantry::read(json);
-
-    _sourceToDetectorDistance = json.value("source-detector distance").toDouble();
-    _sourceToIsoCenterDistance = json.value("source-isocenter distance").toDouble();
-    _rotationAngle = json.value("rotation angle").toDouble();
-    _pitchPosition = json.value("pitch position").toDouble();
-    _tiltAngle = json.value("tilt angle").toDouble();
-}
-
-void TubularGantry::write(QJsonObject &json) const
-{
-    AbstractGantry::write(json);
-
-    json.insert("source-detector distance", _sourceToDetectorDistance);
-    json.insert("source-isocenter distance", _sourceToIsoCenterDistance);
-    json.insert("rotation angle", _rotationAngle);
-    json.insert("pitch position", _pitchPosition);
-    json.insert("tilt angle", _tiltAngle);
 }
 
 /*!

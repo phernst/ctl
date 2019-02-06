@@ -27,7 +27,6 @@ HEADERS += \
     $$PWD/src/components/genericdetector.h \
     $$PWD/src/components/genericgantry.h \
     $$PWD/src/components/genericsource.h \
-    $$PWD/src/components/jsonparser.h \
     $$PWD/src/components/systemcomponent.h \
     $$PWD/src/components/tubulargantry.h \
     $$PWD/src/components/xraylaser.h \

@@ -6,15 +6,6 @@ namespace CTL {
 DECLARE_SERIALIZABLE_TYPE(CarmGantry)
 
 /*!
- * Constructs a CarmGantry object based on the information specified in the QJsonObject \a json.
- */
-CarmGantry::CarmGantry(const QJsonObject& json)
-    : AbstractGantry(defaultName())
-{
-    CarmGantry::read(json);
-}
-
-/*!
  * Constructs a CarmGantry with a C-arm span (i.e. source-to-detector distance) of \a cArmSpan and
  * \a name. If not explicitly specified, the C-arm span defaults to 1000 mm.
  */
@@ -92,22 +83,6 @@ QString CarmGantry::defaultName()
     static const QString defName(QStringLiteral("C-arm gantry"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
-}
-
-void CarmGantry::read(const QJsonObject &json)
-{
-    AbstractGantry::read(json);
-
-    _cArmSpan = json.value("c-arm span").toDouble();
-    _location.fromVariant(json.value("location").toVariant());
-}
-
-void CarmGantry::write(QJsonObject &json) const
-{
-    AbstractGantry::write(json);
-
-    json.insert("c-arm span", _cArmSpan);
-    json.insert("location", QJsonValue::fromVariant(location().toVariant()));
 }
 
 /*!

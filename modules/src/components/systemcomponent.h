@@ -55,7 +55,6 @@ class SystemComponent : public SerializationInterface
 public:
     // ctors etc.
     SystemComponent(const QString& name = defaultName());
-    SystemComponent(const QJsonObject& json); // deprecated
     SystemComponent(const SystemComponent&) = default;
     SystemComponent(SystemComponent&&) = default;
     SystemComponent& operator=(const SystemComponent&) = default;
@@ -69,10 +68,6 @@ public:
 
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
-
-    // deprecated
-    virtual void read(const QJsonObject& json); // JSON
-    virtual void write(QJsonObject& json) const; // JSON
 
     // getter methods
     const QString& name() const;

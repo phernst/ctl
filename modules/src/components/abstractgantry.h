@@ -75,10 +75,6 @@ public:
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
-    // deprecated
-    void read(const QJsonObject& json) override; // JSON
-    void write(QJsonObject& json) const override; // JSON
-
     // getter methods
     mat::Location sourceLocation() const;
     mat::Location detectorLocation() const;
@@ -310,23 +306,6 @@ inline QString AbstractGantry::info() const
     ret += (this->type() == AbstractGantry::Type) ? "}\n" : "";
 
     return ret;
-}
-
-inline void AbstractGantry::read(const QJsonObject& json)
-{
-    SystemComponent::read(json);
-
-    _detectorDisplacement.fromVariant(json.value("detector displacement").toVariant());
-    _sourceDisplacement.fromVariant(json.value("source displacement").toVariant());
-}
-
-inline void AbstractGantry::write(QJsonObject& json) const
-{
-    SystemComponent::write(json);
-
-    json.insert("detector displacement",
-                QJsonValue::fromVariant(_detectorDisplacement.toVariant()));
-    json.insert("source displacement", QJsonValue::fromVariant(_sourceDisplacement.toVariant()));
 }
 
 /*!

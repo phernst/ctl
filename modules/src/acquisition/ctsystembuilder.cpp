@@ -1,5 +1,6 @@
 #include "ctsystembuilder.h"
 #include "ctsystem.h"
+#include "io/jsonserializer.h"
 
 namespace CTL {
 
@@ -20,17 +21,15 @@ CTsystem CTsystemBuilder::createFromBlueprint(const AbstractCTsystemBlueprint &s
     return ret;
 }
 
-CTsystem CTsystemBuilder::createFromJSON(const QJsonObject &json)
+CTsystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
 {
-    auto name = json.value("name").toString();
+    JsonSerializer serializer;
+    auto deserializedSys = serializer.deserializeSystem(fileName);
 
-    CTsystem ret(name);
+    CTsystem system(*std::move(deserializedSys));
+    delete deserializedSys;
 
-    auto jsonArray = json.value("components").toArray();
-    for(auto comp : jsonArray)
-        ret.addComponent(makeComponentFromJson(comp.toObject()));
-
-    return ret;
+    return system;
 }
 
 }

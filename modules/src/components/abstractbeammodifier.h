@@ -51,10 +51,6 @@ public:
 
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
-
-    // deprecated
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
 };
 
 /*!
@@ -76,23 +72,6 @@ inline QString AbstractBeamModifier::info() const
     ret += (this->type() == AbstractBeamModifier::Type) ? "}\n" : "";
 
     return ret;
-}
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-inline void AbstractBeamModifier::read(const QJsonObject &json)
-{
-    SystemComponent::read(json);
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-inline void AbstractBeamModifier::write(QJsonObject &json) const
-{
-    SystemComponent::write(json);
 }
 
 /*!

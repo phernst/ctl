@@ -10,13 +10,6 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(CylindricalDetector)
 
-CylindricalDetector::CylindricalDetector(const QJsonObject &json)
-    : AbstractDetector(defaultName())
-{
-    CylindricalDetector::read(json);
-    //computeModuleLocations();
-}
-
 CylindricalDetector::CylindricalDetector(const QString &name)
     : AbstractDetector(name)
 {
@@ -204,29 +197,6 @@ QVector<double> CylindricalDetector::moduleAngulations() const
         modAngul[module] = (double(module) - double(nbModules) * 0.5 + 0.5) * _angulationPerModule;
 
     return modAngul;
-}
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-void CylindricalDetector::read(const QJsonObject &json)
-{
-    AbstractDetector::read(json);
-
-    _angulationPerModule = json.value("angulation per module").toDouble();
-    _moduleSpacing = json.value("module spacing").toDouble();
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-void CylindricalDetector::write(QJsonObject &json) const
-{
-    AbstractDetector::write(json);
-
-    json.insert("angulation per module", _angulationPerModule);
-    json.insert("module spacing", _moduleSpacing);
 }
 
 /*!

@@ -12,12 +12,6 @@ GenericBeamModifier::GenericBeamModifier(const QString& name)
 {
 }
 
-GenericBeamModifier::GenericBeamModifier(const QJsonObject& json)
-    : AbstractBeamModifier(defaultName())
-{
-    GenericBeamModifier::read(json);
-}
-
 IntervalDataSeries GenericBeamModifier::modify(const IntervalDataSeries &inputSpectrum, double, double)
 {
     return inputSpectrum;
@@ -49,23 +43,6 @@ QString GenericBeamModifier::defaultName()
     static const QString defName(QStringLiteral("Generic beam modifier"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
-}
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-void GenericBeamModifier::read(const QJsonObject &json)
-{
-    AbstractBeamModifier::read(json);
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-void GenericBeamModifier::write(QJsonObject &json) const
-{
-    AbstractBeamModifier::write(json);
 }
 
 /*!

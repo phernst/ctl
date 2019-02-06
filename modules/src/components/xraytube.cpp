@@ -30,13 +30,6 @@ XrayTube::XrayTube(const QString &name)
 {
 }
 
-XrayTube::XrayTube(const QJsonObject& json)
-    : AbstractSource(defaultName())
-{
-    XrayTube::read(json);
-}
-
-
 QString XrayTube::info() const
 {
     QString ret(AbstractSource::info());
@@ -95,29 +88,6 @@ void XrayTube::setSpectrumModel(AbstractXraySpectrumModel *model)
         throw std::runtime_error("Spectral model could not be set: not of type AbstractXraySpectrumModel");
 
     _spectrumModel.reset(model);
-}
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-void XrayTube::read(const QJsonObject &json)
-{
-    AbstractSource::read(json);
-
-    _tubeVoltage = json.value("tube voltage").toDouble();
-    _emissionCurrent = json.value("emission current").toDouble();
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-void XrayTube::write(QJsonObject &json) const
-{
-    AbstractSource::write(json);
-
-    json.insert("tube voltage", _tubeVoltage);
-    json.insert("emission current", _emissionCurrent);
 }
 
 /*!

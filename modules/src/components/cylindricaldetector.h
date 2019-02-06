@@ -31,7 +31,6 @@ public:
                         double angulationPerModule,
                         double moduleSpacing,
                         const QString& name = defaultName());
-    CylindricalDetector(const QJsonObject& json);
 
     static CylindricalDetector fromAngulationAndSpacing(const QSize& nbPixelPerModule,
                                                         const QSizeF& pixelDimensions,
@@ -51,10 +50,6 @@ public:
     QString info() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
-
-    // deprecated
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
 
     // getter methods
     double angulationOfModule(uint module) const;

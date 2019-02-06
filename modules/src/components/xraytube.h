@@ -26,7 +26,6 @@ public:
              const QString &name = defaultName());
     XrayTube(const QSizeF &focalSpotSize, double tubeVoltage, double emissionCurrent, const QString &name = defaultName());
     XrayTube(double tubeVoltage, double emissionCurrent, const QString &name = defaultName());
-    XrayTube(const QJsonObject& json);
 
     // virtual methods
     SystemComponent* clone() const override;
@@ -34,10 +33,6 @@ public:
     void setSpectrumModel(AbstractXraySpectrumModel *model) override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
-
-    // deprecated
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
 
     // getter methods
     double tubeVoltage() const;

@@ -32,7 +32,6 @@ class TubularGantry : public AbstractGantry
     protected: mat::Location nominalSourceLocation() const override;
 
 public:
-    TubularGantry(const QJsonObject& json);
     TubularGantry(double sourceToDetectorDistance,
                   double sourceToIsoCenterDistance,
                   double rotationAngle = 0.0,
@@ -49,10 +48,6 @@ public:
     QString info() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
-
-    // deprecated
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
 
     // setter methods
     void setPitchPosition(double position);

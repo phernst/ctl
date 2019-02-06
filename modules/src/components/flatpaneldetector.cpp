@@ -4,12 +4,6 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(FlatPanelDetector)
 
-FlatPanelDetector::FlatPanelDetector(const QJsonObject &json)
-    : AbstractDetector(defaultName())
-{
-    FlatPanelDetector::read(json);
-}
-
 /*!
  * Constructs a FlatPanelDetector with \a nbPixels pixels which have a dimension specified by
  * \a pixelDimensions.
@@ -53,23 +47,6 @@ SystemComponent* FlatPanelDetector::clone() const { return new FlatPanelDetector
 QVector<AbstractDetector::ModuleLocation> FlatPanelDetector::moduleLocations() const
 {
     return QVector<ModuleLocation>(1);
-}
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-void FlatPanelDetector::read(const QJsonObject &json)
-{
-    AbstractDetector::read(json);
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-void FlatPanelDetector::write(QJsonObject &json) const
-{
-    AbstractDetector::write(json);
 }
 
 /*!

@@ -79,10 +79,6 @@ public:
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
-    // deprecated
-    void read(const QJsonObject& json) override; // JSON
-    void write(QJsonObject& json) const override; // JSON
-
     // getter methods
     double photonFlux() const;
     double fluxModifier() const;
@@ -292,52 +288,6 @@ inline void AbstractSource::setSpectrumModel(AbstractXraySpectrumModel* model)
 inline void AbstractSource::setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model)
 {
     _spectrumModel.ptr = std::move(model);
-}
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-inline void AbstractSource::read(const QJsonObject& json)
-{
-    SystemComponent::read(json);
-
-    QJsonArray fsPos = json.value("focal spot position").toArray();
-    Vector3x1 fsPosVec({ fsPos.at(0).toDouble(), fsPos.at(1).toDouble(), fsPos.at(2).toDouble() });
-
-    QJsonObject fsSize = json.value("focal spot size").toObject();
-    QSizeF fsQSize;
-    fsQSize.setWidth(fsSize.value("width").toDouble());
-    fsQSize.setHeight(fsSize.value("height").toDouble());
-
-    QVariant specMod = json.value("spectrum model").toVariant();
-
-    _focalSpotSize = fsQSize;
-    _focalSpotPosition = fsPosVec;
-    _spectrumModel->fromVariant(specMod);
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-inline void AbstractSource::write(QJsonObject& json) const
-{
-    SystemComponent::write(json);
-
-    QJsonArray fsPos;
-    fsPos.append(_focalSpotPosition.get<0>());
-    fsPos.append(_focalSpotPosition.get<1>());
-    fsPos.append(_focalSpotPosition.get<2>());
-
-    QJsonObject fsSize;
-    fsSize.insert("width", _focalSpotSize.width());
-    fsSize.insert("height", _focalSpotSize.height());
-
-    QJsonValue specMod = QJsonValue::fromVariant(_spectrumModel->toVariant());
-
-    json.insert("focal spot position", fsPos);
-    json.insert("focal spot size", fsSize);
-    json.insert("spectrum model", specMod);
 }
 
 /*!

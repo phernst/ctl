@@ -197,34 +197,6 @@ QList<AbstractBeamModifier*> CTsystem::modifiers() const
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
- */
-void CTsystem::read(const QJsonObject &json)
-{
-    _name = json.value("name").toString();
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-void CTsystem::write(QJsonObject &json) const
-{
-    json.insert("name", _name);
-
-    QJsonArray componentArray;
-
-    for(const auto& comp : _componentList)
-    {
-        QJsonObject tmp;
-        comp->write(tmp);
-        componentArray.append(tmp);
-    }
-
-    json.insert("components", componentArray);
-}
-
-/*!
  * Reads all member variables from the QVariant \a variant.
  */
 void CTsystem::fromVariant(const QVariant &variant)

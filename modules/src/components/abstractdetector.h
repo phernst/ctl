@@ -67,10 +67,6 @@ public:
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
-    // deprecated
-    void read(const QJsonObject& json) override;  // JSON
-    void write(QJsonObject& json) const override; // JSON
-
     // setter methods
     void setSaturationModel(AbstractDataModel* model, SaturationModelType type);
     void setSaturationModel(std::unique_ptr<AbstractDataModel> model, SaturationModelType type);
@@ -227,42 +223,6 @@ inline QString AbstractDetector::info() const
     // clang-format on
 
     return ret;
-}
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-inline void AbstractDetector::read(const QJsonObject &json)
-{
-    SystemComponent::read(json);
-
-    QJsonObject nbPixels = json.value("pixel per module").toObject();
-    _nbPixelPerModule.setWidth(nbPixels.value("channels").toInt());
-    _nbPixelPerModule.setHeight(nbPixels.value("rows").toInt());
-
-    QJsonObject pixelDim = json.value("pixel dimensions").toObject();
-    _pixelDimensions.setWidth(pixelDim.value("width").toDouble());
-    _pixelDimensions.setHeight(pixelDim.value("height").toDouble());
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-inline void AbstractDetector::write(QJsonObject &json) const
-{
-    SystemComponent::write(json);
-
-    QJsonObject nbPixels;
-    nbPixels.insert("channels",_nbPixelPerModule.width());
-    nbPixels.insert("rows", _nbPixelPerModule.height());
-
-    QJsonObject pixelDim;
-    pixelDim.insert("width",_pixelDimensions.width());
-    pixelDim.insert("height", _pixelDimensions.height());
-
-    json.insert("pixel per module", nbPixels);
-    json.insert("pixel dimensions", pixelDim);
 }
 
 /*!

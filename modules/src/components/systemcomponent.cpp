@@ -1,5 +1,4 @@
 #include "systemcomponent.h"
-#include "jsonparser.h"
 
 namespace CTL {
 
@@ -13,11 +12,6 @@ SystemComponent::SystemComponent(const QString& name)
     : _name(name)
 {
 }
-
-/*!
- * Constructs a SystemComponent from a QJsonObject.
- */
-SystemComponent::SystemComponent(const QJsonObject& json) { SystemComponent::read(json); }
 
 /*!
  * Returns the default name for the component: "Generic system component".
@@ -61,22 +55,6 @@ QString SystemComponent::typeInfoString(const std::type_info& type)
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
- */
-void SystemComponent::read(const QJsonObject& json) { _name = json.value("name").toString(); }
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-void SystemComponent::write(QJsonObject& json) const
-{
-    json.insert("type-id", this->type());
-    json.insert("generic type-id", this->elementalType());
-    json.insert("name", _name);
-}
-
-/*!
  * Reads all member variables from the QVariant \a variant.
  */
 void SystemComponent::fromVariant(const QVariant& variant)
@@ -95,16 +73,6 @@ QVariant SystemComponent::toVariant()const
     ret.insert("generic type-id", this->elementalType());
     ret.insert("name", _name);
 
-    return ret;
-}
-
-std::unique_ptr<SystemComponent> makeComponentFromJson(const QJsonObject& object,
-                                                       bool fallbackToGenericType)
-{
-    std::unique_ptr<SystemComponent> ret(parseComponentFromJson(object));
-    // unknown type
-    if((ret == nullptr) && fallbackToGenericType)
-        ret.reset(parseGenericComponentFromJson(object));
     return ret;
 }
 

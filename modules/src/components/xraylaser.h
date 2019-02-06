@@ -21,17 +21,12 @@ public:
               double energy = 100.0f,
               double power = 1.0f,
               const QString &name = defaultName());
-    XrayLaser(const QJsonObject& json);
 
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
-
-    // deprecated
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
 
     // getter
     double photonEnergy() const;

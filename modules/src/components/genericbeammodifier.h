@@ -27,17 +27,12 @@ class GenericBeamModifier : public AbstractBeamModifier
 
 public:
     GenericBeamModifier(const QString& name = defaultName());
-    GenericBeamModifier(const QJsonObject& json);
 
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
-
-    // deprecated
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
 
     // static methods
     static QString defaultName();

@@ -26,13 +26,6 @@ XrayLaser::XrayLaser(const QString &name)
 {
 }
 
-XrayLaser::XrayLaser(const QJsonObject& json)
-    : AbstractSource(defaultName())
-{
-    _spectrumModel.reset((new XrayLaserSpectrumModel));
-    XrayLaser::read(json);
-}
-
 IntervalDataSeries XrayLaser::spectrum(float from, float to, uint nbSamples) const
 {
     if(!hasSpectrumModel())
@@ -55,29 +48,6 @@ QString XrayLaser::info() const
     ret += (this->type() == XrayLaser::Type) ? "}\n" : "";
 
     return ret;
-}
-
-/*!
- * Reads all member variables from the QJsonObject \a json.
- */
-void XrayLaser::read(const QJsonObject &json)
-{
-    AbstractSource::read(json);
-
-    _energy = json.value("energy").toDouble();
-    _power  = json.value("power").toDouble();
-}
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-void XrayLaser::write(QJsonObject &json) const
-{
-    AbstractSource::write(json);
-
-    json.insert("energy", _energy);
-    json.insert("power", _power);
 }
 
 /*!
