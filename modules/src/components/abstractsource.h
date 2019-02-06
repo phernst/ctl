@@ -360,7 +360,7 @@ inline void AbstractSource::fromVariant(const QVariant& variant)
 
     _focalSpotSize = fsQSize;
     _focalSpotPosition = fsPosVec;
-    _spectrumModel.reset(JsonSerializer::parseDataModel(specMod));
+    _spectrumModel.ptr.reset(SerializationHelper::parseDataModel(specMod));
 }
 
 /*!

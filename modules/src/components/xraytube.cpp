@@ -2,7 +2,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_TYPE(XrayTube)
+DECLARE_SERIALIZABLE_TYPE(XrayTube)
 
 XrayTube::XrayTube(const QSizeF &focalSpotSize,
                    const Vector3x1 &focalSpotPosition,

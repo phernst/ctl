@@ -1,7 +1,7 @@
 #ifndef SERIALIZATIONINTERFACE_H
 #define SERIALIZATIONINTERFACE_H
 
-#include "io/jsonserializer.h"
+#include "io/serializationhelper.h"
 
 namespace CTL {
 
@@ -63,12 +63,14 @@ inline QVariant SerializationInterface::toVariant() const
  * };
  * \endcode
  *
- * So far, the JsonSerializer can only mangage the serialization of the following three (base) types
+ * So far, the SerializationHelper can only mangage the serialization of the following three (base)
+ * types
  * - AbstractDataModel
  * - AbstractPrepareStep
  * - SystemComponent
  * Note that \a newIndex within one of the top three categories has to be unique for each class that
- * uses this macro.
+ * uses this macro. It is not necessary for the \a newIndex to be unique with respect to the other
+ * categories.
  */
 #define CTL_TYPE_ID(newIndex)                                                                      \
 public:                                                                                            \
@@ -77,7 +79,7 @@ public:                                                                         
                                                                                                    \
 private:                                                                                           \
     template<class>                                                                                \
-    friend struct JsonSerializer::RegisterWithJsonSerializer;
+    friend struct SerializationHelper::RegisterWithSerializationHelper;
 
 } // namespace CTL
 

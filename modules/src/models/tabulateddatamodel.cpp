@@ -2,7 +2,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_TYPE(TabulatedDataModel);
+DECLARE_SERIALIZABLE_TYPE(TabulatedDataModel);
 
 /*!
  * Constructs a TabulatedDataModel with lookup values given by \a table.

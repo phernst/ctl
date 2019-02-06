@@ -8,7 +8,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_TYPE(CylindricalDetector)
+DECLARE_SERIALIZABLE_TYPE(CylindricalDetector)
 
 CylindricalDetector::CylindricalDetector(const QJsonObject &json)
     : AbstractDetector(defaultName())

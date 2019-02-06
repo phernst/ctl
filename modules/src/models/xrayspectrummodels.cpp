@@ -4,10 +4,10 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_TYPE(XraySpectrumTabulatedModel)
-DECLARE_JSON_COMPATIBLE_TYPE(XrayLaserSpectrumModel)
-DECLARE_JSON_COMPATIBLE_TYPE(FixedXraySpectrumModel)
-DECLARE_JSON_COMPATIBLE_TYPE(KramersLawSpectrumModel)
+DECLARE_SERIALIZABLE_TYPE(XraySpectrumTabulatedModel)
+DECLARE_SERIALIZABLE_TYPE(XrayLaserSpectrumModel)
+DECLARE_SERIALIZABLE_TYPE(FixedXraySpectrumModel)
+DECLARE_SERIALIZABLE_TYPE(KramersLawSpectrumModel)
 
 // ____________________________
 // # AbstractXraySpectrumModel

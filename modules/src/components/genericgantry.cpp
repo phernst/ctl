@@ -2,7 +2,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_TYPE(GenericGantry)
+DECLARE_SERIALIZABLE_TYPE(GenericGantry)
 
 /*!
  * Constructs a GenericGantry object based on the information specified in the QJsonObject \a json.

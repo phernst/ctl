@@ -283,7 +283,7 @@ inline void AbstractDetector::fromVariant(const QVariant& variant)
     _pixelDimensions.setHeight(pixelDim.value("height").toDouble());
 
     QVariant saturationModel = varMap.value("saturation model");
-    _saturationModel.ptr.reset(JsonSerializer::parseDataModel(saturationModel));
+    _saturationModel.ptr.reset(SerializationHelper::parseDataModel(saturationModel));
 
     int satModTypeVal = varMap.value("saturation model type").toMap().value("enum value").toInt();
     _saturationModelType = SaturationModelType(satModTypeVal);

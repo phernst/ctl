@@ -3,7 +3,7 @@
 
 namespace CTL {
 
-DECLARE_JSON_COMPATIBLE_TYPE(XrayLaser)
+DECLARE_SERIALIZABLE_TYPE(XrayLaser)
 
 XrayLaser::XrayLaser(const QSizeF &focalSpotSize,
                      const Vector3x1 &focalSpotPosition,
