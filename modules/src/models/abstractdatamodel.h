@@ -213,11 +213,13 @@ inline DataModelPtr& DataModelPtr::operator=(const DataModelPtr &other)
 
 inline AbstractDataModel* DataModelPtr::operator->() const
 {
+    Q_ASSERT(ptr);
     return ptr.get();
 }
 
 inline AbstractDataModel& DataModelPtr::operator*() const
 {
+    Q_ASSERT(ptr);
     return *ptr;
 }
 
