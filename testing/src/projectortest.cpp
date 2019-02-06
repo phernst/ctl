@@ -60,7 +60,8 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
     setup.setNbViews(nbRepetitions);
     auto firstView = setup.view(0);
     for(auto& view : setup.views())
-        view.prepareSteps = firstView.prepareSteps;
+        for(const auto& prep : firstView.prepareSteps())
+            view.addPrepareStep(prep);
 
     auto poissonExt = makeExtension<PoissonNoiseExtension>(std::move(projector));
     poissonExt->setParallelizationEnabled(true);
