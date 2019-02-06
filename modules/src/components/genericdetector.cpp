@@ -2,11 +2,7 @@
 
 namespace CTL {
 
-GenericDetector::GenericDetector(const QJsonObject& json)
-    : AbstractDetector(defaultName())
-{
-    GenericDetector::read(json);
-}
+DECLARE_SERIALIZABLE_TYPE(GenericDetector)
 
 /*!
  * Constructs an empty object named \a name.
@@ -68,20 +64,19 @@ QString GenericDetector::defaultName()
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
-void GenericDetector::read(const QJsonObject &json)
+void GenericDetector::fromVariant(const QVariant& variant)
 {
-    AbstractDetector::read(json);
+    AbstractDetector::fromVariant(variant);
 
     _moduleLocations.clear();
-    QJsonArray locations = json.value("module locations").toArray();
-    for(const auto& obj : locations)
+    QVariantMap varMap = variant.toMap();
+    auto locations = varMap.value("module locations").toList();
+    for(const auto& var : locations)
     {
-        auto moduleObj = obj.toObject();
-
         mat::Location loc;
-        loc.fromVariant(moduleObj.toVariantMap());
+        loc.fromVariant(var);
 
         _moduleLocations.append(loc);
     }
@@ -89,18 +84,20 @@ void GenericDetector::read(const QJsonObject &json)
 }
 
 /*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * Stores all member variables in a QVariant. Also includes the component's type-id
  * and generic type-id.
  */
-void GenericDetector::write(QJsonObject &json) const
+QVariant GenericDetector::toVariant() const
 {
-    AbstractDetector::write(json);
+    QVariantMap ret = AbstractDetector::toVariant().toMap();
 
-    QJsonArray modLocs;
+    QVariantList modLocs;
     for(const auto& mod : _moduleLocations)
-        modLocs.append(QJsonValue::fromVariant(mod.toVariant()));
+        modLocs.append(mod.toVariant());
 
-    json.insert("module locations", modLocs);
+    ret.insert("module locations", modLocs);
+
+    return ret;
 }
 
 // use documentation of GenericComponent::clone()

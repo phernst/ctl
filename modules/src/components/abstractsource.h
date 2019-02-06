@@ -44,7 +44,7 @@ namespace CTL {
  * unshifed focal spot).
  *
  * When creating a sub-class of AbstractSource, make sure to register the new component in the
- * enumeration using the #ADD_TO_COMPONENT_ENUM(newIndex) macro. It is required to specify a value
+ * enumeration using the #CTL_TYPE_ID(newIndex) macro. It is required to specify a value
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
  * from GenericComponent::UserType, as these are reserved for user-defined types.
  *
@@ -55,7 +55,7 @@ namespace CTL {
  */
 class AbstractSource : public SystemComponent
 {
-    ADD_TO_COMPONENT_ENUM(300)
+    CTL_TYPE_ID(300)
     DECLARE_ELEMENTAL_TYPE
 
     // abstract interface
@@ -76,9 +76,8 @@ public:
     // virtual methods
     virtual void setSpectrumModel(AbstractXraySpectrumModel* model);
     QString info() const override;
-    void read(const QJsonObject& json) override; // JSON
-    void write(QJsonObject& json) const override; // JSON
-    void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // getter methods
     double photonFlux() const;
@@ -96,6 +95,7 @@ public:
 
     // other methods
     bool hasSpectrumModel() const;
+    void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
 
 protected:
     QSizeF _focalSpotSize = QSizeF(0.0, 0.0);
@@ -198,7 +198,7 @@ inline const Vector3x1& AbstractSource::focalSpotPosition() const { return _foca
  */
 inline const AbstractXraySpectrumModel *AbstractSource::spectrumModel() const
 {
-    return static_cast<AbstractXraySpectrumModel*>(_spectrumModel.ptr.get());
+    return static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get());
 }
 
 /*!
@@ -279,7 +279,7 @@ inline QString AbstractSource::info() const
  */
 inline void AbstractSource::setSpectrumModel(AbstractXraySpectrumModel* model)
 {
-    _spectrumModel.ptr.reset(model);
+    _spectrumModel.reset(model);
 }
 
 /*!
@@ -293,47 +293,50 @@ inline void AbstractSource::setSpectrumModel(std::unique_ptr<AbstractXraySpectru
 /*!
  * Reads all member variables from the QJsonObject \a json.
  */
-inline void AbstractSource::read(const QJsonObject& json)
+inline void AbstractSource::fromVariant(const QVariant& variant)
 {
-    SystemComponent::read(json);
+    SystemComponent::fromVariant(variant);
 
-    QJsonArray fsPos = json.value("focal spot position").toArray();
+    QVariantMap varMap = variant.toMap();
+    auto fsPos = varMap.value("focal spot position").toList();
     Vector3x1 fsPosVec({ fsPos.at(0).toDouble(), fsPos.at(1).toDouble(), fsPos.at(2).toDouble() });
 
-    QJsonObject fsSize = json.value("focal spot size").toObject();
+    auto fsSize = varMap.value("focal spot size").toMap();
     QSizeF fsQSize;
     fsQSize.setWidth(fsSize.value("width").toDouble());
     fsQSize.setHeight(fsSize.value("height").toDouble());
 
-    QVariant specMod = json.value("spectrum model").toVariant();
+    QVariant specMod = varMap.value("spectrum model");
 
     _focalSpotSize = fsQSize;
     _focalSpotPosition = fsPosVec;
-    _spectrumModel.ptr->fromVariant(specMod);
+    _spectrumModel.ptr.reset(SerializationHelper::parseDataModel(specMod));
 }
 
 /*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * Stores all member variables in a QVariant. Also includes the component's type-id
  * and generic type-id.
  */
-inline void AbstractSource::write(QJsonObject& json) const
+inline QVariant AbstractSource::toVariant() const
 {
-    SystemComponent::write(json);
+    QVariantMap ret = SystemComponent::toVariant().toMap();
 
-    QJsonArray fsPos;
+    QVariantList fsPos;
     fsPos.append(_focalSpotPosition.get<0>());
     fsPos.append(_focalSpotPosition.get<1>());
     fsPos.append(_focalSpotPosition.get<2>());
 
-    QJsonObject fsSize;
+    QVariantMap fsSize;
     fsSize.insert("width", _focalSpotSize.width());
     fsSize.insert("height", _focalSpotSize.height());
 
-    QJsonValue specMod = QJsonValue::fromVariant(_spectrumModel.ptr->toVariant());
+    QVariant specMod = _spectrumModel.ptr ? _spectrumModel->toVariant() : QVariant();
 
-    json.insert("focal spot position", fsPos);
-    json.insert("focal spot size", fsSize);
-    json.insert("spectrum model", specMod);
+    ret.insert("focal spot position", fsPos);
+    ret.insert("focal spot size", fsSize);
+    ret.insert("spectrum model", specMod);
+
+    return ret;
 }
 
 /*!

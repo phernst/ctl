@@ -1,7 +1,8 @@
 #include "systemcomponent.h"
-#include "jsonparser.h"
 
 namespace CTL {
+
+DECLARE_SERIALIZABLE_TYPE(SystemComponent)
 
 /*!
  * Constructs a component with the name \a name. If no name is passed, it defaults to
@@ -11,11 +12,6 @@ SystemComponent::SystemComponent(const QString& name)
     : _name(name)
 {
 }
-
-/*!
- * Constructs a SystemComponent from a QJsonObject.
- */
-SystemComponent::SystemComponent(const QJsonObject& json) { SystemComponent::read(json); }
 
 /*!
  * Returns the default name for the component: "Generic system component".
@@ -59,28 +55,24 @@ QString SystemComponent::typeInfoString(const std::type_info& type)
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
-void SystemComponent::read(const QJsonObject& json) { _name = json.value("name").toString(); }
-
-/*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
- */
-void SystemComponent::write(QJsonObject& json) const
+void SystemComponent::fromVariant(const QVariant& variant)
 {
-    json.insert("type-id", this->type());
-    json.insert("generic type-id", this->elementalType());
-    json.insert("name", _name);
+    _name = variant.toMap().value("name").toString();
 }
 
-std::unique_ptr<SystemComponent> makeComponentFromJson(const QJsonObject& object,
-                                                       bool fallbackToGenericType)
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant SystemComponent::toVariant()const
 {
-    std::unique_ptr<SystemComponent> ret(parseComponentFromJson(object));
-    // unknown type
-    if((ret == nullptr) && fallbackToGenericType)
-        ret.reset(parseGenericComponentFromJson(object));
+    QVariantMap ret;
+    ret.insert("type-id", this->type());
+    ret.insert("generic type-id", this->elementalType());
+    ret.insert("name", _name);
+
     return ret;
 }
 

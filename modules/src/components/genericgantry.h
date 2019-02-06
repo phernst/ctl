@@ -24,7 +24,7 @@ namespace CTL {
  */
 class GenericGantry : public AbstractGantry
 {
-    ADD_TO_COMPONENT_ENUM(201)
+    CTL_TYPE_ID(201)
 
     // implementation of abstract interface
     protected: mat::Location nominalDetectorLocation() const override;
@@ -40,14 +40,12 @@ public:
                   const Vector3x1& detectorPosition,
                   const Matrix3x3& detectorRotation,
                   const QString& name = defaultName());
-    GenericGantry(const QJsonObject& json);
-
 
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // setter methods
     void setDetectorLocation(const mat::Location& location);

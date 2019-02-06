@@ -1,6 +1,7 @@
 #ifndef SYSTEMCOMPONENT_H
 #define SYSTEMCOMPONENT_H
 
+#include "io/serializationinterface.h"
 #include <QJsonObject>
 #include <QString>
 #include <memory>
@@ -17,7 +18,7 @@ namespace CTL {
  * read() and write().
  *
  * To implement a custom component, create a sub-class of SystemComponent and make sure to
- * register the component in the enumeration using the #ADD_TO_COMPONENT_ENUM(newIndex) macro. It is
+ * register the component in the enumeration using the #CTL_TYPE_ID(newIndex) macro. It is
  * required to specify a value for \a newIndex that is not already in use. Please refer to the table
  * found in type() for a list of values that are already in use. Another easy way to employ a free
  * index is to use values starting from SystemComponent::UserType, as these are reserved for
@@ -47,15 +48,13 @@ namespace CTL {
  * \sa elementalType()
  */
 
-class SystemComponent
+class SystemComponent : public SerializationInterface
 {
+    CTL_TYPE_ID(0)
 
 public:
-    enum { Type = 0, UserType = 65536 };
-
     // ctors etc.
     SystemComponent(const QString& name = defaultName());
-    SystemComponent(const QJsonObject& json);
     SystemComponent(const SystemComponent&) = default;
     SystemComponent(SystemComponent&&) = default;
     SystemComponent& operator=(const SystemComponent&) = default;
@@ -63,12 +62,12 @@ public:
     virtual ~SystemComponent() = default;
 
     // virtual methods
-    virtual int type() const;
     virtual int elementalType() const;
     virtual QString info() const;
     virtual SystemComponent* clone() const;
-    virtual void read(const QJsonObject& json); // JSON
-    virtual void write(QJsonObject& json) const; // JSON
+
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // getter methods
     const QString& name() const;
@@ -102,6 +101,8 @@ std::unique_ptr<SystemComponent> makeComponentFromJson(const QJsonObject& object
                                                        bool fallbackToGenericType = false);
 
 /*!
+ * \fn int SystemComponent::type() const
+ *
  * Returns the type id of the component.
  *
  * List of all default types:
@@ -124,7 +125,6 @@ std::unique_ptr<SystemComponent> makeComponentFromJson(const QJsonObject& object
  * XrayLaser::Type             | 310
  * XrayTube::Type              | 320
  */
-inline int SystemComponent::type() const { return Type; }
 
 /*!
  * Returns the type id of the underlying elemental base class.
@@ -155,18 +155,6 @@ public:                                                                         
 private:
 
 /*!
- * \def ADD_TO_COMPONENT_ENUM(newIndex)
- *
- * Macro to add the component to the component enumeration with the index \a newIndex.
- */
-#define ADD_TO_COMPONENT_ENUM(newIndex)                                                            \
-public:                                                                                            \
-    enum { Type = newIndex };                                                                      \
-    int type() const override { return Type; }                                                     \
-                                                                                                   \
-private:
-
-/*!
  * \fn std::unique_ptr<ComponentType> CTL::makeComponent(ConstructorArguments&&... arguments)
  * \relates SystemComponent
  *
@@ -181,7 +169,7 @@ private:
  * \relates SystemComponent
  *
  * Global (free) make function that parses a QJsonObject and creates a concrete SystemComponent (any
- * subtype) whose Type-ID is registered (with ADD_TO_COMPONENT_ENUM).
+ * subtype) whose Type-ID is registered (with CTL_TYPE_ID).
  * It is also required that this type has been added to the switch-case list inside the
  * implementation of parseComponentFromJson(const QJsonObject&) in the header file
  * "components/jsonparser.h".

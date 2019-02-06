@@ -1,7 +1,7 @@
 #ifndef ABSTRACTDATAMODEL_H
 #define ABSTRACTDATAMODEL_H
 
-#include <QVariant>
+#include "io/serializationinterface.h"
 #include <QDebug>
 #include <memory>
 
@@ -41,25 +41,23 @@ namespace CTL {
  * option to copy by means of deep copying (provided by clone()).
  */
 
-class AbstractDataModel
+class AbstractDataModel : public SerializationInterface
 {
+    CTL_TYPE_ID(0)
+
     // abstract interface
     public:virtual float valueAt(float position) const = 0;
     public:virtual AbstractDataModel* clone() const = 0;
 
 public:
-    enum { Type = 0, UserType = 65536 };
-
     virtual ~AbstractDataModel() = default;
 
-    virtual int type() const;
     virtual bool isIntegrable() const final;
-
-    virtual void fromVariant(const QVariant& variant);
-    virtual QVariant toVariant() const;
     virtual QVariant parameter() const;
     virtual void setParameter(const QVariant& parameter);
 
+    void fromVariant(const QVariant& variant) override;
+    QVariant toVariant() const override;
 };
 
 class AbstractIntegrableDataModel : public AbstractDataModel
@@ -76,8 +74,24 @@ struct DataModelPtr
     DataModelPtr& operator=(const DataModelPtr& other);
     DataModelPtr& operator=(DataModelPtr&& other) = default;
 
+    AbstractDataModel* operator->() const;
+    AbstractDataModel& operator*() const;
+
+    AbstractDataModel* get() const;
+    void reset(AbstractDataModel* model = nullptr);
+
     std::unique_ptr<AbstractDataModel> ptr;
 };
+
+// factory function `makeDataModel`
+template <typename ModelType, typename... ConstructorArguments>
+auto makeDataModel(ConstructorArguments&&... arguments) ->
+    typename std::enable_if<std::is_convertible<ModelType*, AbstractDataModel*>::value,
+                            std::unique_ptr<ModelType>>::type
+{
+    return std::unique_ptr<ModelType>(
+        new ModelType(std::forward<ConstructorArguments>(arguments)...));
+}
 
 /*!
  * \fn float AbstractDataModel::valueAt(float position) const
@@ -101,6 +115,7 @@ struct DataModelPtr
  * \fn QVariant AbstractDataModel::toVariant() const
  *
  * Encodes all information required to describe this instance into a QVariant.
+
  * Required to provide de-/serialization functionality.
  */
 
@@ -145,24 +160,10 @@ struct DataModelPtr
  * \f$ \left[position-\frac{binWidth}{2},\,position+\frac{binWidth}{2}\right] \f$.
  */
 
-/*!
- * \def ADD_TO_MODEL_ENUM(newIndex)
- *
- * Macro to add the model to the model enumeration with the index \a newIndex.
- */
-#define ADD_TO_MODEL_ENUM(newIndex)                                                                \
-public:                                                                                            \
-    enum { Type = newIndex };                                                                      \
-    int type() const override { return Type; }                                                     \
-                                                                                                   \
-private:
-
 // implementations
-inline int AbstractDataModel::type() const { return Type; }
-
 inline QVariant AbstractDataModel::parameter() const { return QVariant(); }
 
-inline void AbstractDataModel::setParameter(const QVariant &) { }
+inline void AbstractDataModel::setParameter(const QVariant&) {}
 
 inline QVariant AbstractDataModel::toVariant() const
 {
@@ -175,13 +176,14 @@ inline QVariant AbstractDataModel::toVariant() const
     return ret;
 }
 
-inline void AbstractDataModel::fromVariant(const QVariant &variant)
+inline void AbstractDataModel::fromVariant(const QVariant& variant)
 {
     auto map = variant.toMap();
     if(map.value("type-id").toInt() != type())
     {
-        qWarning() << QString(typeid(*this).name()) + "::fromVariant: Could not construct instance! "
-                      "reason: incompatible variant passed";
+        qWarning() << QString(typeid(*this).name())
+                + "::fromVariant: Could not construct instance! "
+                  "reason: incompatible variant passed";
         return;
     }
 
@@ -199,18 +201,50 @@ inline DataModelPtr::DataModelPtr(std::unique_ptr<AbstractDataModel> model)
 }
 
 inline DataModelPtr::DataModelPtr(const DataModelPtr& other)
-    : ptr(other.ptr ? other.ptr->clone() : nullptr)
+    : ptr(other.ptr ? other->clone() : nullptr)
 {
 }
 
 inline DataModelPtr& DataModelPtr::operator=(const DataModelPtr &other)
 {
-    ptr.reset(other.ptr ? other.ptr->clone() : nullptr);
-    return *this;
+    ptr.reset(other.ptr ? other->clone() : nullptr);
+        return *this;
 }
 
+inline AbstractDataModel* DataModelPtr::operator->() const
+{
+    Q_ASSERT(ptr);
+    return ptr.get();
+}
 
+inline AbstractDataModel& DataModelPtr::operator*() const
+{
+    Q_ASSERT(ptr);
+    return *ptr;
+}
+
+inline AbstractDataModel* DataModelPtr::get() const
+{
+    return ptr.get();
+}
+
+inline void DataModelPtr::reset(AbstractDataModel* model)
+{
+    ptr.reset(model);
+}
 
 } // namespace CTL
+
+/*! \file */
+///@{
+/*!
+* \fn std::unique_ptr<ModelType> CTL::makeDataModel(ConstructorArguments&&... arguments)
+* \relates AbstractDataModel
+* Global (free) make function that creates a new AbstractDataModel from the constructor \a arguments.
+* The component is returned as a `std::unique_ptr<ModelType>`, whereas `ModelType` is the
+* template argument of this function that needs to be specified.
+*/
+///@}
+
 
 #endif // ABSTRACTDATAMODEL_H

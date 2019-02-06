@@ -4,6 +4,11 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(XraySpectrumTabulatedModel)
+DECLARE_SERIALIZABLE_TYPE(XrayLaserSpectrumModel)
+DECLARE_SERIALIZABLE_TYPE(FixedXraySpectrumModel)
+DECLARE_SERIALIZABLE_TYPE(KramersLawSpectrumModel)
+
 // ____________________________
 // # AbstractXraySpectrumModel
 // ----------------------------

@@ -5,8 +5,56 @@
 namespace CTL {
 
 AcquisitionSetup::View::View(double time)
-    : timeStamp(time)
+    : _timeStamp(time)
 {
+}
+
+void AcquisitionSetup::View::setTimeStamp(double timeStamp) { _timeStamp = timeStamp; }
+
+void AcquisitionSetup::View::addPrepareStep(PrepareStep step)
+{
+    if(step)
+        _prepareSteps.push_back(std::move(step));
+    else
+        qWarning() << "AcquisitionSetup::View::addPrepareStep(): Prepare step not added! "
+                      "Reason: tried to add 'nullptr'.";
+}
+
+double AcquisitionSetup::View::timeStamp() const { return _timeStamp; }
+
+const std::vector<AcquisitionSetup::PrepareStep>& AcquisitionSetup::View::prepareSteps() const
+{
+    return _prepareSteps;
+}
+
+void AcquisitionSetup::View::clearPrepareSteps() { _prepareSteps.clear(); }
+
+void AcquisitionSetup::View::fromVariant(const QVariant& variant)
+{
+    QVariantMap varMap = variant.toMap();
+
+    QVariantList prepareStepVarList = varMap.value("prepare steps").toList();
+    std::vector<PrepareStep> prepSteps;
+    prepSteps.reserve(prepareStepVarList.size());
+    for(const auto& prep : prepareStepVarList)
+        this->addPrepareStep(PrepareStep(SerializationHelper::parsePrepareStep(prep)));
+
+    this->setTimeStamp(varMap.value("time stamp").toDouble());
+}
+
+QVariant AcquisitionSetup::View::toVariant() const
+{
+    QVariantMap ret;
+
+    QVariantList prepareStepVarList;
+    prepareStepVarList.reserve(_prepareSteps.size());
+    for(const auto& prep : _prepareSteps)
+        prepareStepVarList.append(prep->toVariant());
+
+    ret.insert("time stamp", _timeStamp);
+    ret.insert("prepare steps", prepareStepVarList);
+
+    return ret;
 }
 
 AcquisitionSetup::AcquisitionSetup(const CTsystem& system, uint nbViews)
@@ -46,7 +94,7 @@ void AcquisitionSetup::applyPreparationProtocol(const AbstractPreparationProtoco
     {
         auto prepareSteps = preparation.prepareSteps(view, *this);
         for(auto& step : prepareSteps)
-            _views[view].prepareSteps.push_back(std::move(step));
+            _views[view].addPrepareStep(std::move(step));
     }
 
     qDebug() << "AcquisitionSetup --- addPreparationProtocol";
@@ -72,14 +120,14 @@ void AcquisitionSetup::prepareView(uint viewNb)
     if(!_system)
         return;
 
-    for(const auto& step : _views[viewNb].prepareSteps)
+    for(const auto& step : _views[viewNb].prepareSteps())
         step->prepare(_system.get());
 }
 
 void AcquisitionSetup::removeAllPrepareSteps()
 {
     for(auto& view : _views)
-        view.prepareSteps.clear();
+        view.clearPrepareSteps();
 }
 
 bool AcquisitionSetup::resetSystem(const CTsystem& system)
@@ -119,7 +167,7 @@ bool AcquisitionSetup::isValid() const
         return false;
 
     for(const auto& vi : _views)
-        for(const auto& prep : vi.prepareSteps)
+        for(const auto& prep : vi.prepareSteps())
             if(!prep->isApplicableTo(*_system))
                 return false;
 
@@ -153,5 +201,37 @@ const AcquisitionSetup::View& AcquisitionSetup::view(uint viewNb) const { return
 std::vector<AcquisitionSetup::View>& AcquisitionSetup::views() { return _views; }
 
 const std::vector<AcquisitionSetup::View>& AcquisitionSetup::views() const { return _views; }
+
+void AcquisitionSetup::fromVariant(const QVariant &variant)
+{
+    auto varMap = variant.toMap();
+
+    CTsystem system;
+    system.fromVariant(varMap.value("CT system"));
+    this->resetSystem(std::move(system));
+
+    QVariantList viewVarList = varMap.value("views").toList();
+    for(const auto& v : viewVarList)
+    {
+        AcquisitionSetup::View view;
+        view.fromVariant(v);
+        this->addView(std::move(view));
+    }
+}
+
+QVariant AcquisitionSetup::toVariant() const
+{
+    QVariantMap ret;
+
+    QVariantList viewVarList;
+    viewVarList.reserve(_views.size());
+    for(const auto& v : _views)
+        viewVarList.append(v.toVariant());
+
+    ret.insert("CT system", _system ? _system->toVariant() : QVariant());
+    ret.insert("views", viewVarList);
+
+    return ret;
+}
 
 } // namespace CTL

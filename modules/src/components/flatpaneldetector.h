@@ -15,7 +15,7 @@ namespace CTL {
  */
 class FlatPanelDetector : public AbstractDetector
 {
-    ADD_TO_COMPONENT_ENUM(120)
+    CTL_TYPE_ID(120)
 
     // implementation of abstract interface
     public: QVector<ModuleLocation> moduleLocations() const override;
@@ -24,13 +24,12 @@ public:
     FlatPanelDetector(const QSize& nbPixels,
                       const QSizeF& pixelDimensions,
                       const QString& name = defaultName());
-    FlatPanelDetector(const QJsonObject& json);
 
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // getter methods
     ModuleLocation location() const;
@@ -42,6 +41,8 @@ public:
     // static methods
     static QString defaultName();
 
+private:
+    FlatPanelDetector() = default;
 };
 
 } // namespace CTL

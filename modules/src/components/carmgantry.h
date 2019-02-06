@@ -22,7 +22,7 @@ namespace CTL {
  */
 class CarmGantry : public AbstractGantry
 {
-    ADD_TO_COMPONENT_ENUM(210)
+    CTL_TYPE_ID(210)
 
     // implementation of abstract interface
     protected: mat::Location nominalDetectorLocation() const override;
@@ -30,13 +30,12 @@ class CarmGantry : public AbstractGantry
 
 public:
     CarmGantry(double cArmSpan = 1000.0, const QString& name = defaultName());
-    CarmGantry(const QJsonObject& json);
 
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
-    void read(const QJsonObject& json) override;    // JSON
-    void write(QJsonObject& json) const override;   // JSON
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // getter methods
     const mat::Location& location() const;

@@ -94,9 +94,9 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
         detectorSetter->setModuleLocations(moduleLocations);
 
         AcquisitionSetup::View viewSetting;
-        viewSetting.timeStamp = ret.nbViews();
-        viewSetting.prepareSteps.push_back(gantrySetter);
-        viewSetting.prepareSteps.push_back(detectorSetter);
+        viewSetting.setTimeStamp(ret.nbViews());
+        viewSetting.addPrepareStep(gantrySetter);
+        viewSetting.addPrepareStep(detectorSetter);
 
         ret.addView(viewSetting);
     }

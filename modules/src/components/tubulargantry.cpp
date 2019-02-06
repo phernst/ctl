@@ -4,14 +4,7 @@
 
 namespace CTL {
 
-/*!
- * Constructs a TubularGantry object based on the information specified in the QJsonObject \a json.
- */
-TubularGantry::TubularGantry(const QJsonObject& json)
-    : AbstractGantry(defaultName())
-{
-    TubularGantry::read(json);
-}
+DECLARE_SERIALIZABLE_TYPE(TubularGantry)
 
 /*!
  * Constructs a TubularGantry with the dimensions \a sourceToDetectorDistance and \a
@@ -194,26 +187,36 @@ QString TubularGantry::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
-void TubularGantry::read(const QJsonObject &json)
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void TubularGantry::fromVariant(const QVariant& variant)
 {
-    AbstractGantry::read(json);
+    AbstractGantry::fromVariant(variant);
 
-    _sourceToDetectorDistance = json.value("source-detector distance").toDouble();
-    _sourceToIsoCenterDistance = json.value("source-isocenter distance").toDouble();
-    _rotationAngle = json.value("rotation angle").toDouble();
-    _pitchPosition = json.value("pitch position").toDouble();
-    _tiltAngle = json.value("tilt angle").toDouble();
+    QVariantMap varMap = variant.toMap();
+    _sourceToDetectorDistance = varMap.value("source-detector distance").toDouble();
+    _sourceToIsoCenterDistance = varMap.value("source-isocenter distance").toDouble();
+    _rotationAngle = varMap.value("rotation angle").toDouble();
+    _pitchPosition = varMap.value("pitch position").toDouble();
+    _tiltAngle = varMap.value("tilt angle").toDouble();
 }
 
-void TubularGantry::write(QJsonObject &json) const
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant TubularGantry::toVariant() const
 {
-    AbstractGantry::write(json);
+    QVariantMap ret = AbstractGantry::toVariant().toMap();
 
-    json.insert("source-detector distance", _sourceToDetectorDistance);
-    json.insert("source-isocenter distance", _sourceToIsoCenterDistance);
-    json.insert("rotation angle", _rotationAngle);
-    json.insert("pitch position", _pitchPosition);
-    json.insert("tilt angle", _tiltAngle);
+    ret.insert("source-detector distance", _sourceToDetectorDistance);
+    ret.insert("source-isocenter distance", _sourceToIsoCenterDistance);
+    ret.insert("rotation angle", _rotationAngle);
+    ret.insert("pitch position", _pitchPosition);
+    ret.insert("tilt angle", _tiltAngle);
+
+    return ret;
 }
 
 // use documentation of GenericComponent::clone()

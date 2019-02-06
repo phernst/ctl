@@ -8,12 +8,7 @@
 
 namespace CTL {
 
-CylindricalDetector::CylindricalDetector(const QJsonObject &json)
-    : AbstractDetector(defaultName())
-{
-    CylindricalDetector::read(json);
-    //computeModuleLocations();
-}
+DECLARE_SERIALIZABLE_TYPE(CylindricalDetector)
 
 CylindricalDetector::CylindricalDetector(const QString &name)
     : AbstractDetector(name)
@@ -207,24 +202,29 @@ QVector<double> CylindricalDetector::moduleAngulations() const
 /*!
  * Reads all member variables from the QJsonObject \a json.
  */
-void CylindricalDetector::read(const QJsonObject &json)
+void CylindricalDetector::fromVariant(const QVariant& variant)
 {
-    AbstractDetector::read(json);
+    AbstractDetector::fromVariant(variant);
 
-    _angulationPerModule = json.value("angulation per module").toDouble();
-    _moduleSpacing = json.value("module spacing").toDouble();
+    QVariantMap varMap = variant.toMap();
+    _angulationPerModule = varMap.value("angulation per module").toDouble();
+    _moduleSpacing = varMap.value("module spacing").toDouble();
+    _nbModules = varMap.value("number of modules").toUInt();
 }
 
 /*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * Stores all member variables in a QVariant. Also includes the component's type-id
  * and generic type-id.
  */
-void CylindricalDetector::write(QJsonObject &json) const
+QVariant CylindricalDetector::toVariant() const
 {
-    AbstractDetector::write(json);
+    QVariantMap ret = AbstractDetector::toVariant().toMap();
 
-    json.insert("angulation per module", _angulationPerModule);
-    json.insert("module spacing", _moduleSpacing);
+    ret.insert("angulation per module", _angulationPerModule);
+    ret.insert("module spacing", _moduleSpacing);
+    ret.insert("number of modules", _nbModules);
+
+    return ret;
 }
 
 /*!

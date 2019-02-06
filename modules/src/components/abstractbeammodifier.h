@@ -24,7 +24,7 @@ namespace CTL {
  * coordinates (\a phi - azimuthal angle, \a theta - polar angle).
  *
  * When creating a sub-class of AbstractBeamModifier, make sure to register the new component in the
- * enumeration using the #ADD_TO_COMPONENT_ENUM(newIndex) macro. It is required to specify a value
+ * enumeration using the #CTL_TYPE_ID(newIndex) macro. It is required to specify a value
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
  * from GenericComponent::UserType, as these are reserved for user-defined types.
  *
@@ -35,7 +35,7 @@ namespace CTL {
  */
 class AbstractBeamModifier : public SystemComponent
 {
-    ADD_TO_COMPONENT_ENUM(400)
+    CTL_TYPE_ID(400)
     DECLARE_ELEMENTAL_TYPE
 
     // abstract interface
@@ -48,8 +48,9 @@ public:
 
     // virtual methods
     QString info() const override;
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
+
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 };
 
 /*!
@@ -74,20 +75,20 @@ inline QString AbstractBeamModifier::info() const
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
-inline void AbstractBeamModifier::read(const QJsonObject &json)
+inline void AbstractBeamModifier::fromVariant(const QVariant& variant)
 {
-    SystemComponent::read(json);
+    SystemComponent::fromVariant(variant);
 }
 
 /*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * Stores all member variables in a QVariant. Also includes the component's type-id
  * and generic type-id.
  */
-inline void AbstractBeamModifier::write(QJsonObject &json) const
+inline QVariant AbstractBeamModifier::toVariant() const
 {
-    SystemComponent::write(json);
+    return SystemComponent::toVariant();
 }
 
 } // namespace CTL

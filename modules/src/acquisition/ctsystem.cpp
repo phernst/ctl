@@ -197,31 +197,39 @@ QList<AbstractBeamModifier*> CTsystem::modifiers() const
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
-void CTsystem::read(const QJsonObject &json)
+void CTsystem::fromVariant(const QVariant &variant)
 {
-    _name = json.value("name").toString();
+    QVariantMap varMap = variant.toMap();
+
+    this->rename(varMap.value("name").toString());
+
+    // fill in components
+    this->clear();
+    QVariantList componentVariantList = varMap.value("components").toList();
+    for(const auto& comp : componentVariantList)
+        this->addComponent(SerializationHelper::parseComponent(comp));
 }
 
 /*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
- * and generic type-id.
+ * Writes all components to a QVariant. This uses SerializationInterface::toVariant() of individual
+ * components in the system.
  */
-void CTsystem::write(QJsonObject &json) const
+QVariant CTsystem::toVariant() const
 {
-    json.insert("name", _name);
+    QVariantMap ret;
 
-    QJsonArray componentArray;
+    ret.insert("name", _name);
+
+    QVariantList componentVariantList;
 
     for(const auto& comp : _componentList)
-    {
-        QJsonObject tmp;
-        comp->write(tmp);
-        componentArray.append(tmp);
-    }
+        componentVariantList.append(comp ? comp->toVariant() : QVariant());
 
-    json.insert("components", componentArray);
+    ret.insert("components", componentVariantList);
+
+    return ret;
 }
 
 /*!

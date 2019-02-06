@@ -2,6 +2,8 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(XrayTube)
+
 XrayTube::XrayTube(const QSizeF &focalSpotSize,
                    const Vector3x1 &focalSpotPosition,
                    double tubeVoltage,
@@ -27,13 +29,6 @@ XrayTube::XrayTube(const QString &name)
     : XrayTube(QSizeF(0.0,0.0), Vector3x1(0.0), 100.0f, 1.0f, name)
 {
 }
-
-XrayTube::XrayTube(const QJsonObject& json)
-    : AbstractSource(defaultName())
-{
-    XrayTube::read(json);
-}
-
 
 QString XrayTube::info() const
 {
@@ -64,8 +59,7 @@ IntervalDataSeries XrayTube::spectrum(float from, float to, uint nbSamples) cons
 {
     if(!hasSpectrumModel())
         throw std::runtime_error("No spectrum model set.");
-
-    static_cast<AbstractXraySpectrumModel*>(_spectrumModel.ptr.get())->setParameter(_tubeVoltage);
+    static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
     IntervalDataSeries spec = IntervalDataSeries::sampledFromModel(*spectrumModel(), from, to, nbSamples);
     spec.normalizeByIntegral();
     return spec;
@@ -93,30 +87,33 @@ void XrayTube::setSpectrumModel(AbstractXraySpectrumModel *model)
     if(!dynamic_cast<AbstractXraySpectrumModel*>(model))
         throw std::runtime_error("Spectral model could not be set: not of type AbstractXraySpectrumModel");
 
-    _spectrumModel.ptr.reset(model);
+    _spectrumModel.reset(model);
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
-void XrayTube::read(const QJsonObject &json)
+void XrayTube::fromVariant(const QVariant& variant)
 {
-    AbstractSource::read(json);
+    AbstractSource::fromVariant(variant);
 
-    _tubeVoltage = json.value("tube voltage").toDouble();
-    _emissionCurrent = json.value("emission current").toDouble();
+    QVariantMap varMap = variant.toMap();
+    _tubeVoltage = varMap.value("tube voltage").toDouble();
+    _emissionCurrent = varMap.value("emission current").toDouble();
 }
 
 /*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * Stores all member variables in a QVariant. Also includes the component's type-id
  * and generic type-id.
  */
-void XrayTube::write(QJsonObject &json) const
+QVariant XrayTube::toVariant() const
 {
-    AbstractSource::write(json);
+    QVariantMap ret = AbstractSource::toVariant().toMap();
 
-    json.insert("tube voltage", _tubeVoltage);
-    json.insert("emission current", _emissionCurrent);
+    ret.insert("tube voltage", _tubeVoltage);
+    ret.insert("emission current", _emissionCurrent);
+
+    return ret;
 }
 
 } // namespace CTL

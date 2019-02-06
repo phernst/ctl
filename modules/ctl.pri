@@ -27,7 +27,6 @@ HEADERS += \
     $$PWD/src/components/genericdetector.h \
     $$PWD/src/components/genericgantry.h \
     $$PWD/src/components/genericsource.h \
-    $$PWD/src/components/jsonparser.h \
     $$PWD/src/components/systemcomponent.h \
     $$PWD/src/components/tubulargantry.h \
     $$PWD/src/components/xraylaser.h \
@@ -74,7 +73,11 @@ HEADERS += \
     $$PWD/src/models/intervaldataseries.h \
     $$PWD/src/mat/pmatcomparator.h \
     $$PWD/src/models/detectorsaturationmodels.h \
-    $$PWD/src/projectors/detectorsaturationextension.h
+    $$PWD/src/projectors/detectorsaturationextension.h \
+    $$PWD/src/io/jsonserializer.h \
+    $$PWD/src/io/serializationinterface.h \
+    $$PWD/src/io/serializationhelper.h \
+    $$PWD/src/io/abstractserializer.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -114,4 +117,7 @@ SOURCES += \
     $$PWD/src/models/intervaldataseries.cpp \
     $$PWD/src/mat/pmatcomparator.cpp \
     $$PWD/src/models/detectorsaturationmodels.cpp \
-    $$PWD/src/projectors/detectorsaturationextension.cpp
+    $$PWD/src/projectors/detectorsaturationextension.cpp \
+    $$PWD/src/io/jsonserializer.cpp \
+    $$PWD/src/components/genericbeammodifier.cpp \
+    $$PWD/src/io/serializationhelper.cpp

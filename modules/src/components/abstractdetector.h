@@ -36,7 +36,7 @@ namespace CTL {
  * sub-class.
  *
  * When creating a sub-class of AbstractDetector, make sure to register the new component in the
- * enumeration using the #ADD_TO_COMPONENT_ENUM(newIndex) macro. It is required to specify a value
+ * enumeration using the #CTL_TYPE_ID(newIndex) macro. It is required to specify a value
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
  * from GenericComponent::UserType, as these are reserved for user-defined types.
  *
@@ -47,7 +47,7 @@ namespace CTL {
  */
 class AbstractDetector : public SystemComponent
 {
-    ADD_TO_COMPONENT_ENUM(100)
+    CTL_TYPE_ID(100)
     DECLARE_ELEMENTAL_TYPE
 
 public:
@@ -64,8 +64,8 @@ public:
 
     // virtual methods
     QString info() const override;
-    void read(const QJsonObject& json) override;  // JSON
-    void write(QJsonObject& json) const override; // JSON
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // setter methods
     void setSaturationModel(AbstractDataModel* model, SaturationModelType type);
@@ -85,6 +85,7 @@ public:
     SingleViewData::Dimensions viewDimensions() const;
 
 protected:
+    AbstractDetector() = default;
     AbstractDetector(const QString& name);
 
     QSize _nbPixelPerModule;
@@ -157,7 +158,7 @@ inline AbstractDetector::ModuleLocation AbstractDetector::moduleLocation(uint mo
  */
 inline const AbstractDataModel* AbstractDetector::saturationModel() const
 {
-    return _saturationModel.ptr.get();
+    return _saturationModel.get();
 }
 
 /*!
@@ -212,6 +213,7 @@ inline QString AbstractDetector::info() const
     // clang-format off
     ret +=
        typeInfoString(typeid(this)) +
+       "\tNb. of modules: "            + QString::number(nbDetectorModules()) + "\n"
        "\tNb. of pixels per module: "  + QString::number(_nbPixelPerModule.width()) + " x " +
                                          QString::number(_nbPixelPerModule.height()) + "\n"
        "\tPixel dimensions: "          + QString::number(_pixelDimensions.width()) + " mm x " +
@@ -224,39 +226,58 @@ inline QString AbstractDetector::info() const
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
-inline void AbstractDetector::read(const QJsonObject &json)
+inline void AbstractDetector::fromVariant(const QVariant& variant)
 {
-    SystemComponent::read(json);
+    SystemComponent::fromVariant(variant);
 
-    QJsonObject nbPixels = json.value("pixel per module").toObject();
+    QVariantMap varMap = variant.toMap();
+
+    auto nbPixels = varMap.value("pixel per module").toMap();
     _nbPixelPerModule.setWidth(nbPixels.value("channels").toInt());
     _nbPixelPerModule.setHeight(nbPixels.value("rows").toInt());
 
-    QJsonObject pixelDim = json.value("pixel dimensions").toObject();
+    auto pixelDim = varMap.value("pixel dimensions").toMap();
     _pixelDimensions.setWidth(pixelDim.value("width").toDouble());
     _pixelDimensions.setHeight(pixelDim.value("height").toDouble());
+
+    QVariant saturationModel = varMap.value("saturation model");
+    _saturationModel.ptr.reset(SerializationHelper::parseDataModel(saturationModel));
+
+    int satModTypeVal = varMap.value("saturation model type").toMap().value("enum value").toInt();
+    _saturationModelType = SaturationModelType(satModTypeVal);
 }
 
 /*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * Stores all member variables in a QVariant. Also includes the component's type-id
  * and generic type-id.
  */
-inline void AbstractDetector::write(QJsonObject &json) const
+inline QVariant AbstractDetector::toVariant() const
 {
-    SystemComponent::write(json);
+    QVariantMap ret = SystemComponent::toVariant().toMap();
 
-    QJsonObject nbPixels;
+    QVariantMap nbPixels;
     nbPixels.insert("channels",_nbPixelPerModule.width());
     nbPixels.insert("rows", _nbPixelPerModule.height());
 
-    QJsonObject pixelDim;
+    QVariantMap pixelDim;
     pixelDim.insert("width",_pixelDimensions.width());
     pixelDim.insert("height", _pixelDimensions.height());
 
-    json.insert("pixel per module", nbPixels);
-    json.insert("pixel dimensions", pixelDim);
+    QVariant saturationModel = hasSaturationModel() ? _saturationModel.ptr->toVariant()
+                                                    : QVariant();
+
+    QVariantMap satModelType;
+    satModelType.insert("enum value", _saturationModelType);
+    satModelType.insert("meaning", "0: Extinction, 1: Intensity, 2: Undefined");
+
+    ret.insert("pixel per module", nbPixels);
+    ret.insert("pixel dimensions", pixelDim);
+    ret.insert("saturation model", saturationModel);
+    ret.insert("saturation model type", satModelType);
+
+    return ret;
 }
 
 /*!
@@ -265,7 +286,7 @@ inline void AbstractDetector::write(QJsonObject &json) const
  */
 inline void AbstractDetector::setSaturationModel(AbstractDataModel *model, AbstractDetector::SaturationModelType type)
 {
-    _saturationModel.ptr.reset(model);
+    _saturationModel.reset(model);
     _saturationModelType = type;
 }
 

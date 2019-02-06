@@ -14,18 +14,31 @@ namespace CTL {
  *
  *
  */
-class AcquisitionSetup final
+class AcquisitionSetup final : public SerializationInterface
 {
 public:
     typedef std::shared_ptr<const AbstractPrepareStep> PrepareStep;
 
-    struct View
+    class View : public SerializationInterface
     {
+    public:
         View() = default;
         View(double time);
 
-        double timeStamp;
-        std::vector<PrepareStep> prepareSteps;
+        void setTimeStamp(double timeStamp);
+        void addPrepareStep(PrepareStep step);
+
+        double timeStamp() const;
+        const std::vector<PrepareStep>& prepareSteps() const;
+
+        void clearPrepareSteps();
+
+        void fromVariant(const QVariant& variant) override; // de-serialization
+        QVariant toVariant() const override; // serialization
+
+    private:
+        double _timeStamp;
+        std::vector<PrepareStep> _prepareSteps;
     };
 
     AcquisitionSetup() = default;
@@ -54,6 +67,9 @@ public:
     const View& view(uint viewNb) const;
     std::vector<View>& views();
     const std::vector<View>& views() const;
+
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
 private:
     std::unique_ptr<SimpleCTsystem> _system;

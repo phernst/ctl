@@ -21,7 +21,7 @@ namespace CTL {
  */
 class GenericDetector : public AbstractDetector
 {
-    ADD_TO_COMPONENT_ENUM(101)
+    CTL_TYPE_ID(101)
 
     // implementation of abstract interface
     public: QVector<ModuleLocation> moduleLocations() const override;
@@ -32,13 +32,12 @@ public:
                     const QSizeF& pixelDimensions,
                     QVector<ModuleLocation> moduleLocations,
                     const QString& name = defaultName());
-    GenericDetector(const QJsonObject& json);
 
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // setter methods
     void setModuleLocations(QVector<ModuleLocation> moduleLocations);

@@ -1,8 +1,9 @@
 #include "xraylaser.h"
 #include "models/xrayspectrummodels.h"
 
-namespace CTL
-{
+namespace CTL {
+
+DECLARE_SERIALIZABLE_TYPE(XrayLaser)
 
 XrayLaser::XrayLaser(const QSizeF &focalSpotSize,
                      const Vector3x1 &focalSpotPosition,
@@ -25,19 +26,12 @@ XrayLaser::XrayLaser(const QString &name)
 {
 }
 
-XrayLaser::XrayLaser(const QJsonObject& json)
-    : AbstractSource(defaultName())
-{
-    _spectrumModel.ptr.reset((new XrayLaserSpectrumModel));
-    XrayLaser::read(json);
-}
-
 IntervalDataSeries XrayLaser::spectrum(float from, float to, uint nbSamples) const
 {
     if(!hasSpectrumModel())
         throw std::runtime_error("No spectrum model set.");
 
-    static_cast<XrayLaserSpectrumModel*>(_spectrumModel.ptr.get())->setParameter(_energy);
+    static_cast<XrayLaserSpectrumModel*>(_spectrumModel.get())->setParameter(_energy);
     IntervalDataSeries spec = IntervalDataSeries::sampledFromModel(*spectrumModel(), from, to, nbSamples);
     spec.normalizeByIntegral();
     return spec;
@@ -57,26 +51,29 @@ QString XrayLaser::info() const
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
-void XrayLaser::read(const QJsonObject &json)
+void XrayLaser::fromVariant(const QVariant& variant)
 {
-    AbstractSource::read(json);
+    AbstractSource::fromVariant(variant);
 
-    _energy = json.value("energy").toDouble();
-    _power  = json.value("power").toDouble();
+    QVariantMap varMap = variant.toMap();
+    _energy = varMap.value("energy").toDouble();
+    _power  = varMap.value("power").toDouble();
 }
 
 /*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * Stores all member variables in a QVariant. Also includes the component's type-id
  * and generic type-id.
  */
-void XrayLaser::write(QJsonObject &json) const
+QVariant XrayLaser::toVariant() const
 {
-    AbstractSource::write(json);
+    QVariantMap ret = AbstractSource::toVariant().toMap();
 
-    json.insert("energy", _energy);
-    json.insert("power", _power);
+    ret.insert("energy", _energy);
+    ret.insert("power", _power);
+
+    return ret;
 }
 
 QString XrayLaser::defaultName()

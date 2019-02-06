@@ -3,6 +3,9 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(DetectorSaturationLinearModel);
+DECLARE_SERIALIZABLE_TYPE(DetectorSaturationSplineModel);
+
 // ### DetectorSaturationLinearModel ###
 
 /*!

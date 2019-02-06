@@ -19,7 +19,7 @@ namespace CTL {
 
 class CylindricalDetector : public AbstractDetector
 {
-    ADD_TO_COMPONENT_ENUM(110)
+    CTL_TYPE_ID(110)
 
     // implementation of abstract interface
     public: QVector<ModuleLocation> moduleLocations() const override;
@@ -31,7 +31,6 @@ public:
                         double angulationPerModule,
                         double moduleSpacing,
                         const QString& name = defaultName());
-    CylindricalDetector(const QJsonObject& json);
 
     static CylindricalDetector fromAngulationAndSpacing(const QSize& nbPixelPerModule,
                                                         const QSizeF& pixelDimensions,
@@ -49,8 +48,8 @@ public:
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // getter methods
     double angulationOfModule(uint module) const;

@@ -49,7 +49,7 @@ namespace CTL {
  * components (i.e. source and detector) based on your chosen parametrization.
  *
  * When creating a sub-class of AbstractGantry, make sure to register the new component in the
- * enumeration using the #ADD_TO_COMPONENT_ENUM(newIndex) macro. It is required to specify a value
+ * enumeration using the #CTL_TYPE_ID(newIndex) macro. It is required to specify a value
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
  * from GenericComponent::UserType, as these are reserved for user-defined types.
  *
@@ -60,7 +60,7 @@ namespace CTL {
  */
 class AbstractGantry : public SystemComponent
 {
-    ADD_TO_COMPONENT_ENUM(200)
+    CTL_TYPE_ID(200)
     DECLARE_ELEMENTAL_TYPE
 
     // abstract interface
@@ -72,8 +72,8 @@ public:
 
     // virtual methods
     QString info() const override;
-    void read(const QJsonObject& json) override; // JSON
-    void write(QJsonObject& json) const override; // JSON
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // getter methods
     mat::Location sourceLocation() const;
@@ -97,6 +97,9 @@ public:
     void setDetectorDisplacementPosition(double x, double y, double z);
     void setSourceDisplacementPosition(const Vector3x1& position);
     void setSourceDisplacementPosition(double x, double y, double z);
+
+protected:
+    AbstractGantry() = default;
 
 private:
     mat::Location _detectorDisplacement;
@@ -305,21 +308,30 @@ inline QString AbstractGantry::info() const
     return ret;
 }
 
-inline void AbstractGantry::read(const QJsonObject& json)
+/*!
+ * Reads all member variables from the QJsonObject \a json.
+ */
+inline void AbstractGantry::fromVariant(const QVariant& variant)
 {
-    SystemComponent::read(json);
+    SystemComponent::fromVariant(variant);
 
-    _detectorDisplacement.fromVariant(json.value("detector displacement").toVariant());
-    _sourceDisplacement.fromVariant(json.value("source displacement").toVariant());
+    QVariantMap varMap = variant.toMap();
+    _detectorDisplacement.fromVariant(varMap.value("detector displacement"));
+    _sourceDisplacement.fromVariant(varMap.value("source displacement"));
 }
 
-inline void AbstractGantry::write(QJsonObject& json) const
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+inline QVariant AbstractGantry::toVariant() const
 {
-    SystemComponent::write(json);
+    QVariantMap ret = SystemComponent::toVariant().toMap();
 
-    json.insert("detector displacement",
-                QJsonValue::fromVariant(_detectorDisplacement.toVariant()));
-    json.insert("source displacement", QJsonValue::fromVariant(_sourceDisplacement.toVariant()));
+    ret.insert("detector displacement", _detectorDisplacement.toVariant());
+    ret.insert("source displacement", _sourceDisplacement.toVariant());
+
+    return ret;
 }
 
 } // namespace CTL

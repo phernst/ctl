@@ -4,11 +4,7 @@
 
 namespace CTL {
 
-GenericSource::GenericSource(const QJsonObject& json)
-    : AbstractSource(defaultName())
-{
-    GenericSource::read(json);
-}
+DECLARE_SERIALIZABLE_TYPE(GenericSource)
 
 GenericSource::GenericSource(const QString& name)
     : AbstractSource(name)
@@ -44,15 +40,27 @@ QString GenericSource::info() const
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
-void GenericSource::read(const QJsonObject& json) { AbstractSource::read(json); }
+void GenericSource::fromVariant(const QVariant& variant)
+{
+    AbstractSource::fromVariant(variant);
+
+    _totalFlux = variant.toMap().value("photon flux").toDouble();
+}
 
 /*!
- * Writes all member variables to the QJsonObject \a json. Also writes the component's type-id
+ * Stores all member variables in a QVariant. Also includes the component's type-id
  * and generic type-id.
  */
-void GenericSource::write(QJsonObject& json) const { AbstractSource::write(json); }
+QVariant GenericSource::toVariant() const
+{
+    QVariantMap ret = AbstractSource::toVariant().toMap();
+
+    ret.insert("photon flux", _totalFlux);
+
+    return ret;
+}
 
 void GenericSource::setSpectrum(const IntervalDataSeries& spectrum, bool updateFlux)
 {

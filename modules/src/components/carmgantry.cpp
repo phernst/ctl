@@ -3,14 +3,7 @@
 
 namespace CTL {
 
-/*!
- * Constructs a CarmGantry object based on the information specified in the QJsonObject \a json.
- */
-CarmGantry::CarmGantry(const QJsonObject& json)
-    : AbstractGantry(defaultName())
-{
-    CarmGantry::read(json);
-}
+DECLARE_SERIALIZABLE_TYPE(CarmGantry)
 
 /*!
  * Constructs a CarmGantry with a C-arm span (i.e. source-to-detector distance) of \a cArmSpan and
@@ -92,20 +85,30 @@ QString CarmGantry::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
-void CarmGantry::read(const QJsonObject &json)
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void CarmGantry::fromVariant(const QVariant& variant)
 {
-    AbstractGantry::read(json);
+    AbstractGantry::fromVariant(variant);
 
-    _cArmSpan = json.value("c-arm span").toDouble();
-    _location.fromVariant(json.value("location").toVariant());
+    QVariantMap varMap = variant.toMap();
+    _cArmSpan = varMap.value("c-arm span").toDouble();
+    _location.fromVariant(varMap.value("location"));
 }
 
-void CarmGantry::write(QJsonObject &json) const
+/*!
+ * Stores all member variables in a QVariant. Also includes the component's type-id
+ * and generic type-id.
+ */
+QVariant CarmGantry::toVariant() const
 {
-    AbstractGantry::write(json);
+    QVariantMap ret = AbstractGantry::toVariant().toMap();
 
-    json.insert("c-arm span", _cArmSpan);
-    json.insert("location", QJsonValue::fromVariant(location().toVariant()));
+    ret.insert("c-arm span", _cArmSpan);
+    ret.insert("location", location().toVariant());
+
+    return ret;
 }
 
 // use documentation of GenericComponent::clone()

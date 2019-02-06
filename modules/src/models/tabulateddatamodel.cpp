@@ -2,6 +2,8 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(TabulatedDataModel);
+
 /*!
  * Constructs a TabulatedDataModel with lookup values given by \a table.
  */

@@ -25,14 +25,13 @@ namespace CTL {
  */
 class TubularGantry : public AbstractGantry
 {
-    ADD_TO_COMPONENT_ENUM(220)
+    CTL_TYPE_ID(220)
 
     // implementation of abstract interface
     protected: mat::Location nominalDetectorLocation() const override;
     protected: mat::Location nominalSourceLocation() const override;
 
 public:
-    TubularGantry(const QJsonObject& json);
     TubularGantry(double sourceToDetectorDistance,
                   double sourceToIsoCenterDistance,
                   double rotationAngle = 0.0,
@@ -47,8 +46,8 @@ public:
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
-    void read(const QJsonObject& json) override;     // JSON
-    void write(QJsonObject& json) const override;    // JSON
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // setter methods
     void setPitchPosition(double position);
@@ -66,6 +65,8 @@ protected:
     double _tiltAngle;
 
 private:
+    TubularGantry() = default;
+
     // methods
     Matrix3x3 totalGantryRotation() const;
     mat::Location sourceLocationTG() const;
