@@ -12,6 +12,13 @@ public:
     virtual int type() const;
     virtual void fromVariant(const QVariant& variant); // de-serialization
     virtual QVariant toVariant() const; // serialization
+
+    SerializationInterface() = default;
+    SerializationInterface(const SerializationInterface&) = default;
+    SerializationInterface(SerializationInterface&&) = default;
+    SerializationInterface& operator= (const SerializationInterface&) = default;
+    SerializationInterface& operator= (SerializationInterface&&) = default;
+    virtual ~SerializationInterface() = default;
 };
 
 inline int SerializationInterface::type() const

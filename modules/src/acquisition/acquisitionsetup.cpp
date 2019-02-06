@@ -9,6 +9,34 @@ AcquisitionSetup::View::View(double time)
 {
 }
 
+void AcquisitionSetup::View::fromVariant(const QVariant& variant)
+{
+    QVariantMap varMap = variant.toMap();
+
+    QVariantList prepareStepVarList = varMap.value("prepare steps").toList();
+    std::vector<PrepareStep> prepSteps;
+    prepSteps.reserve(prepareStepVarList.size());
+    for(const auto& prep : prepareStepVarList)
+        prepSteps.push_back(std::shared_ptr<AbstractPrepareStep>(SerializationHelper::parsePrepareStep(prep)));
+
+    timeStamp = varMap.value("time stamp").toDouble();
+    prepareSteps = prepSteps;
+}
+
+QVariant AcquisitionSetup::View::toVariant() const
+{
+    QVariantMap ret;
+
+    QVariantList prepareStepVarList;
+    for(const auto& prep : prepareSteps)
+        prepareStepVarList.append(prep->toVariant());
+
+    ret.insert("time stamp", timeStamp);
+    ret.insert("prepare steps", prepareStepVarList);
+
+    return ret;
+}
+
 AcquisitionSetup::AcquisitionSetup(const CTsystem& system, uint nbViews)
 {
     this->resetSystem(system);
@@ -153,5 +181,37 @@ const AcquisitionSetup::View& AcquisitionSetup::view(uint viewNb) const { return
 std::vector<AcquisitionSetup::View>& AcquisitionSetup::views() { return _views; }
 
 const std::vector<AcquisitionSetup::View>& AcquisitionSetup::views() const { return _views; }
+
+void AcquisitionSetup::fromVariant(const QVariant &variant)
+{
+    auto varMap = variant.toMap();
+
+    CTsystem system;
+    system.fromVariant(varMap.value("system"));
+    this->resetSystem(std::move(system));
+
+    QVariantList viewVarList = varMap.value("views").toList();
+    for(const auto& v : viewVarList)
+    {
+        AcquisitionSetup::View view;
+        view.fromVariant(v);
+        this->addView(std::move(view));
+    }
+}
+
+QVariant AcquisitionSetup::toVariant() const
+{
+    QVariantMap ret;
+
+    QVariantList viewVarList;
+    viewVarList.reserve(_views.size());
+    for(const auto& v : _views)
+        viewVarList.append(v.toVariant());
+
+    ret.insert("CT system", _system->toVariant());
+    ret.insert("views", viewVarList);
+
+    return ret;
+}
 
 } // namespace CTL

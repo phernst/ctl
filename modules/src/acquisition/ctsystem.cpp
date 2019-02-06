@@ -225,6 +225,22 @@ void CTsystem::write(QJsonObject &json) const
 }
 
 /*!
+ * Reads all member variables from the QVariant \a variant.
+ */
+void CTsystem::fromVariant(const QVariant &variant)
+{
+    QVariantMap varMap = variant.toMap();
+
+    this->rename(varMap.value("name").toString());
+
+    // fill in components
+    this->clear();
+    QVariantList componentVariantList = varMap.value("components").toList();
+    for(const auto& comp : componentVariantList)
+        this->addComponent(SerializationHelper::parseComponent(comp));
+}
+
+/*!
  * Writes all components to a QVariant. This uses SerializationInterface::toVariant() of individual
  * components in the system.
  */

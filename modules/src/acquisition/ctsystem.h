@@ -81,7 +81,7 @@ class AbstractBeamModifier;
  * \endcode
  */
 
-class CTsystem
+class CTsystem : public SerializationInterface
 {
 public:
     typedef std::unique_ptr<SystemComponent> ComponentPtr; //!< Alias for unique pointer to SystemComponent
@@ -100,7 +100,8 @@ public:
     virtual QString info() const;
     virtual QString overview() const;
 
-    QVariant toVariant() const; // serialization
+    void fromVariant(const QVariant& variant) override; // de-serialization
+    QVariant toVariant() const override; // serialization
 
     // getter methods
     QList<AbstractDetector*> detectors() const;
