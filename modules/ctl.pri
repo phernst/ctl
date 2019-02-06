@@ -77,7 +77,8 @@ HEADERS += \
     $$PWD/src/projectors/detectorsaturationextension.h \
     $$PWD/src/io/jsonserializer.h \
     $$PWD/src/io/serializationinterface.h \
-    $$PWD/src/io/serializationhelper.h
+    $$PWD/src/io/serializationhelper.h \
+    $$PWD/src/io/abstractserializer.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \

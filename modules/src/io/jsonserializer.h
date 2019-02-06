@@ -1,37 +1,28 @@
 #ifndef JSONSERIALIZER_H
 #define JSONSERIALIZER_H
 
+#include "abstractserializer.h"
+
 #include <QVariant>
 
 namespace CTL {
 
-class AbstractDataModel;
-class AbstractPrepareStep;
-class CTsystem;
-class SerializationInterface;
-class SystemComponent;
-
-class JsonSerializer
+class JsonSerializer : public AbstractSerializer
 {
-public:
-    // only for convenience
-    static void serialize(const AbstractDataModel& model, const QString& fileName);
-    static void serialize(const AbstractPrepareStep& prepStep, const QString& fileName);
-    static void serialize(const SystemComponent& component, const QString& fileName);
-    // actual serialization method
-    static void serialize(const SerializationInterface& serializableObject, const QString& fileName);
+    // implementation of serialization interface
+    public: void serialize(const SerializationInterface& serializableObject,
+                   const QString& fileName) const override;
 
-    static void serialize(const CTsystem& system, const QString& fileName);
-
-    static SystemComponent* deserializeComponent(const QString& fileName);
-    static AbstractDataModel* deserializeDataModel(const QString& fileName);
-    static AbstractPrepareStep* deserializePrepareStep(const QString& fileName);
-    static CTsystem* deserializeSystem(const QString& fileName);
+    // implementation of deserialization interface
+    public: SystemComponent* deserializeComponent(const QString& fileName) const override;
+    public: AbstractDataModel* deserializeDataModel(const QString& fileName) const override;
+    public: AbstractPrepareStep* deserializePrepareStep(const QString& fileName) const override;
+    public: CTsystem* deserializeSystem(const QString& fileName) const override;
+    public: AcquisitionSetup* deserializeAquisitionSetup(const QString& fileName) const override;
 
 private:
     // methods
     static QJsonObject convertVariantToJsonObject(const QVariant& variant);
-    void serializeVariant(const QVariant& variant, const QString& fileName) const;
     static QVariant variantFromJsonFile(const QString& fileName);
 };
 
