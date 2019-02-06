@@ -25,7 +25,7 @@ namespace CTL {
  */
 class TubularGantry : public AbstractGantry
 {
-    ADD_TO_COMPONENT_ENUM(220)
+    CTL_TYPE_ID(220)
 
     // implementation of abstract interface
     protected: mat::Location nominalDetectorLocation() const override;

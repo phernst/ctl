@@ -1,13 +1,10 @@
 #ifndef ABSTRACTPREPARESTEP_H
 #define ABSTRACTPREPARESTEP_H
 
+#include "io/serializationinterface.h"
+#include <QDebug>
 #include <memory>
 #include <vector>
-#include <QDebug>
-
-#include "io/serializationinterface.h"
-
-typedef unsigned int uint;
 
 /*
  * NOTE: This is header only.
@@ -40,14 +37,13 @@ class SimpleCTsystem;
  */
 class AbstractPrepareStep : public SerializationInterface
 {
+    CTL_TYPE_ID(0)
+
     // abstract interface
     public:virtual void prepare(SimpleCTsystem* system) const = 0;
     public:virtual bool isApplicableTo(const CTsystem& system) const = 0;
 
 public:
-    enum { Type = 0, UserType = 65536 };
-
-    virtual int type() const;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
@@ -136,6 +132,8 @@ inline bool AbstractPreparationProtocol::isApplicableTo(const AcquisitionSetup&)
  */
 
 /*!
+ * \fn int AbstractPrepareStep::type() const
+ *
  * Returns the type id of the prepare step.
  *
  * List of all default types:
@@ -152,7 +150,6 @@ inline bool AbstractPreparationProtocol::isApplicableTo(const AcquisitionSetup&)
  * XrayLaserParam::Type          | 310
  * XrayTubeParam::Type           | 320
  */
-inline int AbstractPrepareStep::type() const { return Type; }
 
 inline void AbstractPrepareStep::fromVariant(const QVariant &variant)
 {
@@ -176,19 +173,6 @@ inline QVariant AbstractPrepareStep::toVariant() const
     return ret;
 }
 
-/*!
- * \def ADD_TO_PREPARESTEP_ENUM(newIndex)
- *
- * Macro to add the component to the component enumeration with the index \a newIndex.
- */
-#define ADD_TO_PREPARESTEP_ENUM(newIndex)                                                          \
-public:                                                                                            \
-    enum { Type = newIndex };                                                                      \
-    int type() const override { return Type; }                                                     \
-                                                                                                   \
-private:                                                                                           \
-    template<class>                                                                                \
-    friend struct JsonSerializer::RegisterWithJsonSerializer;
 } // namespace CTL
 
 #endif // ABSTRACTPREPARESTEP_H

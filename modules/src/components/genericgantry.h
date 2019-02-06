@@ -24,7 +24,7 @@ namespace CTL {
  */
 class GenericGantry : public AbstractGantry
 {
-    ADD_TO_COMPONENT_ENUM(201)
+    CTL_TYPE_ID(201)
 
     // implementation of abstract interface
     protected: mat::Location nominalDetectorLocation() const override;

@@ -38,7 +38,7 @@ namespace CTL {
 
 class DetectorSaturationLinearModel : public AbstractDataModel
 {
-    ADD_TO_MODEL_ENUM(10)
+    CTL_TYPE_ID(10)
 
     public: float valueAt(float position) const override;
     public: AbstractDataModel* clone() const override;
@@ -59,7 +59,7 @@ private:
 
 class DetectorSaturationSplineModel : public AbstractDataModel
 {
-    ADD_TO_MODEL_ENUM(20)
+    CTL_TYPE_ID(20)
 
     public: float valueAt(float position) const override;
     public: AbstractDataModel* clone() const override;

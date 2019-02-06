@@ -18,7 +18,7 @@ protected:
 
 class XraySpectrumTabulatedModel : public AbstractXraySpectrumModel
 {
-    ADD_TO_MODEL_ENUM(35)
+    CTL_TYPE_ID(35)
 
     // abstract interfaces
     public: float valueAt(float position) const override;
@@ -41,7 +41,7 @@ private:
 
 class XrayLaserSpectrumModel : public AbstractXraySpectrumModel
 {
-    ADD_TO_MODEL_ENUM(40)
+    CTL_TYPE_ID(40)
 
     // abstract interfaces
     public: float valueAt(float position) const override;
@@ -51,7 +51,7 @@ class XrayLaserSpectrumModel : public AbstractXraySpectrumModel
 
 class FixedXraySpectrumModel : public XraySpectrumTabulatedModel
 {
-    ADD_TO_MODEL_ENUM(36)
+    CTL_TYPE_ID(36)
 
 public:
     FixedXraySpectrumModel() = default;
@@ -66,7 +66,7 @@ private:
 
 class KramersLawSpectrumModel : public AbstractXraySpectrumModel
 {
-    ADD_TO_MODEL_ENUM(41)
+    CTL_TYPE_ID(41)
 
     // abstract interfaces
     public: float valueAt(float position) const override;

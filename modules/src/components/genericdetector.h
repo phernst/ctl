@@ -21,7 +21,7 @@ namespace CTL {
  */
 class GenericDetector : public AbstractDetector
 {
-    ADD_TO_COMPONENT_ENUM(101)
+    CTL_TYPE_ID(101)
 
     // implementation of abstract interface
     public: QVector<ModuleLocation> moduleLocations() const override;

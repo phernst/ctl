@@ -1,10 +1,8 @@
 #ifndef ABSTRACTDATAMODEL_H
 #define ABSTRACTDATAMODEL_H
 
-#include "io/jsonserializer.h"
 #include "io/serializationinterface.h"
 #include <QDebug>
-#include <QVariant>
 #include <memory>
 
 /*
@@ -45,22 +43,21 @@ namespace CTL {
 
 class AbstractDataModel : public SerializationInterface
 {
+    CTL_TYPE_ID(0)
+
     // abstract interface
     public:virtual float valueAt(float position) const = 0;
     public:virtual AbstractDataModel* clone() const = 0;
 
 public:
-    enum { Type = 0, UserType = 65536 };
-
     virtual ~AbstractDataModel() = default;
 
-    virtual int type() const;
     virtual bool isIntegrable() const final;
-
-    virtual void fromVariant(const QVariant& variant) override;
-    virtual QVariant toVariant() const override;
     virtual QVariant parameter() const;
     virtual void setParameter(const QVariant& parameter);
+
+    void fromVariant(const QVariant& variant) override;
+    QVariant toVariant() const override;
 };
 
 class AbstractIntegrableDataModel : public AbstractDataModel
@@ -157,24 +154,7 @@ auto makeDataModel(ConstructorArguments&&... arguments) ->
  * \f$ \left[position-\frac{binWidth}{2},\,position+\frac{binWidth}{2}\right] \f$.
  */
 
-/*!
- * \def ADD_TO_MODEL_ENUM(newIndex)
- *
- * Macro to add the model to the model enumeration with the index \a newIndex.
- */
-#define ADD_TO_MODEL_ENUM(newIndex)                                                                \
-public:                                                                                            \
-    enum { Type = newIndex };                                                                      \
-    int type() const override { return Type; }                                                     \
-                                                                                                   \
-private:                                                                                           \
-    template<class>                                                                                \
-    friend struct JsonSerializer::RegisterWithJsonSerializer;
-
-
 // implementations
-inline int AbstractDataModel::type() const { return Type; }
-
 inline QVariant AbstractDataModel::parameter() const { return QVariant(); }
 
 inline void AbstractDataModel::setParameter(const QVariant&) {}

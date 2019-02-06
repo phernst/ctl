@@ -44,7 +44,7 @@ namespace CTL {
  * unshifed focal spot).
  *
  * When creating a sub-class of AbstractSource, make sure to register the new component in the
- * enumeration using the #ADD_TO_COMPONENT_ENUM(newIndex) macro. It is required to specify a value
+ * enumeration using the #CTL_TYPE_ID(newIndex) macro. It is required to specify a value
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
  * from GenericComponent::UserType, as these are reserved for user-defined types.
  *
@@ -55,7 +55,7 @@ namespace CTL {
  */
 class AbstractSource : public SystemComponent
 {
-    ADD_TO_COMPONENT_ENUM(300)
+    CTL_TYPE_ID(300)
     DECLARE_ELEMENTAL_TYPE
 
     // abstract interface

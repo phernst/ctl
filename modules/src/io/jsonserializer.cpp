@@ -156,13 +156,4 @@ QJsonObject JsonSerializer::convertVariantToJsonObject(const QVariant &variant)
     return ret;
 }
 
-void SerializationInterface::fromVariant(const QVariant&)
-{
-}
-
-QVariant SerializationInterface::toVariant() const
-{
-    return QVariant();
-}
-
 } // namespace CTL

@@ -11,7 +11,7 @@ const uint   DEFAULT_SPECTRUM_RESOLUTION = 40;
 
 class XrayTube : public AbstractSource
 {
-    ADD_TO_COMPONENT_ENUM(320)
+    CTL_TYPE_ID(320)
 
     // implementation of abstract interface
     public: IntervalDataSeries spectrum(float from, float to, uint nbSamples) const override;

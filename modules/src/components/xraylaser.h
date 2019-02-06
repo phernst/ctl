@@ -7,7 +7,7 @@ namespace CTL {
 
 class XrayLaser : public AbstractSource
 {
-    ADD_TO_COMPONENT_ENUM(310)
+    CTL_TYPE_ID(310)
 
     // implementation of abstract interface
     public: IntervalDataSeries spectrum(float from, float to, uint nbSamples) const override;

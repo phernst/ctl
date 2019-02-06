@@ -22,7 +22,7 @@ namespace CTL {
  */
 class CarmGantry : public AbstractGantry
 {
-    ADD_TO_COMPONENT_ENUM(210)
+    CTL_TYPE_ID(210)
 
     // implementation of abstract interface
     protected: mat::Location nominalDetectorLocation() const override;

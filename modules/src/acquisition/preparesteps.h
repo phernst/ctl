@@ -16,7 +16,7 @@ namespace prepare {
 
 class TubularGantryParam : public AbstractPrepareStep
 {
-    ADD_TO_PREPARESTEP_ENUM(220)
+    CTL_TYPE_ID(220)
 
 public:
     void setRotationAngle(double rotation) { _newRotationAngle = {true, rotation}; }
@@ -37,7 +37,7 @@ private:
 
 class CarmGantryParam : public AbstractPrepareStep
 {
-    ADD_TO_PREPARESTEP_ENUM(210)
+    CTL_TYPE_ID(210)
 
 public:
     void setLocation(const mat::Location& location) { _newLocation = {true, location}; }
@@ -56,7 +56,7 @@ private:
 
 class GenericGantryParam : public AbstractPrepareStep
 {
-    ADD_TO_PREPARESTEP_ENUM(201)
+    CTL_TYPE_ID(201)
 
 public:
     void setDetectorLocation(const mat::Location& location) { _newDetectorLocation = {true, location}; }
@@ -75,7 +75,7 @@ private:
 
 class GantryDisplacementParam : public AbstractPrepareStep
 {
-    ADD_TO_PREPARESTEP_ENUM(230)
+    CTL_TYPE_ID(230)
 
 public:
     void setDetectorDisplacement(const mat::Location& displacement) { _newDetectorDisplacement = {true, displacement}; }
@@ -103,7 +103,7 @@ private:
 
 class SourceParam : public AbstractPrepareStep
 {
-    ADD_TO_PREPARESTEP_ENUM(300)
+    CTL_TYPE_ID(300)
 
 public:
     void setFluxModifier(double modifier)                { _newFluxModifier = {true, modifier}; }
@@ -124,7 +124,7 @@ protected:
 
 class XrayLaserParam : public SourceParam
 {
-    ADD_TO_PREPARESTEP_ENUM(310)
+    CTL_TYPE_ID(310)
 
 public:
     void setPhotonEnergy(double energy) { _newPhotonEnergy = {true, energy}; }
@@ -143,7 +143,7 @@ private:
 
 class XrayTubeParam : public SourceParam
 {
-    ADD_TO_PREPARESTEP_ENUM(320)
+    CTL_TYPE_ID(320)
 
 public:
     void setTubeVoltage(double voltage)     { _newTubeVoltage = {true, voltage}; }
@@ -167,7 +167,7 @@ private:
 
 class GenericDetectorParam : public AbstractPrepareStep
 {
-    ADD_TO_PREPARESTEP_ENUM(101)
+    CTL_TYPE_ID(101)
 
 public:
     void setModuleLocations(QVector<mat::Location> moduleLocations) { _newModuleLocations = {true, moduleLocations}; }

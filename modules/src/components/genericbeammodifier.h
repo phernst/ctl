@@ -18,7 +18,7 @@ namespace CTL {
  */
 class GenericBeamModifier : public AbstractBeamModifier
 {
-    ADD_TO_COMPONENT_ENUM(401)
+    CTL_TYPE_ID(401)
 
     // implementation of abstract interface
     public: IntervalDataSeries modify(const IntervalDataSeries& inputSpectrum,

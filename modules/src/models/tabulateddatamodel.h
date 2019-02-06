@@ -18,7 +18,7 @@ namespace CTL {
  */
 class TabulatedDataModel : public AbstractIntegrableDataModel
 {
-    ADD_TO_MODEL_ENUM(30)
+    CTL_TYPE_ID(30)
 
     // abstract interfaces
     public: float valueAt(float position) const override;

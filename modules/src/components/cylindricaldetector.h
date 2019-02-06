@@ -19,7 +19,7 @@ namespace CTL {
 
 class CylindricalDetector : public AbstractDetector
 {
-    ADD_TO_COMPONENT_ENUM(110)
+    CTL_TYPE_ID(110)
 
     // implementation of abstract interface
     public: QVector<ModuleLocation> moduleLocations() const override;

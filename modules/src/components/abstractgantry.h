@@ -49,7 +49,7 @@ namespace CTL {
  * components (i.e. source and detector) based on your chosen parametrization.
  *
  * When creating a sub-class of AbstractGantry, make sure to register the new component in the
- * enumeration using the #ADD_TO_COMPONENT_ENUM(newIndex) macro. It is required to specify a value
+ * enumeration using the #CTL_TYPE_ID(newIndex) macro. It is required to specify a value
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
  * from GenericComponent::UserType, as these are reserved for user-defined types.
  *
@@ -60,7 +60,7 @@ namespace CTL {
  */
 class AbstractGantry : public SystemComponent
 {
-    ADD_TO_COMPONENT_ENUM(200)
+    CTL_TYPE_ID(200)
     DECLARE_ELEMENTAL_TYPE
 
     // abstract interface

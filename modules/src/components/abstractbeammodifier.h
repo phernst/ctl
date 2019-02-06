@@ -24,7 +24,7 @@ namespace CTL {
  * coordinates (\a phi - azimuthal angle, \a theta - polar angle).
  *
  * When creating a sub-class of AbstractBeamModifier, make sure to register the new component in the
- * enumeration using the #ADD_TO_COMPONENT_ENUM(newIndex) macro. It is required to specify a value
+ * enumeration using the #CTL_TYPE_ID(newIndex) macro. It is required to specify a value
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
  * from GenericComponent::UserType, as these are reserved for user-defined types.
  *
@@ -35,7 +35,7 @@ namespace CTL {
  */
 class AbstractBeamModifier : public SystemComponent
 {
-    ADD_TO_COMPONENT_ENUM(400)
+    CTL_TYPE_ID(400)
     DECLARE_ELEMENTAL_TYPE
 
     // abstract interface

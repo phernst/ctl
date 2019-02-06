@@ -2,7 +2,6 @@
 #define JSONSERIALIZER_H
 
 #include <QVariant>
-#include <QMap>
 
 namespace CTL {
 
@@ -83,10 +82,14 @@ JsonSerializer::RegisterWithJsonSerializer<SerializableType>::RegisterWithJsonSe
         JsonSerializer::instance()._modelFactories.insert(SerializableType::Type, factoryFunction);
     else if(std::is_convertible<SerializableType*, AbstractPrepareStep*>::value)
         JsonSerializer::instance()._prepareStepFactories.insert(SerializableType::Type, factoryFunction);
+    else
+        Q_ASSERT_X(false, "RegisterWithJsonSerializer", "try a registration of an unknown type");
 }
 
 /*!
  * \def DECLARE_JSON_COMPATIBLE_TYPE(componentClassName_woNamespace)
+ *
+ * \relates JsonSerializer
  *
  * Declares a global variable for a certain serializable class. Its initialization registers this
  * class with the JsonSerializer. The argument of this macro must be the name of the concrete
@@ -100,5 +103,9 @@ JsonSerializer::RegisterWithJsonSerializer<SerializableType>::RegisterWithJsonSe
     JSON_SERIALIZER_KNOWS_ ## className_woNamespace;
 
 } // namespace CTL
+
+/*! \file */
+///@{
+///@}
 
 #endif // JSONSERIALIZER_H

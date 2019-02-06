@@ -15,7 +15,7 @@ namespace CTL {
  */
 class FlatPanelDetector : public AbstractDetector
 {
-    ADD_TO_COMPONENT_ENUM(120)
+    CTL_TYPE_ID(120)
 
     // implementation of abstract interface
     public: QVector<ModuleLocation> moduleLocations() const override;
