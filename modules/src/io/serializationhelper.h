@@ -13,6 +13,8 @@ class SerializationInterface;
 /*!
  * \class SerializationHelper
  * \brief Singleton that manages factory functions for parsing `QVariant`(Maps) to CTL types
+ *
+ * \sa DECLARE_SERIALIZABLE_TYPE(className_woNamespace)
  */
 
 class SerializationHelper
@@ -107,8 +109,6 @@ SerializationHelper::RegisterWithSerializationHelper<SerializableType>::Register
 /*!
  * \def DECLARE_SERIALIZABLE_TYPE(className_woNamespace)
  *
- * \relates SerializationHelper
- *
  * Declares a global variable for a certain serializable class. Its initialization registers this
  * class with the SerializationHelper. The argument of this macro must be the name of the concrete
  * class that should be registered. The name must not contain any namespace, which can be
@@ -137,7 +137,7 @@ SerializationHelper::RegisterWithSerializationHelper<SerializableType>::Register
  * \sa CTL_TYPE_ID(newIndex)
  */
 #define DECLARE_SERIALIZABLE_TYPE(className_woNamespace)                                           \
-    CTL::SerializationHelper::RegisterWithSerializationHelper<className_woNamespace>               \
+    ::CTL::SerializationHelper::RegisterWithSerializationHelper<className_woNamespace>             \
     SERIALIZATION_HELPER_KNOWS_ ## className_woNamespace;
 ///@}
 

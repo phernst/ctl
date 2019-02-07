@@ -8,6 +8,8 @@ namespace CTL {
 /*!
  * \class SerializationInterface
  * \brief Specify an interface for de-/serialization from/to `QVariant`s
+ *
+ * \sa CTL_TYPE_ID(newIndex)
  */
 
 class SerializationInterface
@@ -46,8 +48,6 @@ inline QVariant SerializationInterface::toVariant() const
 ///@{
 /*!
  * \def CTL_TYPE_ID(newIndex)
- *
- * \relates SerializationInterface
  *
  * This macro should be used in classes with SerializationInterface as base class.
  * It adds a class to the type enumeration with the index \a newIndex and
@@ -88,6 +88,8 @@ inline QVariant SerializationInterface::toVariant() const
  * Note that \a newIndex within one of the top four categories has to be unique for each class that
  * uses this macro. It is not necessary for the \a newIndex to be unique with respect to the other
  * categories.
+ *
+ * \sa DECLARE_SERIALIZABLE_TYPE(className_woNamespace)
  */
 #define CTL_TYPE_ID(newIndex)                                                                      \
 public:                                                                                            \
