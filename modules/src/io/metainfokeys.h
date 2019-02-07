@@ -19,7 +19,7 @@ const QString nbVoxelsY = QStringLiteral("num vox y");
 const QString nbVoxelsZ = QStringLiteral("num vox z");
 
 const QString nbRows = QStringLiteral("num row");
-const QString nbChans = QStringLiteral("num channels");
+const QString nbChans = QStringLiteral("num channel");
 const QString nbCols = QStringLiteral("num column");
 const QString nbViews = QStringLiteral("num proj");
 const QString nbMods = QStringLiteral("num det module");
