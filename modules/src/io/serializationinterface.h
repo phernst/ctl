@@ -5,6 +5,11 @@
 
 namespace CTL {
 
+/*!
+ * \class SerializationInterface
+ * \brief Specify an interface for de-/serialization from/to `QVariant`s
+ */
+
 class SerializationInterface
 {
 public:

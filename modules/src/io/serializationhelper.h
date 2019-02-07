@@ -10,6 +10,11 @@ class AbstractPrepareStep;
 class SystemComponent;
 class SerializationInterface;
 
+/*!
+ * \class SerializationHelper
+ * \brief Singleton that manages factory functions for parsing `QVariant`(Maps) to CTL types
+ */
+
 class SerializationHelper
 {
 public:
@@ -108,8 +113,28 @@ SerializationHelper::RegisterWithSerializationHelper<SerializableType>::Register
  * class with the SerializationHelper. The argument of this macro must be the name of the concrete
  * class that should be registered. The name must not contain any namespace, which can be
  * achieved by using this macro inside the according namespace.
+ * The macro should be placed in *one* .cpp file only (below the the include statement of the header
+ * that defines the class \a className_woNamespace):
+ * \code
+ * #include "myclass.h"
  *
- * The global variable name is `SERIALIZATION_HELPER_KNOWS_<className_woNamespace>`.
+ * namespace possible_namespace {
+ *
+ * DECLARE_SERIALIZABLE_TYPE(MyClass);
+ * // ...
+ * }
+ * \endcode
+ *
+ * This macro can only be applied to classes with `SerializationInterface` as base class.
+ * These classes should also used the `CTL_TYPE_ID(id)` macro in their class definitions in order to
+ * define a unique type ID within their category, which may be either AbstractDataModel,
+ * AbstractPrepareStep, SystemComponent or none of the aforementioned, but at least
+ * SerializationInterface as base class.
+ *
+ * The global variable name is `SERIALIZATION_HELPER_KNOWS_<className_woNamespace>`. Its type is
+ * `CTL::SerializationHelper::RegisterWithSerializationHelper<className_woNamespace>`.
+ *
+ * \sa CTL_TYPE_ID(newIndex)
  */
 #define DECLARE_SERIALIZABLE_TYPE(className_woNamespace)                                           \
     CTL::SerializationHelper::RegisterWithSerializationHelper<className_woNamespace>               \
