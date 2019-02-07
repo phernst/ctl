@@ -59,6 +59,8 @@ ProjectionMatrix::compose(const Matrix<3, 3>& K, const Matrix<3, 3>& R, const Ma
  *  0 & 0 & 1
  * \end{array}\right)P\f$
  *
+ * Note that the \a translation vector is in units of detector pixels (not in mm).
+ *
  * \sa shiftDetectorOrigin(double translationX, double translationY)
  */
 void ProjectionMatrix::shiftDetectorOrigin(const Matrix<2, 1>& translation)
