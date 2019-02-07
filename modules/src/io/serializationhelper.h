@@ -21,14 +21,15 @@ public:
 
     // define type: pointer to function that creates CTL objects from a QVariant
     typedef SerializationInterface* (*SerializableFactoryFunction)(const QVariant&);
+    typedef QMap<int, SerializableFactoryFunction> FactoryMap;
 
     static SerializationHelper& instance();  // singleton getter
 
     // maps with registered CTL type factories
-    const QMap<int, SerializableFactoryFunction>& componentFactories() const;
-    const QMap<int, SerializableFactoryFunction>& modelFactories() const;
-    const QMap<int, SerializableFactoryFunction>& prepareStepFactories() const;
-    const QMap<int, SerializableFactoryFunction>& miscFactories() const;
+    const FactoryMap& componentFactories() const;
+    const FactoryMap& modelFactories() const;
+    const FactoryMap& prepareStepFactories() const;
+    const FactoryMap& miscFactories() const;
 
     // functions that parse the QVariant in order to create a concrete system component, data
     // model, prepare step, or something else with SerializationInterface as base class
@@ -43,11 +44,14 @@ private:
     SerializationHelper(const SerializationHelper&) = delete;
     SerializationHelper& operator=(const SerializationHelper&) = delete;
 
+    // generic parse function that uses a specified factory map to create an object
+    static SerializationInterface* parse(const QVariant& variant, const FactoryMap& factoryMap);
+
     // map that maps a type ID to the factory function of a data model
-    QMap<int, SerializableFactoryFunction> _componentFactories;
-    QMap<int, SerializableFactoryFunction> _modelFactories;
-    QMap<int, SerializableFactoryFunction> _prepareStepFactories;
-    QMap<int, SerializableFactoryFunction> _miscFactories;
+    FactoryMap _componentFactories;
+    FactoryMap _modelFactories;
+    FactoryMap _prepareStepFactories;
+    FactoryMap _miscFactories;
 };
 
 template<class SerializableType>

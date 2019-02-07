@@ -38,47 +38,31 @@ SerializationHelper::miscFactories() const
 
 SystemComponent* SerializationHelper::parseComponent(const QVariant& variant)
 {
-    auto varMap = variant.toMap();
-    if(!varMap.contains("type-id"))
-        return nullptr;
-    auto typeID = varMap.value("type-id").toInt();
-    const auto& factoryMap = instance().componentFactories();
-    if(!factoryMap.contains(typeID))
-        return nullptr;
-    return dynamic_cast<SystemComponent*>(factoryMap[typeID](variant));
+    return dynamic_cast<SystemComponent*>(parse(variant, instance().componentFactories()));
 }
 
 AbstractDataModel* SerializationHelper::parseDataModel(const QVariant& variant)
 {
-    auto varMap = variant.toMap();
-    if(!varMap.contains("type-id"))
-        return nullptr;
-    auto typeID = varMap.value("type-id").toInt();
-    const auto& factoryMap = instance().modelFactories();
-    if(!factoryMap.contains(typeID))
-        return nullptr;
-    return dynamic_cast<AbstractDataModel*>(factoryMap[typeID](variant));
+    return dynamic_cast<AbstractDataModel*>(parse(variant, instance().modelFactories()));
 }
 
 AbstractPrepareStep* SerializationHelper::parsePrepareStep(const QVariant& variant)
 {
-    auto varMap = variant.toMap();
-    if(!varMap.contains("type-id"))
-        return nullptr;
-    auto typeID = varMap.value("type-id").toInt();
-    const auto& factoryMap = instance().prepareStepFactories();
-    if(!factoryMap.contains(typeID))
-        return nullptr;
-    return dynamic_cast<AbstractPrepareStep*>(factoryMap[typeID](variant));
+    return dynamic_cast<AbstractPrepareStep*>(parse(variant, instance().prepareStepFactories()));
 }
 
 SerializationInterface* SerializationHelper::parseSerializableObject(const QVariant& variant)
+{
+    return parse(variant, instance().miscFactories());
+}
+
+SerializationInterface* SerializationHelper::parse(const QVariant& variant,
+                                                   const FactoryMap& factoryMap)
 {
     auto varMap = variant.toMap();
     if(!varMap.contains("type-id"))
         return nullptr;
     auto typeID = varMap.value("type-id").toInt();
-    const auto& factoryMap = instance().miscFactories();
     if(!factoryMap.contains(typeID))
         return nullptr;
     return factoryMap[typeID](variant);
