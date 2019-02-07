@@ -30,7 +30,13 @@ SerializationHelper::prepareStepFactories() const
     return _prepareStepFactories;
 }
 
-SystemComponent* SerializationHelper::parseComponent(const QVariant &variant)
+const QMap<int, SerializationHelper::SerializableFactoryFunction>&
+SerializationHelper::miscFactories() const
+{
+    return _miscFactories;
+}
+
+SystemComponent* SerializationHelper::parseComponent(const QVariant& variant)
 {
     auto varMap = variant.toMap();
     if(!varMap.contains("type-id"))
@@ -42,7 +48,7 @@ SystemComponent* SerializationHelper::parseComponent(const QVariant &variant)
     return dynamic_cast<SystemComponent*>(factoryMap[typeID](variant));
 }
 
-AbstractDataModel* SerializationHelper::parseDataModel(const QVariant &variant)
+AbstractDataModel* SerializationHelper::parseDataModel(const QVariant& variant)
 {
     auto varMap = variant.toMap();
     if(!varMap.contains("type-id"))
@@ -54,7 +60,7 @@ AbstractDataModel* SerializationHelper::parseDataModel(const QVariant &variant)
     return dynamic_cast<AbstractDataModel*>(factoryMap[typeID](variant));
 }
 
-AbstractPrepareStep* SerializationHelper::parsePrepareStep(const QVariant &variant)
+AbstractPrepareStep* SerializationHelper::parsePrepareStep(const QVariant& variant)
 {
     auto varMap = variant.toMap();
     if(!varMap.contains("type-id"))
@@ -64,6 +70,18 @@ AbstractPrepareStep* SerializationHelper::parsePrepareStep(const QVariant &varia
     if(!factoryMap.contains(typeID))
         return nullptr;
     return dynamic_cast<AbstractPrepareStep*>(factoryMap[typeID](variant));
+}
+
+SerializationInterface* SerializationHelper::parseSerializableObject(const QVariant& variant)
+{
+    auto varMap = variant.toMap();
+    if(!varMap.contains("type-id"))
+        return nullptr;
+    auto typeID = varMap.value("type-id").toInt();
+    const auto& factoryMap = instance().miscFactories();
+    if(!factoryMap.contains(typeID))
+        return nullptr;
+    return factoryMap[typeID](variant);
 }
 
 } // namespace CTL

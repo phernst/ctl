@@ -28,12 +28,14 @@ public:
     const QMap<int, SerializableFactoryFunction>& componentFactories() const;
     const QMap<int, SerializableFactoryFunction>& modelFactories() const;
     const QMap<int, SerializableFactoryFunction>& prepareStepFactories() const;
+    const QMap<int, SerializableFactoryFunction>& miscFactories() const;
 
     // functions that parse the QVariant in order to create a concrete system component, data
-    // model, or prepare step
+    // model, prepare step, or something else with SerializationInterface as base class
     static AbstractDataModel* parseDataModel(const QVariant& variant);
     static SystemComponent* parseComponent(const QVariant& variant);
     static AbstractPrepareStep* parsePrepareStep(const QVariant& variant);
+    static SerializationInterface* parseSerializableObject(const QVariant& variant);
 
 private:
     // private ctor & non-copyable
@@ -45,6 +47,7 @@ private:
     QMap<int, SerializableFactoryFunction> _componentFactories;
     QMap<int, SerializableFactoryFunction> _modelFactories;
     QMap<int, SerializableFactoryFunction> _prepareStepFactories;
+    QMap<int, SerializableFactoryFunction> _miscFactories;
 };
 
 template<class SerializableType>
@@ -57,28 +60,41 @@ SerializationHelper::RegisterWithSerializationHelper<SerializableType>::Register
         return a;
     };
 
+    constexpr bool sysComponent = std::is_convertible<SerializableType*, SystemComponent*>::value;
+    constexpr bool dataModel = std::is_convertible<SerializableType*, AbstractDataModel*>::value;
+    constexpr bool prepStep = std::is_convertible<SerializableType*, AbstractPrepareStep*>::value;
+    constexpr bool misc = std::is_convertible<SerializableType*, SerializationInterface*>::value;
+
+    static_assert(sysComponent || dataModel || prepStep || misc,
+                  "RegisterWithSerializationHelper fails: tried a registration of an unknown type");
+
     auto& serializer = SerializationHelper::instance();
-    if(std::is_convertible<SerializableType*, SystemComponent*>::value)
+    if(sysComponent)
     {
         Q_ASSERT(!serializer._componentFactories.contains(SerializableType::Type));
         serializer._componentFactories.insert(SerializableType::Type, factoryFunction);
     }
-    else if(std::is_convertible<SerializableType*, AbstractDataModel*>::value)
+    else if(dataModel)
     {
         Q_ASSERT(!serializer._modelFactories.contains(SerializableType::Type));
         serializer._modelFactories.insert(SerializableType::Type, factoryFunction);
     }
-    else if(std::is_convertible<SerializableType*, AbstractPrepareStep*>::value)
+    else if(prepStep)
     {
         Q_ASSERT(!serializer._prepareStepFactories.contains(SerializableType::Type));
         serializer._prepareStepFactories.insert(SerializableType::Type, factoryFunction);
     }
-    else
+    else if(misc)
     {
-        Q_ASSERT_X(false, "RegisterWithSerializationHelper", "try a registration of an unknown type");
+        Q_ASSERT(!serializer._miscFactories.contains(SerializableType::Type));
+        serializer._miscFactories.insert(SerializableType::Type, factoryFunction);
     }
 }
 
+} // namespace CTL
+
+/*! \file */
+///@{
 /*!
  * \def DECLARE_SERIALIZABLE_TYPE(className_woNamespace)
  *
@@ -91,15 +107,9 @@ SerializationHelper::RegisterWithSerializationHelper<SerializableType>::Register
  *
  * The global variable name is `SERIALIZATION_HELPER_KNOWS_<className_woNamespace>`.
  */
-#define DECLARE_SERIALIZABLE_TYPE(className_woNamespace)                                        \
-    CTL::SerializationHelper::RegisterWithSerializationHelper<className_woNamespace>                         \
+#define DECLARE_SERIALIZABLE_TYPE(className_woNamespace)                                           \
+    CTL::SerializationHelper::RegisterWithSerializationHelper<className_woNamespace>               \
     SERIALIZATION_HELPER_KNOWS_ ## className_woNamespace;
-
-
-} // namespace CTL
-
-/*! \file */
-///@{
 ///@}
 
 #endif // SERIALIZATIONHELPER_H

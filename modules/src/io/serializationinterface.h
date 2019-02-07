@@ -35,6 +35,10 @@ inline QVariant SerializationInterface::toVariant() const
     return QVariant();
 }
 
+} // namespace CTL
+
+/*! \file */
+///@{
 /*!
  * \def CTL_TYPE_ID(newIndex)
  *
@@ -70,12 +74,13 @@ inline QVariant SerializationInterface::toVariant() const
  * };
  * \endcode
  *
- * So far, the SerializationHelper can only mangage the serialization of the following three (base)
- * types
+ * The SerializationHelper can mangage the serialization of classes with the following types as base
+ * class:
  * - AbstractDataModel
  * - AbstractPrepareStep
  * - SystemComponent
- * Note that \a newIndex within one of the top three categories has to be unique for each class that
+ * - none of the above, only SerializationInterface
+ * Note that \a newIndex within one of the top four categories has to be unique for each class that
  * uses this macro. It is not necessary for the \a newIndex to be unique with respect to the other
  * categories.
  */
@@ -87,11 +92,6 @@ public:                                                                         
 private:                                                                                           \
     template<class>                                                                                \
     friend struct SerializationHelper::RegisterWithSerializationHelper;
-
-} // namespace CTL
-
-/*! \file */
-///@{
 ///@}
 
 #endif // SERIALIZATIONINTERFACE_H
