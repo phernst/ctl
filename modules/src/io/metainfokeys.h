@@ -7,14 +7,22 @@ namespace CTL {
 namespace io {
 namespace meta_info {
 
-const QString dimX = QStringLiteral("size 1");
-const QString dimY = QStringLiteral("size 2");
-const QString dimZ = QStringLiteral("size 3");
+const QString dimensions = QStringLiteral("dimensions");
 
-const QString dimRows = QStringLiteral("num row");
-const QString dimChans = QStringLiteral("num channels");
-const QString dimViews = QStringLiteral("num proj");
-const QString dimMods = QStringLiteral("num det module");
+const QString dim1Type = QStringLiteral("dimension 1 type");
+const QString dim2Type = QStringLiteral("dimension 2 type");
+const QString dim3Type = QStringLiteral("dimension 3 type");
+const QString dim4Type = QStringLiteral("dimension 4 type");
+
+const QString nbVoxelsX = QStringLiteral("num vox x");
+const QString nbVoxelsY = QStringLiteral("num vox y");
+const QString nbVoxelsZ = QStringLiteral("num vox z");
+
+const QString nbRows = QStringLiteral("num row");
+const QString nbChans = QStringLiteral("num channels");
+const QString nbCols = QStringLiteral("num column");
+const QString nbViews = QStringLiteral("num proj");
+const QString nbMods = QStringLiteral("num det module");
 
 const QString voxSizeX = QStringLiteral("vox size x");
 const QString voxSizeY = QStringLiteral("vox size y");
@@ -26,9 +34,10 @@ const QString volOffZ = QStringLiteral("recon center z");
 
 const QString typeHint = QStringLiteral("type hint");
 namespace type_hint {
-    const QString volume = QStringLiteral("volume data");
     const QString projection = QStringLiteral("projection data");
     const QString projMatrix = QStringLiteral("projection matrix");
+    const QString volume = QStringLiteral("volume data");
+    const QString slice = QStringLiteral("slice");
 } // namespace type_hint
 
 } // namespace meta_info

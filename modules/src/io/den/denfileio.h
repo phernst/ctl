@@ -40,12 +40,11 @@ inline QVariantMap DenFileIO::metaInfo(const QString &fileName) const
 
     auto header = den::loadHeader(fileName);
 
-    ret.insert(meta_info::dimX, QVariant(header.cols));
-    ret.insert(meta_info::dimY, QVariant(header.rows));
-    ret.insert(meta_info::dimZ, QVariant(header.count));
+    QVariantList dimensions{ header.cols,
+                             header.rows,
+                             header.count };
 
-    ret.insert(meta_info::dimChans, QVariant(header.cols));
-    ret.insert(meta_info::dimRows, QVariant(header.rows));
+    ret.insert(meta_info::dimensions, dimensions);
 
     return ret;
 }
@@ -58,27 +57,15 @@ bool DenFileIO::write(const std::vector<T> &data,
     den::DFile dFile(fileName);
     dFile.setVerbose(false);
 
-    den::Header header;
-    if(metaInfo.contains(meta_info::dimX) &&
-       metaInfo.contains(meta_info::dimY) &&
-       metaInfo.contains(meta_info::dimZ))
-    {
-        header.cols  = metaInfo.value(meta_info::dimX).toInt();
-        header.rows  = metaInfo.value(meta_info::dimY).toInt();
-        header.count = metaInfo.value(meta_info::dimZ).toInt();
-    }
-    else if (metaInfo.contains(meta_info::dimChans) &&
-             metaInfo.contains(meta_info::dimRows) &&
-             metaInfo.contains(meta_info::dimMods) &&
-             metaInfo.contains(meta_info::dimViews))
-    {
-        header.cols  = metaInfo.value(meta_info::dimChans).toInt();
-        header.rows  = metaInfo.value(meta_info::dimRows).toInt();
-        header.count = metaInfo.value(meta_info::dimMods).toInt() *
-                       metaInfo.value(meta_info::dimViews).toInt();
-    }
-    else
+    auto dimList = metaInfo.value(meta_info::dimensions).toList();
+
+    if(dimList.size() < 2)
         throw std::runtime_error("Writing aborted: missing data meta information!");
+
+    den::Header header;
+    header.cols = dimList.at(0).toInt();
+    header.rows = dimList.at(1).toInt();
+    header.count = dimList.value(2, 1).toInt() * dimList.value(3, 1).toInt();
 
     return dFile.save(data, header);
 }

@@ -13,9 +13,11 @@ VoxelVolume<T> BaseTypeIO<FileIOImplementer>::readVolume(const QString& fileName
 {
     QVariantMap metaInfo = _implementer.metaInfo(fileName);
 
-    typename VoxelVolume<T>::Dimensions dim{ metaInfo.value(meta_info::dimX, QVariant(0u)).toUInt(),
-                                             metaInfo.value(meta_info::dimY, QVariant(0u)).toUInt(),
-                                             metaInfo.value(meta_info::dimZ, QVariant(0u)).toUInt() };
+    auto dimList = metaInfo.value(meta_info::dimensions).toList();
+
+    typename VoxelVolume<T>::Dimensions dim{ dimList.value(0, 0u).toUInt(),
+                                             dimList.value(1, 0u).toUInt(),
+                                             dimList.value(2, 0u).toUInt() };
 
     typename VoxelVolume<T>::VoxelSize size{ metaInfo.value(meta_info::voxSizeX, QVariant(.0f)).toFloat(),
                                              metaInfo.value(meta_info::voxSizeY, QVariant(.0f)).toFloat(),
@@ -38,9 +40,10 @@ template <typename T>
 Chunk2D<T> BaseTypeIO<FileIOImplementer>::readSlice(const QString& fileName, uint sliceNb) const
 {
     QVariantMap metaInfo = _implementer.metaInfo(fileName);
-    uint dim[3] { metaInfo.value(meta_info::dimX, QVariant(0u)).toUInt(),
-                  metaInfo.value(meta_info::dimY, QVariant(0u)).toUInt(),
-                  metaInfo.value(meta_info::dimZ, QVariant(0u)).toUInt() };
+    auto dimList = metaInfo.value(meta_info::dimensions).toList();
+    uint dim[3] { dimList.value(0, 0u).toUInt(),
+                  dimList.value(1, 0u).toUInt(),
+                  dimList.value(2, 0u).toUInt() };
 
     Chunk2D<T> ret(dim[0], dim[1]);
 
@@ -144,9 +147,13 @@ bool BaseTypeIO<FileIOImplementer>::write(const Chunk2D<T> &data,
                                           QVariantMap supplementaryMetaInfo) const
 {
     QVariantMap metaInfo;
-    metaInfo.insert(meta_info::dimX, QVariant(data.dimensions().width));
-    metaInfo.insert(meta_info::dimY, QVariant(data.dimensions().height));
-    metaInfo.insert(meta_info::dimZ, QVariant(1u));
+    QVariantList dimensions{ data.dimensions().width,
+                             data.dimensions().height };
+    metaInfo.insert(meta_info::dimensions, dimensions);
+
+    metaInfo.insert(meta_info::dim1Type, meta_info::nbVoxelsX);
+    metaInfo.insert(meta_info::dim2Type, meta_info::nbVoxelsY);
+    metaInfo.insert(meta_info::typeHint, meta_info::type_hint::slice);
 
     metaInfo = fusedMetaInfo(metaInfo, std::move(supplementaryMetaInfo));
 
@@ -160,9 +167,13 @@ bool BaseTypeIO<FileIOImplementer>::write(const VoxelVolume<T>& data,
                                           QVariantMap supplementaryMetaInfo) const
 {
     QVariantMap metaInfo;
-    metaInfo.insert(meta_info::dimX, QVariant(data.nbVoxels().x));
-    metaInfo.insert(meta_info::dimY, QVariant(data.nbVoxels().y));
-    metaInfo.insert(meta_info::dimZ, QVariant(data.nbVoxels().z));
+    QVariantList dimensions{ data.nbVoxels().x,
+                             data.nbVoxels().y,
+                             data.nbVoxels().z };
+    metaInfo.insert(meta_info::dimensions, dimensions);
+    metaInfo.insert(meta_info::dim1Type, meta_info::nbVoxelsX);
+    metaInfo.insert(meta_info::dim2Type, meta_info::nbVoxelsY);
+    metaInfo.insert(meta_info::dim3Type, meta_info::nbVoxelsZ);
     metaInfo.insert(meta_info::voxSizeX, QVariant(data.voxelSize().x));
     metaInfo.insert(meta_info::voxSizeY, QVariant(data.voxelSize().y));
     metaInfo.insert(meta_info::voxSizeZ, QVariant(data.voxelSize().z));
@@ -182,10 +193,13 @@ bool BaseTypeIO<FileIOImplementer>::write(const SingleViewData& data,
                                           QVariantMap supplementaryMetaInfo) const
 {
     QVariantMap metaInfo;
-    metaInfo.insert(meta_info::dimChans, QVariant(data.dimensions().nbChannels));
-    metaInfo.insert(meta_info::dimRows, QVariant(data.dimensions().nbRows));
-    metaInfo.insert(meta_info::dimMods, QVariant(data.dimensions().nbModules));
-    metaInfo.insert(meta_info::dimViews, 1);
+    QVariantList dimensions{ data.dimensions().nbChannels,
+                             data.dimensions().nbRows,
+                             data.dimensions().nbModules };
+    metaInfo.insert(meta_info::dimensions, dimensions);
+    metaInfo.insert(meta_info::dim1Type, meta_info::nbChans);
+    metaInfo.insert(meta_info::dim2Type, meta_info::nbRows);
+    metaInfo.insert(meta_info::dim3Type, meta_info::nbMods);
     metaInfo.insert(meta_info::typeHint, meta_info::type_hint::projection);
 
     metaInfo = fusedMetaInfo(metaInfo, std::move(supplementaryMetaInfo));
@@ -199,10 +213,15 @@ bool BaseTypeIO<FileIOImplementer>::write(const ProjectionData& data,
                                           QVariantMap supplementaryMetaInfo) const
 {
     QVariantMap metaInfo;
-    metaInfo.insert(meta_info::dimChans, QVariant(data.dimensions().nbChannels));
-    metaInfo.insert(meta_info::dimRows, QVariant(data.dimensions().nbRows));
-    metaInfo.insert(meta_info::dimMods, QVariant(data.dimensions().nbModules));
-    metaInfo.insert(meta_info::dimViews, QVariant(data.nbViews()));
+    QVariantList dimensions{ data.dimensions().nbChannels,
+                             data.dimensions().nbRows,
+                             data.dimensions().nbModules,
+                             data.dimensions().nbViews };
+    metaInfo.insert(meta_info::dimensions, dimensions);
+    metaInfo.insert(meta_info::dim1Type, meta_info::nbChans);
+    metaInfo.insert(meta_info::dim2Type, meta_info::nbRows);
+    metaInfo.insert(meta_info::dim3Type, meta_info::nbMods);
+    metaInfo.insert(meta_info::dim4Type, meta_info::nbViews);
     metaInfo.insert(meta_info::typeHint, meta_info::type_hint::projection);
 
     metaInfo = fusedMetaInfo(metaInfo, std::move(supplementaryMetaInfo));
@@ -218,10 +237,13 @@ bool BaseTypeIO<FileIOImplementer>::write(const SingleViewGeometry& data,
     const auto nbModules = uint(data.size());
 
     QVariantMap metaInfo;
-    metaInfo.insert(meta_info::dimChans, QVariant(4u));
-    metaInfo.insert(meta_info::dimRows, QVariant(3u));
-    metaInfo.insert(meta_info::dimMods, QVariant(nbModules));
-    metaInfo.insert(meta_info::dimViews, QVariant(1u));
+    QVariantList dimensions{ 4u,
+                             3u,
+                             nbModules };
+    metaInfo.insert(meta_info::dimensions, dimensions);
+    metaInfo.insert(meta_info::dim1Type, meta_info::nbCols);
+    metaInfo.insert(meta_info::dim2Type, meta_info::nbRows);
+    metaInfo.insert(meta_info::dim3Type, meta_info::nbMods);
     metaInfo.insert(meta_info::typeHint, meta_info::type_hint::projMatrix);
 
     metaInfo = fusedMetaInfo(metaInfo, std::move(supplementaryMetaInfo));
@@ -245,10 +267,15 @@ bool BaseTypeIO<FileIOImplementer>::write(const FullGeometry& data,
     const auto nbModules = uint(data.at(0).size());
 
     QVariantMap metaInfo;
-    metaInfo.insert(meta_info::dimChans, QVariant(4u));
-    metaInfo.insert(meta_info::dimRows, QVariant(3u));
-    metaInfo.insert(meta_info::dimMods, QVariant(nbModules));
-    metaInfo.insert(meta_info::dimViews, QVariant(nbViews));
+    QVariantList dimensions{ 4u,
+                             3u,
+                             nbModules,
+                             nbViews };
+    metaInfo.insert(meta_info::dimensions, dimensions);
+    metaInfo.insert(meta_info::dim1Type, meta_info::nbCols);
+    metaInfo.insert(meta_info::dim2Type, meta_info::nbRows);
+    metaInfo.insert(meta_info::dim3Type, meta_info::nbMods);
+    metaInfo.insert(meta_info::dim4Type, meta_info::nbViews);
     metaInfo.insert(meta_info::typeHint, meta_info::type_hint::projMatrix);
 
     metaInfo = fusedMetaInfo(metaInfo, std::move(supplementaryMetaInfo));
@@ -267,11 +294,13 @@ bool BaseTypeIO<FileIOImplementer>::write(const FullGeometry& data,
 template<class FileIOImplementer>
 ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo(const QVariantMap& info, uint nbModules) const
 {
+    auto dimensionList = info.value(meta_info::dimensions).toList();
+
     if(nbModules == 0) // try to extract nbModules from metaInfo
     {
-        if(info.contains(meta_info::dimMods))
+        if(info.value(meta_info::dim3Type).toString() == meta_info::nbMods)
         {
-            nbModules = info.value(meta_info::dimMods).toUInt();
+            nbModules = dimensionList.value(2, 0u).toUInt();
         }
         else
         {
@@ -288,14 +317,14 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
             throw std::domain_error("Aborted loading: number of modules is zero!");
     }
 
-    uint nbViews = info.value(meta_info::dimViews, QVariant(0u)).toUInt();
+    uint nbViews = dimensionList.value(3, 0u).toUInt();
     if(nbViews == 0)
     {
-        // look for entry 'meta_info::dimZ'
-        if(!info.contains(meta_info::dimZ))
+        // look for third dimension entry
+        if(dimensionList.size() < 3)
             throw std::runtime_error("Aborted loading: missing file meta information!");
 
-        uint totalBlocks = info.value(meta_info::dimZ).toUInt();
+        uint totalBlocks = dimensionList.at(2).toUInt();
 
         // check if nb. projs is multiple of nbModules
         if(totalBlocks % nbModules)
@@ -310,8 +339,8 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
 
     ProjectionData::Dimensions ret;
 
-    ret.nbChannels = info.value(meta_info::dimChans, QVariant(0u)).toUInt();
-    ret.nbRows     = info.value(meta_info::dimRows, QVariant(0u)).toUInt();
+    ret.nbChannels = dimensionList.value(0, 0u).toUInt();
+    ret.nbRows     = dimensionList.value(1, 0u).toUInt();
     ret.nbModules  = static_cast<uint>(nbModules);
     ret.nbViews    = static_cast<uint>(nbViews);
 
@@ -353,11 +382,6 @@ QVariantMap BaseTypeIO<FileIOImplementer>::VolumeIO<T>::metaInfo(const QString &
 {
     BaseTypeIO<FileIOImplementer> io;
     QVariantMap metaInfo = io.metaInfo(fileName);
-    // remove meta info that makes no sense in this context but has been possibly set due to a lack
-    // of information provided by the file format
-    metaInfo.remove(meta_info::dimChans);
-    metaInfo.remove(meta_info::dimMods);
-    metaInfo.remove(meta_info::dimRows);
 
     if(!metaInfo.contains(meta_info::typeHint))
         metaInfo.insert(meta_info::typeHint, meta_info::type_hint::volume);
@@ -408,14 +432,6 @@ QVariantMap BaseTypeIO<FileIOImplementer>::ProjectionDataIO::metaInfo(const QStr
 {
     BaseTypeIO<FileIOImplementer> io;
     QVariantMap metaInfo = io.metaInfo(fileName);
-    // remove meta info that makes no sense in this context but has been possibly set due to a lack
-    // of information provided by the file format
-    metaInfo.remove(meta_info::voxSizeX);
-    metaInfo.remove(meta_info::voxSizeY);
-    metaInfo.remove(meta_info::voxSizeZ);
-    metaInfo.remove(meta_info::volOffX);
-    metaInfo.remove(meta_info::volOffY);
-    metaInfo.remove(meta_info::volOffZ);
 
     if(!metaInfo.contains(meta_info::typeHint))
         metaInfo.insert(meta_info::typeHint, meta_info::type_hint::projection);
@@ -468,14 +484,6 @@ BaseTypeIO<FileIOImplementer>::ProjectionMatrixIO::metaInfo(const QString &fileN
 {
     BaseTypeIO<FileIOImplementer> io;
     QVariantMap metaInfo = io.metaInfo(fileName);
-    // remove meta info that makes no sense in this context but has been possibly set due to a lack
-    // of information provided by the file format
-    metaInfo.remove(meta_info::voxSizeX);
-    metaInfo.remove(meta_info::voxSizeY);
-    metaInfo.remove(meta_info::voxSizeZ);
-    metaInfo.remove(meta_info::volOffX);
-    metaInfo.remove(meta_info::volOffY);
-    metaInfo.remove(meta_info::volOffZ);
 
     if(!metaInfo.contains(meta_info::typeHint))
         metaInfo.insert(meta_info::typeHint, meta_info::type_hint::projMatrix);
