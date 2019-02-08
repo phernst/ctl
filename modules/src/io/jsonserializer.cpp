@@ -2,10 +2,6 @@
 
 #include "serializationhelper.h"
 
-#include "acquisition/acquisitionsetup.h"
-#include "acquisition/ctsystem.h"
-
-#include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>

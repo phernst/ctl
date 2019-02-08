@@ -1,5 +1,7 @@
 #include "binaryserializer.h"
 
+#include "serializationhelper.h"
+
 #include <QFile>
 #include <QDataStream>
 

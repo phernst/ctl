@@ -1,7 +1,9 @@
 #ifndef SERIALIZATIONHELPER_H
 #define SERIALIZATIONHELPER_H
 
-#include <QVariant>
+#include <QMap>
+
+class QVariant;
 
 namespace CTL {
 
@@ -16,7 +18,6 @@ class SerializationInterface;
  *
  * \sa DECLARE_SERIALIZABLE_TYPE(className_woNamespace)
  */
-
 class SerializationHelper
 {
 public:

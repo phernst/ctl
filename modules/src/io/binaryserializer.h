@@ -7,10 +7,6 @@ namespace CTL {
 
 class BinarySerializer : public AbstractSerializer
 {
-public:
-
-    // AbstractSerializer interface
-public:
     // implementation of serialization interface
     public: void serialize(const SerializationInterface& serializableObject,
                            const QString& fileName) const override;

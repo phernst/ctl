@@ -3,8 +3,6 @@
 
 #include "abstractserializer.h"
 
-#include <QVariant>
-
 namespace CTL {
 
 class JsonSerializer : public AbstractSerializer

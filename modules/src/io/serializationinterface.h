@@ -3,6 +3,8 @@
 
 #include "io/serializationhelper.h"
 
+#include <QVariant>
+
 namespace CTL {
 
 /*!
