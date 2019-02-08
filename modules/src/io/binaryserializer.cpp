@@ -8,7 +8,12 @@ namespace CTL {
 void BinarySerializer::serialize(const SerializationInterface &serializableObject, const QString &fileName) const
 {
     QFile saveFile(fileName);
-    saveFile.open(QIODevice::WriteOnly);
+    if(!saveFile.open(QIODevice::WriteOnly))
+    {
+        qWarning().noquote() << "BinarySerializer: serializing failed. File(" + fileName +
+                                ") could not be opened for writing.";
+        return;
+    }
     QDataStream out(&saveFile);
     out << serializableObject.toVariant();
     saveFile.close();
@@ -63,10 +68,21 @@ QVariant BinarySerializer::variantFromBinaryFile(const QString &fileName)
     QVariant ret;
 
     QFile loadFile(fileName);
-    loadFile.open(QIODevice::ReadOnly);
+    if(!loadFile.open(QIODevice::ReadOnly))
+    {
+        qWarning().noquote() << "BinarySerializer: deserializing failed. File(" + fileName +
+                                ") could not be opened.";
+        return ret;
+    }
+
     QDataStream in(&loadFile);
     in >> ret;
+
     loadFile.close();
+
+    if(!ret.isValid())
+        qWarning().noquote() << "BinarySerializer: deserializing failed. File(" + fileName +
+                                ") is not a valid binary serialized file.";
 
     return ret;
 }

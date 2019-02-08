@@ -16,7 +16,12 @@ void JsonSerializer::serialize(const SerializationInterface& serializableObject,
                                const QString& fileName) const
 {
     QFile saveFile(fileName);
-    saveFile.open(QIODevice::WriteOnly);
+    if(!saveFile.open(QIODevice::WriteOnly))
+    {
+        qWarning().noquote() << "JsonSerializer: serializing failed. File(" + fileName +
+                                ") could not be opened for writing.";
+        return;
+    }
     QJsonDocument doc(convertVariantToJsonObject(serializableObject.toVariant()));
     saveFile.write(doc.toJson());
     saveFile.close();
@@ -72,9 +77,21 @@ std::unique_ptr<SerializationInterface> JsonSerializer::deserializeMiscObject(co
 QVariant JsonSerializer::variantFromJsonFile(const QString& fileName)
 {
     QFile loadFile(fileName);
-    loadFile.open(QIODevice::ReadOnly);
-    QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll());
+    if(!loadFile.open(QIODevice::ReadOnly))
+    {
+        qWarning().noquote() << "JsonSerializer: deserializing failed. File(" + fileName +
+                                ") could not be opened.";
+        return QVariant();
+    }
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(loadFile.readAll(), &error);
     loadFile.close();
+
+    if(doc.isNull())
+        qWarning().noquote() << "JsonSerializer: deserializing failed. File(" + fileName +
+                                ") is not a valid JSON serialized file. Details:"
+                             << error.errorString();
 
     return doc.toVariant();
 }
