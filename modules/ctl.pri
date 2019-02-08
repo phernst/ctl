@@ -77,7 +77,8 @@ HEADERS += \
     $$PWD/src/io/jsonserializer.h \
     $$PWD/src/io/serializationinterface.h \
     $$PWD/src/io/serializationhelper.h \
-    $$PWD/src/io/abstractserializer.h
+    $$PWD/src/io/abstractserializer.h \
+    $$PWD/src/io/binaryserializer.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -120,4 +121,5 @@ SOURCES += \
     $$PWD/src/projectors/detectorsaturationextension.cpp \
     $$PWD/src/io/jsonserializer.cpp \
     $$PWD/src/components/genericbeammodifier.cpp \
-    $$PWD/src/io/serializationhelper.cpp
+    $$PWD/src/io/serializationhelper.cpp \
+    $$PWD/src/io/binaryserializer.cpp
