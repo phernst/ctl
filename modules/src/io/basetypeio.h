@@ -7,6 +7,62 @@
 namespace CTL {
 namespace io {
 
+/*!
+ * \class BaseTypeIO
+ *
+ * \brief Interface to read and write basic CTL container types.
+ *
+ * This class provides the interface to read and write all basic container classes the are used
+ * throughout the CTL. These basic container types are:
+ * \li VoxelVolume<T>
+ * \li Chunk2D<T>
+ * \li SingleViewData
+ * \li ProjectionData
+ * \li SingleViewGeometry
+ * \li FullGeometry
+ *
+ * Each type can be read from a file using the dedicated 'read' method (e.g. readProjections() for
+ * ProjectionData). Additionally, meta information contained in the file can be obtained from the
+ * metaInfo() method. Use the write() method to store the content of a container in a file.
+ *
+ * The BaseTypeIO is an interface that, internally, uses a FileIOImplementer to perform the actual
+ * read/write processes in a specific file format. To be compatible with BaseTypeIO, a
+ * FileIOImplementer needs to provide the following (public) methods:
+ * \code
+ * QVariantMap metaInfo(const QString& fileName) const;
+ *
+ * template <typename T>
+ * std::vector<T> readAll(const QString& fileName) const;
+ *
+ * template <typename T>
+ * std::vector<T> readChunk(const QString& fileName, uint chunkNb) const;
+ *
+ * template <typename T>
+ * bool write(const std::vector<T>& data, const QVariantMap& metaInfo, const QString& fileName) const;
+ * \endcode
+ *
+ * These functions must fulfill the following conditions:
+ * \li metaInfo(): extract all available meta information from the file and store it in a
+ * QVariantMap. Please check the predefined meta information keys in metainfokeys.h for some
+ * standardized keys.
+ * Minimum requirement for a valid metaInfo() method is to include the dimensions of the data as the
+ * key-value pair (meta_info::dimensions, QVariantList \a dim), whereby \a dim contains exactly as
+ * many unsigned integer values as there are dimensions in the data (one value for each dimension
+ * with the information, how many elements the data contains in this dimension). The dimension values
+ * must be sorted according to the data order described in readAll().
+ * \li readAll(): read the entire data from the file and store it in an std::vector with
+ * row-major order (i.e. (*x* -> *y*) -> *z* for volumes; ((*columns* -> *rows*) -> *modules*) -> *views*
+ * for projections or projection matrices).
+ * \li readChunk(): read a particular two-dimensional chunk of data from the file into and store it
+ * in an std::vector with row-major order (i.e. *x* -> *y* for volume slices; *columns* -> *rows* for
+ * projections or projection matrices). The chunk number \a chunkNb refers to the *z*-slice (volumes)
+ * or to the index in the one-dimensional mapping *modules* -> *views* (projections / projection
+ * matrices).
+ * \li write(): write all data from an std::vector (which contains row-major order sequential data)
+ * to a file. This also includes writing all meta information passed in \a metaInfo that is
+ * supported by the file type.
+ */
+
 // generalized version (preferred)
 template <class FileIOImplementer>
 class BaseTypeIO

@@ -7,6 +7,14 @@ namespace io {
 
 // ####### implementation for generalized version ########
 
+/*!
+ * Reads a VoxelVolume<T> from the file \a fileName.
+ *
+ * If metaInfo(\a fileName) contains information about the size of the voxels (keys:
+ * meta_info::voxSizeX, meta_info::voxSizeY, meta_info::voxSizeZ) and/or the volume offset (keys:
+ * meta_info::volOffX, meta_info::volOffY, meta_info::volOffZ), these values will be set
+ * accordingly.
+ */
 template <class FileIOImplementer>
 template <typename T>
 VoxelVolume<T> BaseTypeIO<FileIOImplementer>::readVolume(const QString& fileName) const
@@ -35,17 +43,20 @@ VoxelVolume<T> BaseTypeIO<FileIOImplementer>::readVolume(const QString& fileName
     return ret;
 }
 
+/*!
+ * Reads the slice \a sliceNb of data from the file \a fileName.
+ *
+ * The slice index \a sliceNb refers to the *z*-slice (volumes) or to the index in the
+ * one-dimensional mapping *modules* -> *views* (projections / projection matrices).
+ */
 template <class FileIOImplementer>
 template <typename T>
 Chunk2D<T> BaseTypeIO<FileIOImplementer>::readSlice(const QString& fileName, uint sliceNb) const
 {
     QVariantMap metaInfo = _implementer.metaInfo(fileName);
     auto dimList = metaInfo.value(meta_info::dimensions).toList();
-    uint dim[3] { dimList.value(0, 0u).toUInt(),
-                  dimList.value(1, 0u).toUInt(),
-                  dimList.value(2, 0u).toUInt() };
 
-    Chunk2D<T> ret(dim[0], dim[1]);
+    Chunk2D<T> ret(dimList.value(0, 0u).toUInt(), dimList.value(1, 0u).toUInt());
 
     ret.setData(_implementer.template readChunk<T>(fileName, sliceNb));
     return ret;
@@ -57,6 +68,18 @@ QVariantMap BaseTypeIO<FileIOImplementer>::metaInfo(const QString &fileName) con
     return _implementer.metaInfo(fileName);
 }
 
+/*!
+ * Reads all projection data from the file \a fileName.
+ *
+ * Specify the number of detector modules with \a nbModules in case this information is not
+ * contained in the meta information of the file. For \a nbModules = 0 (default case), the
+ * method tries to extract the information from the meta information.
+ *
+ * If no suitable meta information can be found, it is assumed that the number of modules is one.
+ * This behavior can be changed by defining NO_SINGLE_MODULE_FALLBACK before including basetypio.h.
+ * In that case, an exception is thrown when the number of modules cannot be extracted from meta
+ * information.
+ */
 template <class FileIOImplementer>
 ProjectionData BaseTypeIO<FileIOImplementer>::readProjections(const QString& fileName,
                                                               uint nbModules) const
