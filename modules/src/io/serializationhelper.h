@@ -43,7 +43,7 @@ public:
     static AbstractDataModel* parseDataModel(const QVariant& variant);
     static SystemComponent* parseComponent(const QVariant& variant);
     static AbstractPrepareStep* parsePrepareStep(const QVariant& variant);
-    static SerializationInterface* parseSerializableObject(const QVariant& variant);
+    static SerializationInterface* parseMiscObject(const QVariant& variant);
 
 private:
     // private ctor & non-copyable

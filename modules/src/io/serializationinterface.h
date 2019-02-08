@@ -53,7 +53,8 @@ inline QVariant SerializationInterface::toVariant() const
  * It adds a class to the type enumeration with the index \a newIndex and
  * it overrides the function `int type() const` so that it returns the \a newIndex.
  *
- * Moreover, the `JsonSerializer::RegisterWithJsonSerializer` class is declared a as a firend class.
+ * Moreover, the `SerializationHelper::RegisterWithSerializationHelper` class is declared as a
+ * friend class.
  * This allows access to a possible private default constructor of the class using this macro.
  *
  * The usage of the macro should be in a class definition as follows:
@@ -72,22 +73,33 @@ inline QVariant SerializationInterface::toVariant() const
  *
  * or further subclasses can be typed like
  * \code
- * class MySubSerializableClass : public MySerializableClass
+ * class MySerializableSubClass : public MySerializableClass
  * {
  *     CTL_TYPE_ID(43)
+ *
+ * // possible variant conversions
  * // ...
  * };
  * \endcode
  *
- * The SerializationHelper can mangage the serialization of classes with the following types as base
- * class:
+ * Additionally, the type may be registered to the `SerializationHelper` by using the macro
+ * `DECLARE_SERIALIZABLE_TYPE(className_woNamespace)`. This is not necessary, however, it enables
+ * the SerializationHelper to mangage the deserialization of classes with the following types as
+ * base class:
  * - AbstractDataModel
  * - AbstractPrepareStep
  * - SystemComponent
- * - none of the above, only SerializationInterface
+ * - miscellaneous, i.e. none of the above, only SerializationInterface.
+ *
  * Note that \a newIndex within one of the top four categories has to be unique for each class that
  * uses this macro. It is not necessary for the \a newIndex to be unique with respect to the other
  * categories.
+ *
+ * The `SerializationHelper` is used by implementations (subclasses) of `AbstractSerializer`.
+ * For instance, you can create an object of the 3rd category from a JSON file with
+ * \code
+ * auto mySystemComponent = JsonSerializer().deserializeComponent("path/to/mySystemComponent.json").
+ * \endcode
  *
  * \sa DECLARE_SERIALIZABLE_TYPE(className_woNamespace)
  */

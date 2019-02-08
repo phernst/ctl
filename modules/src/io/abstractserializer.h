@@ -30,6 +30,7 @@ public:
     public:virtual std::unique_ptr<AbstractPrepareStep> deserializePrepareStep(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<CTsystem> deserializeSystem(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<AcquisitionSetup> deserializeAquisitionSetup(const QString& fileName) const = 0;
+    public:virtual std::unique_ptr<SerializationInterface> deserializeMiscObject(const QString& fileName) const = 0;
 };
 
 inline void AbstractSerializer::serialize(const AbstractDataModel& model, const QString& fileName) const

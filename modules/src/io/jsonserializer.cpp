@@ -63,6 +63,12 @@ JsonSerializer::deserializeAquisitionSetup(const QString& fileName) const
     return ret;
 }
 
+std::unique_ptr<SerializationInterface> JsonSerializer::deserializeMiscObject(const QString &fileName) const
+{
+    return std::unique_ptr<SerializationInterface>(
+                SerializationHelper::parseMiscObject(variantFromJsonFile(fileName)));
+}
+
 QVariant JsonSerializer::variantFromJsonFile(const QString& fileName)
 {
     QFile loadFile(fileName);

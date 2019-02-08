@@ -38,20 +38,32 @@ SerializationHelper::miscFactories() const
 
 SystemComponent* SerializationHelper::parseComponent(const QVariant& variant)
 {
-    return dynamic_cast<SystemComponent*>(parse(variant, instance().componentFactories()));
+    auto ptr = parse(variant, instance().componentFactories());
+    auto castedPtr = dynamic_cast<SystemComponent*>(ptr);
+    if(castedPtr == nullptr) // conversion not successful
+        delete ptr;
+    return castedPtr;
 }
 
 AbstractDataModel* SerializationHelper::parseDataModel(const QVariant& variant)
 {
-    return dynamic_cast<AbstractDataModel*>(parse(variant, instance().modelFactories()));
+    auto ptr = parse(variant, instance().modelFactories());
+    auto castedPtr = dynamic_cast<AbstractDataModel*>(ptr);
+    if(castedPtr == nullptr) // conversion not successful
+        delete ptr;
+    return castedPtr;
 }
 
 AbstractPrepareStep* SerializationHelper::parsePrepareStep(const QVariant& variant)
 {
-    return dynamic_cast<AbstractPrepareStep*>(parse(variant, instance().prepareStepFactories()));
+    auto ptr = parse(variant, instance().prepareStepFactories());
+    auto castedPtr = dynamic_cast<AbstractPrepareStep*>(ptr);
+    if(castedPtr == nullptr) // conversion not successful
+        delete ptr;
+    return castedPtr;
 }
 
-SerializationInterface* SerializationHelper::parseSerializableObject(const QVariant& variant)
+SerializationInterface* SerializationHelper::parseMiscObject(const QVariant& variant)
 {
     return parse(variant, instance().miscFactories());
 }
