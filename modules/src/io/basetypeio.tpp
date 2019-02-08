@@ -304,7 +304,7 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
         }
         else
         {
-#ifdef SINGLE_MODULE_FALLBACK
+#ifndef NO_SINGLE_MODULE_FALLBACK
             nbModules = 1;
             qDebug() << "missing file meta information about the number of modules: "
                         "assuming nbModules = 1.";

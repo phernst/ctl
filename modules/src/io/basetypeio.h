@@ -1,8 +1,6 @@
 #ifndef BASETYPEIO_H
 #define BASETYPEIO_H
 
-#define SINGLE_MODULE_FALLBACK
-
 #include "abstractbasetypeio.h"
 #include <memory>
 
