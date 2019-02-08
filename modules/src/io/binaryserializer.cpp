@@ -50,6 +50,8 @@ std::unique_ptr<AcquisitionSetup> BinarySerializer::deserializeAquisitionSetup(c
     std::unique_ptr<AcquisitionSetup> ret(new AcquisitionSetup);
 
     auto variant = variantFromBinaryFile(fileName);
+    if(!variant.isValid())
+        return nullptr;
     ret->fromVariant(variant);
 
     return ret;
@@ -60,6 +62,8 @@ std::unique_ptr<CTsystem> BinarySerializer::deserializeSystem(const QString &fil
     std::unique_ptr<CTsystem> ret(new CTsystem);
 
     auto variant = variantFromBinaryFile(fileName);
+    if(!variant.isValid())
+        return nullptr;
     ret->fromVariant(variant);
 
     return ret;

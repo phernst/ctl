@@ -48,6 +48,8 @@ std::unique_ptr<CTsystem> JsonSerializer::deserializeSystem(const QString& fileN
     std::unique_ptr<CTsystem> ret(new CTsystem);
 
     auto variant = variantFromJsonFile(fileName);
+    if(!variant.isValid())
+        return nullptr;
     ret->fromVariant(variant);
 
     return ret;
@@ -59,6 +61,8 @@ JsonSerializer::deserializeAquisitionSetup(const QString& fileName) const
     std::unique_ptr<AcquisitionSetup> ret(new AcquisitionSetup);
 
     auto variant = variantFromJsonFile(fileName);
+    if(!variant.isValid())
+        return nullptr;
     ret->fromVariant(variant);
 
     return ret;
