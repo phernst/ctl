@@ -1,3 +1,9 @@
+[![C++11](https://img.shields.io/badge/C++-11-informational.svg)](https://en.cppreference.com)
+[![dependencies](https://img.shields.io/badge/dependencies-Qt-brightgreen.svg)](https://doc.qt.io/qt-5.9/index.html)
+[![testing](https://img.shields.io/badge/unit-testing-success.svg)](https://gitlab.com/tpfeiffe/ctl/tree/master/testing)
+[![doc](https://img.shields.io/badge/doc-online-success.svg)](https://www.forschungscampus-stimulate.de/ctl/)
+[![OpenCL](https://img.shields.io/badge/OpenCL-1.1-informational.svg)](https://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/)
+
 CTL - Computed Tomography Library
 =================================
 
@@ -29,13 +35,19 @@ sudo apt install build-essential
 Install Qt
 ----------
 
+The [Qt Core module](https://doc.qt.io/qt-5/qtcore-index.html) is the only
+library required for the main module
+"[CTL core](https://gitlab.com/tpfeiffe/ctl/blob/master/modules/ctl.pri)" of this
+project.
+
 1. Qt libraries
 
     ```console
     sudo apt install qt5-default
     ```
     
-2. Qt3D (optional, for 3d visualization widgets)
+2. Qt3D (optional, for
+[GUI widgets](https://gitlab.com/tpfeiffe/ctl/blob/master/modules/gui-widgets.pri))
     
     ```console
     sudo apt install qt3d5-dev
@@ -46,7 +58,13 @@ Install Qt
 Install OpenCL 1.1/1.2
 ----------------------
 
-This is an example how to set up OpenCL for a NVIDIA GPU.
+This is an example how to set up
+[OpenCL](https://github.khronos.org/OpenCL-CLHPP/) for a NVIDIA GPU. OpenCL and
+its C++-API is required for the
+[OCL config](https://gitlab.com/tpfeiffe/ctl/blob/master/modules/ocl_config.pri)
+and
+[OCL projectors](https://gitlab.com/tpfeiffe/ctl/blob/master/modules/ocl_projectors.pri)
+module.
 
 1. install official NVIDIA driver using Driver Manager
 (tested with driver version 390.48 + GTX1080 Ti) --> reboot
