@@ -209,8 +209,5 @@ int main(int argc, char* argv[])
 
 --------------
 
-If you have any problems/questions regarding the CTL or if you want to
-contribute, please have a look at our
-[Wiki](https://gitlab.com/tpfeiffe/ctl/wikis/home)
-or do not hesitate to contact us:  
+If you have any problems or questions regarding the CTL, please contact us:  
 <sw4g.production@gmail.com>.
