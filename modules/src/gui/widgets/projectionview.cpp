@@ -29,6 +29,12 @@ void ProjectionView::setData(const CTL::ProjectionData &projections)
     updateImage();
 }
 
+void ProjectionView::setModuleLayout(const CTL::ModuleLayout &layout)
+{
+    _modLayout = layout;
+    updateImage();
+}
+
 void ProjectionView::on_verticalSlider_valueChanged(int value)
 {
     ui->_L_slice->setText(QString::number(value));
@@ -40,7 +46,7 @@ void ProjectionView::updateImage()
         return;
 
     const auto z = uint(ui->verticalSlider->value());
-    auto projection = _data.view(z).combined(CTL::ModuleLayout::canonicLayout(1, 40));
+    auto projection = _data.view(z).combined(_modLayout);
 
     QImage image(int(projection.dimensions().width),
                  int(projection.dimensions().height),
