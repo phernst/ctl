@@ -4,7 +4,7 @@
 # declare module
 CONFIG += GUI_WIDGETS_MODULE
 
-QT += gui 3dcore 3drender 3dextras
+QT += gui widgets 3dcore 3drender 3dextras
 
 INCLUDEPATH += $$PWD/src
 
