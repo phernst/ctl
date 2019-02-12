@@ -362,8 +362,8 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
 
     ret.nbChannels = dimensionList.dim0;
     ret.nbRows     = dimensionList.dim1;
-    ret.nbModules  = static_cast<uint>(nbModules);
-    ret.nbViews    = static_cast<uint>(nbViews);
+    ret.nbModules  = nbModules;
+    ret.nbViews    = nbViews;
 
     return ret;
 }
