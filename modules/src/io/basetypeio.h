@@ -46,10 +46,10 @@ namespace io {
  * QVariantMap. Please check the predefined meta information keys in metainfokeys.h for some
  * standardized keys.
  * Minimum requirement for a valid metaInfo() method is to include the dimensions of the data as the
- * key-value pair (meta_info::dimensions, QVariantList \a dim), whereby \a dim contains exactly as
- * many unsigned integer values as there are dimensions in the data (one value for each dimension
- * with the information, how many elements the data contains in this dimension). The dimension values
- * must be sorted according to the data order described in readAll().
+ * key-value pair (meta_info::dimensions, meta_info::Dimensions \a dim), whereby \a dim contains
+ * exactly as many unsigned integer values as there are dimensions in the data (one value for each
+ * dimension with the information, how many elements the data contains in this dimension). The
+ * dimension values must be sorted according to the data order described in readAll().
  * \li readAll(): read the entire data from the file and store it in an std::vector with
  * row-major order (i.e. (*x* -> *y*) -> *z* for volumes; ((*columns* -> *rows*) -> *modules*) -> *views*
  * for projections or projection matrices).

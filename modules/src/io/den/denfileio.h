@@ -40,11 +40,11 @@ inline QVariantMap DenFileIO::metaInfo(const QString &fileName) const
 
     auto header = den::loadHeader(fileName);
 
-    QVariantList dimensions{ header.cols,
-                             header.rows,
-                             header.count };
+    meta_info::Dimensions dimensions( header.cols,
+                                      header.rows,
+                                      header.count );
 
-    ret.insert(meta_info::dimensions, dimensions);
+    ret.insert(meta_info::dimensions, QVariant::fromValue(dimensions));
 
     return ret;
 }
@@ -57,15 +57,15 @@ bool DenFileIO::write(const std::vector<T> &data,
     den::DFile dFile(fileName);
     dFile.setVerbose(false);
 
-    auto dimList = metaInfo.value(meta_info::dimensions).toList();
+    auto dimList = metaInfo.value(meta_info::dimensions).value<meta_info::Dimensions>();
 
-    if(dimList.size() < 2)
+    if(dimList.nbDim < 2)
         throw std::runtime_error("Writing aborted: missing data meta information!");
 
     den::Header header;
-    header.cols = dimList.at(0).toInt();
-    header.rows = dimList.at(1).toInt();
-    header.count = dimList.value(2, 1).toInt() * dimList.value(3, 1).toInt();
+    header.cols = dimList.dim0;
+    header.rows = dimList.dim1;
+    header.count = (dimList.dim2 ? dimList.dim2 : 1) * (dimList.dim3 ? dimList.dim3 : 1);
 
     return dFile.save(data, header);
 }

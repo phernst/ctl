@@ -11,9 +11,7 @@
 #include "io/basetypeio.h"
 #include "io/den/denfileio.h"
 
-
 using namespace CTL;
-
 
 void DenFileIOtest::initTestCase()
 {
@@ -392,12 +390,12 @@ void DenFileIOtest::processAbstractVolume(CTL::io::AbstractVolumeIO<float>* volI
     QVERIFY(volIO->write(volume, fileName));
 
     auto metaInfo = volIO->metaInfo(fileName);
-    auto dimList = metaInfo[CTL::io::meta_info::dimensions].toList();
-    QCOMPARE(dimList.size(), 3);
-    QCOMPARE(dimList[0].toInt(), 20);
-    QCOMPARE(dimList[1].toInt(), 10);
-    QCOMPARE(dimList[2].toInt(), 15);
-    QCOMPARE(metaInfo[CTL::io::meta_info::typeHint].toString(), CTL::io::meta_info::type_hint::volume);
+    auto dimList = metaInfo[io::meta_info::dimensions].value<io::meta_info::Dimensions>();
+    QCOMPARE(dimList.nbDim, 3u);
+    QCOMPARE(dimList.dim0, 20u);
+    QCOMPARE(dimList.dim1, 10u);
+    QCOMPARE(dimList.dim2, 15u);
+    QCOMPARE(metaInfo[io::meta_info::typeHint].toString(), io::meta_info::type_hint::volume);
 
     auto r = volIO->readSlice(fileName,4);
     QCOMPARE(r(2,3), volume(2,3,4));
@@ -409,12 +407,12 @@ void DenFileIOtest::processAbstractProjDat(io::AbstractProjectionDataIO* projDat
     QVERIFY(projDatIO->write(_testProjections, fileName));
 
     auto metaInfo = projDatIO->metaInfo(fileName);
-    auto dimList = metaInfo[CTL::io::meta_info::dimensions].toList();
-    QCOMPARE(dimList.size(), 3);
-    QCOMPARE(dimList[0].toUInt(), dims.nbChannels);
-    QCOMPARE(dimList[1].toUInt(), dims.nbRows);
-    QCOMPARE(dimList[2].toUInt(), dims.nbModules * _testProjections.nbViews());
-    QCOMPARE(metaInfo[CTL::io::meta_info::typeHint].toString(), CTL::io::meta_info::type_hint::projection);
+    auto dimList = metaInfo[io::meta_info::dimensions].value<io::meta_info::Dimensions>();
+    QCOMPARE(dimList.nbDim, 3u);
+    QCOMPARE(dimList.dim0, dims.nbChannels);
+    QCOMPARE(dimList.dim1, dims.nbRows);
+    QCOMPARE(dimList.dim2, dims.nbModules * _testProjections.nbViews());
+    QCOMPARE(metaInfo[io::meta_info::typeHint].toString(), io::meta_info::type_hint::projection);
 
     auto r = projDatIO->readSingleView(fileName, 1, dims.nbModules);
     QCOMPARE(r.module(0)(3,2), _testProjections.view(1).module(0)(3,2));
@@ -424,12 +422,12 @@ void DenFileIOtest::processAbstractProjDat(io::AbstractProjectionDataIO* projDat
     QVERIFY(projDatIO->write(singleViewProj, fileName));
 
     metaInfo = projDatIO->metaInfo(fileName);
-    dimList = metaInfo[CTL::io::meta_info::dimensions].toList();
-    QCOMPARE(dimList.size(), 3);
-    QCOMPARE(dimList[0].toUInt(), dims.nbChannels);
-    QCOMPARE(dimList[1].toUInt(), dims.nbRows);
-    QCOMPARE(dimList[2].toUInt(), dims.nbModules);
-    QCOMPARE(metaInfo[CTL::io::meta_info::typeHint].toString(), CTL::io::meta_info::type_hint::projection);
+    auto dimList2 = metaInfo[io::meta_info::dimensions].value<io::meta_info::Dimensions>();
+    QCOMPARE(dimList2.nbDim, 3u);
+    QCOMPARE(dimList2.dim0, dims.nbChannels);
+    QCOMPARE(dimList2.dim1, dims.nbRows);
+    QCOMPARE(dimList2.dim2, dims.nbModules);
+    QCOMPARE(metaInfo[io::meta_info::typeHint].toString(), io::meta_info::type_hint::projection);
     r = projDatIO->readSingleView(fileName, 0, dims.nbModules);
     QCOMPARE(r.module(0)(3,2), _testProjections.view(0).module(0)(3,2));
 }
@@ -439,12 +437,12 @@ void DenFileIOtest::processAbstractProjMat(io::AbstractProjectionMatrixIO* projM
     QVERIFY(projMatIO->write(_testGeometry, fileName));
 
     auto metaInfo = projMatIO->metaInfo(fileName);
-    auto dimList = metaInfo[CTL::io::meta_info::dimensions].toList();
-    QCOMPARE(dimList.size(), 3);
-    QCOMPARE(dimList[0].toInt(), 4);
-    QCOMPARE(dimList[1].toInt(), 3);
-    QCOMPARE(dimList[2].toInt(), _testGeometry.at(0).length() * _testGeometry.size());
-    QCOMPARE(metaInfo[CTL::io::meta_info::typeHint].toString(), CTL::io::meta_info::type_hint::projMatrix);
+    auto dimList = metaInfo[io::meta_info::dimensions].value<io::meta_info::Dimensions>();
+    QCOMPARE(dimList.nbDim, 3u);
+    QCOMPARE(dimList.dim0, 4u);
+    QCOMPARE(dimList.dim1, 3u);
+    QCOMPARE(dimList.dim2, _testGeometry.at(0).length() * _testGeometry.size());
+    QCOMPARE(metaInfo[io::meta_info::typeHint].toString(), io::meta_info::type_hint::projMatrix);
 
     auto r = projMatIO->readSingleViewGeometry(fileName, 2, _testGeometry.at(0).length());
     auto valRead = r.at(0).get<1,2>();
@@ -456,12 +454,12 @@ void DenFileIOtest::processAbstractProjMat(io::AbstractProjectionMatrixIO* projM
     QVERIFY(projMatIO->write(singleViewGeo, fileName));
 
     metaInfo = projMatIO->metaInfo(fileName);
-    dimList = metaInfo[CTL::io::meta_info::dimensions].toList();
-    QCOMPARE(dimList.size(), 3);
-    QCOMPARE(dimList[0].toInt(), 4);
-    QCOMPARE(dimList[1].toInt(), 3);
-    QCOMPARE(dimList[2].toInt(), _testGeometry.at(1).length());
-    QCOMPARE(metaInfo[CTL::io::meta_info::typeHint].toString(), CTL::io::meta_info::type_hint::projMatrix);
+    auto dimList2 = metaInfo[io::meta_info::dimensions].value<io::meta_info::Dimensions>();
+    QCOMPARE(dimList2.nbDim, 3u);
+    QCOMPARE(dimList2.dim0, 4u);
+    QCOMPARE(dimList2.dim1, 3u);
+    QCOMPARE(dimList2.dim2, _testGeometry.at(1).length());
+    QCOMPARE(metaInfo[io::meta_info::typeHint].toString(), io::meta_info::type_hint::projMatrix);
 
     r = projMatIO->readSingleViewGeometry(fileName, 0, _testGeometry.at(0).length());
     valRead = r.at(1).get<2,3>();
