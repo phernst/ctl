@@ -82,14 +82,6 @@ void XrayTube::setEmissionCurrent(double current) { _emissionCurrent = current; 
 
 void XrayTube::setIntensityConstant(double value) { _intensityConstant = value; }
 
-void XrayTube::setSpectrumModel(AbstractXraySpectrumModel *model)
-{
-    if(!dynamic_cast<AbstractXraySpectrumModel*>(model))
-        throw std::runtime_error("Spectral model could not be set: not of type AbstractXraySpectrumModel");
-
-    _spectrumModel.reset(model);
-}
-
 /*!
  * Reads all member variables from the QVariant \a variant.
  */
