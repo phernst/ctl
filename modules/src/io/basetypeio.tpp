@@ -92,6 +92,18 @@ ProjectionData BaseTypeIO<FileIOImplementer>::readProjections(const QString& fil
     return ret;
 }
 
+/*!
+ * Reads projection data of a single view from the file \a fileName. This reads data of view
+ * \a viewNb assuming that the view comprises data from \a nbModules modules.
+ *
+ * For \a nbModules = 0 (default case), the method tries to extract the information from the meta
+ * information.
+ *
+ * If no suitable meta information can be found, the number of modules is assumed to be one.
+ * This behavior can be changed by defining NO_SINGLE_MODULE_FALLBACK before including basetypio.h.
+ * In that case, an exception is thrown when the number of modules cannot be extracted from meta
+ * information.
+ */
 template <class FileIOImplementer>
 SingleViewData BaseTypeIO<FileIOImplementer>::readSingleView(const QString& fileName,
                                                              uint viewNb,
@@ -110,6 +122,18 @@ SingleViewData BaseTypeIO<FileIOImplementer>::readSingleView(const QString& file
     return ret;
 }
 
+/*!
+ * Reads all projection matrices from the file \a fileName.
+ *
+ * Specify the number of detector modules with \a nbModules in case this information is not
+ * contained in the meta information of the file. For \a nbModules = 0 (default case), the
+ * method tries to extract the information from the meta information.
+ *
+ * If no suitable meta information can be found, the number of modules is assumed to be one.
+ * This behavior can be changed by defining NO_SINGLE_MODULE_FALLBACK before including basetypio.h.
+ * In that case, an exception is thrown when the number of modules cannot be extracted from meta
+ * information.
+ */
 template <class FileIOImplementer>
 FullGeometry BaseTypeIO<FileIOImplementer>::readFullGeometry(const QString& fileName,
                                                              uint nbModules) const
@@ -144,6 +168,18 @@ FullGeometry BaseTypeIO<FileIOImplementer>::readFullGeometry(const QString& file
     return ret;
 }
 
+/*!
+ * Reads projection matrices of a single view from the file \a fileName. This reads data of view
+ * \a viewNb assuming that the view comprises data from \a nbModules modules.
+ *
+ * For \a nbModules = 0 (default case), the method tries to extract the information from the meta
+ * information.
+ *
+ * If no suitable meta information can be found, the number of modules is assumed to be one.
+ * This behavior can be changed by defining NO_SINGLE_MODULE_FALLBACK before including basetypio.h.
+ * In that case, an exception is thrown when the number of modules cannot be extracted from meta
+ * information.
+ */
 template <class FileIOImplementer>
 SingleViewGeometry BaseTypeIO<FileIOImplementer>::readSingleViewGeometry(const QString& fileName,
                                                                          uint viewNb,
@@ -161,7 +197,18 @@ SingleViewGeometry BaseTypeIO<FileIOImplementer>::readSingleViewGeometry(const Q
     return ret;
 }
 
-
+/*!
+ * Writes data from the Chunk2D<T> \a data to the file \a fileName.
+ *
+ * This method will forward all meta information available from a Chunk2D object to the
+ * FileIOImplementer. This includes:
+ * \li Dimensions (number of elements in x and y direction)
+ * \li Dimension types (dimension 1: meta_info::nbVoxelsX, dimension 2: meta_info::nbVoxelsY)
+ * \li Type hint: meta_info::type_hint::slice
+ *
+ * Additional meta information can be passed by \a supplementaryMetaInfo. This will also be
+ * forwarded to the FileIOImplementer.
+ */
 template <class FileIOImplementer>
 template <typename T>
 bool BaseTypeIO<FileIOImplementer>::write(const Chunk2D<T> &data,
@@ -181,6 +228,21 @@ bool BaseTypeIO<FileIOImplementer>::write(const Chunk2D<T> &data,
     return _implementer.write(data.constData(), metaInfo, fileName);
 }
 
+/*!
+ * Writes data from the VoxelVolume<T> \a data to the file \a fileName.
+ *
+ * This method will forward all meta information available from a VoxelVolume object to the
+ * FileIOImplementer. This includes:
+ * \li Dimensions (number of elements in x, y, and z direction)
+ * \li Dimension types (dimension 1: meta_info::nbVoxelsX, dimension 2: meta_info::nbVoxelsY,
+ * dimension 3: meta_info::nbVoxelsZ)
+ * \li Size of individual voxels
+ * \li Offset of the volume
+ * \li Type hint: meta_info::type_hint::volume
+ *
+ * Additional meta information can be passed by \a supplementaryMetaInfo. This will also be
+ * forwarded to the FileIOImplementer.
+ */
 template <class FileIOImplementer>
 template <typename T>
 bool BaseTypeIO<FileIOImplementer>::write(const VoxelVolume<T>& data,
@@ -208,6 +270,19 @@ bool BaseTypeIO<FileIOImplementer>::write(const VoxelVolume<T>& data,
     return _implementer.write(data.constData(), metaInfo, fileName);
 }
 
+/*!
+ * Writes data from the SingleViewData \a data to the file \a fileName.
+ *
+ * This method will forward all meta information available from a SingleViewData object to the
+ * FileIOImplementer. This includes:
+ * \li Dimensions (number of channels, rows, and modules)
+ * \li Dimension types (dimension 1: meta_info::nbChans, dimension 2: meta_info::nbRows,
+ * dimension 3: meta_info::nbMods)
+ * \li Type hint: meta_info::type_hint::projection
+ *
+ * Additional meta information can be passed by \a supplementaryMetaInfo. This will also be
+ * forwarded to the FileIOImplementer.
+ */
 template <class FileIOImplementer>
 bool BaseTypeIO<FileIOImplementer>::write(const SingleViewData& data,
                                           const QString& fileName,
@@ -228,6 +303,19 @@ bool BaseTypeIO<FileIOImplementer>::write(const SingleViewData& data,
     return _implementer.write(data.toVector(), metaInfo, fileName);
 }
 
+/*!
+ * Writes data from the ProjectionData \a data to the file \a fileName.
+ *
+ * This method will forward all meta information available from a ProjectionData object to the
+ * FileIOImplementer. This includes:
+ * \li Dimensions (number of channels, rows, modules, and views)
+ * \li Dimension types (dimension 1: meta_info::nbChans, dimension 2: meta_info::nbRows,
+ * dimension 3: meta_info::nbMods, dimension 4: meta_info::nbViews)
+ * \li Type hint: meta_info::type_hint::projection
+ *
+ * Additional meta information can be passed by \a supplementaryMetaInfo. This will also be
+ * forwarded to the FileIOImplementer.
+ */
 template <class FileIOImplementer>
 bool BaseTypeIO<FileIOImplementer>::write(const ProjectionData& data,
                                           const QString& fileName,
@@ -250,6 +338,19 @@ bool BaseTypeIO<FileIOImplementer>::write(const ProjectionData& data,
     return _implementer.write(data.toVector(), metaInfo, fileName);
 }
 
+/*!
+ * Writes data from the SingleViewGeometry \a data to the file \a fileName.
+ *
+ * This method will forward all meta information available from a SingleViewGeometry object to the
+ * FileIOImplementer. This includes:
+ * \li Dimensions (4, 3, and number of modules)
+ * \li Dimension types (dimension 1: meta_info::nbCols, dimension 2: meta_info::nbRows,
+ * dimension 3: meta_info::nbMods)
+ * \li Type hint: meta_info::type_hint::projMatrix
+ *
+ * Additional meta information can be passed by \a supplementaryMetaInfo. This will also be
+ * forwarded to the FileIOImplementer.
+ */
 template <class FileIOImplementer>
 bool BaseTypeIO<FileIOImplementer>::write(const SingleViewGeometry& data,
                                           const QString& fileName,
@@ -279,6 +380,19 @@ bool BaseTypeIO<FileIOImplementer>::write(const SingleViewGeometry& data,
     return _implementer.write(dataVec, metaInfo, fileName);
 }
 
+/*!
+ * Writes data from the FullGeometry \a data to the file \a fileName.
+ *
+ * This method will forward all meta information available from a FullGeometry object to the
+ * FileIOImplementer. This includes:
+ * \li Dimensions (4, 3, number of modules, and number of views)
+ * \li Dimension types (dimension 1: meta_info::nbCols, dimension 2: meta_info::nbRows,
+ * dimension 3: meta_info::nbMods, dimension 4: meta_info::nbViews)
+ * \li Type hint: meta_info::type_hint::projMatrix
+ *
+ * Additional meta information can be passed by \a supplementaryMetaInfo. This will also be
+ * forwarded to the FileIOImplementer.
+ */
 template <class FileIOImplementer>
 bool BaseTypeIO<FileIOImplementer>::write(const FullGeometry& data,
                                           const QString& fileName,
@@ -312,6 +426,17 @@ bool BaseTypeIO<FileIOImplementer>::write(const FullGeometry& data,
     return _implementer.write(dataVec, metaInfo, fileName);
 }
 
+/*!
+ * Constructs a ProjectionData::Dimensions object from the meta information in \a info.
+ *
+ * For \a nbModules = 0 (default case), the method tries to extract the information from the meta
+ * information.
+ *
+ * If no suitable meta information can be found, the number of modules is assumed to be one.
+ * This behavior can be changed by defining NO_SINGLE_MODULE_FALLBACK before including basetypio.h.
+ * In that case, an exception is thrown when the number of modules cannot be extracted from meta
+ * information.
+ */
 template<class FileIOImplementer>
 ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo(const QVariantMap& info, uint nbModules) const
 {
@@ -368,6 +493,13 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
     return ret;
 }
 
+/*!
+ * Fuses the meta information from \a baseInfo and \a supplementary into one QVariantMap and returns
+ * this map.
+ *
+ * Information from \a baseInfo will be dominant, i.e. it will overwrite any entry in
+ * \a supplementary that has the same key.
+ */
 template<class FileIOImplementer>
 QVariantMap BaseTypeIO<FileIOImplementer>::fusedMetaInfo(const QVariantMap &baseInfo,
                                                          QVariantMap supplementary) const
