@@ -4,13 +4,23 @@
 
 namespace CTL {
 
+/*!
+ * Creates a View object and sets its time stamp to \a time.
+ */
 AcquisitionSetup::View::View(double time)
     : _timeStamp(time)
 {
 }
 
+/*!
+ * Sets the time stamp of this instance to \a timeStamp.
+ */
 void AcquisitionSetup::View::setTimeStamp(double timeStamp) { _timeStamp = timeStamp; }
 
+/*!
+ * Adds the PrepareStep \a step to the vector of prepare steps of this View. Prepare steps will
+ * be applied in the same order as they have been added to the View.
+ */
 void AcquisitionSetup::View::addPrepareStep(PrepareStep step)
 {
     if(step)
@@ -20,15 +30,28 @@ void AcquisitionSetup::View::addPrepareStep(PrepareStep step)
                       "Reason: tried to add 'nullptr'.";
 }
 
+/*!
+ * Returns the time stamp of this instance.
+ */
 double AcquisitionSetup::View::timeStamp() const { return _timeStamp; }
 
+/*!
+ * Returns a constant reference to the vector of prepare steps of this instance.
+ */
 const std::vector<AcquisitionSetup::PrepareStep>& AcquisitionSetup::View::prepareSteps() const
 {
     return _prepareSteps;
 }
 
+/*!
+ * Removes all prepare steps from this instance. This keeps the time stamp of this instance
+ * untouched.
+ */
 void AcquisitionSetup::View::clearPrepareSteps() { _prepareSteps.clear(); }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
 void AcquisitionSetup::View::fromVariant(const QVariant& variant)
 {
     QVariantMap varMap = variant.toMap();
@@ -42,6 +65,9 @@ void AcquisitionSetup::View::fromVariant(const QVariant& variant)
     this->setTimeStamp(varMap.value("time stamp").toDouble());
 }
 
+/*!
+ * Stores all member variables in a QVariant.
+ */
 QVariant AcquisitionSetup::View::toVariant() const
 {
     QVariantMap ret;
@@ -57,24 +83,38 @@ QVariant AcquisitionSetup::View::toVariant() const
     return ret;
 }
 
+/*!
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTsystem \a system.
+ */
 AcquisitionSetup::AcquisitionSetup(const CTsystem& system, uint nbViews)
 {
     this->resetSystem(system);
     this->setNbViews(nbViews);
 }
 
+/*!
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTsystem \a system.
+ */
 AcquisitionSetup::AcquisitionSetup(CTsystem&& system, uint nbViews)
 {
     this->resetSystem(std::move(system));
     this->setNbViews(nbViews);
 }
 
+/*!
+ * Creates a copy of \a other. This uses CTsystem::clone() to create a deep copy of the CTsystem
+ * member variable.
+ */
 AcquisitionSetup::AcquisitionSetup(const AcquisitionSetup& other)
     : _system(other._system ? static_cast<SimpleCTsystem*>(other._system->clone()) : nullptr)
     , _views(other._views)
 {
 }
 
+/*!
+ * Assigns the content of \a other to this instance. This uses CTsystem::clone() to create a deep
+ * copy of the CTsystem member variable.
+ */
 AcquisitionSetup& AcquisitionSetup::operator=(const AcquisitionSetup& other)
 {
     _system.reset(other._system ? static_cast<SimpleCTsystem*>(other._system->clone()) : nullptr);
