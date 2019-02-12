@@ -22,9 +22,9 @@ VoxelVolume<T> BaseTypeIO<FileIOImplementer>::readVolume(const QString& fileName
     QVariantMap metaInfo = _implementer.metaInfo(fileName);
     auto dimList = metaInfo.value(meta_info::dimensions).value<meta_info::Dimensions>();
 
-    typename VoxelVolume<T>::Dimensions dim{ dimList.dim0,
-                                             dimList.dim1,
-                                             dimList.dim2 };
+    typename VoxelVolume<T>::Dimensions dim{ dimList.dim1,
+                                             dimList.dim2,
+                                             dimList.dim3 };
 
     typename VoxelVolume<T>::VoxelSize size{ metaInfo.value(meta_info::voxSizeX, QVariant(.0f)).toFloat(),
                                              metaInfo.value(meta_info::voxSizeY, QVariant(.0f)).toFloat(),
@@ -55,7 +55,7 @@ Chunk2D<T> BaseTypeIO<FileIOImplementer>::readSlice(const QString& fileName, uin
     QVariantMap metaInfo = _implementer.metaInfo(fileName);
     auto dimList = metaInfo.value(meta_info::dimensions).value<meta_info::Dimensions>();
 
-    Chunk2D<T> ret(dimList.dim0, dimList.dim1);
+    Chunk2D<T> ret(dimList.dim1, dimList.dim2);
 
     ret.setData(_implementer.template readChunk<T>(fileName, sliceNb));
     return ret;
@@ -446,7 +446,7 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
     {
         if(info.value(meta_info::dim3Type).toString() == meta_info::nbMods)
         {
-            nbModules = dimensionList.dim2;
+            nbModules = dimensionList.dim3;
         }
         else
         {
@@ -463,14 +463,14 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
             throw std::domain_error("Aborted loading: number of modules is zero!");
     }
 
-    uint nbViews = dimensionList.dim3;
+    uint nbViews = dimensionList.dim4;
     if(nbViews == 0)
     {
         // look for third dimension entry
         if(dimensionList.nbDim < 3)
             throw std::runtime_error("Aborted loading: missing file meta information!");
 
-        uint totalBlocks = dimensionList.dim2;
+        uint totalBlocks = dimensionList.dim3;
 
         // check if nb. projs is multiple of nbModules
         if(totalBlocks % nbModules)
@@ -485,8 +485,8 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
 
     ProjectionData::Dimensions ret;
 
-    ret.nbChannels = dimensionList.dim0;
-    ret.nbRows     = dimensionList.dim1;
+    ret.nbChannels = dimensionList.dim1;
+    ret.nbRows     = dimensionList.dim2;
     ret.nbModules  = nbModules;
     ret.nbViews    = nbViews;
 

@@ -63,9 +63,9 @@ bool DenFileIO::write(const std::vector<T> &data,
         throw std::runtime_error("Writing aborted: missing data meta information!");
 
     den::Header header;
-    header.cols = dimList.dim0;
-    header.rows = dimList.dim1;
-    header.count = (dimList.dim2 ? dimList.dim2 : 1) * (dimList.dim3 ? dimList.dim3 : 1);
+    header.cols = dimList.dim1;
+    header.rows = dimList.dim2;
+    header.count = (dimList.dim3 ? dimList.dim3 : 1) * (dimList.dim4 ? dimList.dim4 : 1);
 
     return dFile.save(data, header);
 }
