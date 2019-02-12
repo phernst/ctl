@@ -309,7 +309,7 @@ inline QString AbstractGantry::info() const
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
 inline void AbstractGantry::fromVariant(const QVariant& variant)
 {

@@ -291,7 +291,7 @@ inline void AbstractSource::setSpectrumModel(std::unique_ptr<AbstractXraySpectru
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
 inline void AbstractSource::fromVariant(const QVariant& variant)
 {
