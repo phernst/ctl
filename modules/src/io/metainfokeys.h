@@ -61,37 +61,17 @@ namespace type_hint {
 struct Dimensions
 {
     Dimensions()
-        : nbDim(0)
-        , dim0(0)
-        , dim1(0)
-        , dim2(0)
-        , dim3(0)
-    {
-    }
-    Dimensions(uint dim1, uint dim2)
-        : nbDim(2)
-        , dim0(dim1)
-        , dim1(dim2)
-        , dim2(0)
-        , dim3(0)
-    {
-    }
-    Dimensions(uint dim1, uint dim2, uint dim3)
-        : nbDim(3)
-        , dim0(dim1)
-        , dim1(dim2)
-        , dim2(dim3)
-        , dim3(0)
-    {
-    }
-    Dimensions(uint dim1, uint dim2, uint dim3, uint dim4)
-        : nbDim(4)
-        , dim0(dim1)
-        , dim1(dim2)
-        , dim2(dim3)
-        , dim3(dim4)
-    {
-    }
+        : nbDim(0), dim0(0), dim1(0), dim2(0), dim3(0)
+    {}
+    Dimensions(uint dim0, uint dim1)
+        : nbDim(2), dim0(dim0), dim1(dim1), dim2(0), dim3(0)
+    {}
+    Dimensions(uint dim0, uint dim1, uint dim2)
+        : nbDim(3), dim0(dim0), dim1(dim1), dim2(dim2), dim3(0)
+    {}
+    Dimensions(uint dim0, uint dim1, uint dim2, uint dim3)
+        : nbDim(4), dim0(dim0), dim1(dim1), dim2(dim2), dim3(dim3)
+    {}
 
     const uint nbDim;
     const uint dim0;
