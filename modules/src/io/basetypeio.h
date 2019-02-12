@@ -147,11 +147,11 @@ public:
     };
 
     // ### MAKE FUNCTIONS FOR INSTANTIATION OF A CONCRETE IO OBJECT ###
-    static std::unique_ptr<MetaInfoReader> makeMetaInfoReader();
+    static auto makeMetaInfoReader() -> std::unique_ptr<MetaInfoReader>;
     template<typename T>
-    static std::unique_ptr<VolumeIO<T>> makeVolumeIO();
-    static std::unique_ptr<ProjectionDataIO> makeProjectionDataIO();
-    static std::unique_ptr<ProjectionMatrixIO> makeProjectionMatrixIO();
+    static auto makeVolumeIO() -> std::unique_ptr<VolumeIO<T>>;
+    static auto makeProjectionDataIO() -> std::unique_ptr<ProjectionDataIO>;
+    static auto makeProjectionMatrixIO() -> std::unique_ptr<ProjectionMatrixIO>;
 
 private:
     FileIOImplementer _implementer;

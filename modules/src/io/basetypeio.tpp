@@ -701,13 +701,13 @@ auto BaseTypeIO<FileIOImplementer>::makeVolumeIO() -> std::unique_ptr<VolumeIO<T
 template<class FileIOImplementer>
 auto BaseTypeIO<FileIOImplementer>::makeProjectionDataIO() -> std::unique_ptr<ProjectionDataIO>
 {
-   return std::unique_ptr<ProjectionDataIO>(new ProjectionDataIO);
+    return std::unique_ptr<ProjectionDataIO>(new ProjectionDataIO);
 }
 
 template<class FileIOImplementer>
 auto BaseTypeIO<FileIOImplementer>::makeProjectionMatrixIO() -> std::unique_ptr<ProjectionMatrixIO>
 {
-  return std::unique_ptr<ProjectionMatrixIO>(new ProjectionMatrixIO);
+    return std::unique_ptr<ProjectionMatrixIO>(new ProjectionMatrixIO);
 }
 
 } // namespace io
