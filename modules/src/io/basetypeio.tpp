@@ -61,6 +61,29 @@ Chunk2D<T> BaseTypeIO<FileIOImplementer>::readSlice(const QString& fileName, uin
     return ret;
 }
 
+/*!
+ * Returns the meta information extracted from \a fileName by the FileIOImplementer.
+ *
+ * Meta information is stored in a QVariantMap. To query a specific fact, use
+ * QVariantMap::value(metaInfoKey) with the \a metaInfoKey related to your fact of interest. Convert
+ * the obtained value into the specific data type.
+ *
+ * Refer to metainfokeys.h for a list of standardized meta information keys.
+ *
+ * Example - getting the number of voxels and the size of the voxels in x-direction:
+ * \code
+ * BaseTypeIO<MyFileIOImplementer> io;
+ * QString fName = "volumeData.dat";
+ * auto meta = io.metaInfo(fName);
+ * auto nbVoxels = meta.value(meta_info::dimensions).value<meta_info::Dimensions>();
+ * auto voxelSizeX = meta.value(meta_info::voxSizeX).toFloat();
+ * std::cout << "File: " << fName.toStdString() << " has " << nbVoxels.nbDim << " dimensions with: "
+ *           << nbVoxels.dim1 << "x" << nbVoxels.dim2 << "x" << nbVoxels.dim3 << " voxels. \n"
+ *           << "Voxel size in x-direction: " << voxelSizeX << " mm.";
+ * // output (examplary): File: volumeData.dat has 3 dimensions with: 256x256x200 voxels.
+ * //                     Voxel size in x-direction: 0.5 mm.
+ * \endcode
+ */
 template <class FileIOImplementer>
 QVariantMap BaseTypeIO<FileIOImplementer>::metaInfo(const QString &fileName) const
 {
