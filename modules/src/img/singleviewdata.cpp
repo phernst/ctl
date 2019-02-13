@@ -177,6 +177,9 @@ Chunk2D<float> SingleViewData::combined(const ModuleLayout &layout, bool *ok) co
 {
     if(ok) *ok = true;
 
+    if(layout.isEmpty())
+        return combined(ModuleLayout::canonicLayout(1, std::max(nbModules(), 1u)), ok);
+
     const uint nbRows = layout.rows();
     const uint nbCols = layout.columns();
     const uint elemPerMod = elementsPerModule();

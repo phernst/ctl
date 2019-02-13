@@ -52,7 +52,7 @@ public:
     void append(const ModuleData& moduleData);
     void append(std::vector<float>&& dataVector);
     void append(const std::vector<float>& dataVector);
-    Chunk2D<float> combined(const ModuleLayout& layout, bool* ok = nullptr) const;
+    Chunk2D<float> combined(const ModuleLayout& layout = ModuleLayout(), bool* ok = nullptr) const;
     float max() const;
     float min() const;
     void setDataFromVector(const std::vector<float>& dataVector);

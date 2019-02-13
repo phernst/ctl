@@ -149,8 +149,13 @@ void ProjectionData::setDataFromVector(const std::vector<float> &dataVector)
  */
 ProjectionData ProjectionData::combined(const ModuleLayout& layout) const
 {
-    ProjectionData ret( _viewDim.nbChannels * _viewDim.nbModules,  _viewDim.nbRows, 1);
-    SingleViewData::ModuleData::Dimensions moduleDim { _viewDim.nbChannels * _viewDim.nbModules, _viewDim.nbRows };
+    if(layout.isEmpty())
+        return combined(ModuleLayout::canonicLayout(1, std::max(_viewDim.nbModules, 1u)));
+
+    ProjectionData ret( _viewDim.nbChannels * layout.columns(),
+                        _viewDim.nbRows * layout.rows(), 1);
+    SingleViewData::ModuleData::Dimensions moduleDim { _viewDim.nbChannels * layout.columns(),
+                                                       _viewDim.nbRows * layout.rows() };
 
     for(uint view = 0; view < nbViews(); ++view)
     {
