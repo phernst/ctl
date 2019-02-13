@@ -58,18 +58,18 @@ void ProjectionView::updateImage()
     const auto minGrayValue = static_cast<float>(windowing.first);
     const auto maxGrayValue = static_cast<float>(windowing.second);
     const auto grayScale = 255.0f / float(maxGrayValue - minGrayValue);
-    const auto offset = minGrayValue * grayScale;
-    const auto X = image.width();
-    const auto Y = image.height();
+    const auto offset = - minGrayValue * grayScale;
+    const auto nbPixel = image.width() * image.height();
 
-    projection *= grayScale;
     auto imgPtr = image.bits();
-    for(int y = 0; y < Y; ++y)
-        for(int x = 0; x < X; ++x)
-        {
-            *imgPtr = static_cast<uchar>(qMax(qMin(qRound(projection(x,y) - offset), 255), 0));
-            ++imgPtr;
-        }
+    auto projIt = projection.data().begin();
+    for(int pix = 0; pix < nbPixel; ++pix)
+    {
+        *imgPtr = static_cast<uchar>(qMax(qMin(qRound(
+                  std::fma(*projIt, grayScale, offset)), 255), 0)); // *projIt * grayScale + offset
+        ++imgPtr;
+        ++projIt;
+    }
 
     auto pixmap = QPixmap::fromImage(image).scaledToHeight(image.height() * ui->_SB_zoom->value());
     ui->_L_image->setPixmap(pixmap);
