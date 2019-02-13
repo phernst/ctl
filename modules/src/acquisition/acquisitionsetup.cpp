@@ -224,9 +224,15 @@ void AcquisitionSetup::setNbViews(uint nbViews)
     }
     else
     {
+        uint prevNbViews = this->nbViews();
+        double lastTimestamp = prevNbViews ? _views.back().timeStamp() : -1.0;
+        double timeIncrement = (prevNbViews > 1)
+                ? view(prevNbViews-1).timeStamp() - view(prevNbViews-2).timeStamp()
+                : 1.0;
+
         _views.reserve(nbViews);
-        for(uint viewTime = this->nbViews(); viewTime < nbViews; ++viewTime)
-            _views.emplace_back(double(viewTime));
+        for(uint v = 0, reqNewViews = nbViews-prevNbViews; v < reqNewViews; ++v)
+            _views.emplace_back(lastTimestamp + (v+1)*timeIncrement);
     }
 }
 
