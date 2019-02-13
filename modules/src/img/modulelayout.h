@@ -36,13 +36,15 @@ namespace CTL {
 class ModuleLayout
 {
 public:
-    ModuleLayout(uint nbRows, uint nbCols);
+    ModuleLayout(uint nbRows = 0, uint nbCols = 0);
 
     int& operator()(uint row, uint col);
     const int& operator()(uint row, uint col) const;
 
     uint columns() const;
     uint rows() const;
+
+    bool isEmpty() const;
 
     static ModuleLayout canonicLayout(uint nbRows, uint nbCols, bool rowMajorOrder = true);
 
@@ -122,6 +124,11 @@ inline uint ModuleLayout::columns() const { return _cols; }
  * Returns the number of rows in the layout.
  */
 inline uint ModuleLayout::rows() const { return _rows; }
+
+/*!
+ * Returns true if either the number of rows or columns in this layout is zero.
+ */
+inline bool ModuleLayout::isEmpty() const { return (_rows == 0) || (_cols == 0); }
 
 // clang-format off
 /*!
