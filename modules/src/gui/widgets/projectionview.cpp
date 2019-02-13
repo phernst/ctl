@@ -1,7 +1,7 @@
 #include "projectionview.h"
 #include "ui_projectionview.h"
 
-#include <QDebug>
+#include <cmath>
 
 ProjectionView::ProjectionView(QWidget *parent) :
     QWidget(parent),
@@ -25,8 +25,13 @@ void ProjectionView::setData(const CTL::ProjectionData &projections)
 {
     _data = projections;
 
-    updateSliderRange();
-    updateImage();
+    updateSliderRange();   
+
+    if(ui->_W_windowing->windowFromTo().first == 0 &&
+       ui->_W_windowing->windowFromTo().second == 0)
+        autoWindowing();
+    else
+        updateImage();
 }
 
 void ProjectionView::setModuleLayout(const CTL::ModuleLayout &layout)
@@ -58,15 +63,15 @@ void ProjectionView::updateImage()
     const auto minGrayValue = static_cast<float>(windowing.first);
     const auto maxGrayValue = static_cast<float>(windowing.second);
     const auto grayScale = 255.0f / float(maxGrayValue - minGrayValue);
-    const auto offset = - minGrayValue * grayScale;
+    const auto offset = - minGrayValue * grayScale + 0.5f; // 0.5 for rounding
     const auto nbPixel = image.width() * image.height();
 
     auto imgPtr = image.bits();
     auto projIt = projection.data().begin();
     for(int pix = 0; pix < nbPixel; ++pix)
     {
-        *imgPtr = static_cast<uchar>(qMax(qMin(qRound(
-                  std::fma(*projIt, grayScale, offset)), 255), 0)); // *projIt * grayScale + offset
+        *imgPtr = static_cast<uchar>(qMax(qMin( // clamp to interval [0, 255]
+                  std::fma(*projIt, grayScale, offset), 255.f), 0.f)); // *projIt*grayScale + offset
         ++imgPtr;
         ++projIt;
     }

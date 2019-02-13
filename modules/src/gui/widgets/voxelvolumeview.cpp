@@ -84,4 +84,11 @@ void VoxelVolumeView::setColorTable()
         _colorTable[i] = qRgb(i,i,i);
 }
 
-
+void VoxelVolumeView::checkIfAutoWindowingRequired()
+{
+    if(ui->_W_windowing->windowFromTo().first == 0 &&
+       ui->_W_windowing->windowFromTo().second == 0)
+        autoWindowing();
+    else
+        updateImage();
+}

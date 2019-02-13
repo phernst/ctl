@@ -34,6 +34,7 @@ private:
     QVector<QRgb> _colorTable;
 
     void setColorTable();
+    void checkIfAutoWindowingRequired();
 };
 
 template<typename T>
@@ -51,7 +52,7 @@ void VoxelVolumeView::setVolumeData(const CTL::VoxelVolume<T> &volume)
         dataPtr[vox] = static_cast<float>(srcData[vox]);
 
     updateSliderRange();
-    updateImage();
+    checkIfAutoWindowingRequired();
 }
 
 #endif // VOXELVOLUMEVIEW_H
