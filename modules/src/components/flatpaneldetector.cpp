@@ -50,7 +50,7 @@ QVector<AbstractDetector::ModuleLocation> FlatPanelDetector::moduleLocations() c
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
 void FlatPanelDetector::fromVariant(const QVariant& variant)
 {

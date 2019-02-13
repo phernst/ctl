@@ -200,7 +200,7 @@ QVector<double> CylindricalDetector::moduleAngulations() const
 }
 
 /*!
- * Reads all member variables from the QJsonObject \a json.
+ * Reads all member variables from the QVariant \a variant.
  */
 void CylindricalDetector::fromVariant(const QVariant& variant)
 {
