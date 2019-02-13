@@ -14,6 +14,15 @@ namespace CTL {
  *
  *
  */
+
+/*!
+ * \class AcquisitionSetup::View
+ *
+ * \brief Holds the information about the system settings for a particular view.
+ *
+ *
+ */
+
 class AcquisitionSetup final : public SerializationInterface
 {
 public:
@@ -37,8 +46,8 @@ public:
         QVariant toVariant() const override; // serialization
 
     private:
-        double _timeStamp;
-        std::vector<PrepareStep> _prepareSteps;
+        double _timeStamp; //!< Time stamp of the view.
+        std::vector<PrepareStep> _prepareSteps; //!< List of prepare steps to configure the view.
     };
 
     AcquisitionSetup() = default;
@@ -72,8 +81,8 @@ public:
     QVariant toVariant() const override; // serialization
 
 private:
-    std::unique_ptr<SimpleCTsystem> _system;
-    std::vector<View> _views;
+    std::unique_ptr<SimpleCTsystem> _system; //!< CTsystem used for the acquisition.
+    std::vector<View> _views; //!< List of all views of the acquisition.
 };
 
 } // namespace CTL

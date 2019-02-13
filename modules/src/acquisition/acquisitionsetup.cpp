@@ -122,8 +122,21 @@ AcquisitionSetup& AcquisitionSetup::operator=(const AcquisitionSetup& other)
     return *this;
 }
 
+/*!
+ * Adds the View \a view to this setup.
+ */
 void AcquisitionSetup::addView(AcquisitionSetup::View view) { _views.push_back(std::move(view)); }
 
+/*!
+ * Applies the prepration protocol \a preparation to this setup. This means that the prepare steps
+ * created by AbstractPreparationProtocol::prepareSteps() are appended to all views in this setup.
+ *
+ * Note that changing the number of views afterwards does not take into account this application of
+ * \a preparation. Consequently, all views that are added later on will not contain the preparation
+ * steps from \a preparation.
+ *
+ * \sa setNbViews().
+ */
 void AcquisitionSetup::applyPreparationProtocol(const AbstractPreparationProtocol& preparation)
 {
     if(this->nbViews() == 0)
@@ -141,6 +154,11 @@ void AcquisitionSetup::applyPreparationProtocol(const AbstractPreparationProtoco
     qDebug() << "-nbViews: " << _views.size();
 }
 
+/*!
+ * Clears all views from the setup. This leaves the setup with the same number of views as it had
+ * beforehand. If \a keepTimeStamps is \c true, the time stamps from the previous views are
+ * preserved. Otherwise, views are created with default time stamps.
+ */
 void AcquisitionSetup::clearViews(bool keepTimeStamps)
 {
     if(keepTimeStamps)
@@ -155,6 +173,12 @@ void AcquisitionSetup::clearViews(bool keepTimeStamps)
     }
 }
 
+/*!
+ * Prepares the system of this setup for the view \a viewNb.
+ *
+ * This applies all prepare step queued in the corresponding View. Steps are applied in the order
+ * they have been added to the View object.
+ */
 void AcquisitionSetup::prepareView(uint viewNb)
 {
     if(!_system)
@@ -164,12 +188,22 @@ void AcquisitionSetup::prepareView(uint viewNb)
         step->prepare(_system.get());
 }
 
+/*!
+ * Removes all prepare steps from all views of this setup. This preserves the time stamp of all
+ * these View instances.
+ */
 void AcquisitionSetup::removeAllPrepareSteps()
 {
     for(auto& view : _views)
         view.clearPrepareSteps();
 }
 
+/*!
+ * Sets the system of this setup to \a system. This creates a deep copy of \a system using
+ * CTsystem::clone(). The previous system is deleted.
+ *
+ * \a system must be convertible to a SimpleCTsystem. Otherwise the system will be set to nullptr.
+ */
 bool AcquisitionSetup::resetSystem(const CTsystem& system)
 {
     bool ok;
@@ -184,6 +218,12 @@ bool AcquisitionSetup::resetSystem(const CTsystem& system)
     return ok;
 }
 
+/*!
+ * Sets the system of this setup to \a system. This moves \a system to this instance. The previous
+ * system is deleted.
+ *
+ * \a system must be convertible to a SimpleCTsystem. Otherwise the system will be set to nullptr.
+ */
 bool AcquisitionSetup::resetSystem(CTsystem&& system)
 {
     bool ok;
@@ -198,6 +238,12 @@ bool AcquisitionSetup::resetSystem(CTsystem&& system)
     return ok;
 }
 
+/*!
+ * Returns true if this setup is valid. To be valid, the following conditions must be fulfilled:
+ * \li the system must be set properly (no nullptr),
+ * \li the number of views must be non-zero,
+ * \li all prepare steps in all views must be applicable to the system.
+ */
 bool AcquisitionSetup::isValid() const
 {
     if(!_system)
@@ -214,8 +260,20 @@ bool AcquisitionSetup::isValid() const
     return true;
 }
 
+/*!
+ * Returns the number of views in this setup.
+ */
 uint AcquisitionSetup::nbViews() const { return static_cast<uint>(_views.size()); }
 
+/*!
+ * Sets the number of views in this setup to \a nbViews. Depending on the current number of views,
+ * this has either of the following effects:
+ * \li If \a nbViews is less than the current number of views, all excess views are removed
+ * \li If \a nbViews is larger than the current number of views, empty views are appended to this
+ * setup to reach the requested number of views. The time stamps of the newly created views will
+ * continue from the time stamp of the last original view with the time increment between the last
+ * two views (if the number of views was less than two, the time increment will be 1.0).
+ */
 void AcquisitionSetup::setNbViews(uint nbViews)
 {
     if(nbViews <= this->nbViews())
@@ -236,18 +294,43 @@ void AcquisitionSetup::setNbViews(uint nbViews)
     }
 }
 
+/*!
+ * Returns a pointer to the system in this setup.
+ */
 SimpleCTsystem* AcquisitionSetup::system() { return _system.get(); }
 
+/*!
+ * Returns a pointer to the (constant) system in this setup.
+ */
 const SimpleCTsystem* AcquisitionSetup::system() const { return _system.get(); }
 
+/*!
+ * Returns a reference to the View \a viewNb of this setup.
+ *
+ * This does not perform boundary checks.
+ */
 AcquisitionSetup::View& AcquisitionSetup::view(uint viewNb) { return _views[viewNb]; }
 
+/*!
+ * Returns a constant reference to the View \a viewNb of this setup.
+ *
+ * This does not perform boundary checks.
+ */
 const AcquisitionSetup::View& AcquisitionSetup::view(uint viewNb) const { return _views[viewNb]; }
 
+/*!
+ * Returns a reference to the vector of views of this setup.
+ */
 std::vector<AcquisitionSetup::View>& AcquisitionSetup::views() { return _views; }
 
+/*!
+ * Returns a constant reference to the vector of views of this setup.
+ */
 const std::vector<AcquisitionSetup::View>& AcquisitionSetup::views() const { return _views; }
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
 void AcquisitionSetup::fromVariant(const QVariant &variant)
 {
     auto varMap = variant.toMap();
@@ -265,6 +348,9 @@ void AcquisitionSetup::fromVariant(const QVariant &variant)
     }
 }
 
+/*!
+ * Stores all member variables in a QVariant.
+ */
 QVariant AcquisitionSetup::toVariant() const
 {
     QVariantMap ret;
