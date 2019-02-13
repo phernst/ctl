@@ -29,6 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
         throw std::runtime_error("no OpenCL device found (GPU or CPU)!");
 
     updateGeometryPreview();
+
+    // linear arrangement of detector modules
+    ui->_W_projectionViewer->setModuleLayout(
+                ModuleLayout::canonicLayout(1, _CTSystem.detector()->nbDetectorModules()));
 }
 
 MainWindow::~MainWindow()
@@ -115,12 +119,17 @@ void MainWindow::loadDenFile(const QString &fileName)
 void MainWindow::saveDenFile(const QString &fileName)
 {
     io::BaseTypeIO<io::DenFileIO> fileIO;
+    bool ok;
 
-    if(fileIO.write(_projectionData.combined(ModuleLayout::canonicLayout(1,40)), fileName))
-        ui->_statusBar->showMessage("Projections saved successfully.");
-
-    if(fileIO.write(GeometryEncoder::encodeFullGeometry(currentSetup()), fileName + "_pmat"))
+    ok = fileIO.write(GeometryEncoder::encodeFullGeometry(currentSetup()), fileName + "_pmat");
+    if(ok)
         ui->_statusBar->showMessage("Projection matrices saved successfully.");
+
+    ok = fileIO.write(_projectionData.combined(
+                            ModuleLayout::canonicLayout(1, _projectionData.dimensions().nbModules)),
+                      fileName);
+    if(ok)
+        ui->_statusBar->showMessage("Projections saved successfully.");
 }
 
 void MainWindow::setDimensionLabelText(uint x, uint y, uint z)
