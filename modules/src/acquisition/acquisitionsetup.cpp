@@ -44,6 +44,14 @@ const std::vector<AcquisitionSetup::PrepareStep>& AcquisitionSetup::View::prepar
 }
 
 /*!
+ * Returns a (modifiable) reference to the vector of prepare steps of this instance.
+ */
+std::vector<AcquisitionSetup::PrepareStep>& AcquisitionSetup::View::prepareSteps()
+{
+    return _prepareSteps;
+}
+
+/*!
  * Removes all prepare steps from this instance. This keeps the time stamp of this instance
  * untouched.
  */

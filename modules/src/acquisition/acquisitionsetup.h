@@ -39,6 +39,7 @@ public:
 
         double timeStamp() const;
         const std::vector<PrepareStep>& prepareSteps() const;
+        std::vector<PrepareStep>& prepareSteps();
 
         void clearPrepareSteps();
 
