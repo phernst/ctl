@@ -1,5 +1,5 @@
 #include "raycasterprojector.h"
-#include "components/genericdetector.h"
+#include "components/abstractdetector.h"
 #include "mat/matrix_algorithm.h"
 #include "ocl/openclconfig.h"
 #include "ocl/clfileloader.h"
