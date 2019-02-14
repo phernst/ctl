@@ -13,7 +13,7 @@ public:
     QVariant parameter() const override;
 
 protected:
-    float _energy = 0.0f;
+    float _energy = 0.0f; //!< Control parameter of device setting (usually tube voltage).
 };
 
 class XraySpectrumTabulatedModel : public AbstractXraySpectrumModel

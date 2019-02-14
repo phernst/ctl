@@ -372,7 +372,7 @@ T VoxelVolume<T>::min() const
 // operators
 /*!
  * Adds the data from \a other to this volume and returns a reference to this instance.
- * Throws an std::domain_error if the dimensions of \other and this volume do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this volume do not match.
  *
  * Note that the voxel size will be ignored (i.e. there is no consistency check). Hence, the result
  * will always have the voxel size of this instance.
@@ -393,7 +393,7 @@ VoxelVolume<T>& VoxelVolume<T>::operator+=(const VoxelVolume<T>& other)
 
 /*!
  * Subtracts the data from \a other from this volume and returns a reference to this instance.
- * Throws an std::domain_error if the dimensions of \other and this volume do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this volume do not match.
  *
  * Note that the voxel size will be ignored (i.e. there is no consistency check). Hence, the result
  * will always have the voxel size of this instance.
@@ -463,7 +463,7 @@ VoxelVolume<T>& VoxelVolume<T>::operator/=(const T& divisor)
 
 /*!
  * Returns the (element-wise) sum of this volume and \a other.
- * Throws an std::domain_error if the dimensions of \other and this volume do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this volume do not match.
  *
  * Note that the voxel size will be ignored (i.e. there is no consistency check). Hence, the result
  * will always have the voxel size of this instance (i.e. left hand side operand).
@@ -482,7 +482,7 @@ VoxelVolume<T> VoxelVolume<T>::operator+(const VoxelVolume<T>& other) const
 
 /*!
  * Returns the (element-wise) difference between this volume and \a other.
- * Throws an std::domain_error if the dimensions of \other and this volume do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this volume do not match.
  *
  * Note that the voxel size will be ignored (i.e. there is no consistency check). Hence, the result
  * will always have the voxel size of this instance (i.e. left hand side operand).
@@ -498,7 +498,6 @@ VoxelVolume<T> VoxelVolume<T>::operator-(const VoxelVolume<T>& other) const
     ret -= other;
     return ret;
 }
-
 
 /*!
  * Returns a copy of this volume in which \a additiveShift has been added to all voxel values.

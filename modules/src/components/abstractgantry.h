@@ -102,8 +102,8 @@ protected:
     AbstractGantry() = default;
 
 private:
-    mat::Location _detectorDisplacement;
-    mat::Location _sourceDisplacement;
+    mat::Location _detectorDisplacement; //!< Displacement of the detector component.
+    mat::Location _sourceDisplacement; //!< Displacement of the source component.
 };
 
 /*!
@@ -334,22 +334,32 @@ inline QVariant AbstractGantry::toVariant() const
     return ret;
 }
 
+/*!
+ * \fn virtual mat::Location AbstractGantry::nominalDetectorLocation() const = 0
+ *
+ * Returns the nominal location of the detector. Nominal means the positioning without consideration
+ * of the displacement. This is the expected (or ideal) location as it would occur in a perfect
+ * system.
+ *
+ * Implement this method in derived classes such that it extracts the location of the detector
+ * component based on the parametrization used in that particular sub-class.
+ */
+
+/*!
+ * \fn virtual mat::Location AbstractGantry::nominalSourceLocation() const = 0
+ *
+ * Returns the nominal location of the source. Nominal means the positioning without consideration
+ * of the displacement. This is the expected (or ideal) location as it would occur in a perfect
+ * system.
+ *
+ * Implement this method in derived classes such that it extracts the location of the source
+ * component based on the parametrization used in that particular sub-class.
+ */
+
 } // namespace CTL
 
 /*! \file */
 ///@{
-/*!
- * \fn std::unique_ptr<GenericGantry> CTL::makeGantry(ConstructorArguments&&... arguments)
- * \relates GenericGantry
- *
- * Factory method to construct a GenericGantry and wrap the object in a
- * std::unique_ptr<GenericGantry>.
- *
- * This is similar to the more general method GenericComponent::makeComponent() with the difference
- * that it returns a unique pointer to the GenericGantry base type instead of GenericComponent.
- *
- * \sa GenericComponent::makeComponent().
- */
 ///@}
 
 #endif // ABSTRACTGANTRY_H

@@ -64,9 +64,9 @@ public:
     static QString defaultName();
 
 protected:
-    uint _nbModules;
-    double _angulationPerModule;
-    double _moduleSpacing;
+    uint _nbModules; //!< Number of individual (flat-panel) modules in the detector.
+    double _angulationPerModule; //!< Angulation (in rad) between adjacent detector modules.
+    double _moduleSpacing; //!< Gap between adjacent detector modules (zero if fitting tight).
 
 private:
     CylindricalDetector(const QString& name = defaultName());

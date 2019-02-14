@@ -23,10 +23,10 @@ class ProjectionData
 public:
     struct Dimensions
     {
-        uint nbChannels;
-        uint nbRows;
-        uint nbModules;
-        uint nbViews;
+        uint nbChannels; //!< Number of channels in each module.
+        uint nbRows;     //!< Number of rows in each module.
+        uint nbModules;  //!< Number of modules.
+        uint nbViews;    //!< Number of views.
 
         bool operator==(const Dimensions& other) const;
         bool operator!=(const Dimensions& other) const;

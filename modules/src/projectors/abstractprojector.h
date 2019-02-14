@@ -17,6 +17,11 @@ namespace CTL {
 class AcquisitionSetup;
 class AbstractProjectorConfig;
 
+/*!
+ * Alias name for template specialization VoxelVolume<float>.
+ *
+ * Also serves as a placeholder for potential future changes to the concept of volume data.
+ */
 typedef VoxelVolume<float> VolumeData;
 
 /*!
@@ -109,6 +114,12 @@ auto makeProjector(ConstructorArguments&&... arguments) ->
  * \endcode
  */
 inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
+
+/*!
+* \fn void ProjectorNotifier::projectionFinished(int viewNb)
+*
+* Signal that is emitted after processing of projection \a viewNb is finished.
+*/
 
 /*!
  * \fn AbstractProjector::~AbstractProjector()

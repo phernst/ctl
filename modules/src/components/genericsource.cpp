@@ -6,11 +6,20 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(GenericSource)
 
+/*!
+ * Constructs a GenericSource with the name \a name.
+ *
+ * Focal spot size defaults to QSizeF(0.0, 0.0) and the focal spot position to Vector3x1(0.0f).
+ */
 GenericSource::GenericSource(const QString& name)
     : AbstractSource(name)
 {
 }
 
+/*!
+ * Constructs a GenericSource with a focal spot size of \a focalSpotSize, the focal spot positioned
+ * at \a focalSpotPosition and the name \a name.
+ */
 GenericSource::GenericSource(const QSizeF& focalSpotSize,
                              const Vector3x1& focalSpotPosition,
                              const QString& name)
@@ -28,11 +37,19 @@ QString GenericSource::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
+/*!
+ * Returns a formatted string with information about the object.
+ *
+ * In addition to the information from the base class (SystemComponent), the info string contains
+ * the following details:
+ * \li Total photon flux
+ */
 QString GenericSource::info() const
 {
     QString ret(AbstractSource::info());
 
-    ret += typeInfoString(typeid(this));
+    ret += typeInfoString(typeid(this)) +
+            "\tTotal photon flux: "   + QString::number(_totalFlux) + "\n";
 
     ret += (this->type() == GenericSource::Type) ? "}\n" : "";
 
@@ -62,6 +79,12 @@ QVariant GenericSource::toVariant() const
     return ret;
 }
 
+/*!
+ * Sets the spectrum of this instance to the sampled data provided by \a spectrum.
+ *
+ * If \a updateFlux = \c true, the total flux will be set to the integral over the samples from
+ * \a spectrum. Otherwise, the total flux remains unchanged.
+ */
 void GenericSource::setSpectrum(const IntervalDataSeries& spectrum, bool updateFlux)
 {
     auto specModel = new FixedXraySpectrumModel;
@@ -81,8 +104,15 @@ void GenericSource::setSpectrum(const IntervalDataSeries& spectrum, bool updateF
         _totalFlux = spectrum.integral();
 }
 
+// use documentation of base class
 SystemComponent* GenericSource::clone() const { return new GenericSource(*this); }
 
+/*!
+ * Returns the emitted radiation spectrum sampled with \a nbSamples bins covering the energy
+ * range of [\a from, \a to] keV. Each energy bin is defined to represent the integral over the
+ * contribution of all energies within the bin to the total intensity. The spectrum provides
+ * relative intensities, i.e. the sum over all bins equals to one.
+ */
 IntervalDataSeries GenericSource::spectrum(float from, float to, uint nbSamples) const
 {
     if(!hasSpectrumModel())
@@ -94,8 +124,14 @@ IntervalDataSeries GenericSource::spectrum(float from, float to, uint nbSamples)
     return sampSpec;
 }
 
+/*!
+ * Returns the nominal photon flux.
+ */
 double GenericSource::nominalPhotonFlux() const { return _totalFlux; }
 
+/*!
+ * Sets total photon flux to \a flux.
+ */
 void GenericSource::setPhotonFlux(double flux) { _totalFlux = flux; }
 
 } // namespace CTL

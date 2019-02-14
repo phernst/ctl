@@ -26,7 +26,7 @@ namespace CTL {
 class AcquisitionSetup final : public SerializationInterface
 {
 public:
-    typedef std::shared_ptr<const AbstractPrepareStep> PrepareStep;
+    typedef std::shared_ptr<const AbstractPrepareStep> PrepareStep; //!< Alias for shared_ptr to const AbstractPrepareStep.
 
     class View : public SerializationInterface
     {

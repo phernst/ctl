@@ -108,6 +108,11 @@ Chunk2D<T>::Chunk2D(uint width, uint height, const std::vector<T>& data)
     setData(data);
 }
 
+/*!
+ * Returns the maximum value in this instance.
+ *
+ * Returns zero if this data is empty.
+ */
 template<typename T>
 T Chunk2D<T>::max() const
 {
@@ -123,6 +128,11 @@ T Chunk2D<T>::max() const
     return tempMax;
 }
 
+/*!
+ * Returns the minimum value in this instance.
+ *
+ * Returns zero if this data is empty.
+ */
 template<typename T>
 T Chunk2D<T>::min() const
 {
@@ -294,6 +304,215 @@ Chunk2D<T> Chunk2D<T>::operator/(T divisor) const
     ret /= divisor;
 
     return ret;
+}
+
+/*!
+ * Returns `true` if both dimensions (i.e. height and width) of \a other are identical to
+ * this instance.
+ *
+ * \sa operator!=()
+ */
+template <typename T>
+bool Chunk2D<T>::Dimensions::operator==(const Dimensions& other) const
+{
+    return (width == other.width) && (height == other.height);
+}
+
+/*!
+ * Returns `true` if at least one dimension (i.e. height or width) of \a other is different from
+ * the dimensions of this instance.
+ *
+ * \sa operator==()
+ */
+template <typename T>
+bool Chunk2D<T>::Dimensions::operator!=(const Dimensions& other) const
+{
+    return (width != other.width) || (height != other.height);
+}
+
+/*!
+ * Returns a string that contains the dimensions joined with " x ".
+ */
+template <typename T>
+std::string Chunk2D<T>::Dimensions::info() const
+{
+    return std::to_string(width) + " x " + std::to_string(height);
+}
+
+/*!
+ * Returns the number of elements for which memory has been allocated. This is either zero if no
+ * memory has been allocated (after instantiation with a non-allocating constructor) or equal to the
+ * number of elements.
+ *
+ * Same as: constData().size().
+ *
+ * \sa nbElements(), allocateMemory().
+ */
+template <typename T>
+size_t Chunk2D<T>::allocatedElements() const
+{
+    return _data.size();
+}
+
+/*!
+ * Returns a constant reference to the std::vector storing the data.
+ */
+template <typename T>
+const std::vector<T>& Chunk2D<T>::constData() const
+{
+    return _data;
+}
+
+/*!
+ * Returns a constant reference to the std::vector storing the data.
+ */
+template <typename T>
+const std::vector<T>& Chunk2D<T>::data() const
+{
+    return _data;
+}
+
+/*!
+ * Returns a reference to the std::vector storing the data.
+ */
+template <typename T>
+std::vector<T>& Chunk2D<T>::data()
+{
+    return _data;
+}
+
+/*!
+ * Returns the dimensions of the chunk.
+ *
+ * \sa Dimensions.
+ */
+template <typename T>
+const typename Chunk2D<T>::Dimensions& Chunk2D<T>::dimensions() const
+{
+    return _dim;
+}
+
+/*!
+ * Returns the height of the chunk. Same as: dimensions().height.
+ *
+ * \sa width().
+ */
+template <typename T>
+uint Chunk2D<T>::height() const
+{
+    return _dim.height;
+}
+
+/*!
+ * Returns the number of elements in the chunk. Note that these are not necessarily allocated
+ * already.
+ *
+ * \sa allocatedElements().
+ */
+template <typename T>
+size_t Chunk2D<T>::nbElements() const
+{
+    return _dim.width * size_t(_dim.height);
+}
+
+/*!
+ * Returns the pointer to the raw data in the std::vector. Same as data().data().
+ *
+ * \sa rawData() const.
+ */
+template <typename T>
+T* Chunk2D<T>::rawData()
+{
+    return _data.data();
+}
+
+/*!
+ * Returns the pointer to the constant raw data in the std::vector.
+ *
+ * \sa rawData().
+ */
+template <typename T>
+const T* Chunk2D<T>::rawData() const
+{
+    return _data.data();
+}
+
+/*!
+ * Returns the width of the chunk. Same as: dimensions().width.
+ *
+ * \sa height().
+ */
+template <typename T>
+uint Chunk2D<T>::width() const
+{
+    return _dim.width;
+}
+
+/*!
+ * Fills the chunk with \a fillValue. Note that this will overwrite all data stored in the chunk.
+ *
+ * This method allocates memory for the data if it has not been allocated before.
+ */
+template <typename T>
+void Chunk2D<T>::fill(const T& fillValue)
+{
+    if(allocatedElements() != nbElements())
+        allocateMemory();
+
+    std::fill(_data.begin(), _data.end(), fillValue);
+}
+
+/*!
+ * Returns a reference to the element at position (\a row, \a column). Does not perform boundary
+ * checks!
+ */
+template <typename T>
+T& Chunk2D<T>::operator()(uint x, uint y)
+{
+    Q_ASSERT((y * _dim.width + x) < allocatedElements());
+    return _data[y * _dim.width + x];
+}
+
+/*!
+ * Returns a constant reference to the element at position (\a row, \a column). Does not perform
+ * boundary checks!
+ */
+template <typename T>
+const T& Chunk2D<T>::operator()(uint x, uint y) const
+{
+    Q_ASSERT((y * _dim.width + x) < allocatedElements());
+    return _data[y * _dim.width + x];
+}
+
+/*!
+ * Returns a true if the dimensions and data of \a other are equal to those of this chunk.
+ */
+template <typename T>
+bool Chunk2D<T>::operator==(const Chunk2D<T>& other) const
+{
+    return (_dim == other._dim) && (_data == other._data);
+}
+
+/*!
+ * Returns a true if either the dimensions or the data of \a other differ from those of this chunk.
+ */
+template <typename T>
+bool Chunk2D<T>::operator!=(const Chunk2D<T>& other) const
+{
+    return (_dim != other._dim) || (_data != other._data);
+}
+
+/*!
+ * Enforces memory allocation. This resizes the internal std::vector to the required number of
+ * elements, given by the dimensions of the chunk, i.e. width x heigth.
+ * As a result, allocatedElements() will return the same as nbElements().
+ *
+ * \sa nbElements().
+ */
+template <typename T>
+void Chunk2D<T>::allocateMemory()
+{
+    _data.resize(nbElements());
 }
 
 } // namespace CTL

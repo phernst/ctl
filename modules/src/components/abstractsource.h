@@ -98,11 +98,11 @@ public:
     void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
 
 protected:
-    QSizeF _focalSpotSize = QSizeF(0.0, 0.0);
-    Vector3x1 _focalSpotPosition = Vector3x1(0.0);
-    double _fluxModifier = 1.0;
+    QSizeF _focalSpotSize = QSizeF(0.0, 0.0); //!< Size of the focal spot (in mm).
+    Vector3x1 _focalSpotPosition = Vector3x1(0.0); //!< Position of the focal spot (relative to source center).
+    double _fluxModifier = 1.0; //!< Global (multiplicative) modifier for the photon flux.
 
-    DataModelPtr _spectrumModel;
+    DataModelPtr _spectrumModel; //!< Data model for the emitted radiation spectrum.
 };
 
 /*!

@@ -9,8 +9,8 @@ namespace CTL {
  * Constructs a GeometryEncoder object. This object refers to a SimpleCTsystem.
  *
  * Note that the SimpleCTsystem on which \a system points to is not owned by the GeometryEncoder
- * and the client have to make sure that the object \a system points to a valid objec before calling
- * encodeSingleViewGeometry().
+ * and the client have to make sure that the object \a system points to a valid object before
+ * calling encodeSingleViewGeometry().
  */
 GeometryEncoder::GeometryEncoder(const SimpleCTsystem* system)
     : _system(system)

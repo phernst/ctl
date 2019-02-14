@@ -34,7 +34,7 @@ public:
     static QString defaultName();
 
 protected:
-    double _totalFlux = 0.0f;
+    double _totalFlux = 0.0f; //!< Total photon flux (photons/cm² in 1m distance).
 };
 
 } // namespace CTL

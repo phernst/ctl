@@ -106,22 +106,38 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
     return ret;
 }
 
-QSize GeometryDecoder::pixelPerModule() const
+/*!
+ * Returns the number of pixels per module of the detector that the geometry decoder shall assume
+ * for the system.
+ */
+const QSize& GeometryDecoder::pixelPerModule() const
 {
     return _pixelPerModule;
 }
 
-QSizeF GeometryDecoder::pixelDimensions() const
+/*!
+ * Returns the pixel dimensions of the detector that the geometry decoder shall assume for the
+ * system.
+ */
+const QSizeF& GeometryDecoder::pixelDimensions() const
 {
     return _pixelDimensions;
 }
 
-void GeometryDecoder::setPixelPerModule(const QSize &value)
+/*!
+ * Sets the number of pixels per module of the detector that the geometry decoder shall assume for
+ * the system to \a value.
+ */
+void GeometryDecoder::setPixelPerModule(const QSize& value)
 {
     _pixelPerModule = value;
 }
 
-void GeometryDecoder::setPixelDimensions(const QSizeF &value)
+/*!
+ * Sets the pixel dimensions of the detector that the geometry decoder shall assume for the system
+ * to \a value.
+ */
+void GeometryDecoder::setPixelDimensions(const QSizeF& value)
 {
     _pixelDimensions = value;
 }

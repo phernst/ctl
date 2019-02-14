@@ -28,8 +28,8 @@ public:
 
     AcquisitionSetup decodeFullGeometry(const FullGeometry& geometry) const;
 
-    QSize pixelPerModule() const;
-    QSizeF pixelDimensions() const;
+    const QSize& pixelPerModule() const;
+    const QSizeF& pixelDimensions() const;
     void setPixelPerModule(const QSize& value);
     void setPixelDimensions(const QSizeF& value);
 
@@ -38,8 +38,8 @@ public:
                                                const QSizeF& pixelDimensions);
 
 private:
-    QSize _pixelPerModule;
-    QSizeF _pixelDimensions;
+    QSize _pixelPerModule; //!< Number of pixels of the assumed detector.
+    QSizeF _pixelDimensions; //!< Pixel size of the assumed detector.
 };
 
 } // namespace CTL

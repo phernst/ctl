@@ -7,7 +7,7 @@
  * NOTE: This is header only.
  */
 
-typedef unsigned int uint;
+typedef unsigned int uint; //!< Qt style alias for unsigned int.
 
 namespace CTL {
 

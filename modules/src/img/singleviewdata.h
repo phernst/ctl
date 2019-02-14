@@ -19,13 +19,13 @@ namespace CTL {
 class SingleViewData
 {
 public:
-    typedef Chunk2D<float> ModuleData;
+    typedef Chunk2D<float> ModuleData; //!< Alias for template specialization Chunk2D<float>.
 
     struct Dimensions
     {
-        uint nbChannels;
-        uint nbRows;
-        uint nbModules;
+        uint nbChannels; //!< Number of channels in each module.
+        uint nbRows;     //!< Number of rows in each module.
+        uint nbModules;  //!< Number of modules.
 
         bool operator==(const Dimensions& other) const;
         bool operator!=(const Dimensions& other) const;

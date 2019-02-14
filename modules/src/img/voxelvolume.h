@@ -145,18 +145,23 @@ private:
  * \brief Size of individual voxels (in millimeter) in the volume.
  */
 
+/*!
+ * Returns true if all three dimensions of this instance and \a other are equal.
+ */
 template<typename T>
 bool VoxelVolume<T>::Dimensions::operator==(const Dimensions& other) const
 {
     return (x == other.x) && (y == other.y) && (z == other.z);
 }
 
+/*!
+ * Returns true if any of the three dimensions of this instance and \a other differ.
+ */
 template<typename T>
 bool VoxelVolume<T>::Dimensions::operator!=(const Dimensions& other) const
 {
     return (x != other.x) || (y != other.y) || (z != other.z);
 }
-
 
 /*!
  * Returns the number of elements for which memory has been allocated. This is either zero if no

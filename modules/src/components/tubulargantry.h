@@ -58,11 +58,11 @@ public:
     static QString defaultName();
 
 protected:
-    double _sourceToDetectorDistance;
-    double _sourceToIsoCenterDistance;
-    double _rotationAngle;
-    double _pitchPosition;
-    double _tiltAngle;
+    double _sourceToDetectorDistance;  //!< Distance between source and detector (in mm).
+    double _sourceToIsoCenterDistance; //!< Distance between source and iso center (in mm).
+    double _rotationAngle;             //!< Gantry rotation angle (in rad).
+    double _pitchPosition;             //!< Table pitch position (in mm).
+    double _tiltAngle;                 //!< Gantry tilt angle (in rad).
 
 private:
     TubularGantry() = default;

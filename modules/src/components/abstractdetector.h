@@ -88,11 +88,11 @@ protected:
     AbstractDetector() = default;
     AbstractDetector(const QString& name);
 
-    QSize _nbPixelPerModule;
-    QSizeF _pixelDimensions;
+    QSize _nbPixelPerModule; //!< Number of pixels in each detector module.
+    QSizeF _pixelDimensions; //!< Size of individual pixels (in mm).
 
-    DataModelPtr _saturationModel;
-    SaturationModelType _saturationModelType = Undefined;
+    DataModelPtr _saturationModel; //!< Data model for saturation of measured values.
+    SaturationModelType _saturationModelType = Undefined; //!< States whether saturation model refers to intensity or extinction values.
 };
 
 /*!
@@ -310,9 +310,27 @@ inline void AbstractDetector::setSaturationModel(std::unique_ptr<AbstractDataMod
  */
 
 /*!
+ * \fn virtual QVector<ModuleLocation> AbstractDetector::moduleLocations() const = 0
+ *
+ * Returns the location (i.e. position and rotation) of all individual detector modules with respect
+ * to the (physical) center of the detector. These locations are considered in addition to the
+ * global positioning of the detector (managed by AbstractGantry).
+ *
+ * Implement this method in derived classes to compute the locations of individual modules based on
+ * the specific parametrization of that particular sub-class.
+ */
+
+/*!
  * \typedef AbstractDetector::ModuleLocation
  *
  * Synonym for mat::Location.
+ */
+
+/*!
+ * \enum AbstractDetector::SaturationModelType
+ *
+ * Specification of whether the saturation model of this instance relates to intensity or extinction
+ * values.
  */
 
 } // namespace CTL

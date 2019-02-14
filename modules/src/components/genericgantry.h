@@ -61,8 +61,8 @@ public:
     static QString defaultName();
 
 private:
-    mat::Location _detectorLocation;
-    mat::Location _sourceLocation;
+    mat::Location _detectorLocation; //!< Location of the detector component.
+    mat::Location _sourceLocation; //!< Location of the source component.
 };
 
 } // namespace CTL

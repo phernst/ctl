@@ -70,7 +70,7 @@ private:
                                               const QSizeF& pixelDimensions);
 
     // member variables
-    const SimpleCTsystem* _system;
+    const SimpleCTsystem* _system; //!< Pointer to system whose geometry shall be encoded.
 };
 
 } // namespace CTL

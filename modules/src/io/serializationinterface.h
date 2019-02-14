@@ -30,19 +30,71 @@ public:
     virtual ~SerializationInterface() = default;
 };
 
+/*!
+ * Returns the type-id of the serializable object. Used in deserialization to determine the proper
+ * object type.
+ *
+ * Add derived classes to the enumeration using the CTL_TYPE_ID macro.
+ */
 inline int SerializationInterface::type() const
 {
     return Type;
 }
 
+/*!
+ * Interface to read all member variables from the QVariant \a variant.
+ *
+ * To be reimplemented in derived classes.
+ */
 inline void SerializationInterface::fromVariant(const QVariant&)
 {
 }
 
+/*!
+ * Interface to store all member variables in a QVariant.
+ *
+ * To be reimplemented in derived classes.
+ */
 inline QVariant SerializationInterface::toVariant() const
 {
     return QVariant();
 }
+
+/*!
+ * \fn SerializationInterface::SerializationInterface()
+ *
+ * Standard default constructor.
+ */
+
+/*!
+ * \fn SerializationInterface::SerializationInterface(const SerializationInterface&)
+ *
+ * Standard copy constructor.
+ */
+
+/*!
+ * \fn SerializationInterface::SerializationInterface(SerializationInterface&&)
+ *
+ * Standard move constructor.
+ */
+
+/*!
+ * \fn SerializationInterface& SerializationInterface::operator= (const SerializationInterface&)
+ *
+ * Standard copy assignment operator.
+ */
+
+/*!
+ * \fn SerializationInterface& SerializationInterface::operator= (SerializationInterface&&)
+ *
+ * Standard move assignment operator.
+ */
+
+/*!
+ * \fn virtual SerializationInterface::~SerializationInterface()
+ *
+ * Default destructor. Virtual for purpose of polymorphism.
+ */
 
 } // namespace CTL
 

@@ -151,6 +151,9 @@ inline bool AbstractPreparationProtocol::isApplicableTo(const AcquisitionSetup&)
  * XrayTubeParam::Type           | 320
  */
 
+/*!
+ * Reads all member variables from the QVariant \a variant.
+ */
 inline void AbstractPrepareStep::fromVariant(const QVariant &variant)
 {
     auto varMap = variant.toMap();
@@ -163,6 +166,9 @@ inline void AbstractPrepareStep::fromVariant(const QVariant &variant)
     }
 }
 
+/*!
+ * Stores all member variables in a QVariant.
+ */
 inline QVariant AbstractPrepareStep::toVariant() const
 {
     QVariantMap ret;

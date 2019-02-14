@@ -83,7 +83,7 @@ protected:
     static QString typeInfoString(const std::type_info& type);
 
 private:
-    QString _name;
+    QString _name; //!< The component's name.
 };
 
 // factory function `makeComponent`

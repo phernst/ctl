@@ -374,4 +374,16 @@ QVariant AcquisitionSetup::toVariant() const
     return ret;
 }
 
+/*!
+ * \fn AcquisitionSetup::AcquisitionSetup(AcquisitionSetup&& other)
+ *
+ * Default move constructor.
+ */
+
+/*!
+ * \fn AcquisitionSetup& AcquisitionSetup::operator=(AcquisitionSetup&& other)
+ *
+ * Default move assignment operator.
+ */
+
 } // namespace CTL

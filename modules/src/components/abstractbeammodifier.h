@@ -91,6 +91,13 @@ inline QVariant AbstractBeamModifier::toVariant() const
     return SystemComponent::toVariant();
 }
 
+/*!
+ * \fn IntervalDataSeries AbstractBeamModifier::modify(const IntervalDataSeries& inputSpectrum,
+ * double theta = 0.0, double phi = 0.0) = 0
+ *
+ * Returns the modified version of \a inputSpectrum at solid angle position (\a theta, \a phi).
+ */
+
 } // namespace CTL
 
 #endif // ABSTRACTBEAMMODIFIER_H

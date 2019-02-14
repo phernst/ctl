@@ -47,7 +47,7 @@ public:
 
 
 protected:
-    QVector<ModuleLocation> _moduleLocations;
+    QVector<ModuleLocation> _moduleLocations; //!< Vector of locations of all detector modules.
 };
 
 } // namespace CTL

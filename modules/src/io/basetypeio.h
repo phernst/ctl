@@ -169,12 +169,12 @@ private:
 ///@{
 
 /*!
- * \def SINGLE_MODULE_FALLBACK
- * If this macro has been defined, the BaseTypeIO assumes that you have only one detector module
- * if the number of modules is not given at all, i.e. neither by an argument passed to the read
+ * \def NO_SINGLE_MODULE_FALLBACK
+ * By default, the BaseTypeIO assumes that you have only one detector module in all methods where
+ * the number of modules is not available directly , i.e. neither as an argument passed to the read
  * functions (nbModules = 0) nor by the meta information in the file (e.g. the DEN format has not
  * such meta info inherently).
- * In case you remove this macro, the read functions
+ * If this behavior is not desired, define NO_SINGLE_MODULE_FALLBACK. Then, the read functions
  * readProjections, readSingleView, readFullGeometry and readSingleViewGeometry will throw an
  * exception (std::runtime_error) if the number of modules is not available.
  */

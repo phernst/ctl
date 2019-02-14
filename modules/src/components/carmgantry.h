@@ -49,8 +49,8 @@ public:
     static QString defaultName();
 
 protected:
-    double _cArmSpan;
-    mat::Location _location;
+    double _cArmSpan; //!< Span of the C-arm, i.e. distance between source and detector (in mm).
+    mat::Location _location; //!< Location of the source (rotation is oriented towards detector).
 
 private:
     // helper methods

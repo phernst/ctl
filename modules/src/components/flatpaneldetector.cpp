@@ -83,6 +83,9 @@ AbstractDetector::ModuleLocation FlatPanelDetector::location() const
  */
 const QSize& FlatPanelDetector::nbPixels() const { return _nbPixelPerModule; }
 
+/*!
+ * Returns the physical dimensions of the flat panel module (i.e. [width, height] in mm).
+ */
 const QSizeF FlatPanelDetector::panelDimensions() const
 {
     return QSizeF(double(_nbPixelPerModule.width())*_pixelDimensions.width(),

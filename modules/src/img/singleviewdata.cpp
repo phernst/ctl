@@ -302,7 +302,7 @@ void SingleViewData::allocateMemory(uint nbModules)
 
 /*!
  * Adds the data from \a other to this view and returns a reference to this instance.
- * Throws an std::domain_error if the dimensions of \other and this view do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this view do not match.
  */
 SingleViewData& SingleViewData::operator += (const SingleViewData& other)
 {
@@ -320,7 +320,7 @@ SingleViewData& SingleViewData::operator += (const SingleViewData& other)
 
 /*!
  * Subtracts the data of \a other from this view and returns a reference to this instance.
- * Throws an std::domain_error if the dimensions of \other and this view do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this view do not match.
  */
 SingleViewData& SingleViewData::operator -= (const SingleViewData& other)
 {
@@ -360,7 +360,7 @@ SingleViewData& SingleViewData::operator /= (float divisor)
 
 /*!
  * Adds the data from \a other to this view and returns the result.
- * Throws an std::domain_error if the dimensions of \other and this view do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this view do not match.
  */
 SingleViewData SingleViewData::operator + (const SingleViewData& other) const
 {
@@ -372,7 +372,7 @@ SingleViewData SingleViewData::operator + (const SingleViewData& other) const
 
 /*!
  * Subtracts the data of \a other from this view and returns the result.
- * Throws an std::domain_error if the dimensions of \other and this view do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this view do not match.
  */
 SingleViewData SingleViewData::operator - (const SingleViewData& other) const
 {

@@ -255,7 +255,7 @@ void ProjectionData::allocateMemory(uint nbViews)
 
 /*!
  * Adds the data from \a other to this instance and returns a reference to this instance.
- * Throws an std::domain_error if the dimensions of \other and this instance do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this instance do not match.
  */
 ProjectionData& ProjectionData::operator += (const ProjectionData& other)
 {
@@ -277,7 +277,7 @@ ProjectionData& ProjectionData::operator += (const ProjectionData& other)
 
 /*!
  * Subtracts the data of \a other from this instance and returns a reference to this instance.
- * Throws an std::domain_error if the dimensions of \other and this instance do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this instance do not match.
  */
 ProjectionData& ProjectionData::operator -= (const ProjectionData& other)
 {
@@ -323,7 +323,7 @@ ProjectionData& ProjectionData::operator /= (float divisor)
 
 /*!
  * Returns the (element-wise) sum of \a other and this instance.
- * Throws an std::domain_error if the dimensions of \other and this view do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this view do not match.
  */
 ProjectionData ProjectionData::operator + (const ProjectionData& other) const
 {
@@ -335,7 +335,7 @@ ProjectionData ProjectionData::operator + (const ProjectionData& other) const
 
 /*!
  * Returns the (element-wise) difference of \a other and this instance.
- * Throws an std::domain_error if the dimensions of \other and this view do not match.
+ * Throws an std::domain_error if the dimensions of \a other and this view do not match.
  */
 ProjectionData ProjectionData::operator - (const ProjectionData& other) const
 {

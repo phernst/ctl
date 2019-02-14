@@ -5,6 +5,9 @@
 
 namespace CTL {
 
+/*!
+ * \brief The XrayLaser class represents source components that emit monoenergetic radiation.
+ */
 class XrayLaser : public AbstractSource
 {
     CTL_TYPE_ID(310)
@@ -40,8 +43,8 @@ public:
 
 
 protected:
-    double _energy;
-    double _power;
+    double _energy; //!< Energy of the emitted photons (in keV).
+    double _power;  //!< Total emission power.
 
 private:
     using AbstractSource::setSpectrumModel;

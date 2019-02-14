@@ -10,6 +10,11 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(CylindricalDetector)
 
+/*!
+ * Constructs an empty (invalid) CylindricalDetector object.
+ *
+ * To be used only in combination with deserialization by means of fromVariant().
+ */
 CylindricalDetector::CylindricalDetector(const QString &name)
     : AbstractDetector(name)
 {
