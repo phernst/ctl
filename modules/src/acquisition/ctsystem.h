@@ -104,10 +104,10 @@ public:
     QVariant toVariant() const override; // serialization
 
     // getter methods
-    QList<AbstractDetector*> detectors() const;
-    QList<AbstractGantry*> gantries() const;
-    QList<AbstractSource*> sources() const;
-    QList<AbstractBeamModifier*> modifiers() const;
+    std::vector<AbstractDetector*> detectors() const;
+    std::vector<AbstractGantry*> gantries() const;
+    std::vector<AbstractSource*> sources() const;
+    std::vector<AbstractBeamModifier*> modifiers() const;
 
     const std::vector<ComponentPtr>& components() const;
     const QString& name() const;

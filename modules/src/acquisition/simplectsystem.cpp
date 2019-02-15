@@ -1,8 +1,6 @@
 #include "simplectsystem.h"
 #include "components/allgenerictypes.h"
 
-#include <QList>
-
 namespace CTL {
 
 /*!
@@ -103,8 +101,8 @@ SimpleCTsystem SimpleCTsystem::fromCTsystem(CTsystem&& system, bool* ok)
 AbstractDetector* SimpleCTsystem::detector() const
 {
     auto dtctrs = detectors();
-    Q_ASSERT(!dtctrs.isEmpty());
-    return dtctrs.isEmpty() ? nullptr : dtctrs.first();
+    Q_ASSERT(!dtctrs.empty());
+    return dtctrs.empty() ? nullptr : dtctrs.front();
 }
 
 /*!
@@ -113,8 +111,8 @@ AbstractDetector* SimpleCTsystem::detector() const
 AbstractGantry* SimpleCTsystem::gantry() const
 {
     auto gntrs = gantries();
-    Q_ASSERT(!gntrs.isEmpty());
-    return gntrs.isEmpty() ? nullptr : gntrs.first();
+    Q_ASSERT(!gntrs.empty());
+    return gntrs.empty() ? nullptr : gntrs.front();
 }
 
 /*!
@@ -123,8 +121,8 @@ AbstractGantry* SimpleCTsystem::gantry() const
 AbstractSource* SimpleCTsystem::source() const
 {
     auto srcs = sources();
-    Q_ASSERT(!srcs.isEmpty());
-    return srcs.isEmpty() ? nullptr : srcs.first();
+    Q_ASSERT(!srcs.empty());
+    return srcs.empty() ? nullptr : srcs.front();
 }
 
 /*!

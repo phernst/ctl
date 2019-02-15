@@ -109,9 +109,9 @@ bool CTsystem::isEmpty() const
  */
 bool CTsystem::isValid() const
 {
-    bool hasDetector = !detectors().isEmpty();
-    bool hasGantry = !gantries().isEmpty();
-    bool hasSource = !sources().isEmpty();
+    bool hasDetector = !detectors().empty();
+    bool hasGantry = !gantries().empty();
+    bool hasSource = !sources().empty();
 
     return hasDetector && hasGantry && hasSource;
 }
@@ -127,7 +127,7 @@ bool CTsystem::isValid() const
  */
 bool CTsystem::isSimple() const
 {
-    return (detectors().length() == 1) && (gantries().length() == 1) && (sources().length() == 1);
+    return (detectors().size() == 1) && (gantries().size() == 1) && (sources().size() == 1);
 }
 
 /*!
@@ -143,13 +143,13 @@ QString CTsystem::defaultName()
 /*!
  * Returns a list of all components of elementary type AbstractDetector in the system.
  */
-QList<AbstractDetector*> CTsystem::detectors() const
+std::vector<AbstractDetector*> CTsystem::detectors() const
 {
-    QList<AbstractDetector*> ret;
+    std::vector<AbstractDetector*> ret;
 
     for(const auto& comp : _componentList)
         if(comp->elementalType() == AbstractDetector::Type)
-            ret.append(static_cast<AbstractDetector*>(comp.get()));
+            ret.push_back(static_cast<AbstractDetector*>(comp.get()));
 
     return ret;
 }
@@ -157,13 +157,13 @@ QList<AbstractDetector*> CTsystem::detectors() const
 /*!
  * Returns a list of all components of elementary type AbstractGantry in the system.
  */
-QList<AbstractGantry*> CTsystem::gantries() const
+std::vector<AbstractGantry*> CTsystem::gantries() const
 {
-    QList<AbstractGantry*> ret;
+    std::vector<AbstractGantry*> ret;
 
     for(const auto& comp : _componentList)
         if(comp->elementalType() == AbstractGantry::Type)
-            ret.append(static_cast<AbstractGantry*>(comp.get()));
+            ret.push_back(static_cast<AbstractGantry*>(comp.get()));
 
     return ret;
 }
@@ -171,13 +171,13 @@ QList<AbstractGantry*> CTsystem::gantries() const
 /*!
  * Returns a list of all components of elementary type AbstractSource in the system.
  */
-QList<AbstractSource *> CTsystem::sources() const
+std::vector<AbstractSource *> CTsystem::sources() const
 {
-    QList<AbstractSource*> ret;
+    std::vector<AbstractSource*> ret;
 
     for(const auto& comp : _componentList)
         if(comp->elementalType() == AbstractSource::Type)
-            ret.append(static_cast<AbstractSource*>(comp.get()));
+            ret.push_back(static_cast<AbstractSource*>(comp.get()));
 
     return ret;
 }
@@ -185,13 +185,13 @@ QList<AbstractSource *> CTsystem::sources() const
 /*!
  * Returns a list of all components of elementary type AbstractBeamModifier in the system.
  */
-QList<AbstractBeamModifier*> CTsystem::modifiers() const
+std::vector<AbstractBeamModifier*> CTsystem::modifiers() const
 {
-    QList<AbstractBeamModifier*> ret;
+    std::vector<AbstractBeamModifier*> ret;
 
     for(const auto& comp : _componentList)
         if(comp->elementalType() == AbstractBeamModifier::Type)
-            ret.append(static_cast<AbstractBeamModifier*>(comp.get()));
+            ret.push_back(static_cast<AbstractBeamModifier*>(comp.get()));
 
     return ret;
 }

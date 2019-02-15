@@ -39,7 +39,7 @@ void TubularGantryParam::prepare(SimpleCTsystem* system) const
 bool TubularGantryParam::isApplicableTo(const CTsystem& system) const
 {
     return system.isSimple() &&
-            dynamic_cast<TubularGantry*>(system.gantries().first());
+            dynamic_cast<TubularGantry*>(system.gantries().front());
 }
 
 void TubularGantryParam::fromVariant(const QVariant &variant)
@@ -87,7 +87,7 @@ void CarmGantryParam::prepare(SimpleCTsystem* system) const
 bool CarmGantryParam::isApplicableTo(const CTsystem& system) const
 {
     return system.isSimple() &&
-           dynamic_cast<CarmGantry*>(system.gantries().first());
+           dynamic_cast<CarmGantry*>(system.gantries().front());
 }
 
 void CarmGantryParam::fromVariant(const QVariant &variant)
@@ -137,7 +137,7 @@ void GenericGantryParam::prepare(SimpleCTsystem* system) const
 bool GenericGantryParam::isApplicableTo(const CTsystem& system) const
 {
     return system.isSimple() &&
-           dynamic_cast<GenericGantry*>(system.gantries().first());
+           dynamic_cast<GenericGantry*>(system.gantries().front());
 }
 
 void GenericGantryParam::fromVariant(const QVariant &variant)
@@ -356,7 +356,7 @@ void XrayLaserParam::prepare(SimpleCTsystem* system) const
 bool XrayLaserParam::isApplicableTo(const CTsystem& system) const
 {
     return system.isSimple() &&
-           dynamic_cast<XrayLaser*>(system.sources().first());
+           dynamic_cast<XrayLaser*>(system.sources().front());
 }
 
 void XrayLaserParam::fromVariant(const QVariant &variant)
@@ -402,7 +402,7 @@ void XrayTubeParam::prepare(SimpleCTsystem* system) const
 bool XrayTubeParam::isApplicableTo(const CTsystem& system) const
 {
     return system.isSimple() &&
-           dynamic_cast<XrayTube*>(system.sources().first());
+           dynamic_cast<XrayTube*>(system.sources().front());
 }
 
 void XrayTubeParam::fromVariant(const QVariant &variant)
@@ -444,7 +444,7 @@ void GenericDetectorParam::prepare(SimpleCTsystem* system) const
 bool GenericDetectorParam::isApplicableTo(const CTsystem& system) const
 {
     return system.isSimple() &&
-           dynamic_cast<GenericDetector*>(system.detectors().first());
+           dynamic_cast<GenericDetector*>(system.detectors().front());
 }
 
 void GenericDetectorParam::fromVariant(const QVariant &variant)
