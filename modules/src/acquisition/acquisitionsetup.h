@@ -22,7 +22,6 @@ namespace CTL {
  *
  *
  */
-
 class AcquisitionSetup final : public SerializationInterface
 {
 public:
@@ -31,22 +30,31 @@ public:
     class View : public SerializationInterface
     {
     public:
+        // ctors
         View() = default;
         View(double time);
 
+        // time
         void setTimeStamp(double timeStamp);
-        void addPrepareStep(PrepareStep step);
-
         double timeStamp() const;
-        const std::vector<PrepareStep>& prepareSteps() const;
-        std::vector<PrepareStep>& prepareSteps();
 
+        // prepare steps
+        void addPrepareStep(PrepareStep step);
         void clearPrepareSteps();
+        size_t nbPrepareSteps() const;
+        const std::vector<PrepareStep>& prepareSteps() const;
+        const PrepareStep& prepareStep(int prepareStepType, bool searchFromBack = true) const;
+        int indexOfPrepareStep(int prepareStepType, bool searchFromBack = true) const;
+        bool replacePrepareStep(int index, PrepareStep newPrepareStep);
+        bool replacePrepareStep(PrepareStep newPrepareStep, bool searchFromBack = true);
+        void removeAllPrepareSteps(int prepareStepType);
 
         void fromVariant(const QVariant& variant) override; // de-serialization
         QVariant toVariant() const override; // serialization
 
     private:
+        PrepareStep& prepareStep(int prepareStepType, bool searchFromBack);
+
         double _timeStamp; //!< Time stamp of the view.
         std::vector<PrepareStep> _prepareSteps; //!< List of prepare steps to configure the view.
     };

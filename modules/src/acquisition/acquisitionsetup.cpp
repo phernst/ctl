@@ -35,6 +35,8 @@ void AcquisitionSetup::View::addPrepareStep(PrepareStep step)
  */
 double AcquisitionSetup::View::timeStamp() const { return _timeStamp; }
 
+size_t AcquisitionSetup::View::nbPrepareSteps() const { return _prepareSteps.size(); }
+
 /*!
  * Returns a constant reference to the vector of prepare steps of this instance.
  */
@@ -43,12 +45,95 @@ const std::vector<AcquisitionSetup::PrepareStep>& AcquisitionSetup::View::prepar
     return _prepareSteps;
 }
 
-/*!
- * Returns a (modifiable) reference to the vector of prepare steps of this instance.
- */
-std::vector<AcquisitionSetup::PrepareStep>& AcquisitionSetup::View::prepareSteps()
+const AcquisitionSetup::PrepareStep&
+AcquisitionSetup::View::prepareStep(int prepareStepType, bool searchFromBack) const
 {
-    return _prepareSteps;
+    static PrepareStep invalid(nullptr);
+
+    auto matchesType = [prepareStepType](const PrepareStep& prepStep)
+    {
+        return prepStep->type() == prepareStepType;
+    };
+
+    if(searchFromBack)
+    {
+        auto match = std::find_if(_prepareSteps.rbegin(), _prepareSteps.rend(), matchesType);
+        return match == _prepareSteps.rend() ? invalid : *match;
+    }
+    else
+    {
+        auto match = std::find_if(_prepareSteps.begin(), _prepareSteps.end(), matchesType);
+        return match == _prepareSteps.end() ? invalid : *match;
+    }
+}
+
+int AcquisitionSetup::View::indexOfPrepareStep(int prepareStepType, bool searchFromBack) const
+{
+    if(searchFromBack)
+    {
+        for(auto i = int(_prepareSteps.size()-1); i >= 0; --i)
+            if(_prepareSteps[i]->type() == prepareStepType)
+                return i;
+    }
+    else
+    {
+        for(auto i = 0, end = int(_prepareSteps.size()); i < end; ++i)
+            if(_prepareSteps[i]->type() == prepareStepType)
+                return i;
+    }
+    return -1;
+}
+
+bool AcquisitionSetup::View::replacePrepareStep(int index, PrepareStep newPrepareStep)
+{
+    if(newPrepareStep == nullptr)
+        return false;
+
+    if(index < 0)
+        return false;
+
+    Q_ASSERT(size_t(index) < _prepareSteps.size());
+
+    _prepareSteps[size_t(index)] = std::move(newPrepareStep);
+
+    return true;
+}
+
+/*!
+ * private helper; non-const version of `prepareStep(int, bool) const`
+ */
+AcquisitionSetup::PrepareStep& AcquisitionSetup::View::prepareStep(int prepareStepType,
+                                                                   bool searchFromBack)
+{
+    return const_cast<PrepareStep&>(
+           const_cast<const AcquisitionSetup::View&>(*this).prepareStep(prepareStepType,
+                                                                        searchFromBack));
+}
+
+bool AcquisitionSetup::View::replacePrepareStep(PrepareStep newPrepareStep, bool searchFromBack)
+{
+    if(newPrepareStep == nullptr)
+        return false;
+
+    auto& toBeReplaced = prepareStep(newPrepareStep->type(), searchFromBack);
+    if(toBeReplaced == nullptr)
+        return false;
+
+    toBeReplaced = std::move(newPrepareStep);
+
+    return true;
+}
+
+void AcquisitionSetup::View::removeAllPrepareSteps(int prepareStepType)
+{
+    std::vector<PrepareStep> newPrepareSteps;
+    newPrepareSteps.reserve(_prepareSteps.size());
+
+    for(auto& prepStep : _prepareSteps)
+        if(prepStep->type() != prepareStepType)
+            newPrepareSteps.push_back(std::move(prepStep));
+
+    _prepareSteps = std::move(newPrepareSteps);
 }
 
 /*!
