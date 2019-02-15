@@ -35,6 +35,9 @@ void AcquisitionSetup::View::addPrepareStep(PrepareStep step)
  */
 double AcquisitionSetup::View::timeStamp() const { return _timeStamp; }
 
+/*!
+ * Returns the number of prepare steps in this instance.
+ */
 size_t AcquisitionSetup::View::nbPrepareSteps() const { return _prepareSteps.size(); }
 
 /*!
@@ -45,6 +48,18 @@ const std::vector<AcquisitionSetup::PrepareStep>& AcquisitionSetup::View::prepar
     return _prepareSteps;
 }
 
+/*!
+ * Returns a constant reference to the first PrepareStep of type \a prepareStepType that occurs in
+ * the vector of prepare steps in this instance. The \a prepareStepType refers to the type-id
+ * provided by AbstractPrepareStep::type().
+ *
+ * If \a searchFromBack = \c true, the vector of prepare steps will be scanned through in reverse
+ * order, thus, providing the PrepareStep of type \a prepareStepType occurring last in this
+ * instance.
+ *
+ * Returns a reference to an invalid PrepareStep (wrapping a nullptr) if no PrepareStep of type
+ * \a prepareStepType exists in this instance.
+ */
 const AcquisitionSetup::PrepareStep&
 AcquisitionSetup::View::prepareStep(int prepareStepType, bool searchFromBack) const
 {
@@ -67,6 +82,19 @@ AcquisitionSetup::View::prepareStep(int prepareStepType, bool searchFromBack) co
     }
 }
 
+/*!
+ * Returns the index of the first PrepareStep of type \a prepareStepType that occurs in
+ * the vector of prepare steps in this instance. The \a prepareStepType refers to the type-id
+ * provided by AbstractPrepareStep::type().
+ *
+ * If \a searchFromBack = \c true, the vector of prepare steps will be scanned through in reverse
+ * order, thus, providing the index of the PrepareStep of type \a prepareStepType occurring last
+ * in this instance.
+ *
+ * Returns -1 if no PrepareStep of type \a prepareStepType exists in this instance.
+ *
+ * \sa AbstractPrepareStep::type().
+ */
 int AcquisitionSetup::View::indexOfPrepareStep(int prepareStepType, bool searchFromBack) const
 {
     if(searchFromBack)
@@ -84,6 +112,14 @@ int AcquisitionSetup::View::indexOfPrepareStep(int prepareStepType, bool searchF
     return -1;
 }
 
+/*!
+ * Replaces the prepare step at position \a index in the vector of prepare steps by
+ * \a newPrepareStep. Returns true if the prepare step has been replaced.
+ *
+ * The \a index must not exceed the range of the prepare step vector.
+ *
+ * Does nothing (and returns false) if \a index < 0 and/or \a newPrepareStep is nullptr.
+ */
 bool AcquisitionSetup::View::replacePrepareStep(int index, PrepareStep newPrepareStep)
 {
     if(newPrepareStep == nullptr)
@@ -100,16 +136,15 @@ bool AcquisitionSetup::View::replacePrepareStep(int index, PrepareStep newPrepar
 }
 
 /*!
- * private helper; non-const version of `prepareStep(int, bool) const`
+ * Replaces a prepare step of the same type as \a newPrepareStep by \a newPrepareStep. Returns
+ * true if a prepare step has been replaced.
+ *
+ * This replaces the first occurrence of a corresponding PrepareStep. If
+ * \a searchFromBack = \c true, the last matching element is replaced.
+ *
+ * Does nothing (and returns false) if no prepare step of matching type is found and/or
+ * \a newPrepareStep is nullptr.
  */
-AcquisitionSetup::PrepareStep& AcquisitionSetup::View::prepareStep(int prepareStepType,
-                                                                   bool searchFromBack)
-{
-    return const_cast<PrepareStep&>(
-           const_cast<const AcquisitionSetup::View&>(*this).prepareStep(prepareStepType,
-                                                                        searchFromBack));
-}
-
 bool AcquisitionSetup::View::replacePrepareStep(PrepareStep newPrepareStep, bool searchFromBack)
 {
     if(newPrepareStep == nullptr)
@@ -124,6 +159,11 @@ bool AcquisitionSetup::View::replacePrepareStep(PrepareStep newPrepareStep, bool
     return true;
 }
 
+/*!
+ * Removes all prepare steps of type \a prepareStepType from this instance.
+ *
+ * \sa AbstractPrepareStep::type().
+ */
 void AcquisitionSetup::View::removeAllPrepareSteps(int prepareStepType)
 {
     std::vector<PrepareStep> newPrepareSteps;
@@ -174,6 +214,17 @@ QVariant AcquisitionSetup::View::toVariant() const
     ret.insert("prepare steps", prepareStepVarList);
 
     return ret;
+}
+
+/*!
+ * private helper; non-const version of `prepareStep(int, bool) const`
+ */
+AcquisitionSetup::PrepareStep& AcquisitionSetup::View::prepareStep(int prepareStepType,
+                                                                   bool searchFromBack)
+{
+    return const_cast<PrepareStep&>(
+           const_cast<const AcquisitionSetup::View&>(*this).prepareStep(prepareStepType,
+                                                                        searchFromBack));
 }
 
 /*!
