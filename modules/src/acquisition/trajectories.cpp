@@ -245,7 +245,7 @@ AxialScanTrajectory::AxialScanTrajectory(double startAngle)
 std::vector<std::shared_ptr<AbstractPrepareStep>>
 AxialScanTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setup) const
 {
-    float angleIncrement = (setup.nbViews() > 1) ? 360.0_deg / (setup.nbViews() - 1)
+    float angleIncrement = (setup.nbViews() > 0) ? 360.0_deg / setup.nbViews()
                                                  : 0.0;
     std::vector<std::shared_ptr<AbstractPrepareStep>> ret;
 
