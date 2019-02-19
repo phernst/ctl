@@ -48,19 +48,20 @@ SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry() const
     AbstractDetector* detector = _system->detector();
     ret.reserve(detector->nbDetectorModules());
 
-    Vector3x1WCS sourcePos = finalSourcePosition();
-    Vector3x1WCS detectorPos = _system->gantry()->detectorPosition();
-    Matrix3x3 detectorRot = _system->gantry()->detectorRotation();
+    const Vector3x1WCS sourcePos = finalSourcePosition();
+    const Vector3x1WCS detectorPos = _system->gantry()->detectorPosition();
+    const Matrix3x3 detectorRot = _system->gantry()->detectorRotation();
+    const Matrix3x3 detectorRot_T = detectorRot.transposed();
 
     auto pixelDim = detector->pixelDimensions();
     auto moduleSize = detector->nbPixelPerModule();
     auto moduleLocs = detector->moduleLocations();
 
-    for(uint module = 0; module < detector->nbDetectorModules(); ++module)
+    for(uint module = 0, nbModules = moduleLocs.count(); module < nbModules; ++module)
     {
         auto modLoc = moduleLocs.at(module);
 
-        Vector3x1WCS modulePos = detectorPos + detectorRot.transposed() * modLoc.position;
+        Vector3x1WCS modulePos = detectorPos + detectorRot_T * modLoc.position;
         Matrix3x3 moduleRot = modLoc.rotation;
 
         Vector3x1CTS pPoint = principalPoint(modulePos - sourcePos, moduleRot * detectorRot);
