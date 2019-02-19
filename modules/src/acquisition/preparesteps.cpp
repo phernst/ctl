@@ -23,10 +23,10 @@ void TubularGantryParam::prepare(SimpleCTsystem* system) const
 {
     auto gantryPtr = static_cast<TubularGantry*>(system->gantry());
 
-    qDebug() << "PrepareTubularGantry --- preparing gantry"
-             << "\n-rotation\t" << _newRotationAngle
-             << "\n-pitch\t\t" << _newPitchPosition
-             << "\n-tilt\t\t" << _newTiltAngle;
+    qDebug() << "PrepareTubularGantry --- preparing gantry\n"
+             << "- rotation\t" << _newRotationAngle << "\n"
+             << "- pitch\t\t" << _newPitchPosition << "\n"
+             << "- tilt\t\t" << _newTiltAngle << "\n";
 
     if(_newRotationAngle.first)
         gantryPtr->setRotationAngle(_newRotationAngle.second);
@@ -72,11 +72,10 @@ void CarmGantryParam::prepare(SimpleCTsystem* system) const
 {
     auto gantryPtr = static_cast<CarmGantry*>(system->gantry());
 
-    qDebug() << "PrepareCarmGantry --- preparing gantry"
-             << "\n-location\t" << _newLocation.first
-             << QString::fromStdString(_newLocation.second.position.info())
-             << QString::fromStdString(_newLocation.second.rotation.info())
-             << "\n-span\t\t" << _newCarmSpan;
+    qDebug() << "PrepareCarmGantry --- preparing gantry\n"
+             << "- location\t" << _newLocation.first;
+    qDebug() << (_newLocation.second.position.info() + _newLocation.second.rotation.info()).c_str()
+             << "- span\t\t" << _newCarmSpan << "\n";
 
     if(_newLocation.first)
         gantryPtr->setLocation(_newLocation.second);
@@ -120,13 +119,13 @@ void GenericGantryParam::prepare(SimpleCTsystem* system) const
 {
     auto gantryPtr = static_cast<GenericGantry*>(system->gantry());
 
-    qDebug() << "PrepareGenericGantry --- preparing gantry"
-             << "\n-detector location\t" << _newDetectorLocation.first
-             << QString::fromStdString(_newDetectorLocation.second.position.info())
-             << QString::fromStdString(_newDetectorLocation.second.rotation.info())
-             << "\n-source location\t" << _newSourceLocation.first
-             << QString::fromStdString(_newSourceLocation.second.position.info())
-             << QString::fromStdString(_newSourceLocation.second.rotation.info());
+    qDebug() << "PrepareGenericGantry --- preparing gantry\n"
+             << "- detector location\t" << _newDetectorLocation.first;
+    qDebug() << (_newDetectorLocation.second.position.info()
+                 + _newDetectorLocation.second.rotation.info()).c_str()
+             << "- X-ray source location \t" << _newSourceLocation.first;
+    qDebug() << (_newSourceLocation.second.position.info()
+                 + _newSourceLocation.second.rotation.info()).c_str();
 
     if(_newDetectorLocation.first)
         gantryPtr->setDetectorLocation(_newDetectorLocation.second);
@@ -174,13 +173,13 @@ void GantryDisplacementParam::prepare(SimpleCTsystem* system) const
 {
     auto gantryPtr = system->gantry();
 
-    qDebug() << "PrepareGantryDisplacements --- preparing gantry"
-             << "\n-detector displacement\t" << _newDetectorDisplacement.first
-             << QString::fromStdString(_newDetectorDisplacement.second.position.info())
-             << QString::fromStdString(_newDetectorDisplacement.second.rotation.info())
-             << "\n-source location\t" << _newSourceDisplacement.first
-             << QString::fromStdString(_newSourceDisplacement.second.position.info())
-             << QString::fromStdString(_newSourceDisplacement.second.rotation.info());
+    qDebug() << "PrepareGantryDisplacements --- preparing gantry\n"
+             << "- detector displacement\t" << _newDetectorDisplacement.first;
+    qDebug() << (_newDetectorDisplacement.second.position.info()
+                 + _newDetectorDisplacement.second.rotation.info()).c_str()
+             << "- X-ray source location\t" << _newSourceDisplacement.first;
+    qDebug() << (_newSourceDisplacement.second.position.info()
+                 + _newSourceDisplacement.second.rotation.info()).c_str();
 
     if(_newDetectorDisplacement.first)
         gantryPtr->setDetectorDisplacement(_newDetectorDisplacement.second);
@@ -267,11 +266,11 @@ void SourceParam::prepare(SimpleCTsystem* system) const
 {
     auto sourcePtr = system->source();
 
-    qDebug() << "PrepareAbstractSource --- preparing source"
-             << "\n-flux mod\t" << _newFluxModifier
-             << "\n-focal spot size\t" << _newFocalSpotSize
-             << "\n-focal spot pos\t" << _newSpotPosition.first
-             << QString::fromStdString(_newSpotPosition.second.info());
+    qDebug() << "PrepareAbstractSource --- preparing source\n"
+             << "- flux mod\t" << _newFluxModifier << "\n"
+             << "- focal spot size\t" << _newFocalSpotSize << "\n"
+             << "- focal spot pos\t" << _newSpotPosition.first;
+    qDebug() << _newSpotPosition.second.info().c_str();
 
     if(_newFluxModifier.first)
         sourcePtr->setFluxModifier(_newFluxModifier.second);
@@ -343,9 +342,9 @@ void XrayLaserParam::prepare(SimpleCTsystem* system) const
 
     auto sourcePtr = static_cast<XrayLaser*>(system->source());
 
-    qDebug() << "PrepareXrayLaser --- preparing source"
-             << "\n-energy\t" << _newPhotonEnergy
-             << "\n-power\t" << _newPower;
+    qDebug() << "PrepareXrayLaser --- preparing source\n"
+             << "- energy\t" << _newPhotonEnergy << "\n"
+             << "- power\t" << _newPower << "\n";
 
     if(_newPhotonEnergy.first)
         sourcePtr->setPhotonEnergy(_newPhotonEnergy.second);
@@ -389,9 +388,9 @@ void XrayTubeParam::prepare(SimpleCTsystem* system) const
 
     auto sourcePtr = static_cast<XrayTube*>(system->source());
 
-    qDebug() << "PrepareXrayTube --- preparing source"
-             << "\n-voltage\t" << _newTubeVoltage
-             << "\n-emission\t" << _newEmissionCurrent;
+    qDebug() << "PrepareXrayTube --- preparing source\n"
+             << "- voltage\t" << _newTubeVoltage << "\n"
+             << "- emission\t" << _newEmissionCurrent << "\n";
 
     if(_newTubeVoltage.first)
         sourcePtr->setTubeVoltage(_newTubeVoltage.second);
@@ -433,9 +432,9 @@ void GenericDetectorParam::prepare(SimpleCTsystem* system) const
 {
     auto detectorPtr = static_cast<GenericDetector*>(system->detector());
 
-    qDebug() << "PrepareGenericDetector --- preparing detector"
-             << "\n-module locations\t" << _newModuleLocations.first
-             << _newModuleLocations.second.size() << " modules";
+    qDebug() << "PrepareGenericDetector --- preparing detector\n"
+             << "- module locations\t" << _newModuleLocations.first << "\n"
+             << "- number of modules\t" << _newModuleLocations.second.size() << "\n";
 
     if(_newModuleLocations.first)
         detectorPtr->setModuleLocations(_newModuleLocations.second);
