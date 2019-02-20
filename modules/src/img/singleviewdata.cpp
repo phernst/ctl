@@ -180,23 +180,26 @@ Chunk2D<float> SingleViewData::combined(const ModuleLayout &layout, bool *ok) co
     if(layout.isEmpty())
         return combined(ModuleLayout::canonicLayout(1, std::max(nbModules(), 1u)), ok);
 
-    const uint nbRows = layout.rows();
-    const uint nbCols = layout.columns();
+    const uint nbRowsL = layout.rows();
+    const uint nbColsL = layout.columns();
     const uint elemPerMod = elementsPerModule();
 
-    Chunk2D<float> combinedChunk(nbCols*_moduleDim.width, nbRows*_moduleDim.height); // the result chunk
+    Chunk2D<float> combinedChunk(nbColsL * _moduleDim.width,
+                                 nbRowsL * _moduleDim.height); // the result chunk
 
     // prepare data for combined chunk
     std::vector<float> temp(combinedChunk.nbElements(), 0.0f);
-    for(uint row=0; row<nbRows; ++row)
-        for(uint col=0; col<nbCols; ++col)
+    for(uint row = 0; row < nbRowsL; ++row)
+        for(uint col = 0; col < nbColsL; ++col)
         {
             if(layout(row,col) < 0) // skip layout tile if module ID is negative
             {
-                qDebug() << "Module position (" << row << "," << col << ") skipped. [index:" << layout(row,col) << "]";
+                qDebug() << "Module position (" << row << "," << col << ") skipped. [index:"
+                         << layout(row,col) << "]";
                 continue;
             }
-            auto moduleID = static_cast<uint>(layout(row,col)); // data from this module goes at position (row,col) in the combined chunk
+            // data from this module goes at position (row,col) in the combined chunk
+            auto moduleID = static_cast<uint>(layout(row,col));
 
             Q_ASSERT(moduleID < nbModules()); // check if module is available in the data
             if(moduleID >= nbModules())
@@ -205,15 +208,19 @@ Chunk2D<float> SingleViewData::combined(const ModuleLayout &layout, bool *ok) co
                 continue;
             }
 
-            uint skip = (row*nbCols*elemPerMod) + (col*_moduleDim.width); // skip all data from earlier modules (i.e. full rows + columns within current row)
-            float* resPtr   = temp.data() + skip;
+            // skip all data from earlier modules (i.e. full rows + columns within current row)
+            uint skip = (row * nbColsL * elemPerMod) + (col * _moduleDim.width);
+            float* resPtr = temp.data() + skip;
             const float* currentModulePtr = module(moduleID).rawData();
 
-            for(uint moduleRow=0; moduleRow<_moduleDim.height; ++moduleRow)
+            for(uint moduleRow = 0; moduleRow < _moduleDim.height; ++moduleRow)
             {
+                // copy one row of the module with moduleID
                 std::copy_n(currentModulePtr, _moduleDim.width, resPtr);
-                currentModulePtr += _moduleDim.width; // set (source) pointer to beginning of next row in the current module
-                resPtr += combinedChunk.width(); // shift (result) pointer by one full row in the combined chunk
+                // set (source) pointer to beginning of next row in the current module
+                currentModulePtr += _moduleDim.width;
+                // shift (result) pointer by one full row in the combined chunk
+                resPtr += combinedChunk.width();
             }
         }
 

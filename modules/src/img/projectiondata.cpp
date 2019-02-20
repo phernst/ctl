@@ -152,17 +152,15 @@ ProjectionData ProjectionData::combined(const ModuleLayout& layout) const
     if(layout.isEmpty())
         return combined(ModuleLayout::canonicLayout(1, std::max(_viewDim.nbModules, 1u)));
 
-    ProjectionData ret( _viewDim.nbChannels * layout.columns(),
-                        _viewDim.nbRows * layout.rows(), 1);
-    SingleViewData::ModuleData::Dimensions moduleDim { _viewDim.nbChannels * layout.columns(),
-                                                       _viewDim.nbRows * layout.rows() };
+    SingleViewData::ModuleData::Dimensions moduleDim{ _viewDim.nbChannels * layout.columns(),
+                                                      _viewDim.nbRows * layout.rows() };
+    ProjectionData ret(moduleDim.width, moduleDim.height, 1);
 
-    for(uint view = 0; view < nbViews(); ++view)
+    for(uint view = 0, nbViews = this->nbViews(); view < nbViews; ++view)
     {
         SingleViewData viewData(moduleDim);
-        auto combinedData = _data[view].combined(layout);
-        viewData.append(combinedData);
-        ret.append(viewData);
+        viewData.append(_data[view].combined(layout));
+        ret.append(std::move(viewData));
     }
 
     return ret;
