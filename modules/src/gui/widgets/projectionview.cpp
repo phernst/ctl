@@ -51,12 +51,13 @@ void ProjectionView::updateImage()
         return;
 
     const auto z = uint(ui->verticalSlider->value());
-    auto projection = _data.view(z).combined(_modLayout);
+    const auto& projection = _data.dimensions().nbModules > 1
+                           ? _data.view(z).combined(_modLayout)
+                           : _data.view(z).module(0);
+    const auto imgWidth = int(projection.dimensions().width);
+    const auto imgHeight = int(projection.dimensions().height);
 
-    QImage image(int(projection.dimensions().width),
-                 int(projection.dimensions().height),
-                 QImage::Format_Indexed8);
-
+    QImage image(imgWidth, imgHeight, QImage::Format_Indexed8);
     image.setColorTable(_colorTable);
 
     const auto windowing = ui->_W_windowing->windowFromTo();
@@ -64,19 +65,21 @@ void ProjectionView::updateImage()
     const auto maxGrayValue = static_cast<float>(windowing.second);
     const auto grayScale = 255.0f / float(maxGrayValue - minGrayValue);
     const auto offset = - minGrayValue * grayScale + 0.5f; // 0.5 for rounding
-    const auto nbPixel = image.width() * image.height();
 
-    auto imgPtr = image.bits();
     auto projIt = projection.data().begin();
-    for(int pix = 0; pix < nbPixel; ++pix)
+    for(int y = 0; y < imgHeight; ++y)
     {
-        *imgPtr = static_cast<uchar>(qMax(qMin( // clamp to interval [0, 255]
-                  std::fma(*projIt, grayScale, offset), 255.f), 0.f)); // *projIt*grayScale + offset
-        ++imgPtr;
-        ++projIt;
+        auto linePtr = image.scanLine(y);
+        for(int x = 0; x < imgWidth; ++x)
+        {
+            *linePtr = static_cast<uchar>(qMax(qMin( // clamp to interval [0, 255]
+                std::fma(*projIt, grayScale, offset), 255.f), 0.f)); // projVal * grayScale + offset
+            ++linePtr;
+            ++projIt;
+        }
     }
 
-    auto pixmap = QPixmap::fromImage(image).scaledToHeight(image.height() * ui->_SB_zoom->value());
+    auto pixmap = QPixmap::fromImage(image).scaledToHeight(imgHeight * ui->_SB_zoom->value());
     ui->_L_image->setPixmap(pixmap);
 }
 

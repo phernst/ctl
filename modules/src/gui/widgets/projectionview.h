@@ -23,7 +23,7 @@ private:
     Ui::ProjectionView *ui;
 
     CTL::ProjectionData _data = CTL::ProjectionData(0,0,0);
-    CTL::ModuleLayout _modLayout = CTL::ModuleLayout::canonicLayout(1,1);
+    CTL::ModuleLayout _modLayout;
     QVector<QRgb> _colorTable;
 
     void setColorTable();
