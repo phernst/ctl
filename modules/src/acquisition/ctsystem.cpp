@@ -30,7 +30,8 @@ CTsystem::CTsystem(const QString& name)
  * Constructs a copy of \a other.
  */
 CTsystem::CTsystem(const CTsystem& other)
-    : _name(other.name())
+    : SerializationInterface(other)
+    , _name(other.name())
 {
     _componentList.reserve(other.components().size());
     for(const auto& otherComp : other.components())

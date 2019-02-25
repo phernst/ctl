@@ -250,7 +250,8 @@ AcquisitionSetup::AcquisitionSetup(CTsystem&& system, uint nbViews)
  * member variable.
  */
 AcquisitionSetup::AcquisitionSetup(const AcquisitionSetup& other)
-    : _system(other._system ? static_cast<SimpleCTsystem*>(other._system->clone()) : nullptr)
+    : SerializationInterface(other)
+    , _system(other._system ? static_cast<SimpleCTsystem*>(other._system->clone()) : nullptr)
     , _views(other._views)
 {
 }
