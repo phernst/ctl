@@ -62,12 +62,12 @@ SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry() const
         auto modLoc = moduleLocs.at(module);
 
         Vector3x1WCS modulePos = detectorPos + detectorRot_T * modLoc.position;
-        Matrix3x3 moduleRot = modLoc.rotation;
+        Matrix3x3 totalRot = modLoc.rotation * detectorRot;
 
-        Vector3x1CTS pPoint = principalPoint(modulePos - sourcePos, moduleRot * detectorRot);
-        Matrix3x3 K = intrinsicParameterMatrix(pPoint, moduleSize, pixelDim);
+        Vector3x1CTS pPointDeviation = totalRot * (modulePos - sourcePos);
+        Matrix3x3 K = intrinsicParameterMatrix(pPointDeviation, moduleSize, pixelDim);
 
-        ret.append(computeIndividualModulePMat(sourcePos, moduleRot * detectorRot, K));
+        ret.append(computeIndividualModulePMat(sourcePos, totalRot, K));
     }
 
     return ret;
@@ -131,20 +131,6 @@ ProjectionMatrix GeometryEncoder::computeIndividualModulePMat(const Vector3x1WCS
 }
 
 /*!
- * Computes the principal point for a detector with the vector connecting source and detector center
- * \a sourceToDetectorVector and the transformation from world to CT coordinates \a rotation.
- *
- * Same as \a rotation * \a sourceToDetectorVector.
- */
-Vector3x1CTS GeometryEncoder::principalPoint(const Vector3x1WCS& sourceToDetectorVector,
-                                             const Matrix3x3& rotation)
-{
-    Vector3x1CTS principPt = (rotation * sourceToDetectorVector); // transformed center of detector
-
-    return principPt;
-}
-
-/*!
  * Computes the intrinsic parameter matrix from the \a principalPoint, the number of pixels in the
  * detector (module) \a nbPixel and the dimensions of the pixels \a pixelDimensions.
  */
@@ -153,10 +139,25 @@ Matrix3x3 GeometryEncoder::intrinsicParameterMatrix(const Vector3x1CTS& principa
                                                     const QSizeF& pixelDimensions)
 {
     double focalLengthMM = fabs(principalPoint(2));
+    // principal point: mounting point in CTS "(N-1)/2" minus the
+    //                  deviation of source-to-mounting-point vector from z-axis (pinc. ray) in CTS
+    //           x S
+    //          /|
+    //      M-S/ |z-axis
+    //        /  |
+    // ------<---|-- detector
+    //       ^ ^ ^
+    //       M d P
+    //
+    // S - x-ray source
+    // P - principal point
+    // M - mounting point
+    // d - x-y (s-t) part of "M-S" in the CTS frame, i.e. the
+    //     deviation of source-to-mounting-point vector from z-axis (pincipal ray)
     double principalPointS
-        = -principalPoint.get<0>() / pixelDimensions.width() + 0.5 * double(nbPixel.width() - 1);
+        = 0.5 * double(nbPixel.width() - 1) - principalPoint.get<0>() / pixelDimensions.width();
     double principalPointT
-        = -principalPoint.get<1>() / pixelDimensions.height() + 0.5 * double(nbPixel.height() - 1);
+        = 0.5 * double(nbPixel.height() - 1) - principalPoint.get<1>() / pixelDimensions.height();
 
     return Matrix3x3(focalLengthMM / pixelDimensions.width(), 0.0, principalPointS,
                      0.0, focalLengthMM / pixelDimensions.height(), principalPointT,

@@ -63,8 +63,6 @@ private:
     static ProjectionMatrix computeIndividualModulePMat(const Vector3x1WCS& finalSourcePosition,
                                                         const Matrix3x3& detectorRotation,
                                                         const Matrix3x3& K);
-    static Vector3x1CTS principalPoint(const Vector3x1WCS& sourceToDetectorVector,
-                                       const Matrix3x3& rotation);
     static Matrix3x3 intrinsicParameterMatrix(const Vector3x1CTS& principalPoint,
                                               const QSize& nbPixel,
                                               const QSizeF& pixelDimensions);
