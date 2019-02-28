@@ -24,6 +24,94 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
     return decodeFullGeometry(geometry, _pixelPerModule, _pixelDimensions);
 }
 
+SimpleCTsystem
+GeometryDecoder::decodeSingleViewGeometry(const SingleViewGeometry& singleViewGeometry,
+                                          const QSize& pixelPerModule,
+                                          GeometryDecoder::PhysicalDimension physicalDimension,
+                                          double mm)
+{
+    QSizeF pixelDimensions;
+    mat::Matrix<2, 1> focalLength = singleViewGeometry.first().focalLength();
+
+    switch(physicalDimension)
+    {
+    case PhysicalDimension::PixelWidth:
+        pixelDimensions.setWidth(mm);
+        pixelDimensions.setHeight(mm * focalLength.get<0>() / focalLength.get<1>());
+        break;
+    case PhysicalDimension::PixelHeight:
+        pixelDimensions.setWidth(mm * focalLength.get<1>() / focalLength.get<0>());
+        pixelDimensions.setHeight(mm);
+        break;
+    case PhysicalDimension::SourceDetectorDistance:
+        pixelDimensions.setWidth(mm / focalLength.get<0>());
+        pixelDimensions.setHeight(mm / focalLength.get<1>());
+        break;
+    default:
+        throw std::domain_error("invalid value for the physical dimension");
+    }
+
+    auto srcPos = singleViewGeometry.first().sourcePosition();
+
+    QVector<mat::Location> moduleLocations = computeModuleLocations(
+        singleViewGeometry, srcPos, pixelPerModule, pixelDimensions.width());
+
+    auto srcRot = computeSourceRotation(moduleLocations, srcPos);
+    mat::Location sourceLocation = mat::Location(srcPos, srcRot);
+
+    GenericDetector detector(pixelPerModule, pixelDimensions, std::move(moduleLocations));
+    GenericGantry gantry(sourceLocation, mat::Location());
+
+    return { std::move(detector), std::move(gantry), GenericSource() };
+}
+
+/*!
+ * Returns matrix that rotates source perpendicular to the centroid of detector locations
+ */
+Matrix3x3 GeometryDecoder::computeSourceRotation(const QVector<mat::Location>& moduleLocations,
+                                                 const Vector3x1& sourcePosition)
+{
+    // centroid of detector locations
+    Vector3x1 centroid(0.0);
+    for(const auto& modLoc : moduleLocations)
+        centroid += modLoc.position;
+    centroid /= moduleLocations.length();
+
+    // vector from source to detector centroid
+    Vector3x1 src2centroid = centroid - sourcePosition;
+    src2centroid /= src2centroid.norm();
+
+    // construct a rotation matrix that rotates the z-axis to `src2centroid` vector, i.e. it needs
+    // to have the form
+    // [ r1 r2 src2centroid ]
+    // with r1 and r2 perpendicular to src2centroid
+
+    // find axis that is as most as perpendicular to this vector
+    uint axis = abs(src2centroid.get<0>()) < abs(src2centroid.get<1>()) ? 0 : 1;
+    axis = abs(src2centroid(axis)) < abs(src2centroid.get<2>()) ? axis : 2;
+
+    // init 1st vector with this axis
+    Vector3x1 r1(0.0);
+    r1(axis) = 1.0;
+
+    // define canonical unit vectors
+    mat::Matrix<1, 3> e1(1,0,0);
+    mat::Matrix<1, 3> e2(0,1,0);
+    mat::Matrix<1, 3> e3(0,0,1);
+
+    // prepare cross product
+    auto M = mat::vertcat(src2centroid.transposed(), r1.transposed());
+    // 1st cross product
+    r1 = { mat::det(mat::vertcat(e1,M)), mat::det(mat::vertcat(e2,M)), mat::det(mat::vertcat(e3,M)) };
+
+    // prepare cross product
+    M = mat::vertcat(src2centroid.transposed(), r1.transposed());
+    // 2nd cross product
+    Vector3x1 r2{ mat::det(mat::vertcat(e1,M)), mat::det(mat::vertcat(e2,M)), mat::det(mat::vertcat(e3,M)) };
+
+    return mat::horzcat(r1, mat::horzcat(r2, src2centroid));
+}
+
 /*!
  * Decodes the set of projection matrices in \a geometry and constructs a GenericAcquisitionSetup
  * that represents all the geometry information that has been extracted.
@@ -60,39 +148,25 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
 
     AcquisitionSetup ret(theSystem);
 
-    QVector<mat::Location> moduleLocations;
-
     // extract geometry information
     for(const SingleViewGeometry& view : geometry)
     {
         auto srcPos = view.first().sourcePosition();
+        auto moduleLocations = computeModuleLocations(view, srcPos, pixelPerModule,
+                                                      pixelDimensions.width());
 
-        // compute module locations
-        moduleLocations.clear();
-        for(const ProjectionMatrix& modulePmat : view)
-        {
-            mat::Location modLoc;
-            modLoc.position = modulePmat.directionSourceToPixel(0.5 * (pixelPerModule.width() - 1),
-                                                                0.5 * (pixelPerModule.height() - 1),
-                                                                mat::ProjectionMatrix::NormalizeByX);
-
-            modLoc.position *= pixelDimensions.width(); // scale to physical dimensions
-            modLoc.position += srcPos;                  // offset by position of the source
-
-            modLoc.rotation = modulePmat.rotationMatR();
-
-            moduleLocations.append(modLoc);
-        }
-
+        // prepare steps gantry
         auto gantrySetter = std::make_shared<prepare::GenericGantryParam>();
         // note: all position/rotation information about detector stored in module locations
         gantrySetter->setDetectorLocation(mat::Location());
-        // note: source position cannot be extracted w.o. further information
-        gantrySetter->setSourceLocation(mat::Location(srcPos, mat::eye<3>()));
+        auto srcRot = computeSourceRotation(moduleLocations, srcPos);
+        gantrySetter->setSourceLocation(mat::Location(srcPos, srcRot));
 
+        // detector prepare steps
         auto detectorSetter = std::make_shared<prepare::GenericDetectorParam>();
-        detectorSetter->setModuleLocations(moduleLocations);
+        detectorSetter->setModuleLocations(std::move(moduleLocations));
 
+        // create AcquisitionSetup::View
         AcquisitionSetup::View viewSetting;
         viewSetting.setTimeStamp(ret.nbViews());
         viewSetting.addPrepareStep(gantrySetter);
@@ -102,6 +176,32 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
     }
 
     ret.prepareView(0);
+
+    return ret;
+}
+
+QVector<mat::Location> GeometryDecoder::computeModuleLocations(const SingleViewGeometry& singleViewGeometry,
+                                                               const Vector3x1& sourcePosition,
+                                                               const QSize& pixelPerModule,
+                                                               double pixelWidth)
+{
+    QVector<mat::Location> ret;
+    ret.reserve(singleViewGeometry.length());
+
+    for(const ProjectionMatrix& modulePmat : singleViewGeometry)
+    {
+        mat::Location modLoc;
+        modLoc.position = modulePmat.directionSourceToPixel(0.5 * (pixelPerModule.width() - 1),
+                                                            0.5 * (pixelPerModule.height() - 1),
+                                                            mat::ProjectionMatrix::NormalizeByX);
+
+        modLoc.position *= pixelWidth;     // scale to physical dimensions
+        modLoc.position += sourcePosition; // offset by position of the source
+
+        modLoc.rotation = modulePmat.rotationMatR();
+
+        ret.append(modLoc);
+    }
 
     return ret;
 }

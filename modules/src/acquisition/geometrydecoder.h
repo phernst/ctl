@@ -3,9 +3,9 @@
 
 #include "acquisitionsetup.h"
 #include "fullgeometry.h"
+#include "mat/mat.h"
 #include <QSizeF>
 
-// typedefs
 namespace CTL {
 
 /*!
@@ -24,6 +24,8 @@ namespace CTL {
 class GeometryDecoder
 {
 public:
+    enum PhysicalDimension { PixelWidth, PixelHeight, SourceDetectorDistance };
+
     GeometryDecoder(const QSize& pixelPerModule, const QSizeF& pixelDimensions);
 
     AcquisitionSetup decodeFullGeometry(const FullGeometry& geometry) const;
@@ -33,6 +35,11 @@ public:
     void setPixelPerModule(const QSize& value);
     void setPixelDimensions(const QSizeF& value);
 
+    static SimpleCTsystem decodeSingleViewGeometry(const SingleViewGeometry& singleViewGeometry,
+                                                   const QSize& pixelPerModule,
+                                                   PhysicalDimension physicalDimension = PixelWidth,
+                                                   double mm = 1.0);
+
     static AcquisitionSetup decodeFullGeometry(const FullGeometry& geometry,
                                                const QSize& pixelPerModule,
                                                const QSizeF& pixelDimensions);
@@ -40,6 +47,14 @@ public:
 private:
     QSize _pixelPerModule; //!< Number of pixels of the assumed detector.
     QSizeF _pixelDimensions; //!< Pixel size of the assumed detector.
+
+    static QVector<mat::Location> computeModuleLocations(const SingleViewGeometry& singleViewGeometry,
+                                                         const Vector3x1& sourcePosition,
+                                                         const QSize& pixelPerModule,
+                                                         double pixelWidth);
+
+    static Matrix3x3 computeSourceRotation(const QVector<mat::Location>& moduleLocations,
+                                           const Vector3x1& sourcePosition);
 };
 
 } // namespace CTL
