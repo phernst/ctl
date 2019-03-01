@@ -87,8 +87,8 @@ Matrix3x3 GeometryDecoder::computeSourceRotation(const QVector<mat::Location>& m
     // with r1 and r2 perpendicular to src2centroid
 
     // find axis that is as most as perpendicular to this vector
-    uint axis = abs(src2centroid.get<0>()) < abs(src2centroid.get<1>()) ? 0 : 1;
-    axis = abs(src2centroid(axis)) < abs(src2centroid.get<2>()) ? axis : 2;
+    uint axis = fabs(src2centroid.get<0>()) < fabs(src2centroid.get<1>()) ? 0 : 1;
+    axis = fabs(src2centroid(axis)) < fabs(src2centroid.get<2>()) ? axis : 2;
 
     // init 1st vector with this axis
     Vector3x1 r1(0.0);
