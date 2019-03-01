@@ -63,9 +63,10 @@ private:
     static ProjectionMatrix computeIndividualModulePMat(const Vector3x1WCS& finalSourcePosition,
                                                         const Matrix3x3& detectorRotation,
                                                         const Matrix3x3& K);
-    static Matrix3x3 intrinsicParameterMatrix(const Vector3x1CTS& principalPoint,
+    static Matrix3x3 intrinsicParameterMatrix(const Vector3x1CTS& principalPointDeviation,
                                               const QSize& nbPixel,
-                                              const QSizeF& pixelDimensions);
+                                              const QSizeF& pixelDimensions,
+                                              double skewCoefficient);
 
     // member variables
     const SimpleCTsystem* _system; //!< Pointer to system whose geometry shall be encoded.

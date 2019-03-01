@@ -56,6 +56,7 @@ SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry() const
     auto pixelDim = detector->pixelDimensions();
     auto moduleSize = detector->nbPixelPerModule();
     auto moduleLocs = detector->moduleLocations();
+    auto skewCoeff = detector->skewCoefficient();
 
     for(uint module = 0, nbModules = moduleLocs.count(); module < nbModules; ++module)
     {
@@ -65,7 +66,7 @@ SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry() const
         Matrix3x3 totalRot = modLoc.rotation * detectorRot;
 
         Vector3x1CTS pPointDeviation = totalRot * (modulePos - sourcePos);
-        Matrix3x3 K = intrinsicParameterMatrix(pPointDeviation, moduleSize, pixelDim);
+        Matrix3x3 K = intrinsicParameterMatrix(pPointDeviation, moduleSize, pixelDim, skewCoeff);
 
         ret.append(computeIndividualModulePMat(sourcePos, totalRot, K));
     }
@@ -134,11 +135,15 @@ ProjectionMatrix GeometryEncoder::computeIndividualModulePMat(const Vector3x1WCS
  * Computes the intrinsic parameter matrix from the \a principalPoint, the number of pixels in the
  * detector (module) \a nbPixel and the dimensions of the pixels \a pixelDimensions.
  */
-Matrix3x3 GeometryEncoder::intrinsicParameterMatrix(const Vector3x1CTS& principalPoint,
+Matrix3x3 GeometryEncoder::intrinsicParameterMatrix(const Vector3x1CTS& principalPointDeviation,
                                                     const QSize& nbPixel,
-                                                    const QSizeF& pixelDimensions)
+                                                    const QSizeF& pixelDimensions,
+                                                    double skew)
 {
-    double focalLengthMM = fabs(principalPoint(2));
+    auto focalLengthMM = fabs(principalPointDeviation.get<2>());
+    auto fX = focalLengthMM / pixelDimensions.width();
+    auto fY = focalLengthMM / pixelDimensions.height();
+
     // principal point: mounting point in CTS "(N-1)/2" minus the
     //                  deviation of source-to-mounting-point vector from z-axis (pinc. ray) in CTS
     //           x S
@@ -152,16 +157,19 @@ Matrix3x3 GeometryEncoder::intrinsicParameterMatrix(const Vector3x1CTS& principa
     // S - x-ray source
     // P - principal point
     // M - mounting point
-    // d - x-y (s-t) part of "M-S" in the CTS frame, i.e. the
+    // d - x-y part of "M-S" in the CTS frame, i.e. the
     //     deviation of source-to-mounting-point vector from z-axis (pincipal ray)
-    double principalPointS
-        = 0.5 * double(nbPixel.width() - 1) - principalPoint.get<0>() / pixelDimensions.width();
-    double principalPointT
-        = 0.5 * double(nbPixel.height() - 1) - principalPoint.get<1>() / pixelDimensions.height();
 
-    return Matrix3x3(focalLengthMM / pixelDimensions.width(), 0.0, principalPointS,
-                     0.0, focalLengthMM / pixelDimensions.height(), principalPointT,
-                     0.0, 0.0, 1.0);
+    // mounting point in the CTL is alway the physical center of the detector module
+    auto mountingX = 0.5 * double(nbPixel.width() - 1);
+    auto mountingY = 0.5 * double(nbPixel.height() - 1);
+
+    auto principalPointX = mountingX - principalPointDeviation.get<0>() / pixelDimensions.width();
+    auto principalPointY = mountingY - principalPointDeviation.get<1>() / pixelDimensions.height();
+
+    return Matrix3x3(fX , skew, principalPointX,
+                     0.0, fY,   principalPointY,
+                     0.0, 0.0,  1.0);
 }
 
 } // namespace CTL

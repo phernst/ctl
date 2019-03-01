@@ -59,8 +59,8 @@ public:
 
 public:
     AbstractDetector(const QSize& nbPixelPerModule,
-                    const QSizeF& pixelDimensions,
-                    const QString& name);
+                     const QSizeF& pixelDimensions,
+                     const QString& name);
 
     // virtual methods
     QString info() const override;
@@ -70,6 +70,7 @@ public:
     // setter methods
     void setSaturationModel(AbstractDataModel* model, SaturationModelType type);
     void setSaturationModel(std::unique_ptr<AbstractDataModel> model, SaturationModelType type);
+    void setSkewCoefficient(double skewCoefficient);
 
     // getter methods
     uint nbDetectorModules() const;
@@ -78,6 +79,7 @@ public:
     ModuleLocation moduleLocation(uint module) const;
     const AbstractDataModel* saturationModel() const;
     SaturationModelType saturationModelType() const;
+    double skewCoefficient() const;
 
     // other methods
     bool hasSaturationModel() const;
@@ -90,6 +92,7 @@ protected:
 
     QSize _nbPixelPerModule; //!< Number of pixels in each detector module.
     QSizeF _pixelDimensions; //!< Size of individual pixels (in mm).
+    double _skewCoefficient = 0.0; //!< specifies non-orthogonality of pixels
 
     DataModelPtr _saturationModel; //!< Data model for saturation of measured values.
     SaturationModelType _saturationModelType = Undefined; //!< States whether saturation model refers to intensity or extinction values.
@@ -121,7 +124,7 @@ inline const QSizeF& AbstractDetector::pixelDimensions() const { return _pixelDi
 inline QSizeF AbstractDetector::moduleDimensions() const
 {
     return { _nbPixelPerModule.width()*_pixelDimensions.width(),
-                _nbPixelPerModule.height()*_pixelDimensions.height() };
+             _nbPixelPerModule.height()*_pixelDimensions.height() };
 }
 
 /*!
@@ -168,6 +171,11 @@ inline const AbstractDataModel* AbstractDetector::saturationModel() const
 inline AbstractDetector::SaturationModelType AbstractDetector::saturationModelType() const
 {
     return _saturationModelType;
+}
+
+inline double AbstractDetector::skewCoefficient() const
+{
+    return _skewCoefficient;
 }
 
 /*!
@@ -299,6 +307,11 @@ inline void AbstractDetector::setSaturationModel(std::unique_ptr<AbstractDataMod
 {
     _saturationModel.ptr = std::move(model);
     _saturationModelType = type;
+}
+
+inline void AbstractDetector::setSkewCoefficient(double skewCoefficient)
+{
+    _skewCoefficient = skewCoefficient;
 }
 
 /*!

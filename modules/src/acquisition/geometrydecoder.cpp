@@ -30,9 +30,10 @@ GeometryDecoder::decodeSingleViewGeometry(const SingleViewGeometry& singleViewGe
                                           GeometryDecoder::PhysicalDimension physicalDimension,
                                           double mm)
 {
-    QSizeF pixelDimensions;
-    mat::Matrix<2, 1> focalLength = singleViewGeometry.first().focalLength();
+    const auto referencePmat = singleViewGeometry.first();
+    mat::Matrix<2, 1> focalLength = referencePmat.focalLength();
 
+    QSizeF pixelDimensions;
     switch(physicalDimension)
     {
     case PhysicalDimension::PixelWidth:
@@ -51,16 +52,21 @@ GeometryDecoder::decodeSingleViewGeometry(const SingleViewGeometry& singleViewGe
         throw std::domain_error("invalid value for the physical dimension");
     }
 
-    auto srcPos = singleViewGeometry.first().sourcePosition();
+    // X-ray source position
+    auto srcPos = referencePmat.sourcePosition();
 
+    // detector module locations
     QVector<mat::Location> moduleLocations = computeModuleLocations(
         singleViewGeometry, srcPos, pixelPerModule, pixelDimensions.width());
 
+    // gantry contains only source location (no detector location)
     auto srcRot = computeSourceRotation(moduleLocations, srcPos);
     mat::Location sourceLocation = mat::Location(srcPos, srcRot);
-
-    GenericDetector detector(pixelPerModule, pixelDimensions, std::move(moduleLocations));
     GenericGantry gantry(sourceLocation, mat::Location());
+
+    // detector has full information about its location
+    GenericDetector detector(pixelPerModule, pixelDimensions, std::move(moduleLocations));
+    detector.setSkewCoefficient(referencePmat.skewCoefficient());
 
     return { std::move(detector), std::move(gantry), GenericSource() };
 }
