@@ -50,6 +50,25 @@ void GeometryTest::testGeometryEncoder()
     verifyPmatDiff(loadedCarmGeo, geo);
 }
 
+void GeometryTest::testDecoderEncoderConsistency()
+{
+    // define a random projection matrix
+    auto P = CTL::ProjectionMatrix{
+            0.4572,   -0.3581,    0.2922,   -0.4643,
+           -0.0146,   -0.0782,    0.4595,    0.3491,
+            0.3003,    0.4157,    0.1557,    0.4340 };
+    P.normalize();
+
+    auto ctSystem = CTL::GeometryDecoder::decodeSingleViewGeometry(CTL::SingleViewGeometry{ P },
+                                                                   QSize(100, 100));
+
+    auto encodedDecodedP = CTL::GeometryEncoder::encodeSingleViewGeometry(ctSystem).first();
+
+    auto diff = (P - encodedDecodedP).norm();
+    qInfo() << "diff: " << diff;
+    QVERIFY(qFuzzyIsNull(diff));
+}
+
 void GeometryTest::testGeometryDecoder()
 {
     GeometryDecoder decoder(QSize(16, 64), QSizeF(1.0, 1.0));
