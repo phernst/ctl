@@ -186,6 +186,9 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
     return ret;
 }
 
+/*!
+ * Computes the physical center of the modules in world coordinates.
+ */
 QVector<mat::Location> GeometryDecoder::computeModuleLocations(const SingleViewGeometry& singleViewGeometry,
                                                                const Vector3x1& sourcePosition,
                                                                const QSize& pixelPerModule,

@@ -140,9 +140,16 @@ Matrix3x3 GeometryEncoder::intrinsicParameterMatrix(const Vector3x1CTS& principa
                                                     const QSizeF& pixelDimensions,
                                                     double skew)
 {
+    Q_ASSERT(pixelDimensions.width() != 0.0);
+    Q_ASSERT(pixelDimensions.height() != 0.0);
+
+    // extract z component for focal length
     auto focalLengthMM = fabs(principalPointDeviation.get<2>());
+    // convert mm in pixel
     auto fX = focalLengthMM / pixelDimensions.width();
     auto fY = focalLengthMM / pixelDimensions.height();
+
+    Q_ASSERT(fY != 0.0);
 
     // principal point: mounting point in CTS "(N-1)/2" minus the
     //                  deviation of source-to-mounting-point vector from z-axis (pinc. ray) in CTS
@@ -160,12 +167,19 @@ Matrix3x3 GeometryEncoder::intrinsicParameterMatrix(const Vector3x1CTS& principa
     // d - x-y part of "M-S" in the CTS frame, i.e. the
     //     deviation of source-to-mounting-point vector from z-axis (pincipal ray)
 
+    // convert mm in pixel
+    auto pPDevPixelX = principalPointDeviation.get<0>() / pixelDimensions.width();
+    auto pPDevPixelY = principalPointDeviation.get<1>() / pixelDimensions.height();
+
+    // skew correction for x coordinate
+    pPDevPixelX += pPDevPixelY * skew / fY;
+
     // mounting point in the CTL is alway the physical center of the detector module
     auto mountingX = 0.5 * double(nbPixel.width() - 1);
     auto mountingY = 0.5 * double(nbPixel.height() - 1);
 
-    auto principalPointX = mountingX - principalPointDeviation.get<0>() / pixelDimensions.width();
-    auto principalPointY = mountingY - principalPointDeviation.get<1>() / pixelDimensions.height();
+    auto principalPointX = mountingX - pPDevPixelX;
+    auto principalPointY = mountingY - pPDevPixelY;
 
     return Matrix3x3(fX , skew, principalPointX,
                      0.0, fY,   principalPointY,
