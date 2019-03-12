@@ -463,8 +463,8 @@ void Chunk2D<T>::fill(const T& fillValue)
 }
 
 /*!
- * Returns a reference to the element at position (\a row, \a column). Does not perform boundary
- * checks!
+ * Returns a reference to the element at position (\a x, \a y) or (column, row).
+ * Does not perform boundary checks!
  */
 template <typename T>
 T& Chunk2D<T>::operator()(uint x, uint y)
@@ -474,8 +474,8 @@ T& Chunk2D<T>::operator()(uint x, uint y)
 }
 
 /*!
- * Returns a constant reference to the element at position (\a row, \a column). Does not perform
- * boundary checks!
+ * Returns a constant reference to the element at position (\a x, \a y) or (column, row).
+ * Does not perform boundary checks!
  */
 template <typename T>
 const T& Chunk2D<T>::operator()(uint x, uint y) const
