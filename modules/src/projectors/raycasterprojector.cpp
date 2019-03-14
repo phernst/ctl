@@ -190,6 +190,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         }
         else // no interpolation, volume is cl::Buffer
         {
+            std::vector<cl::Event> writeVolFinished(nbUsedDevs);
             volumeBufs.reserve(nbUsedDevs);
             const auto memSize = sizeof(float) * volDim[0] * volDim[1] * volDim[2];
             for(uint dev = 0; dev < nbUsedDevs; ++dev)
@@ -197,11 +198,15 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
                 volumeBufs.emplace_back(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                                         memSize);
                 queues[dev].enqueueWriteBuffer(volumeBufs[dev], CL_FALSE, 0,
-                                               memSize, volumeDataPtr);
+                                               memSize, volumeDataPtr, nullptr, &writeVolFinished[dev]);
             }
             // additional buffer with volume dimensions
             uint volumeDim[3] = { uint(volDim[0]), uint(volDim[1]), uint(volDim[2]) };
             volumeDimensionsBufs = mkInitBufs(&volumeDim);
+
+            // there seems to be a bug on Windows, therefore this waiting is required
+            for(auto& e : writeVolFinished)
+                e.wait();
         }
 
         // Allocate output buffer: pinned (page-locked) projection buffer for each device
