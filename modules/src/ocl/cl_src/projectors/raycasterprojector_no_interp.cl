@@ -39,10 +39,12 @@ __kernel void ray_caster( float increment_mm,
     const float2 intraPixelSpacing = (float2)1.0f / convert_float2(*raysPerPixel);
     const float2 pixelCornerPlusOffset = (float2)((float)x, (float)y) - (float2)0.5f + 0.5f*intraPixelSpacing;
 
+    // helper variables
     float3 direction, position;
     float2 rayBounds, pixelCoord;
     int3 voxelIdx;
 
+    // resulting projection value
     double projVal = 0.0;
 
     for(uint rayX = 0; rayX < raysPerPixel[0].x; ++rayX)
@@ -107,29 +109,29 @@ float2 calculateIntersections(float3 source, float3 direction, float3 volSize, f
     float2 minMax = (float2)(FLT_MAX, 0.0f);
     float2 hit;
 
-    // # lambda1
-    // yz-faces
+    // # lambda1: faces around corner1
+    // yz-face
     hit = source.yz + lambda1.x*direction.yz;
     minMax = checkFace(hit, corner1.yz, corner2.yz, lambda1.x, minMax);
 
-    // xz-faces
+    // xz-face
     hit = source.xz + lambda1.y*direction.xz;
     minMax = checkFace(hit, corner1.xz, corner2.xz, lambda1.y, minMax);
 
-    // xy-faces
+    // xy-face
     hit = source.xy + lambda1.z*direction.xy;
     minMax = checkFace(hit, corner1.xy, corner2.xy, lambda1.z, minMax);
 
-    // # lambda2
-    // yz-faces
+    // # lambda2: faces around corner2
+    // yz-face
     hit = source.yz + lambda2.x*direction.yz;
     minMax = checkFace(hit, corner1.yz, corner2.yz, lambda2.x, minMax);
 
-    // xz-faces
+    // xz-face
     hit = source.xz + lambda2.y*direction.xz;
     minMax = checkFace(hit, corner1.xz, corner2.xz, lambda2.y, minMax);
 
-    // xy-faces
+    // xy-face
     hit = source.xy + lambda2.z*direction.xy;
     minMax = checkFace(hit, corner1.xy, corner2.xy, lambda2.z, minMax);
 

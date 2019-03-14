@@ -103,29 +103,29 @@ float2 calculateIntersections(float3 source, float3 direction, float3 volSize, f
     float2 minMax = (float2)(FLT_MAX, 0.0f);
     float2 hit;
 
-    // # lambda1
-    // yz-faces
+    // # lambda1: faces around corner1
+    // yz-face
     hit = source.yz + lambda1.x*direction.yz;
     minMax = checkFace(hit, corner1.yz, corner2.yz, lambda1.x, minMax);
 
-    // xz-faces
+    // xz-face
     hit = source.xz + lambda1.y*direction.xz;
     minMax = checkFace(hit, corner1.xz, corner2.xz, lambda1.y, minMax);
 
-    // xy-faces
+    // xy-face
     hit = source.xy + lambda1.z*direction.xy;
     minMax = checkFace(hit, corner1.xy, corner2.xy, lambda1.z, minMax);
 
-    // # lambda2
-    // yz-faces
+    // # lambda2: faces around corner2
+    // yz-face
     hit = source.yz + lambda2.x*direction.yz;
     minMax = checkFace(hit, corner1.yz, corner2.yz, lambda2.x, minMax);
 
-    // xz-faces
+    // xz-face
     hit = source.xz + lambda2.y*direction.xz;
     minMax = checkFace(hit, corner1.xz, corner2.xz, lambda2.y, minMax);
 
-    // xy-faces
+    // xy-face
     hit = source.xy + lambda2.z*direction.xy;
     minMax = checkFace(hit, corner1.xy, corner2.xy, lambda2.z, minMax);
 
