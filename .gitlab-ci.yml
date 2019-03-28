@@ -16,6 +16,13 @@ build-simTool:
     - qmake
     - make
 
+build-readmeTeaser:
+  stage: build
+  script:
+    - cd examples/readme-example
+    - qmake
+    - make
+
 
 # unit testing
 

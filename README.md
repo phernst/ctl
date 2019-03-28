@@ -240,6 +240,8 @@ int main(int argc, char* argv[])
  *  include(path/to/ocl_projectors.pri)
  */
  ```
+ A corresponding qmake project for this example can be found in
+ [examples/readme-example](https://gitlab.com/tpfeiffe/ctl/tree/master/examples/readme-example).
 
 --------------
 
