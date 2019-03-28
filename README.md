@@ -112,17 +112,19 @@ Use a Docker image
 
 Instead of installing the above libraries, you may also start directly by using
 a Docker image.
-There are two prepared Docker images that you can use as a development
+There are two prepared Docker images that you can use as a development/testing
 environment:
  * `frysch/ubuntu:ocl-nvidia` for Nvidia GPUs
  * `frysch/ubuntu:ocl-intel` for Intel CPUs
 
 ### Run a GUI example inside Docker
-Give Docker the rights to access the X-Server with
+Give Docker the rights to access the X-Server:
 ```console
 xhost +local:docker
 ```
-Run Docker in interactive mode (`-it`) and shared X11 socket (required for GUI):
+Run Docker in interactive mode (`-it`) and shared X11 socket (
+`-e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix` - required only for 
+showing GUIs):
 ```console
 docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix frysch/ubuntu:ocl-intel bash
 ```
