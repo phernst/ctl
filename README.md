@@ -1,9 +1,3 @@
-[![C++11](https://img.shields.io/badge/C++-11-informational.svg)](https://en.cppreference.com)
-[![dependencies](https://img.shields.io/badge/dependencies-Qt-brightgreen.svg)](https://doc.qt.io/qt-5.9/index.html)
-[![testing](https://img.shields.io/badge/unit-testing-success.svg)](https://gitlab.com/tpfeiffe/ctl/tree/master/testing)
-[![doc](https://img.shields.io/badge/doc-online-success.svg)](https://www.forschungscampus-stimulate.de/ctl/)
-[![OpenCL](https://img.shields.io/badge/OpenCL-1.1-informational.svg)](https://www.khronos.org/registry/OpenCL/sdk/1.1/docs/man/xhtml/)
-
 CTL - Computed Tomography Library
 =================================
 
@@ -23,7 +17,9 @@ Moreover, you may find useful information in the
 [Wiki](https://gitlab.com/tpfeiffe/ctl/wikis/home),
 especially if you want to contribute to the project as a developer.
 
-The following installation guide has been tested with Kubuntu 18.04 LTS.
+The following installation guide has been tested with Kubuntu 18.04 LTS.  
+You may also try a preconfigured Docker image. In this case, you can skip the 
+following three steps and go directly to *Use a Docker image*.
 
 Install compiler and build tools (GCC, make, ...)
 ---------------------------------------------------
@@ -110,6 +106,39 @@ It might happen on some Debian platforms, that the *CL/cl.hpp* header is missing
 even when you have installed the 'opencl-headers' package. In this case, you can
 manually download the header file from the
 [khronos group](https://www.khronos.org/registry/OpenCL/api/2.1/cl.hpp).
+
+Use a Docker image
+------------------
+
+Instead of installing the above libraries, you may also start directly by using
+a Docker image.
+There are two prepared Docker images that you can use as a development
+environment:
+ * `frysch/ubuntu:ocl-nvidia` for Nvidia GPUs
+ * `frysch/ubuntu:ocl-intel` for Intel CPUs
+
+### Run a GUI example inside Docker
+Give Docker the rights to access the X-Server with
+```console
+xhost +local:docker
+```
+Run Docker in interactive mode (`-it`) and shared X11 socket (required for GUI):
+```console
+docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix frysch/ubuntu:ocl-intel bash
+```
+Inside the Docker container run
+```console
+git clone https://gitlab.com/tpfeiffe/ctl.git
+cd ctl/examples/simTool/
+qmake && make -j 4
+./bin/SimulationTool
+```
+in order to compile and run the GUI example "SimulationTool".
+
+
+For further details about the Docker images, see
+[this Wiki page](https://gitlab.com/tpfeiffe/ctl/wikis/Docker-Images).
+
 
 Use modules that you need
 -------------------------
