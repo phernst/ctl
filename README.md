@@ -140,6 +140,9 @@ For further details about the Docker images, see
 [this Wiki page](https://gitlab.com/tpfeiffe/ctl/wikis/Docker-Images).
 
 
+Develop your own C++ apps or modules
+====================================
+
 Use modules that you need
 -------------------------
 
