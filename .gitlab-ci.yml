@@ -1,0 +1,36 @@
+image: frysch/ubuntu:ocl-intel
+
+# compile examples
+
+build-setupVisualizer:
+  stage: build
+  script:
+    - cd examples/setupVisualizer
+    - qmake
+    - make
+
+build-simTool:
+  stage: build
+  script:
+    - cd examples/simTool
+    - qmake
+    - make
+
+
+# unit testing
+
+build-unitTests:
+  stage: build
+  script:
+    - cd testing/src
+    - qmake
+    - make
+  artifacts:
+    paths:
+      - testing/src/bin/
+
+run-unitTests:
+  stage: test
+  script:
+    - cd testing/src/bin
+    - ./unitTesting
