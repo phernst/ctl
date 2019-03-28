@@ -37,5 +37,5 @@ int main(int argc, char* argv[])
     else
         std::cout << "\n ##### All tests passed. #####" << std::endl;
 
-    return 0;
+    return failedTests;
 }
