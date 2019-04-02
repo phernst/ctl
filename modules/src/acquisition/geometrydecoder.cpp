@@ -14,6 +14,13 @@ GeometryDecoder::GeometryDecoder(const QSize &pixelPerModule, const QSizeF &pixe
 {
 }
 
+GeometryDecoder::GeometryDecoder(const QSize &pixelPerModule, PhysicalDimension physicalDimension, double mm)
+    : _pixelPerModule(pixelPerModule)
+    , _physicalDimensionReference(qMakePair(physicalDimension , mm))
+{
+
+}
+
 /*!
  * See
  * decodeFullGeometry(const FullGeometry& geometry, const QSize& pixelPerModule, const QSizeF& pixelDimensions).
@@ -21,7 +28,10 @@ GeometryDecoder::GeometryDecoder(const QSize &pixelPerModule, const QSizeF &pixe
  */
 AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometry) const
 {
-    return decodeFullGeometry(geometry, _pixelPerModule, _pixelDimensions);
+    return _pixelDimensions.isValid() ? decodeFullGeometry(geometry, _pixelPerModule, _pixelDimensions)
+                                      : decodeFullGeometry(geometry, _pixelPerModule,
+                                                           _physicalDimensionReference.first,
+                                                           _physicalDimensionReference.second);
 }
 
 SimpleCTsystem
@@ -31,26 +41,7 @@ GeometryDecoder::decodeSingleViewGeometry(const SingleViewGeometry& singleViewGe
                                           double mm)
 {
     const auto referencePmat = singleViewGeometry.first();
-    mat::Matrix<2, 1> focalLength = referencePmat.focalLength();
-
-    QSizeF pixelDimensions;
-    switch(physicalDimension)
-    {
-    case PhysicalDimension::PixelWidth:
-        pixelDimensions.setWidth(mm);
-        pixelDimensions.setHeight(mm * focalLength.get<0>() / focalLength.get<1>());
-        break;
-    case PhysicalDimension::PixelHeight:
-        pixelDimensions.setWidth(mm * focalLength.get<1>() / focalLength.get<0>());
-        pixelDimensions.setHeight(mm);
-        break;
-    case PhysicalDimension::SourceDetectorDistance:
-        pixelDimensions.setWidth(mm / focalLength.get<0>());
-        pixelDimensions.setHeight(mm / focalLength.get<1>());
-        break;
-    default:
-        throw std::domain_error("invalid value for the physical dimension");
-    }
+    QSizeF pixelDimensions = computePixelSize(referencePmat, physicalDimension, mm);
 
     // X-ray source position
     auto srcPos = referencePmat.sourcePosition();
@@ -171,6 +162,7 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
         // detector prepare steps
         auto detectorSetter = std::make_shared<prepare::GenericDetectorParam>();
         detectorSetter->setModuleLocations(std::move(moduleLocations));
+        detectorSetter->setSkewCoefficient(view.first().skewCoefficient());
 
         // create AcquisitionSetup::View
         AcquisitionSetup::View viewSetting;
@@ -184,6 +176,87 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
     ret.prepareView(0);
 
     return ret;
+}
+
+AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry &geometry,
+                                                     const QSize &pixelPerModule,
+                                                     PhysicalDimension physicalDimension,
+                                                     double mm)
+{
+    // construct a generic system
+    CTsystem theSystem;
+
+    auto detector
+        = makeComponent<GenericDetector>(pixelPerModule, QSizeF(0.0, 0.0), QVector<mat::Location>());
+    auto source = makeComponent<GenericSource>(QSizeF(0.0, 0.0), Vector3x1(0.0));
+    auto gantry = makeComponent<GenericGantry>();
+
+    theSystem << std::move(source) << std::move(detector) << std::move(gantry);
+
+    AcquisitionSetup ret(theSystem);
+
+    // extract geometry information
+    for(const SingleViewGeometry& view : geometry)
+    {
+        const auto referencePmat = view.first();
+        auto srcPos = referencePmat.sourcePosition();
+        auto pixelDimensions = computePixelSize(referencePmat, physicalDimension, mm);
+        auto moduleLocations = computeModuleLocations(view, srcPos, pixelPerModule,
+                                                      pixelDimensions.width());
+
+        // prepare steps gantry
+        auto gantrySetter = std::make_shared<prepare::GenericGantryParam>();
+        // note: all position/rotation information about detector stored in module locations
+        gantrySetter->setDetectorLocation(mat::Location());
+        auto srcRot = computeSourceRotation(moduleLocations, srcPos);
+        gantrySetter->setSourceLocation(mat::Location(srcPos, srcRot));
+
+        // detector prepare steps
+        auto detectorSetter = std::make_shared<prepare::GenericDetectorParam>();
+        detectorSetter->setModuleLocations(std::move(moduleLocations));
+        detectorSetter->setPixelSize(pixelDimensions);
+        detectorSetter->setSkewCoefficient(referencePmat.skewCoefficient());
+
+        // create AcquisitionSetup::View
+        AcquisitionSetup::View viewSetting;
+        viewSetting.setTimeStamp(ret.nbViews());
+        viewSetting.addPrepareStep(gantrySetter);
+        viewSetting.addPrepareStep(detectorSetter);
+
+        ret.addView(viewSetting);
+    }
+
+    ret.prepareView(0);
+
+    return ret;
+}
+
+QSizeF GeometryDecoder::computePixelSize(const mat::ProjectionMatrix& pMat,
+                                         PhysicalDimension physicalDimension,
+                                         double mm)
+{
+    mat::Matrix<2, 1> focalLength = pMat.focalLength();
+
+    QSizeF pixelDimensions;
+    switch(physicalDimension)
+    {
+    case PhysicalDimension::PixelWidth:
+        pixelDimensions.setWidth(mm);
+        pixelDimensions.setHeight(mm * focalLength.get<0>() / focalLength.get<1>());
+        break;
+    case PhysicalDimension::PixelHeight:
+        pixelDimensions.setWidth(mm * focalLength.get<1>() / focalLength.get<0>());
+        pixelDimensions.setHeight(mm);
+        break;
+    case PhysicalDimension::SourceDetectorDistance:
+        pixelDimensions.setWidth(mm / focalLength.get<0>());
+        pixelDimensions.setHeight(mm / focalLength.get<1>());
+        break;
+    default:
+        throw std::domain_error("invalid value for the physical dimension");
+    }
+
+    return pixelDimensions;
 }
 
 /*!

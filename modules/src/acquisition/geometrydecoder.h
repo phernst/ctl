@@ -5,6 +5,7 @@
 #include "fullgeometry.h"
 #include "mat/mat.h"
 #include <QSizeF>
+#include <QPair>
 
 namespace CTL {
 
@@ -27,11 +28,16 @@ public:
     enum PhysicalDimension { PixelWidth, PixelHeight, SourceDetectorDistance };
 
     GeometryDecoder(const QSize& pixelPerModule, const QSizeF& pixelDimensions);
+    GeometryDecoder(const QSize& pixelPerModule,
+                    PhysicalDimension physicalDimension = PixelWidth,
+                    double mm = 1.0);
 
     AcquisitionSetup decodeFullGeometry(const FullGeometry& geometry) const;
 
+    const QPair<PhysicalDimension, double>& dimensionReference() const;
     const QSize& pixelPerModule() const;
     const QSizeF& pixelDimensions() const;
+    void setDimensionReference(PhysicalDimension physicalDimension, double mm);
     void setPixelPerModule(const QSize& value);
     void setPixelDimensions(const QSizeF& value);
 
@@ -44,9 +50,19 @@ public:
                                                const QSize& pixelPerModule,
                                                const QSizeF& pixelDimensions);
 
+    static AcquisitionSetup decodeFullGeometry(const FullGeometry& geometry,
+                                               const QSize& pixelPerModule,
+                                               PhysicalDimension physicalDimension = PixelWidth,
+                                               double mm = 1.0);
+
 private:
     QSize _pixelPerModule; //!< Number of pixels of the assumed detector.
     QSizeF _pixelDimensions; //!< Pixel size of the assumed detector.
+    QPair<PhysicalDimension, double> _physicalDimensionReference = { PixelWidth, 1.0 };
+
+    static QSizeF computePixelSize(const mat::ProjectionMatrix& pMat,
+                                   PhysicalDimension physicalDimension,
+                                   double mm);
 
     static QVector<mat::Location> computeModuleLocations(const SingleViewGeometry& singleViewGeometry,
                                                          const Vector3x1& sourcePosition,
