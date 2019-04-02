@@ -171,6 +171,8 @@ class GenericDetectorParam : public AbstractPrepareStep
 
 public:
     void setModuleLocations(QVector<mat::Location> moduleLocations) { _newModuleLocations = {true, moduleLocations}; }
+    void setPixelSize(const QSizeF& size) { _newPixelSize = {true, size}; }
+    void setSkewCoefficient(double skewCoefficient) { _newSkewCoefficient = {true, skewCoefficient}; }
 
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem *system) const override;
@@ -180,7 +182,8 @@ public:
 
 private:
     std::pair<bool,QVector<mat::Location>> _newModuleLocations = {false, QVector<mat::Location>()};
-
+    std::pair<bool,QSizeF> _newPixelSize                       = {false, QSizeF()};
+    std::pair<bool,double> _newSkewCoefficient                 = {false, 0.0};
 };
 
 } // namespace prepare

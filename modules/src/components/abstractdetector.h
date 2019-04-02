@@ -70,7 +70,6 @@ public:
     // setter methods
     void setSaturationModel(AbstractDataModel* model, SaturationModelType type);
     void setSaturationModel(std::unique_ptr<AbstractDataModel> model, SaturationModelType type);
-    void setSkewCoefficient(double skewCoefficient);
 
     // getter methods
     uint nbDetectorModules() const;
@@ -307,11 +306,6 @@ inline void AbstractDetector::setSaturationModel(std::unique_ptr<AbstractDataMod
 {
     _saturationModel.ptr = std::move(model);
     _saturationModelType = type;
-}
-
-inline void AbstractDetector::setSkewCoefficient(double skewCoefficient)
-{
-    _skewCoefficient = skewCoefficient;
 }
 
 /*!

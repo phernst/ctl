@@ -123,4 +123,20 @@ void GenericDetector::setModuleLocations(QVector<AbstractDetector::ModuleLocatio
     _moduleLocations = std::move(moduleLocations);
 }
 
+/*!
+ * Sets the pixel size to \a size.
+ */
+void GenericDetector::setPixelSize(const QSizeF &size)
+{
+    _pixelDimensions = size;
+}
+
+/*!
+ * Sets the skew coefficient to \a skewCoefficient.
+ */
+void GenericDetector::setSkewCoefficient(double skewCoefficient)
+{
+    _skewCoefficient = skewCoefficient;
+}
+
 } // namespace CTL

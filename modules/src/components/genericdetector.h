@@ -41,6 +41,8 @@ public:
 
     // setter methods
     void setModuleLocations(QVector<ModuleLocation> moduleLocations);
+    void setPixelSize(const QSizeF& size);
+    void setSkewCoefficient(double skewCoefficient);
 
     // static methods
     static QString defaultName();

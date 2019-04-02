@@ -434,10 +434,16 @@ void GenericDetectorParam::prepare(SimpleCTsystem* system) const
 
     qDebug() << "PrepareGenericDetector --- preparing detector\n"
              << "- module locations\t" << _newModuleLocations.first << "\n"
-             << "- number of modules\t" << _newModuleLocations.second.size() << "\n";
+             << "- number of modules\t" << _newModuleLocations.second.size() << "\n"
+             << "- pixelSize\t" << _newPixelSize << "\n"
+             << "- skew\t" << _newSkewCoefficient << "\n";
 
     if(_newModuleLocations.first)
         detectorPtr->setModuleLocations(_newModuleLocations.second);
+    if(_newPixelSize.first)
+        detectorPtr->setPixelSize(_newPixelSize.second);
+    if(_newSkewCoefficient.first)
+        detectorPtr->setSkewCoefficient(_newSkewCoefficient.second);
 }
 
 bool GenericDetectorParam::isApplicableTo(const CTsystem& system) const
@@ -464,6 +470,17 @@ void GenericDetectorParam::fromVariant(const QVariant &variant)
 
         _newModuleLocations = { true, std::move(modLocs) };
     }
+    if(varMap.contains("pixel size"))
+    {
+        auto pixSize = varMap.value("pixel size").toMap();
+        QSizeF pixQSize;
+        pixQSize.setWidth(pixSize.value("width").toDouble());
+        pixQSize.setHeight(pixSize.value("height").toDouble());
+
+        _newPixelSize = { true, pixQSize };
+    }
+    if(varMap.contains("skew coefficient"))
+        _newSkewCoefficient = { true, varMap.value("skew coefficient").toDouble() };
 }
 
 QVariant GenericDetectorParam::toVariant() const
@@ -478,6 +495,15 @@ QVariant GenericDetectorParam::toVariant() const
             moduleList.append(mod.toVariant());
         ret.insert("module locations", moduleList);
     }
+    if(_newPixelSize.first)
+    {
+        QVariantMap pixSize;
+        pixSize.insert("width", _newPixelSize.second.width());
+        pixSize.insert("height", _newPixelSize.second.height());
+        ret.insert("pixel size", pixSize);
+    }
+    if(_newSkewCoefficient.first)
+        ret.insert("skew coefficient",_newSkewCoefficient.second);
 
     return ret;
 }
