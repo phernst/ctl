@@ -14,7 +14,8 @@ void RayCasterAdapter::configure(const AcquisitionSetup &setup,
     FullGeometry pMats = GeometryEncoder::encodeFullGeometry(setup);
     _pMatsVectorized.clear();
     for(const auto& viewPMats : pMats)
-        _pMatsVectorized.append(viewPMats);
+        for(const auto& modPMats : viewPMats)
+            _pMatsVectorized.append(modPMats);
 
     // prepare RayCaster
     Q_ASSERT(dynamic_cast<const Config*>(&config));

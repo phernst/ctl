@@ -109,7 +109,7 @@ double DenFileIOtest::viewGeoDiff(const SingleViewGeometry &toVerify, const Sing
 
     auto nbModules = toVerify.length();
 
-        for(auto mod = 0; mod < nbModules; ++mod)
+        for(auto mod = 0u; mod < nbModules; ++mod)
         {
             auto diff = toVerify.at(mod).normalized() - original.at(mod).normalized();
             sumDiff += diff.norm();
@@ -250,10 +250,10 @@ void DenFileIOtest::oneModuleOneView(const ProjectionMatrix& pMat, const Project
     auto load_sVG_2 = io.readSingleViewGeometry("testData/1view_1module_geo.den", 0, 1);
 
     // check dimensions
-    QCOMPARE(load_fG_1.at(0).length(), 1);
-    QCOMPARE(load_fG_2.at(0).length(), 1);
-    QCOMPARE(load_sVG_1.length(), 1);
-    QCOMPARE(load_sVG_2.length(), 1);
+    QCOMPARE(load_fG_1.at(0).length(), 1u);
+    QCOMPARE(load_fG_2.at(0).length(), 1u);
+    QCOMPARE(load_sVG_1.length(), 1u);
+    QCOMPARE(load_sVG_2.length(), 1u);
     // check content
     verifyFullGeoDiff(load_fG_1, fG, 0.0);
     verifyFullGeoDiff(load_fG_2, fG, 0.0);
@@ -308,10 +308,10 @@ void DenFileIOtest::oneModuleMultipleViews(const ProjectionMatrix& pMat, const P
     }
     for(uint view = 0; view < nbViews; ++view)
     {
-        QCOMPARE(load_fG_1.at(int(view)).length(), 1);
-        QCOMPARE(load_fG_2.at(int(view)).length(), 1);
-        QCOMPARE(load_sV1_geo.at(int(view)).length(), 1);
-        QCOMPARE(load_sV2_geo.at(int(view)).length(), 1);
+        QCOMPARE(load_fG_1.at(int(view)).length(), 1u);
+        QCOMPARE(load_fG_2.at(int(view)).length(), 1u);
+        QCOMPARE(load_sV1_geo.at(int(view)).length(), 1u);
+        QCOMPARE(load_sV2_geo.at(int(view)).length(), 1u);
     }
     verifyFullGeoDiff(load_fG_1, fG, 0.0);
     verifyFullGeoDiff(load_fG_2, fG, 0.0);
@@ -352,7 +352,7 @@ void DenFileIOtest::oneModuleMultipleViews(const ProjectionMatrix& pMat, const P
 
 void DenFileIOtest::oneViewMultipleModules_geo(const CTL::mat::ProjectionMatrix& pMat)
 {
-    FullGeometry fullGeo{ { 1.0 * pMat, 2.0 * pMat } }; // one view and two modules
+    FullGeometry fullGeo{ SingleViewGeometry({ 1.0 * pMat, 2.0 * pMat }) }; // one view and two modules
     QVERIFY(fullGeo.length() == 1);
     QVERIFY(fullGeo.at(0).length() == 2);
 
@@ -368,11 +368,11 @@ void DenFileIOtest::oneViewMultipleModules_geo(const CTL::mat::ProjectionMatrix&
     auto load_sVG_3 = io.readSingleViewGeometry(fileNameGeo, 1); // wrong case -> "inventing" an additional view
 
     // check dimensions
-    QCOMPARE(load_fG_1.at(0).length(), int(nbModules)); // correct case
-    QCOMPARE(load_fG_2.at(0).length(), 1); // wrong case
-    QCOMPARE(load_sVG_1.length(), int(nbModules)); // correct case
-    QCOMPARE(load_sVG_2.length(), 1); // wrong case
-    QCOMPARE(load_sVG_3.length(), 1); // wrong case (fake view)
+    QCOMPARE(load_fG_1.at(0).length(), nbModules); // correct case
+    QCOMPARE(load_fG_2.at(0).length(), 1u); // wrong case
+    QCOMPARE(load_sVG_1.length(), nbModules); // correct case
+    QCOMPARE(load_sVG_2.length(), 1u); // wrong case
+    QCOMPARE(load_sVG_3.length(), 1u); // wrong case (fake view)
     // check content
     verifyFullGeoDiff(load_fG_1, fullGeo, 0.0); // correct case
     QVERIFY(qFuzzyIsNull((load_fG_2.at(0).at(0) - fullGeo.at(0).at(0)).norm())); // wrong case
