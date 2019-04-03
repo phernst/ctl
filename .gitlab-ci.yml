@@ -15,6 +15,13 @@ build-simTool:
     - cd examples/simTool
     - qmake
     - make
+    
+build-simTool-Debug:
+  stage: build
+  script:
+    - cd examples/simTool
+    - qmake CONFIG+=debug
+    - make
 
 build-readmeTeaser:
   stage: build
@@ -41,3 +48,14 @@ run-unitTests:
   script:
     - cd testing/src/bin
     - ./unitTesting
+
+
+# trigger building of documentation
+
+run-doxygen:
+  stage: build
+  script:
+    - apt-get update
+    - apt-get install -y lynx
+    - wget -q -O start-doxy $INITIATE_DOXY_SCRIPT
+    - lynx -cmd_script=start-doxy $DOXY_LOGIN_PAGE > /dev/null
