@@ -94,7 +94,7 @@ void DenFileIOtest::verifyFullGeoDiff(const FullGeometry &toVerify, const FullGe
 
     auto nbViews = toVerify.length();
 
-    for(auto view = 0; view < nbViews; ++view)
+    for(auto view = 0u; view < nbViews; ++view)
         sumDiff += viewGeoDiff(toVerify.at(view), original.at(view));
 
     auto normalizedDiff = sumDiff / double(nbViews);
@@ -241,7 +241,7 @@ void DenFileIOtest::oneModuleOneView(const ProjectionMatrix& pMat, const Project
     io::BaseTypeIO<io::DenFileIO> io;
 
     SingleViewGeometry sV{ { pMat } };
-    FullGeometry fG{ sV };
+    FullGeometry fG{ { sV } };
     io.write(fG, "testData/1view_1module_geo.den");
 
     auto load_fG_1 = io.readFullGeometry("testData/1view_1module_geo.den");
@@ -352,7 +352,7 @@ void DenFileIOtest::oneModuleMultipleViews(const ProjectionMatrix& pMat, const P
 
 void DenFileIOtest::oneViewMultipleModules_geo(const CTL::mat::ProjectionMatrix& pMat)
 {
-    FullGeometry fullGeo{ SingleViewGeometry({ 1.0 * pMat, 2.0 * pMat }) }; // one view and two modules
+    FullGeometry fullGeo( { SingleViewGeometry( { 1.0 * pMat, 2.0 * pMat } ) } ); // one view and two modules
     QVERIFY(fullGeo.length() == 1);
     QVERIFY(fullGeo.at(0).length() == 2);
 

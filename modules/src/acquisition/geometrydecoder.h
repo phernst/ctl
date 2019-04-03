@@ -2,7 +2,7 @@
 #define GEOMETRYDECODER_H
 
 #include "acquisitionsetup.h"
-#include "fullgeometry.h"
+#include "viewgeometry.h"
 #include "mat/mat.h"
 #include <QSizeF>
 #include <QPair>

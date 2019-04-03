@@ -2,7 +2,7 @@
 #define GEOMETRYENCODER_H
 
 #include "acquisitionsetup.h"
-#include "fullgeometry.h"
+#include "viewgeometry.h"
 #include "mat/matrix_types.h"
 
 #include <QSize>

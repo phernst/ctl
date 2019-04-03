@@ -59,7 +59,6 @@ HEADERS += \
     $$PWD/src/acquisition/acquisitionsetup.h \
     $$PWD/src/acquisition/ctsystem.h \
     $$PWD/src/acquisition/ctsystembuilder.h \
-    $$PWD/src/acquisition/fullgeometry.h \
     $$PWD/src/acquisition/geometrydecoder.h \
     $$PWD/src/acquisition/geometryencoder.h \
     $$PWD/src/acquisition/preparationprotocols.h \
@@ -78,7 +77,8 @@ HEADERS += \
     $$PWD/src/io/serializationinterface.h \
     $$PWD/src/io/serializationhelper.h \
     $$PWD/src/io/abstractserializer.h \
-    $$PWD/src/io/binaryserializer.h
+    $$PWD/src/io/binaryserializer.h \
+    $$PWD/src/acquisition/viewgeometry.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -122,4 +122,5 @@ SOURCES += \
     $$PWD/src/io/jsonserializer.cpp \
     $$PWD/src/components/genericbeammodifier.cpp \
     $$PWD/src/io/serializationhelper.cpp \
-    $$PWD/src/io/binaryserializer.cpp
+    $$PWD/src/io/binaryserializer.cpp \
+    $$PWD/src/acquisition/viewgeometry.cpp

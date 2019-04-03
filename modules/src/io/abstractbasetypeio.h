@@ -3,7 +3,7 @@
 
 #include "img/voxelvolume.h"
 #include "img/projectiondata.h"
-#include "acquisition/fullgeometry.h"
+#include "acquisition/viewgeometry.h"
 #include <QVariantMap>
 
 namespace CTL {

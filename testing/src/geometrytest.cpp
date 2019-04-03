@@ -105,7 +105,7 @@ void GeometryTest::verifyPmatDiff(const FullGeometry &toVerify, const FullGeomet
     auto nbViews = toVerify.length();
     auto nbModules = toVerify.first().length();
 
-    for(auto view = 0; view < nbViews; ++view)
+    for(auto view = 0u; view < nbViews; ++view)
         for(auto mod = 0u; mod < nbModules; ++mod)
         {
             auto diff = toVerify.at(view).at(mod).normalized() - original.at(view).at(mod).normalized();

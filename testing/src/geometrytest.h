@@ -2,13 +2,11 @@
 #define GEOMETRYTEST_H
 
 #include <QtTest>
-#include "acquisition/fullgeometry.h"
+#include "acquisition/viewgeometry.h"
 #include "mat/mat.h"
 
 namespace CTL {
     class CTsystem;
-    //typedef QVector<ProjectionMatrix> SingleViewGeometry;
-    typedef QVector<SingleViewGeometry> FullGeometry;
 }
 
 class GeometryTest : public QObject

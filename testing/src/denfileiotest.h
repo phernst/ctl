@@ -5,7 +5,7 @@
 #include "img/projectiondata.h"
 #include "img/voxelvolume.h"
 #include "io/abstractbasetypeio.h"
-#include "acquisition/fullgeometry.h"
+#include "acquisition/viewgeometry.h"
 
 class DenFileIOtest : public QObject
 {
