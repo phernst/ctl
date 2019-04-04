@@ -1,6 +1,7 @@
 #ifndef ABSTRACTPROJECTOR_H
 #define ABSTRACTPROJECTOR_H
 
+#include "img/compositevolume.h"
 #include "img/projectiondata.h"
 #include "img/voxelvolume.h"
 
@@ -22,7 +23,8 @@ class AbstractProjectorConfig;
  *
  * Also serves as a placeholder for potential future changes to the concept of volume data.
  */
-typedef VoxelVolume<float> VolumeData;
+//typedef VoxelVolume<float> VolumeData;
+typedef SpectralVolumeData VolumeData;
 
 /*!
  * \class AbstractProjector
@@ -73,6 +75,9 @@ class AbstractProjector
     public:virtual ProjectionData project(const VolumeData& volume) = 0;
 
 public:
+    virtual ProjectionData projectComposite(const CompositeVolume& volume);
+
+public:
     virtual ~AbstractProjector() = default;
 
     ProjectorNotifier* notifier();
@@ -80,6 +85,17 @@ public:
 private:
     ProjectorNotifier _notifier; //!< The notifier object used for signal emission.
 };
+
+inline ProjectionData AbstractProjector::projectComposite(const CompositeVolume &volume)
+{
+    ProjectionData ret = project(volume.materialVolume(0));
+
+    for(uint material = 1; material < volume.nbMaterials(); ++material)
+        ret += project(volume.materialVolume(material));
+
+    return ret;
+}
+
 
 // factory function `makeProjector`
 template <typename ProjectorType, typename... ConstructorArguments>
@@ -113,6 +129,7 @@ auto makeProjector(ConstructorArguments&&... arguments) ->
  * connect(myProjector->notifier(), SIGNAL(projectionFinished(int), myProgressBar, SLOT(setValue(int));
  * \endcode
  */
+
 inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
 
 /*!

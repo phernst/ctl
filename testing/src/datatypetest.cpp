@@ -3,6 +3,8 @@
 #include "img/chunk2d.h"
 #include "img/voxelvolume.h"
 #include "img/projectiondata.h"
+#include "img/compositevolume.h"
+#include "models/tabulateddatamodel.h"
 
 using namespace CTL;
 
@@ -346,4 +348,37 @@ void DataTypeTest::testProjectionData()
     QCOMPARE(testProj.view(0).module(2)(0,0), 201.0f);
     QCOMPARE(testProj.view(1).module(0)(0,0), 501.0f);
     QCOMPARE(testProj.view(1).module(0)(2,1), 513.0f);
+}
+
+void DataTypeTest::testCompositeVolume()
+{
+    VoxelVolume<float> vol1(10,10,10);
+    vol1.fill(1.0f);
+
+    auto tabModel = std::make_shared<TabulatedDataModel>();
+    tabModel->insertDataPoint(1.0, 1.0);
+    tabModel->insertDataPoint(2.0, 2.0);
+    tabModel->insertDataPoint(3.0, 3.0);
+
+    auto tabModel2 = std::make_shared<TabulatedDataModel>();
+    tabModel2->insertDataPoint(1.0, 2.0);
+    tabModel2->insertDataPoint(2.0, 4.0);
+    tabModel2->insertDataPoint(3.0, 6.0);
+
+    SpectralVolumeData realVol1(vol1, tabModel, "boy");
+    SpectralVolumeData realVol2(vol1, tabModel2, "heavy boy");
+
+    QCOMPARE(realVol1.averageMassAttenuationFactor(1.4f, 1.9f), 1.65f);
+    QCOMPARE(realVol1.muVolume(1.4f, 1.9f).max(), 1.65f);
+
+    QCOMPARE(realVol2.averageMassAttenuationFactor(1.4f, 1.9f), 3.3f);
+    QCOMPARE(realVol2.muVolume(1.4f, 1.9f).max(), 3.3f);
+
+    CompositeVolume compositeVol;
+    compositeVol.addMaterialVolume(realVol1);
+    compositeVol.addMaterialVolume(realVol2);
+
+    QCOMPARE(compositeVol.nbMaterials(), 2u);
+    QCOMPARE(compositeVol.muVolume(0, 1.4f, 1.9f).max(), 1.65f);
+    QCOMPARE(compositeVol.muVolume(1, 1.4f, 1.9f).max(), 3.3f);
 }

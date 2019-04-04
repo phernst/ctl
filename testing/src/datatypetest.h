@@ -21,6 +21,7 @@ private Q_SLOTS:
     void testVoxelMinMax();
     void testVoxelOperations();
     void testProjectionData();
+    void testCompositeVolume();
 };
 
 #endif // DATATYPETEST_H

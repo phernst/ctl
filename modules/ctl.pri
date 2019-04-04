@@ -78,7 +78,8 @@ HEADERS += \
     $$PWD/src/io/serializationhelper.h \
     $$PWD/src/io/abstractserializer.h \
     $$PWD/src/io/binaryserializer.h \
-    $$PWD/src/acquisition/viewgeometry.h
+    $$PWD/src/acquisition/viewgeometry.h \
+    $$PWD/src/img/compositevolume.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -123,4 +124,5 @@ SOURCES += \
     $$PWD/src/components/genericbeammodifier.cpp \
     $$PWD/src/io/serializationhelper.cpp \
     $$PWD/src/io/binaryserializer.cpp \
-    $$PWD/src/acquisition/viewgeometry.cpp
+    $$PWD/src/acquisition/viewgeometry.cpp \
+    $$PWD/src/img/compositevolume.cpp
