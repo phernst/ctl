@@ -18,11 +18,11 @@ public:
 
     // getter methods
     std::shared_ptr<AbstractIntegrableDataModel> absorptionModel() const;
-    float averageMassAttenuationFactor(float fromEnergy, float toEnergy) const;
+    float averageMassAttenuationFactor(float centerEnergy, float binWidth) const;
     const VoxelVolume<float>& density() const;
     float massAttenuationFactor(float atEnergy) const;
     const QString& materialName() const;
-    VoxelVolume<float> muVolume(float E1, float E2) const;
+    VoxelVolume<float> muVolume(float centerEnergy, float binWidth) const;
 
     // setter methods
     void setAbsorptionModel(std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
@@ -44,7 +44,7 @@ public:
 
     // getter methods
     const SpectralVolumeData& materialVolume(uint materialIdx) const;
-    VoxelVolume<float> muVolume(uint materialIdx, float fromEnergy, float toEnergy) const;
+    VoxelVolume<float> muVolume(uint materialIdx, float centerEnergy, float binWidth) const;
     uint nbMaterials() const;
 
     // other methods

@@ -368,17 +368,17 @@ void DataTypeTest::testCompositeVolume()
     SpectralVolumeData realVol1(vol1, tabModel, "boy");
     SpectralVolumeData realVol2(vol1, tabModel2, "heavy boy");
 
-    QCOMPARE(realVol1.averageMassAttenuationFactor(1.4f, 1.9f), 1.65f);
-    QCOMPARE(realVol1.muVolume(1.4f, 1.9f).max(), 1.65f);
+    QCOMPARE(realVol1.averageMassAttenuationFactor(1.5f, 1.0f), 1.5f);
+    QCOMPARE(realVol1.muVolume(1.5f, 1.0f).max(), 1.5f);
 
-    QCOMPARE(realVol2.averageMassAttenuationFactor(1.4f, 1.9f), 3.3f);
-    QCOMPARE(realVol2.muVolume(1.4f, 1.9f).max(), 3.3f);
+    QCOMPARE(realVol2.averageMassAttenuationFactor(1.5f, 1.0f), 3.0f);
+    QCOMPARE(realVol2.muVolume(1.5f, 1.0f).max(), 3.0f);
 
     CompositeVolume compositeVol;
     compositeVol.addMaterialVolume(realVol1);
     compositeVol.addMaterialVolume(realVol2);
 
     QCOMPARE(compositeVol.nbMaterials(), 2u);
-    QCOMPARE(compositeVol.muVolume(0, 1.4f, 1.9f).max(), 1.65f);
-    QCOMPARE(compositeVol.muVolume(1, 1.4f, 1.9f).max(), 3.3f);
+    QCOMPARE(compositeVol.muVolume(0, 1.5f, 1.0f).max(), 1.5f);
+    QCOMPARE(compositeVol.muVolume(1, 1.5f, 1.0f).max(), 3.0f);
 }

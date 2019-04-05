@@ -25,20 +25,16 @@ std::shared_ptr<AbstractIntegrableDataModel> SpectralVolumeData::absorptionModel
     return _absorptionModel;
 }
 
-float SpectralVolumeData::averageMassAttenuationFactor(float fromEnergy, float toEnergy) const
+float SpectralVolumeData::averageMassAttenuationFactor(float centerEnergy, float binWidth) const
 {
-    if(fromEnergy > toEnergy)
-        qWarning("RealisticVolumeData::averageMassAttenuationFactor: Interval start point larger"
-                 " than end point!");
-    if(fromEnergy == toEnergy)
+    if(qFuzzyIsNull(binWidth))
     {
-        qWarning("RealisticVolumeData::averageMassAttenuationFactor: Interval start point equal to"
-                 " end point! Delegating call to RealisticVolumeData::massAttenuationFactor.");
-        return massAttenuationFactor(fromEnergy);
+        qWarning("RealisticVolumeData::averageMassAttenuationFactor: Interval width is zero!"
+                 "Delegating call to RealisticVolumeData::massAttenuationFactor.");
+        return massAttenuationFactor(centerEnergy);
     }
 
-    const float binWidth = toEnergy - fromEnergy;
-    return _absorptionModel->binIntegral(fromEnergy + binWidth/2.0, binWidth) / binWidth;
+    return _absorptionModel->binIntegral(centerEnergy, binWidth) / binWidth;
 }
 
 const VoxelVolume<float>& SpectralVolumeData::density() const
@@ -56,9 +52,9 @@ const QString& SpectralVolumeData::materialName() const
     return _materialName;
 }
 
-VoxelVolume<float> SpectralVolumeData::muVolume(float fromEnergy, float toEnergy) const
+VoxelVolume<float> SpectralVolumeData::muVolume(float centerEnergy, float binWidth) const
 {
-    return (*this) * averageMassAttenuationFactor(fromEnergy, toEnergy);
+    return (*this) * averageMassAttenuationFactor(centerEnergy, binWidth);
 }
 
 void SpectralVolumeData::setAbsorptionModel(std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
@@ -88,9 +84,9 @@ const SpectralVolumeData& CompositeVolume::materialVolume(uint materialIdx) cons
     return _materialVolumes[materialIdx];
 }
 
-VoxelVolume<float> CompositeVolume::muVolume(uint materialIdx, float fromEnergy, float toEnergy) const
+VoxelVolume<float> CompositeVolume::muVolume(uint materialIdx, float centerEnergy, float binWidth) const
 {
-    return _materialVolumes[materialIdx].muVolume(fromEnergy, toEnergy);
+    return _materialVolumes[materialIdx].muVolume(centerEnergy, binWidth);
 }
 
 uint CompositeVolume::nbMaterials() const
