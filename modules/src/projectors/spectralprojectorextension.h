@@ -26,7 +26,7 @@ private:
     std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
 
     float _from = 0.0f;
-    float _to   = -1.0f;
+    float _to   = 200.0f;
     uint _nbSamples = 10;
 
 };

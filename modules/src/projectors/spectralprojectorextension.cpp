@@ -1,5 +1,6 @@
 #include "spectralprojectorextension.h"
 #include "components/abstractsource.h"
+#include "components/abstractdetector.h"
 
 namespace CTL {
 
@@ -18,6 +19,7 @@ void SpectralProjectorExtension::configure(const AcquisitionSetup& setup, const 
 
 ProjectionData SpectralProjectorExtension::project(const VolumeData& volume)
 {
+    // project material density
     auto proj = ProjectorExtension::project(volume);
 
     const auto srcPtr = _setup.system()->source();
@@ -79,22 +81,22 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
     const auto samplingPoints = spectrum.samplingPoints();
     const auto binWidth = spectrum.binWidth();
 
-    // first bin
-    auto sumProj = materialProjs[0] * volume.materialVolume(0).averageMassAttenuationFactor(samplingPoints[0], binWidth);
-    for(uint material = 1; material < volume.nbMaterials(); ++material)
-        sumProj += materialProjs[material] * volume.materialVolume(material).averageMassAttenuationFactor(samplingPoints[0], binWidth);
+    ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
+    sumProj.allocateMemory(_setup.nbViews(), 0.0f);
 
-    sumProj.transformToIntensity(spectra[0]);
+    ProjectionData binProj(_setup.system()->detector()->viewDimensions());
+    binProj.allocateMemory(_setup.nbViews(), 0.0f);
 
-    for(uint bin = 1; bin < _nbSamples; ++bin)
+    for(uint bin = 0; bin < _nbSamples; ++bin)
     {
         const auto& binWeights = spectra[bin];
         if(qFuzzyIsNull(std::accumulate(binWeights.cbegin(),binWeights.cend(),0.0)))
             continue;
 
-        auto binProj = materialProjs[0] * volume.materialVolume(0).averageMassAttenuationFactor(samplingPoints[bin], binWidth);
-            for(uint material = 1; material < volume.nbMaterials(); ++material)
-                binProj += materialProjs[material] * volume.materialVolume(material).averageMassAttenuationFactor(samplingPoints[bin], binWidth);
+        for(uint material = 0; material < volume.nbMaterials(); ++material)
+            binProj += materialProjs[material] *
+                    volume.materialVolume(material).averageMassAttenuationFactor(samplingPoints[bin],
+                                                                                 binWidth);
 
         binProj.transformToIntensity(binWeights);
         sumProj += binProj;
