@@ -133,8 +133,8 @@ inline QSizeF AbstractDetector::moduleDimensions() const
 inline SingleViewData::Dimensions AbstractDetector::viewDimensions() const
 {
     SingleViewData::Dimensions ret;
-    ret.nbChannels = _pixelDimensions.width();
-    ret.nbRows     = _pixelDimensions.height();
+    ret.nbChannels = _nbPixelPerModule.width();
+    ret.nbRows     = _nbPixelPerModule.height();
     ret.nbModules  = nbDetectorModules();
     return ret;
 }
