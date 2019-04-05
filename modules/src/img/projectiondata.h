@@ -49,9 +49,11 @@ public:
 
     // other methods
     void allocateMemory(uint nbViews);
+    void allocateMemory(uint nbViews, float initValue);
     void append(SingleViewData&& singleView);
     void append(const SingleViewData& singleView);
     ProjectionData combined(const ModuleLayout& layout = ModuleLayout()) const;
+    void fill(float fillValue);
     float max() const;
     float min() const;
     void setDataFromVector(const std::vector<float>& dataVector);

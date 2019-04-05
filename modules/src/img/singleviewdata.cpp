@@ -230,6 +230,15 @@ Chunk2D<float> SingleViewData::combined(const ModuleLayout &layout, bool *ok) co
 }
 
 /*!
+ * Fills the projection data with \a fillValue. Note that this will overwrite all data.
+ */
+void SingleViewData::fill(float fillValue)
+{
+    for(auto& ch : _data)
+        ch.fill(fillValue);
+}
+
+/*!
  * Returns the maximum value in this instance.
  *
  * Returns zero if this data is empty.
@@ -305,6 +314,17 @@ void SingleViewData::allocateMemory(uint nbModules)
 
     for(auto& module : _data)
         module.allocateMemory();
+}
+
+/*!
+ * Enforces memory allocation and initializes all values with \a initValue.
+ *
+ * \sa allocateMemory(uint), fill().
+ */
+void SingleViewData::allocateMemory(uint nbModules, float initValue)
+{
+    allocateMemory(nbModules);
+    fill(initValue);
 }
 
 /*!

@@ -167,6 +167,15 @@ ProjectionData ProjectionData::combined(const ModuleLayout& layout) const
 }
 
 /*!
+ * Fills the projection data with \a fillValue. Note that this will overwrite all data.
+ */
+void ProjectionData::fill(float fillValue)
+{
+    for(auto& view : _data)
+        view.fill(fillValue);
+}
+
+/*!
  * Concatenates the projection data from all views and returns it as a one-dimensional vector.
  */
 std::vector<float> ProjectionData::toVector() const
@@ -289,6 +298,17 @@ void ProjectionData::allocateMemory(uint nbViews)
 
     for(auto& view : _data)
         view.allocateMemory(_viewDim.nbModules);
+}
+
+/*!
+ * Enforces memory allocation and initializes all values with \a initValue.
+ *
+ * \sa allocateMemory(uint), fill().
+ */
+void ProjectionData::allocateMemory(uint nbViews, float initValue)
+{
+    allocateMemory(nbViews);
+    fill(initValue);
 }
 
 /*!

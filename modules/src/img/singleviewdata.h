@@ -48,11 +48,13 @@ public:
 
     // other methods
     void allocateMemory(uint nbModules);
+    void allocateMemory(uint nbModules, float initValue);
     void append(ModuleData&& moduleData);
     void append(const ModuleData& moduleData);
     void append(std::vector<float>&& dataVector);
     void append(const std::vector<float>& dataVector);
     Chunk2D<float> combined(const ModuleLayout& layout = ModuleLayout(), bool* ok = nullptr) const;
+    void fill(float fillValue);
     float max() const;
     float min() const;
     void setDataFromVector(const std::vector<float>& dataVector);
