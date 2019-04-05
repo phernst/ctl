@@ -57,7 +57,9 @@ public:
     void setDataFromVector(const std::vector<float>& dataVector);
     std::vector<float> toVector() const;
     void transformToExtinction(double i0 = 1.0);
+    void transformToExtinction(const std::vector<double>& viewDependentI0);
     void transformToIntensity(double i0 = 1.0);
+    void transformToIntensity(const std::vector<double>& viewDependentI0);
 
     // arithmetic operations
     ProjectionData& operator+=(const ProjectionData& other);

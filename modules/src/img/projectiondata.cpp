@@ -210,6 +210,26 @@ void ProjectionData::transformToExtinction(double i0)
 }
 
 /*!
+ * Transforms all data values in this instance to extinction (w.r.t. the view-dependent initial
+ * intensities passed by \a viewDependentI0) using the following formula:
+ *
+ * \f$
+ * \mathtt{newValue}_{v}=\ln\frac{i0_{v}}{\mathtt{oldValue}_{v}}\,,\quad v=1,...,\textrm{nbViews}.
+ * \f$
+ */
+void ProjectionData::transformToExtinction(const std::vector<double>& viewDependentI0)
+{
+    std::vector<std::future<void>> futures;
+    futures.reserve(nbViews());
+
+    auto i0Iterator = viewDependentI0.begin();
+    for(auto& singleView : _data)
+        futures.push_back(std::async(&SingleViewData::transformToExtinction,
+                                     &singleView,
+                                     *i0Iterator++));
+}
+
+/*!
  * Transforms all data values in this instance to intensities (w.r.t. the initial intensity passed
  * by \a i0) using the following formula:
  *
@@ -226,6 +246,26 @@ void ProjectionData::transformToIntensity(double i0)
         futures.push_back(std::async(&SingleViewData::transformToIntensity,
                                      &singleView,
                                      i0));
+}
+
+/*!
+ * Transforms all data values in this instance to intensities (w.r.t. the view-dependent initial
+ * intensities passed by \a viewDependentI0) using the following formula:
+ *
+ * \f$
+ * \mathtt{newValue}_{v}=i0_{v}\cdot\exp(-\mathtt{oldValue}_{v})\,,\quad v=1,...,\textrm{nbViews}.
+ * \f$
+ */
+void ProjectionData::transformToIntensity(const std::vector<double>& viewDependentI0)
+{
+    std::vector<std::future<void>> futures;
+    futures.reserve(nbViews());
+
+    auto i0Iterator = viewDependentI0.begin();
+    for(auto& singleView : _data)
+        futures.push_back(std::async(&SingleViewData::transformToIntensity,
+                                     &singleView,
+                                     *i0Iterator++));
 }
 
 /*!
