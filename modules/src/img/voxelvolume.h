@@ -91,6 +91,7 @@ public:
 
     // other methods
     void allocateMemory();
+    void allocateMemory(const T& initValue);
     void fill(const T& fillValue);
     T max() const;
     T min() const;
@@ -190,6 +191,18 @@ template <typename T>
 void VoxelVolume<T>::allocateMemory()
 {
     _data.resize(totalVoxelCount());
+}
+
+/*!
+ * Enforces memory allocation and initilizes all elements with \a initValue.
+ *
+ * \sa allocateMemory(), fill().
+ */
+template<typename T>
+void VoxelVolume<T>::allocateMemory(const T& initValue)
+{
+    allocateMemory();
+    fill(initValue);
 }
 
 /*!
