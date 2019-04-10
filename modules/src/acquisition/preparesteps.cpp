@@ -177,12 +177,17 @@ void GantryDisplacementParam::prepare(SimpleCTsystem* system) const
              << "- detector displacement\t" << _newDetectorDisplacement.first;
     qDebug() << (_newDetectorDisplacement.second.position.info()
                  + _newDetectorDisplacement.second.rotation.info()).c_str()
+             << "- gantry displacement\t" << _newGantryDisplacement.first;
+    qDebug() << (_newGantryDisplacement.second.position.info()
+                 + _newGantryDisplacement.second.rotation.info()).c_str()
              << "- X-ray source location\t" << _newSourceDisplacement.first;
     qDebug() << (_newSourceDisplacement.second.position.info()
                  + _newSourceDisplacement.second.rotation.info()).c_str();
 
     if(_newDetectorDisplacement.first)
         gantryPtr->setDetectorDisplacement(_newDetectorDisplacement.second);
+    if(_newGantryDisplacement.first)
+        gantryPtr->setGantryDisplacement(_newGantryDisplacement.second);
     if(_newSourceDisplacement.first)
         gantryPtr->setSourceDisplacement(_newSourceDisplacement.second);
     if(_detectorDisplacementIncrement.first)
@@ -222,6 +227,12 @@ void GantryDisplacementParam::fromVariant(const QVariant &variant)
         loc.fromVariant(varMap.value("detector displacement"));
         _newDetectorDisplacement = { true, loc };
     }
+    if(varMap.contains("gantry displacement"))
+    {
+        mat::Location loc;
+        loc.fromVariant(varMap.value("gantry displacement"));
+        _newGantryDisplacement = { true, loc };
+    }
     if(varMap.contains("source displacement"))
     {
         mat::Location loc;
@@ -248,6 +259,8 @@ QVariant GantryDisplacementParam::toVariant() const
 
     if(_newDetectorDisplacement.first)
         ret.insert("detector displacement", _newDetectorDisplacement.second.toVariant());
+    if(_newGantryDisplacement.first)
+        ret.insert("gantry displacement", _newGantryDisplacement.second.toVariant());
     if(_newSourceDisplacement.first)
         ret.insert("source displacement", _newSourceDisplacement.second.toVariant());
     if(_detectorDisplacementIncrement.first)

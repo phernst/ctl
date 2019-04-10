@@ -79,10 +79,12 @@ public:
     mat::Location sourceLocation() const;
     mat::Location detectorLocation() const;
     const mat::Location& detectorDisplacement() const;
+    const mat::Location& gantryDisplacement() const;
     const mat::Location& sourceDisplacement() const;
 
     // setter methods
     void setDetectorDisplacement(const mat::Location& displacement);
+    void setGantryDisplacement(const mat::Location& displacement);
     void setSourceDisplacement(const mat::Location& displacement);
 
     // convenience getter
@@ -95,6 +97,8 @@ public:
     void setDetectorDisplacementAngles(double rollAngle, double tiltAngle, double twistAngle);
     void setDetectorDisplacementPosition(const Vector3x1& position);
     void setDetectorDisplacementPosition(double x, double y, double z);
+    void setGantryDisplacementPosition(const Vector3x1& position);
+    void setGantryDisplacementPosition(double x, double y, double z);
     void setSourceDisplacementPosition(const Vector3x1& position);
     void setSourceDisplacementPosition(double x, double y, double z);
 
@@ -102,6 +106,7 @@ protected:
     AbstractGantry() = default;
 
 private:
+    mat::Location _globalGantryDisplacement; //!< Displacement of the whole gantry.
     mat::Location _detectorDisplacement; //!< Displacement of the detector component.
     mat::Location _sourceDisplacement; //!< Displacement of the source component.
 };
@@ -132,7 +137,9 @@ inline mat::Location AbstractGantry::sourceLocation() const
  */
 inline Vector3x1 AbstractGantry::sourcePosition() const
 {
-    return nominalSourceLocation().position + sourceRotation() * _sourceDisplacement.position;
+    return _globalGantryDisplacement.rotation* nominalSourceLocation().position
+            + sourceRotation() * _sourceDisplacement.position
+            + _globalGantryDisplacement.position;
 }
 
 /*!
@@ -143,7 +150,9 @@ inline Vector3x1 AbstractGantry::sourcePosition() const
  */
 inline Matrix3x3 AbstractGantry::sourceRotation() const
 {
-    return nominalSourceLocation().rotation * _sourceDisplacement.rotation;
+    return _globalGantryDisplacement.rotation
+            * nominalSourceLocation().rotation
+            * _sourceDisplacement.rotation;
 }
 
 /*!
@@ -166,8 +175,9 @@ inline mat::Location AbstractGantry::detectorLocation() const
  */
 inline Vector3x1 AbstractGantry::detectorPosition() const
 {
-    return nominalDetectorLocation().position
-        + detectorRotation().transposed() * _detectorDisplacement.position;
+    return _globalGantryDisplacement.rotation * nominalDetectorLocation().position
+            + detectorRotation().transposed() * _detectorDisplacement.position
+            + _globalGantryDisplacement.position;
 }
 
 /*!
@@ -178,7 +188,9 @@ inline Vector3x1 AbstractGantry::detectorPosition() const
  */
 inline Matrix3x3 AbstractGantry::detectorRotation() const
 {
-    return _detectorDisplacement.rotation * nominalDetectorLocation().rotation;
+    return _detectorDisplacement.rotation.transposed()
+            * nominalDetectorLocation().rotation
+            * _globalGantryDisplacement.rotation.transposed();
 }
 
 /*!
@@ -187,6 +199,14 @@ inline Matrix3x3 AbstractGantry::detectorRotation() const
 inline const mat::Location& AbstractGantry::detectorDisplacement() const
 {
     return _detectorDisplacement;
+}
+
+/*!
+ *  Returns the specified displacement of the whole gantry.
+ */
+inline const mat::Location& AbstractGantry::gantryDisplacement() const
+{
+    return _globalGantryDisplacement;
 }
 
 /*!
@@ -203,6 +223,14 @@ inline const mat::Location& AbstractGantry::sourceDisplacement() const
 inline void AbstractGantry::setDetectorDisplacement(const mat::Location& displacement)
 {
     _detectorDisplacement = displacement;
+}
+
+/*!
+ *  Sets the displacement of the whole gantry to \a displacement.
+ */
+inline void AbstractGantry::setGantryDisplacement(const mat::Location& displacement)
+{
+    _globalGantryDisplacement = displacement;
 }
 
 /*!

@@ -79,6 +79,7 @@ class GantryDisplacementParam : public AbstractPrepareStep
 
 public:
     void setDetectorDisplacement(const mat::Location& displacement) { _newDetectorDisplacement = {true, displacement}; }
+    void setGantryDisplacement(const mat::Location& displacement)   { _newGantryDisplacement   = {true, displacement}; }
     void setSourceDisplacement(const mat::Location& displacement)   { _newSourceDisplacement   = {true, displacement}; }
 
     void incrementDetectorDisplacement(const mat::Location& increment) { _detectorDisplacementIncrement = {true, increment}; }
@@ -92,6 +93,7 @@ public:
 
 private:
     std::pair<bool,mat::Location> _newDetectorDisplacement = {false, mat::Location()};
+    std::pair<bool,mat::Location> _newGantryDisplacement   = {false, mat::Location()};
     std::pair<bool,mat::Location> _newSourceDisplacement   = {false, mat::Location()};
     std::pair<bool,mat::Location> _detectorDisplacementIncrement = {false, mat::Location()};
     std::pair<bool,mat::Location> _sourceDisplacementIncrement   = {false, mat::Location()};
