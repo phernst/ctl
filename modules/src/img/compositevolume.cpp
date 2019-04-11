@@ -57,6 +57,11 @@ VoxelVolume<float> SpectralVolumeData::muVolume(float centerEnergy, float binWid
     return (*this) * averageMassAttenuationFactor(centerEnergy, binWidth);
 }
 
+void SpectralVolumeData::setAbsorptionModel(AbstractIntegrableDataModel* absorptionModel)
+{
+    _absorptionModel = std::shared_ptr<AbstractIntegrableDataModel>(absorptionModel);
+}
+
 void SpectralVolumeData::setAbsorptionModel(std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
 {
     _absorptionModel = absorptionModel;

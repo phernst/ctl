@@ -25,6 +25,7 @@ public:
     VoxelVolume<float> muVolume(float centerEnergy, float binWidth) const;
 
     // setter methods
+    void setAbsorptionModel(AbstractIntegrableDataModel* absorptionModel);
     void setAbsorptionModel(std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
     void setDensity(const VoxelVolume<float>& density);
     void setDensity(VoxelVolume<float>&& density);
