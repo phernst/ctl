@@ -41,6 +41,60 @@ TubularGantry::TubularGantry(double sourceToDetectorDistance,
 }
 
 /*!
+ * Returns the nominal detector location. This ignores any (optional) detector or gantry displacement.
+ *
+ * Overrides the base class method and computes the detector location based on the tubular gantry
+ * parametrization (i.e. source-to-detector distance etc.).
+ *
+ * \f$
+ * L_{\textrm{det}}^{\textrm{nominal}}=
+ * (t_{\textrm{det}}^{\textrm{nominal}},R_{\textrm{det}}^{\textrm{nominal}}),
+ * \f$
+ *
+ * where:
+ *
+ * \f$
+ * \begin{align*}
+ * t_{\textrm{det}}^{\textrm{nominal}} & =R_{\textrm{gantry}}\cdot\left[\begin{array}{c}
+ * \mathtt{SID}-\mathtt{SDD}\\0\\-\mathtt{pitchPos}\end{array}\right]=
+ * \mathbf{R}_{x}(\mathtt{tilt})\cdot\mathbf{R}_{z}(\mathtt{gantryRot})
+ * \cdot\left[\begin{array}{c}
+ * \mathtt{SID}\\0\\-\mathtt{pitchPos}\end{array}\right]\\
+ * R_{\textrm{det}}^{\textrm{nominal}} & =\mathbf{R}_{x}(\mathtt{\pi/2})
+ * \cdot\mathbf{R}_{z}(-\pi/2)\cdot R_{\textrm{gantry}}^{T}
+ * \end{align*}
+ * \f$
+ */
+mat::Location TubularGantry::nominalDetectorLocation() const { return detectorLocationTG(); }
+
+/*!
+ * Returns the nominal source location. This ignores any (optional) source or gantry displacement.
+ *
+ * Overrides the base class method and computes the source location based on the tubular gantry
+ * parametrization (i.e. source-to-detector distance etc.).
+ *
+ * \f$
+ * L_{\textrm{src}}^{\textrm{nominal}}=
+ * (t_{\textrm{src}}^{\textrm{nominal}},R_{\textrm{src}}^{\textrm{nominal}}),
+ * \f$
+ *
+ * where:
+ *
+ * \f$
+ * \begin{align*}
+ * t_{\textrm{src}}^{\textrm{nominal}} & =R_{\textrm{gantry}}\cdot\left[\begin{array}{c}
+ * \mathtt{SID}\\0\\-\mathtt{pitchPos}\end{array}\right]=
+ * \mathbf{R}_{x}(\mathtt{tilt})\cdot\mathbf{R}_{z}(\mathtt{gantryRot})
+ * \cdot\left[\begin{array}{c}
+ * \mathtt{SID}\\0\\-\mathtt{pitchPos}\end{array}\right]\\
+ * R_{\textrm{src}}^{\textrm{nominal}} & =R_{\textrm{gantry}}
+ * \cdot\mathbf{R}_{z}(\pi/2)\cdot\mathbf{R}_{x}(\mathtt{-\pi/2})
+ * \end{align*}
+ * \f$
+ */
+mat::Location TubularGantry::nominalSourceLocation() const { return sourceLocationTG(); }
+
+/*!
  * Computed the current source location (i.e. position and rotation) based on the system
  * configuration.
  *
@@ -66,10 +120,11 @@ mat::Location TubularGantry::detectorLocationTG() const
  * Computes the current source position based on the system configuration.
  *
  * \f$
- * \mathtt{sourcePos}=\mathtt{totalRot}\cdot\left[\begin{array}{c}\mathtt{SID}\\0\\-
- * \mathtt{pitchPos}\end{array}\right]=\mathbf{R}_{x}(\mathtt{tilt})\cdot\mathbf{R}_{z}
- * (\mathtt{gantryRot})\cdot\left[\begin{array}{c}\mathtt{SID}\\0\\-\mathtt{pitchPos}
- * \end{array}\right]
+ * t_{\textrm{src}}^{\textrm{nominal}}=R_{\textrm{gantry}}\cdot\left[\begin{array}{c}
+ * \mathtt{SID}\\0\\-\mathtt{pitchPos}\end{array}\right]=
+ * \mathbf{R}_{x}(\mathtt{tilt})\cdot\mathbf{R}_{z}(\mathtt{gantryRot})
+ * \cdot\left[\begin{array}{c}
+ * \mathtt{SID}\\0\\-\mathtt{pitchPos}\end{array}\right]
  * \f$
  */
 Vector3x1 TubularGantry::sourcePositionTG() const
@@ -86,9 +141,8 @@ Vector3x1 TubularGantry::sourcePositionTG() const
  * Hence, for an angle of zero degrees, the source is located on the positive x-axis.
  *
  * \f$
- * \mathtt{sourceRot} =
- * \mathbf{R}_{x}(\mathtt{tilt})\cdot\mathbf{R}_{z}(\mathtt{gantryRot})\cdot\mathbf{R}_{z}(\pi/2)
- * \cdot\mathbf{R}_{x}(\mathtt{-\pi/2})
+ * R_{\textrm{src}}^{\textrm{nominal}}=R_{\textrm{gantry}}
+ * \cdot\mathbf{R}_{z}(\pi/2)\cdot\mathbf{R}_{x}(\mathtt{-\pi/2})
  * \f$
  */
 Matrix3x3 TubularGantry::sourceRotationTG() const
@@ -101,10 +155,11 @@ Matrix3x3 TubularGantry::sourceRotationTG() const
  * Computes the current detector position based on the system configuration.
  *
  * \f$
- * \mathtt{detectorPos} =\mathtt{totalRot}\cdot\left[\begin{array}{c}\mathtt{SID}-\mathtt{SDD}\\0\\
- * -\mathtt{pitchPos}\end{array}\right]=\mathbf{R}_{x}(\mathtt{tilt})\cdot\mathbf{R}_{z}
- * (\mathtt{gantryRot})\cdot\left[\begin{array}{c}\mathtt{SID}-\mathtt{SDD}\\0\\-\mathtt{pitchPos}
- * \end{array}\right]
+ * t_{\textrm{det}}^{\textrm{nominal}}=R_{\textrm{gantry}}\cdot\left[\begin{array}{c}
+ * \mathtt{SID}-\mathtt{SDD}\\0\\-\mathtt{pitchPos}\end{array}\right]=
+ * \mathbf{R}_{x}(\mathtt{tilt})\cdot\mathbf{R}_{z}(\mathtt{gantryRot})
+ * \cdot\left[\begin{array}{c}
+ * \mathtt{SID}\\0\\-\mathtt{pitchPos}\end{array}\right]
  * \f$
  */
 Vector3x1 TubularGantry::detectorPositionTG() const
@@ -122,8 +177,8 @@ Vector3x1 TubularGantry::detectorPositionTG() const
  * Hence, for an angle of zero degrees, the detector is located on the negative x-axis.
  *
  * \f$
- * \mathtt{detectorRot}=\mathbf{R}_{x}(\mathtt{\pi/2})\cdot\mathbf{R}_{z}(-\pi/2)\cdot
- * \mathbf{R}_{z}(\mathtt{-gantryRot})\cdot\mathbf{R}_{x}(-\mathtt{tilt})
+ * R_{\textrm{det}}^{\textrm{nominal}}=\mathbf{R}_{x}(\mathtt{\pi/2})
+ * \cdot\mathbf{R}_{z}(-\pi/2)\cdot R_{\textrm{gantry}}^{T}
  * \f$
  */
 Matrix3x3 TubularGantry::detectorRotationTG() const
@@ -138,7 +193,8 @@ Matrix3x3 TubularGantry::detectorRotationTG() const
  * Computes the total rotation matrix of the gantry system. This includes gantry rotation and tilt:
  *
  * \f$
- * \mathtt{totalRot} = \mathbf{R}_{x}(\mathtt{tilt})\cdot\mathbf{R}_{z}(\mathtt{gantryRot})
+ * R_{\textrm{gantry}}=
+ * \mathbf{R}_{x}(\mathtt{tilt})\cdot\mathbf{R}_{z}(\mathtt{gantryRot})
  * \f$
  */
 Matrix3x3 TubularGantry::totalGantryRotation() const
@@ -221,22 +277,6 @@ QVariant TubularGantry::toVariant() const
 
 // use documentation of GenericComponent::clone()
 SystemComponent* TubularGantry::clone() const { return new TubularGantry(*this); }
-
-/*!
- * Returns the nominal detector location. This ignores any (optional) detector displacement.
- *
- * Overrides the base class method and computes the detector location based on the tubular gantry
- * parametrization (i.e. source-to-detector distance etc.).
- */
-mat::Location TubularGantry::nominalDetectorLocation() const { return detectorLocationTG(); }
-
-/*!
- * Returns the nominal source location. This ignores any (optional) source displacement.
- *
- * Overrides the base class method and computes the source location based on the tubular gantry
- * parametrization (i.e. source-to-detector distance etc.).
- */
-mat::Location TubularGantry::nominalSourceLocation() const { return sourceLocationTG(); }
 
 /*!
  * Sets the table pitch to \a position. Position value is expected in millimeters.

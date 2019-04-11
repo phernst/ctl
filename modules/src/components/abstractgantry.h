@@ -124,6 +124,13 @@ inline AbstractGantry::AbstractGantry(const QString& name)
  *
  * The location contains the position in world coordinates as well as the rotation matrix that
  * holds the transformation from an unaltered source coordinate system to the WCS.
+ *
+ * \f$
+ * L_{\textrm{src}}^{\textrm{total}}=
+ * (t_{\textrm{src}}^{\textrm{total}},R_{\textrm{src}}^{\textrm{total}})
+ * \f$
+ *
+ * \sa sourcePosition(), sourceRotation().
  */
 inline mat::Location AbstractGantry::sourceLocation() const
 {
@@ -132,6 +139,12 @@ inline mat::Location AbstractGantry::sourceLocation() const
 
 /*!
  * Convenience method. Returns the final source position in world coordinates.
+ *
+ * \f$
+ * t_{\textrm{src}}^{\textrm{total}}=R_{\textrm{gantry}}^{\textrm{displ}}
+ * \cdot t_{\textrm{src}}^{\textrm{nominal}}+R_{\textrm{src}}^{\textrm{total}}
+ * \cdot t_{\textrm{src}}^{\textrm{displ}}+t_{\textrm{gantry}}^{\textrm{displ}}
+ * \f$
  *
  * Same as: sourceLocation().position.
  */
@@ -145,6 +158,11 @@ inline Vector3x1 AbstractGantry::sourcePosition() const
 /*!
  * Convenience method. Returns the total transformation matrix from an unaltered source coordinate
  * system to the WCS.
+ *
+ * \f$
+ * R_{\textrm{src}}^{\textrm{total}}=R_{\textrm{gantry}}^{\textrm{displ}}
+ * \cdot R_{\textrm{src}}^{\textrm{nominal}}\cdot R_{\textrm{src}}^{\textrm{displ}}
+ * \f$
  *
  * Same as sourceLocation().rotation.
  */
@@ -162,6 +180,13 @@ inline Matrix3x3 AbstractGantry::sourceRotation() const
  * The location contains the position in world coordinates as well as the rotation matrix that
  * holds the transformation from world coordinates to the CT coordinate system of the detector as
  * a whole.
+ *
+ * \f$
+ * L_{\textrm{det}}^{\textrm{total}}=
+ * (t_{\textrm{det}}^{\textrm{total}},R_{\textrm{det}}^{\textrm{total}})
+ * \f$
+ *
+ * \sa detectorPosition(), detectorRotation().
  */
 inline mat::Location AbstractGantry::detectorLocation() const
 {
@@ -170,6 +195,17 @@ inline mat::Location AbstractGantry::detectorLocation() const
 
 /*!
  * Convenience method. Returns the final position of the detector center in world coordinates.
+ *
+ * \f$
+ * \begin{align*}
+ * t_{\textrm{det}}^{\textrm{total}} & =R_{\textrm{gantry}}^{\textrm{displ}}\cdot
+ * \left(t_{\textrm{det}}^{\textrm{nominal}}+\left(R_{\textrm{det}}^{\textrm{displ}}\right)^{T}
+ * \cdot R_{\textrm{det}}^{\textrm{nominal}}\cdot t_{\textrm{det}}^{\textrm{displ}}\right)
+ * +t_{\textrm{gantry}}^{\textrm{displ}}\\& =R_{\textrm{gantry}}^{\textrm{displ}}
+ * \cdot t_{\textrm{det}}^{\textrm{nominal}}+\left(R_{\textrm{det}}^{\textrm{total}}\right)^{T}
+ * \cdot t_{\textrm{det}}^{\textrm{displ}}+t_{\textrm{gantry}}^{\textrm{displ}}
+ * \end{align*}
+ * \f$
  *
  * Same as: detectorLocation().position.
  */
@@ -184,6 +220,12 @@ inline Vector3x1 AbstractGantry::detectorPosition() const
  * Convenience method. Returns the total transformation matrix from world coordinates to the CT
  * coordinate system of the detector as a whole.
  *
+ * \f$
+ * R_{\textrm{WCS-CTS}}:=R_{\textrm{det}}^{\textrm{total}}=\left(R_{\textrm{det}}^{\textrm{displ}}
+ * \right)^{T}\cdot R_{\textrm{det}}^{\textrm{nominal}}\cdot\left(R_{\textrm{gantry}}^{\textrm{displ}}
+ * \right)^{T}
+ * \f$
+ *
  * Same as: detectorLocation().rotation.
  */
 inline Matrix3x3 AbstractGantry::detectorRotation() const
@@ -195,6 +237,11 @@ inline Matrix3x3 AbstractGantry::detectorRotation() const
 
 /*!
  *  Returns the specified displacement of the detector.
+ *
+ * \f$
+ * L_{\textrm{det}}^{\textrm{displ}}=
+ * (t_{\textrm{det}}^{\textrm{displ}},R_{\textrm{det}}^{\textrm{displ}})
+ * \f$
  */
 inline const mat::Location& AbstractGantry::detectorDisplacement() const
 {
@@ -203,6 +250,11 @@ inline const mat::Location& AbstractGantry::detectorDisplacement() const
 
 /*!
  *  Returns the specified displacement of the whole gantry.
+ *
+ * \f$
+ * L_{\textrm{gantry}}^{\textrm{displ}}=
+ * (t_{\textrm{gantry}}^{\textrm{displ}},R_{\textrm{gantry}}^{\textrm{displ}})
+ * \f$
  */
 inline const mat::Location& AbstractGantry::gantryDisplacement() const
 {
@@ -211,6 +263,11 @@ inline const mat::Location& AbstractGantry::gantryDisplacement() const
 
 /*!
  *  Returns the specified displacement of the source.
+ *
+ * \f$
+ * L_{\textrm{src}}^{\textrm{displ}}=
+ * (t_{\textrm{src}}^{\textrm{displ}},R_{\textrm{src}}^{\textrm{displ}})
+ * \f$
  */
 inline const mat::Location& AbstractGantry::sourceDisplacement() const
 {
@@ -219,6 +276,8 @@ inline const mat::Location& AbstractGantry::sourceDisplacement() const
 
 /*!
  *  Sets the displacement of the detector to \a displacement.
+ *
+ * The detector displacement is defined in the CT coordinate system.
  */
 inline void AbstractGantry::setDetectorDisplacement(const mat::Location& displacement)
 {
@@ -227,6 +286,8 @@ inline void AbstractGantry::setDetectorDisplacement(const mat::Location& displac
 
 /*!
  *  Sets the displacement of the whole gantry to \a displacement.
+ *
+ * The gantry displacement is defined in the world coordinate system.
  */
 inline void AbstractGantry::setGantryDisplacement(const mat::Location& displacement)
 {
@@ -235,6 +296,8 @@ inline void AbstractGantry::setGantryDisplacement(const mat::Location& displacem
 
 /*!
  *  Sets the displacement of the source to \a displacement.
+ *
+ * The source displacement is defined in the world coordinate system.
  */
 inline void AbstractGantry::setSourceDisplacement(const mat::Location& displacement)
 {

@@ -16,8 +16,34 @@ CarmGantry::CarmGantry(double cArmSpan, const QString &name)
 }
 
 /*!
+ * Returns the nominal detector location. This ignores any (optional) detector displacement.
+ *
+ * Overrides the base class method and computes the detector location based on the C-arm
+ * parametrization (i.e. source location and C-arm span).
+ */
+mat::Location CarmGantry::nominalDetectorLocation() const { return detectorLocationCA(); }
+
+/*!
+ * Returns the nominal source location. This ignores any (optional) source displacement.
+ *
+ * Overrides the base class method and returns the source location like specified as part of the
+ * C-arm parametrization (i.e. source location and C-arm span).
+ *
+ * \sa location().
+ */
+mat::Location CarmGantry::nominalSourceLocation() const { return _location; }
+
+/*!
  * Computes the detector position based on the location of the source and the C-arm span, based on
  * the assumption that all components are aligned on the optical axis.
+ *
+ * \f$
+ * t_{\textrm{det}}^{\textrm{nominal}}=t_{\textrm{C-arm}}-R_{\textrm{C-arm}}
+ * \cdot\left[\begin{array}{c}0\\0\\-\mathtt{cArmSpan}\end{array}\right],
+ * \f$
+ *
+ * where \f$t_{\textrm{C-arm}}\f$ and \f$R_{\textrm{C-arm}}\f$ are the position and rotation of
+ * the C-arm that have been specified by setLocation().
  */
 Vector3x1 CarmGantry::detectorPositionCA() const
 {
@@ -31,6 +57,13 @@ Vector3x1 CarmGantry::detectorPositionCA() const
  *
  * In this configuration, this is the same as the transposed source rotation matrix, i.e.:
  * location().rotation.transposed().
+ *
+ * \f$
+ * R_{\textrm{det}}^{\textrm{nominal}}=R_{\textrm{C-arm}}^{T},
+ * \f$
+ *
+ * where \f$R_{\textrm{C-arm}}\f$ denotes the rotation of the C-arm that has been specified by
+ * setLocation().
  */
 Matrix3x3 CarmGantry::detectorRotationCA() const
 {
@@ -113,24 +146,6 @@ QVariant CarmGantry::toVariant() const
 
 // use documentation of GenericComponent::clone()
 SystemComponent* CarmGantry::clone() const { return new CarmGantry(*this); }
-
-/*!
- * Returns the nominal detector location. This ignores any (optional) detector displacement.
- *
- * Overrides the base class method and computes the detector location based on the C-arm
- * parametrization (i.e. source location and C-arm span).
- */
-mat::Location CarmGantry::nominalDetectorLocation() const { return detectorLocationCA(); }
-
-/*!
- * Returns the nominal source location. This ignores any (optional) source displacement.
- *
- * Overrides the base class method and returns the source location like specified as part of the
- * C-arm parametrization (i.e. source location and C-arm span).
- *
- * \sa location().
- */
-mat::Location CarmGantry::nominalSourceLocation() const { return _location; }
 
 /*!
  * Returns the current location of the gantry, i.e. the position (in world coordinates) of the
