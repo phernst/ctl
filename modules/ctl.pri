@@ -80,7 +80,8 @@ HEADERS += \
     $$PWD/src/io/binaryserializer.h \
     $$PWD/src/acquisition/viewgeometry.h \
     $$PWD/src/img/compositevolume.h \
-    $$PWD/src/projectors/spectralprojectorextension.h
+    $$PWD/src/projectors/spectralprojectorextension.h \
+    $$PWD/src/io/ctldatabase.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -127,4 +128,5 @@ SOURCES += \
     $$PWD/src/io/binaryserializer.cpp \
     $$PWD/src/acquisition/viewgeometry.cpp \
     $$PWD/src/img/compositevolume.cpp \
-    $$PWD/src/projectors/spectralprojectorextension.cpp
+    $$PWD/src/projectors/spectralprojectorextension.cpp \
+    $$PWD/src/io/ctldatabase.cpp
