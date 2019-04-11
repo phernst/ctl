@@ -34,6 +34,12 @@ float SpectralVolumeData::averageMassAttenuationFactor(float centerEnergy, float
         return massAttenuationFactor(centerEnergy);
     }
 
+    if(!_absorptionModel)
+    {
+        qWarning("RealisticVolumeData::averageMassAttenuationFactor: No absorption model set!");
+        return -1.0f;
+    }
+
     return _absorptionModel->binIntegral(centerEnergy, binWidth) / binWidth;
 }
 
@@ -44,6 +50,12 @@ const VoxelVolume<float>& SpectralVolumeData::density() const
 
 float SpectralVolumeData::massAttenuationFactor(float atEnergy) const
 {
+    if(!_absorptionModel)
+    {
+        qWarning("RealisticVolumeData::massAttenuationFactor: No absorption model set!");
+        return -1.0f;
+    }
+
     return _absorptionModel->valueAt(atEnergy);
 }
 
