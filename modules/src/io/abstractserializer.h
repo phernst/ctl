@@ -31,6 +31,25 @@ public:
     public:virtual std::unique_ptr<CTsystem> deserializeSystem(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<AcquisitionSetup> deserializeAquisitionSetup(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<SerializationInterface> deserializeMiscObject(const QString& fileName) const = 0;
+
+    // convenience deserialization interface for concrete derived types
+public:
+    template<class DerivedType>
+    std::unique_ptr<DerivedType> deserialize(const QString& fileName);
+
+private:
+    template<class DerivedType>
+    std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, SystemComponent*);
+    template<class DerivedType>
+    std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, AbstractDataModel*);
+    template<class DerivedType>
+    std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, AbstractPrepareStep*);
+    template<class DerivedType>
+    std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, CTsystem*);
+    template<class DerivedType>
+    std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, AcquisitionSetup*);
+    template<class DerivedType>
+    std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, SerializationInterface*);
 };
 
 inline void AbstractSerializer::serialize(const AbstractDataModel& model, const QString& fileName) const
@@ -57,6 +76,68 @@ inline void AbstractSerializer::serialize(const CTsystem& system, const QString&
 inline void AbstractSerializer::serialize(const SystemComponent& component, const QString& fileName) const
 {
     serialize(static_cast<const SerializationInterface&>(component), fileName);
+}
+
+template<class DerivedType>
+std::unique_ptr<DerivedType> AbstractSerializer::deserialize(const QString& fileName)
+{
+    DerivedType* d = nullptr;
+    return deserializeDerived<DerivedType>(fileName, d);
+}
+
+template<class DerivedType>
+std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, SystemComponent*)
+{
+    auto uPtr = deserializeComponent(fileName);
+    if(dynamic_cast<DerivedType*>(uPtr.get()))
+        return std::unique_ptr<DerivedType>(static_cast<DerivedType*>(uPtr.release()));
+    else
+        return nullptr;
+}
+template<class DerivedType>
+std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, AbstractDataModel*)
+{
+    auto uPtr = deserializeDataModel(fileName);
+    if(dynamic_cast<DerivedType*>(uPtr.get()))
+        return std::unique_ptr<DerivedType>(static_cast<DerivedType*>(uPtr.release()));
+    else
+        return nullptr;
+}
+template<class DerivedType>
+std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, AbstractPrepareStep*)
+{
+    auto uPtr = deserializePrepareStep(fileName);
+    if(dynamic_cast<DerivedType*>(uPtr.get()))
+        return std::unique_ptr<DerivedType>(static_cast<DerivedType*>(uPtr.release()));
+    else
+        return nullptr;
+}
+template<class DerivedType>
+std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, CTsystem*)
+{
+    auto uPtr = deserializeSystem(fileName);
+    if(dynamic_cast<DerivedType*>(uPtr.get()))
+        return std::unique_ptr<DerivedType>(static_cast<DerivedType*>(uPtr.release()));
+    else
+        return nullptr;
+}
+template<class DerivedType>
+std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, AcquisitionSetup*)
+{
+    auto uPtr = deserializeAquisitionSetup(fileName);
+    if(dynamic_cast<DerivedType*>(uPtr.get()))
+        return std::unique_ptr<DerivedType>(static_cast<DerivedType*>(uPtr.release()));
+    else
+        return nullptr;
+}
+template<class DerivedType>
+std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, SerializationInterface*)
+{
+    auto uPtr = deserializeMiscObject(fileName);
+    if(dynamic_cast<DerivedType*>(uPtr.get()))
+        return std::unique_ptr<DerivedType>(static_cast<DerivedType*>(uPtr.release()));
+    else
+        return nullptr;
 }
 
 } // namespace CTL
