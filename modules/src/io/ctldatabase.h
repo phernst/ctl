@@ -2,6 +2,7 @@
 #define CTLDATABASEHANDLER_H
 
 #include "models/abstractdatamodel.h"
+#include "models/tabulateddatamodel.h"
 #include "io/jsonserializer.h"
 
 #include <QDir>
@@ -161,7 +162,7 @@ enum class spectrum{
 
 std::shared_ptr<AbstractIntegrableDataModel> attenuationModel(database::element element);
 std::shared_ptr<AbstractIntegrableDataModel> attenuationModel(database::composite composite);
-std::shared_ptr<AbstractIntegrableDataModel> xRaySpectrum(database::spectrum spectrum);
+std::shared_ptr<TabulatedDataModel> xRaySpectrum(database::spectrum spectrum);
 
 }
 
@@ -174,10 +175,10 @@ public:
 
     std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::composite composite);
     std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::element element);
-    std::shared_ptr<AbstractIntegrableDataModel> loadXRaySpectrum(database::spectrum spectrum);
+    std::shared_ptr<TabulatedDataModel> loadXRaySpectrum(database::spectrum spectrum);
 
 private:
-    CTLDatabaseHandler();
+    CTLDatabaseHandler() = default;
     // non-copyable
     CTLDatabaseHandler(const CTLDatabaseHandler&) = delete;
     CTLDatabaseHandler& operator=(const CTLDatabaseHandler&) = delete;

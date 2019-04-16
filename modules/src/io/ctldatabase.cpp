@@ -27,14 +27,9 @@ std::shared_ptr<AbstractIntegrableDataModel> CTLDatabaseHandler::loadAttenuation
     return _serializer.deserialize<AbstractIntegrableDataModel>(_fileMap.value(int(element)));
 }
 
-std::shared_ptr<AbstractIntegrableDataModel> CTLDatabaseHandler::loadXRaySpectrum(database::spectrum spectrum)
+std::shared_ptr<TabulatedDataModel> CTLDatabaseHandler::loadXRaySpectrum(database::spectrum spectrum)
 {
-    return _serializer.deserialize<AbstractIntegrableDataModel>(_fileMap.value(int(spectrum)));
-}
-
-CTLDatabaseHandler::CTLDatabaseHandler()
-{
-
+    return _serializer.deserialize<TabulatedDataModel>(_fileMap.value(int(spectrum)));
 }
 
 void CTLDatabaseHandler::makeFileMap()
@@ -219,7 +214,7 @@ std::shared_ptr<AbstractIntegrableDataModel> database::attenuationModel(database
     return CTLDatabaseHandler::instance().loadAttenuationModel(composite);
 }
 
-std::shared_ptr<AbstractIntegrableDataModel> database::xRaySpectrum(database::spectrum spectrum)
+std::shared_ptr<TabulatedDataModel> database::xRaySpectrum(database::spectrum spectrum)
 {
     return CTLDatabaseHandler::instance().loadXRaySpectrum(spectrum);
 }
