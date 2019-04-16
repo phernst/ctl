@@ -230,4 +230,34 @@ AbstractDataModel *KramersLawSpectrumModel::clone() const
     return new KramersLawSpectrumModel(*this);
 }
 
+float HeuristicCubicSpectrumModel::valueAt(float position) const
+{
+    return (position<_energy) ? _energy * std::pow(_energy-position, 2.0) - std::pow(_energy-position, 3.0)
+                              : 0.0f;
+}
+
+float HeuristicCubicSpectrumModel::binIntegral(float position, float binWidth) const
+{
+    auto antiderivative = [this](float E)
+    {
+        return -1.0/3.0 * _energy * std::pow(_energy-E, 3.0) + 1.0/4.0 * std::pow(_energy-E, 4.0);
+    };
+
+    const float bot = position - 0.5f*binWidth;
+    float top = position + 0.5f*binWidth;
+
+    if((top < 0.0f) || (bot > _energy))
+        return 0.0f;
+
+    if(top > _energy)
+        top = _energy;
+
+    return antiderivative(top) - antiderivative(bot);
+}
+
+AbstractDataModel* HeuristicCubicSpectrumModel::clone() const
+{
+    return new HeuristicCubicSpectrumModel(*this);
+}
+
 } // namespace CTL

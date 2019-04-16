@@ -74,6 +74,16 @@ class KramersLawSpectrumModel : public AbstractXraySpectrumModel
     public: AbstractDataModel* clone() const override;
 };
 
+class HeuristicCubicSpectrumModel : public AbstractXraySpectrumModel
+{
+    CTL_TYPE_ID(42)
+
+    // abstract interfaces
+    public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
+    public: AbstractDataModel* clone() const override;
+};
+
 } // namespace CTL
 
 #endif // XRAYSPECTRUMMODELS_H
