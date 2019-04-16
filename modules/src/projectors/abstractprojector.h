@@ -75,16 +75,17 @@ class AbstractProjector
     public:virtual ProjectionData project(const VolumeData& volume) = 0;
 
 public:
-    virtual ProjectionData projectComposite(const CompositeVolume& volume);
-
-public:
     virtual ~AbstractProjector() = default;
 
+    virtual bool isLinear() const;
+    virtual ProjectionData projectComposite(const CompositeVolume& volume);
     ProjectorNotifier* notifier();
 
 private:
     ProjectorNotifier _notifier; //!< The notifier object used for signal emission.
 };
+
+inline bool AbstractProjector::isLinear() const { return true; }
 
 inline ProjectionData AbstractProjector::projectComposite(const CompositeVolume &volume)
 {

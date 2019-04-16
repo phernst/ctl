@@ -29,6 +29,7 @@ public:
     // virtual methods
     void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
     ProjectionData project(const VolumeData& volume) override;
+    bool isLinear() const override;
 
     // other methods
     AbstractProjector* release();
@@ -127,6 +128,15 @@ inline ProjectionData ProjectorExtension::project(const VolumeData& volume)
         throw std::runtime_error("ProjectorExtension::project(): no nested projector set.");
 
     return _projector->project(volume);
+}
+
+inline bool ProjectorExtension::isLinear() const
+{
+    Q_ASSERT(_projector);
+    if(!_projector)
+        throw std::runtime_error("ProjectorExtension::isLinear(): no nested projector set.");
+
+    return _projector->isLinear();
 }
 
 /*!
