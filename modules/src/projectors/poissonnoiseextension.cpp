@@ -16,10 +16,10 @@ void PoissonNoiseExtension::configure(const AcquisitionSetup &setup,
     ProjectorExtension::configure(setup, config);
 }
 
-ProjectionData PoissonNoiseExtension::project(const VolumeData &volume)
+ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& nestedProjector)
 {
     // compute (clean) projections
-    auto ret = ProjectorExtension::project(volume);
+    auto ret = nestedProjector.project();
 
     // add noise
     if(_useParallelization)
@@ -47,6 +47,11 @@ ProjectionData PoissonNoiseExtension::project(const VolumeData &volume)
     }
 
     return ret;
+}
+
+bool PoissonNoiseExtension::isLinear() const
+{
+    return false;
 }
 
 void PoissonNoiseExtension::setParallelizationEnabled(bool enabled)

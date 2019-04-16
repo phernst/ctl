@@ -14,9 +14,9 @@ void DetectorSaturationExtension::configure(const AcquisitionSetup& setup,
     ProjectorExtension::configure(setup, config);
 }
 
-ProjectionData DetectorSaturationExtension::project(const VolumeData& volume)
+ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector& nestedProjector)
 {
-    auto ret = ProjectorExtension::project(volume);
+    auto ret = nestedProjector.project();
 
     auto saturationModelType = _setup.system()->detector()->saturationModelType();
 

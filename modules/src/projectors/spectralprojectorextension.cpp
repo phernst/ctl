@@ -87,7 +87,7 @@ ProjectionData SpectralProjectorExtension::project(const VolumeData& volume)
             intens += spectraI[bin][0];
         }
 
-        //sumProj.transformToExtinction(intens);
+        sumProj.transformToExtinction(intens);
 
         return sumProj;
     }

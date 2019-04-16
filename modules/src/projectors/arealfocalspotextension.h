@@ -66,11 +66,11 @@ public:
     using ProjectorExtension::ProjectorExtension;
 
     void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
-    ProjectionData project(const VolumeData& volume) override;
-
     void setDiscretization(const QSize& discretization);
 
 protected:
+    ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
+
     QSize _discretizationSteps = { 1, 1 }; //!< Requested number of discretization steps in both dimensions.
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
     std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
