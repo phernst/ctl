@@ -20,6 +20,23 @@ namespace CTL {
  */
 class ProjectorExtension : public AbstractProjector
 {
+protected:
+    class MetaProjector
+    {
+    public:
+        MetaProjector(const VolumeData& volume, AbstractProjector* projector);
+        MetaProjector(const CompositeVolume& volume, AbstractProjector* projector);
+
+        ProjectionData project() const;
+        bool isComposite() const;
+
+    private:
+        AbstractProjector* _projector;
+        const VolumeData* _simpleVolume;
+        const CompositeVolume* _compositeVolume;
+    };
+
+
 public:
     ProjectorExtension(AbstractProjector* projector = nullptr);
     ProjectorExtension(std::unique_ptr<AbstractProjector> projector);
@@ -29,6 +46,7 @@ public:
     // virtual methods
     void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
     ProjectionData project(const VolumeData& volume) override;
+    ProjectionData projectComposite(const CompositeVolume& volume) override;
     bool isLinear() const override;
 
     // other methods
@@ -37,26 +55,45 @@ public:
     void use(AbstractProjector* other);
     void use(std::unique_ptr<AbstractProjector> other);
 
+protected:
+    virtual ProjectionData extendedProject(const MetaProjector& nestedProjector);
+
 private:
     AbstractProjector* _projector; //!< The nested projector object.
 };
 
-// factory function `makeExtension` (2 overloads, one for each ctor)
-template <typename ProjectorExtensionType>
-auto makeExtension(AbstractProjector* projector = nullptr) ->
-typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorExtension*>::value,
-                        std::unique_ptr<ProjectorExtensionType>>::type
+
+inline ProjectorExtension::MetaProjector::MetaProjector(const VolumeData& volume,
+                                                        AbstractProjector* projector)
+    : _projector(projector)
+    , _simpleVolume(&volume)
+    , _compositeVolume(nullptr)
 {
-    return std::unique_ptr<ProjectorExtensionType>(new ProjectorExtensionType(projector));
 }
 
-template <typename ProjectorExtensionType>
-auto makeExtension(std::unique_ptr<AbstractProjector> projector) ->
-typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorExtension*>::value,
-                        std::unique_ptr<ProjectorExtensionType>>::type
+inline ProjectorExtension::MetaProjector::MetaProjector(const CompositeVolume& volume,
+                                                        AbstractProjector* projector)
+    : _projector(projector)
+    , _simpleVolume(nullptr)
+    , _compositeVolume(&volume)
 {
-    return std::unique_ptr<ProjectorExtensionType>(
-        new ProjectorExtensionType(std::move(projector)));
+}
+
+inline bool ProjectorExtension::MetaProjector::isComposite() const
+{
+    return _compositeVolume;
+}
+
+inline ProjectionData ProjectorExtension::MetaProjector::project() const
+{
+    return isComposite() ? _projector->projectComposite(*_compositeVolume)
+                         : _projector->project(*_simpleVolume);
+}
+
+inline ProjectionData ProjectorExtension::extendedProject(const MetaProjector& nestedProjector)
+{
+    qDebug() << "called metaProject";
+    return nestedProjector.project();
 }
 
 /*!
@@ -127,7 +164,22 @@ inline ProjectionData ProjectorExtension::project(const VolumeData& volume)
     if(!_projector)
         throw std::runtime_error("ProjectorExtension::project(): no nested projector set.");
 
-    return _projector->project(volume);
+    qDebug() << "build MetaProjector";
+    MetaProjector p(volume, _projector);
+    qDebug() << "MetaProjector rdy";
+
+    return extendedProject(p);
+}
+
+inline ProjectionData ProjectorExtension::projectComposite(const CompositeVolume& volume)
+{
+    Q_ASSERT(_projector);
+    if(!_projector)
+        throw std::runtime_error("ProjectorExtension::projectComposite(): no nested projector set.");
+
+    MetaProjector p(volume, _projector);
+
+    return extendedProject(p);
 }
 
 inline bool ProjectorExtension::isLinear() const
@@ -192,6 +244,25 @@ inline void ProjectorExtension::use(AbstractProjector* other)
 inline void ProjectorExtension::use(std::unique_ptr<AbstractProjector> other)
 {
     this->use(other.release());
+}
+
+
+// factory function `makeExtension` (2 overloads, one for each ctor)
+template <typename ProjectorExtensionType>
+auto makeExtension(AbstractProjector* projector = nullptr) ->
+typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorExtension*>::value,
+                        std::unique_ptr<ProjectorExtensionType>>::type
+{
+    return std::unique_ptr<ProjectorExtensionType>(new ProjectorExtensionType(projector));
+}
+
+template <typename ProjectorExtensionType>
+auto makeExtension(std::unique_ptr<AbstractProjector> projector) ->
+typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorExtension*>::value,
+                        std::unique_ptr<ProjectorExtensionType>>::type
+{
+    return std::unique_ptr<ProjectorExtensionType>(
+        new ProjectorExtensionType(std::move(projector)));
 }
 
 } // namespace CTL
