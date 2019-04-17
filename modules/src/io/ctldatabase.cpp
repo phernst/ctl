@@ -3,6 +3,31 @@
 
 namespace CTL {
 
+CTLDatabaseHandler::CTLDatabaseHandler()
+{
+    auto fileWithDatabasePath = []
+    {
+        QString ret = QCoreApplication::applicationDirPath();
+        if(!ret.isEmpty() &&
+           !ret.endsWith(QStringLiteral("/")) &&
+           !ret.endsWith(QStringLiteral("\\")))
+            ret += QStringLiteral("/");
+        ret += QStringLiteral("database.path");
+        return ret;
+    };
+
+    QFile file(fileWithDatabasePath());
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        qWarning() << "cannot open 'database.path'";
+        return;
+    }
+
+    auto dbRoot = file.readLine();
+    dbRoot.chop(1);
+    this->setDataBaseRoot(dbRoot);
+}
+
 CTLDatabaseHandler& CTLDatabaseHandler::instance()
 {
     static CTLDatabaseHandler theInstance;
@@ -31,32 +56,6 @@ std::shared_ptr<AbstractIntegrableDataModel> CTLDatabaseHandler::loadAttenuation
 std::shared_ptr<TabulatedDataModel> CTLDatabaseHandler::loadXRaySpectrum(database::spectrum spectrum)
 {
     return _serializer.deserialize<TabulatedDataModel>(_fileMap.value(int(spectrum)));
-}
-
-CTLDatabaseHandler::CTLDatabaseHandler()
-{
-    auto fileWithDatabasePath = []
-    {
-        QString ret = QCoreApplication::applicationDirPath();
-        if(!ret.isEmpty() &&
-           !ret.endsWith(QStringLiteral("/")) &&
-           !ret.endsWith(QStringLiteral("\\")))
-            ret += QStringLiteral("/");
-        ret += QStringLiteral("database.path");
-        return ret;
-    };
-
-    QFile file(fileWithDatabasePath());
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        qWarning() << "cannot open 'database.path'";
-        return;
-    }
-
-    auto dbFileName = file.readLine();
-    dbFileName.chop(1);
-    _dbRoot = dbFileName;
-    makeFileMap();
 }
 
 void CTLDatabaseHandler::makeFileMap()
