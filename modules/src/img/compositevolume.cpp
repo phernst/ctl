@@ -1,4 +1,5 @@
 #include "compositevolume.h"
+#include <cmath>
 
 namespace CTL {
 
@@ -67,6 +68,28 @@ const QString& SpectralVolumeData::materialName() const
 VoxelVolume<float> SpectralVolumeData::muVolume(float centerEnergy, float binWidth) const
 {
     return (*this) * averageMassAttenuationFactor(centerEnergy, binWidth);
+}
+
+SpectralVolumeData SpectralVolumeData::createBall(float radius, float voxelSize, float density,
+                                                  std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
+{
+    uint nbVox = static_cast<uint>(ceil(2.0f * radius / voxelSize));
+
+    SpectralVolumeData::Dimensions volDim{ nbVox, nbVox, nbVox };
+    SpectralVolumeData::VoxelSize voxSize = { voxelSize, voxelSize, voxelSize };
+    SpectralVolumeData volume({volDim, voxSize});
+    volume.fill(density);
+    volume.setAbsorptionModel(absorptionModel);
+
+    float center = float(nbVox-1)/2.0;
+
+    for(float x = 0.0f; x < nbVox; ++x)
+        for(float y = 0.0f; y < nbVox; ++y)
+            for(float z = 0.0f; z < nbVox; ++z)
+                if((x-center)*(x-center) + (y-center)*(y-center) + (z-center)*(z-center) > radius*radius)
+                    volume(x,y,z) = 0.0f;
+
+    return volume;
 }
 
 void SpectralVolumeData::setAbsorptionModel(AbstractIntegrableDataModel* absorptionModel)

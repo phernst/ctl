@@ -24,6 +24,9 @@ public:
     const QString& materialName() const;
     VoxelVolume<float> muVolume(float centerEnergy, float binWidth) const;
 
+    static SpectralVolumeData createBall(float radius, float voxelSize, float density,
+                                         std::shared_ptr<AbstractIntegrableDataModel> absorptionModel = nullptr);
+
     // setter methods
     void setAbsorptionModel(AbstractIntegrableDataModel* absorptionModel);
     void setAbsorptionModel(std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
