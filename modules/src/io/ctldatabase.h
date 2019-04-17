@@ -178,7 +178,7 @@ public:
     std::shared_ptr<TabulatedDataModel> loadXRaySpectrum(database::spectrum spectrum);
 
 private:
-    CTLDatabaseHandler() = default;
+    CTLDatabaseHandler();
     // non-copyable
     CTLDatabaseHandler(const CTLDatabaseHandler&) = delete;
     CTLDatabaseHandler& operator=(const CTLDatabaseHandler&) = delete;

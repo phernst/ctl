@@ -130,3 +130,9 @@ SOURCES += \
     $$PWD/src/img/compositevolume.cpp \
     $$PWD/src/projectors/spectralprojectorextension.cpp \
     $$PWD/src/io/ctldatabase.cpp
+
+# create a file that contains the absolute path to database
+DATABASE_ROOT = $$PWD/../database
+QMAKE_SUBSTITUTES += $$PWD/.database.path.in
+# copy this file to build folder
+QMAKE_POST_LINK += $(COPY_FILE) \"$$shell_path($$PWD/.database.path)\" \"$$shell_path($$DESTDIR/database.path)\" $$escape_expand(\n\t)
