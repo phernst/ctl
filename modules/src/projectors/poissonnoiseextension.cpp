@@ -30,6 +30,7 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
         {
             _setup.prepareView(view);
             auto i_0 = _setup.system()->source()->photonFlux();
+            uint seed = _useFixedSeed ? _fixedSeed + view : rd();
             futures[view] = std::async(processViewCompact,
                                        &ret.view(view), i_0, rd());
         }
@@ -38,34 +39,45 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
     }
     else
     {
+        uint seedShift = 0;
         for(uint view = 0; view < ret.nbViews(); ++view)
         {
             _setup.prepareView(view);
             auto i_0 = _setup.system()->source()->photonFlux();
-            processView(ret.view(view), i_0);
+            seedShift = std::max(seedShift, view * ret.view(view).nbModules());
+            processView(ret.view(view), i_0, seedShift);
         }
     }
 
     return ret;
 }
 
-bool PoissonNoiseExtension::isLinear() const
-{
-    return false;
-}
+bool PoissonNoiseExtension::isLinear() const { return false; }
+
+void PoissonNoiseExtension::setFixedSeed(uint seed) { _fixedSeed = seed; }
 
 void PoissonNoiseExtension::setParallelizationEnabled(bool enabled)
 {
     _useParallelization = enabled;
 }
 
-void PoissonNoiseExtension::processView(SingleViewData &view, double i_0)
+void PoissonNoiseExtension::toggleFixedSeed(bool enabled) { _useFixedSeed = enabled; }
+
+void PoissonNoiseExtension::processView(SingleViewData &view, double i_0, uint seedShift)
 {
+    if(qFuzzyIsNull(i_0))
+    {
+        qDebug() << "PoissonNoiseExtension::processView(): Skipped view with i_0 = 0.";
+        return;
+    }
+
+    std::random_device rd;
     for(uint mod = 0; mod < view.nbModules(); ++mod)
     {
         auto counts = transformedToCounts(view.module(mod), i_0);
 
-        addNoiseToData(counts);
+        uint seed = _useFixedSeed ? _fixedSeed + mod + seedShift : rd();
+        addNoiseToData(counts, seed);
 
         view.module(mod) = transformedToExtinctions(counts, i_0);
     }
@@ -73,6 +85,12 @@ void PoissonNoiseExtension::processView(SingleViewData &view, double i_0)
 
 void PoissonNoiseExtension::processViewCompact(SingleViewData* view, double i_0, uint seed)
 {
+    if(qFuzzyIsNull(i_0))
+    {
+        qDebug() << "PoissonNoiseExtension::processViewCompact(): Skipped view with i_0 = 0.";
+        return;
+    }
+
     std::mt19937_64 gen(seed);
 
     for(auto& module : view->data())
@@ -111,10 +129,9 @@ SingleViewData::ModuleData PoissonNoiseExtension::transformedToExtinctions(const
     return ret;
 }
 
-void PoissonNoiseExtension::addNoiseToData(Chunk2D<double> &data)
+void PoissonNoiseExtension::addNoiseToData(Chunk2D<double> &data, uint seed)
 {
-    std::random_device rd;
-    std::mt19937_64 gen(rd());
+    std::mt19937_64 gen(seed);
 
     auto rawDataPtr = data.rawData();
     for(uint pix = 0; pix < data.nbElements(); ++pix)

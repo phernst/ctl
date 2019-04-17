@@ -16,19 +16,23 @@ public:
     void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
     bool isLinear() const override;
 
+    void setFixedSeed(uint seed);
     void setParallelizationEnabled(bool enabled);
+    void toggleFixedSeed(bool enabled);
 
 protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
 
 private:
     bool _useParallelization = true;
+    bool _useFixedSeed = false;
+    uint _fixedSeed = 0;
 
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
     std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
 
-    void addNoiseToData(Chunk2D<double>& data);
-    void processView(SingleViewData& view, double i_0);
+    void addNoiseToData(Chunk2D<double>& data, uint seed);
+    void processView(SingleViewData& view, double i_0, uint seedShift);
     Chunk2D<double> transformedToCounts(const SingleViewData::ModuleData& module, double i_0) const;
     SingleViewData::ModuleData transformedToExtinctions(const Chunk2D<double>& counts,
                                                         double i_0) const;
