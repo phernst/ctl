@@ -30,33 +30,12 @@ void SpectralProjectorExtension::configure(const AcquisitionSetup& setup, const 
  */
 ProjectionData SpectralProjectorExtension::project(const VolumeData& volume)
 {
+    CompositeVolume vol;
+    vol.addMaterialVolume(volume);
 
-    // get (view-dependent) spectra
-    const auto srcPtr = _setup.system()->source();
-
-    IntervalDataSeries spectrum;
-    std::vector<std::vector<double>> spectraN(_nbSamples);
-    std::vector<std::vector<double>> spectraI(_nbSamples);
-    std::vector<std::vector<double>> fluxMods(_nbSamples);
-    for(uint view = 0; view < _setup.nbViews(); ++view)
-    {
-        _setup.prepareView(view);
-        spectrum = srcPtr->spectrum(_from, _to, _nbSamples);
-        for(uint bin = 0; bin < _nbSamples; ++bin)
-        {
-            fluxMods[bin].push_back(srcPtr->fluxModifier());
-            spectraN[bin].push_back(spectrum.value(bin));
-            spectraI[bin].push_back(spectrum.value(bin) * spectrum.samplingPoint(bin));
-        }
-
-        // create dummy prepare step -> replaced in energy bin loop
-        auto dummyPrepareStep = std::make_shared<prepare::SourceParam>();
-        _setup.view(view).addPrepareStep(dummyPrepareStep);
-    }
-
-    const auto samplingPoints = spectrum.samplingPoints();
-    const auto binWidth = spectrum.binWidth();
-
+    return projectComposite(vol);
+    /*
+    auto spectralInfo = spectralInformation();
 
     if(ProjectorExtension::isLinear()) // linear case
     {
@@ -64,36 +43,30 @@ ProjectionData SpectralProjectorExtension::project(const VolumeData& volume)
         auto proj = ProjectorExtension::project(volume);
 
         // first bin
-        auto sumProj = proj * volume.averageMassAttenuationFactor(samplingPoints[0], binWidth);
-        sumProj.transformToIntensity(spectraI[0]);
+        auto sumProj = proj * volume.averageMassAttenuationFactor(spectralInfo.energyBins[0], spectralInfo.binWidth);
+        sumProj.transformToIntensity(spectralInfo.intensities[0]);
 
         for(uint bin = 1; bin < _nbSamples; ++bin)
         {
-            const auto& binWeights = spectraI[bin];
-            if(qFuzzyIsNull(std::accumulate(binWeights.cbegin(),binWeights.cend(),0.0)))
+            if(qFuzzyIsNull(std::accumulate(spectralInfo.intensities[bin].cbegin(),
+                                            spectralInfo.intensities[bin].cend(),0.0)))
+            {
+                qDebug() << "SpectralProjectorExtension::project(): Skipped energy bin " << bin;
                 continue;
+            }
 
-            auto binProj = proj * volume.averageMassAttenuationFactor(samplingPoints[bin], binWidth);
-            binProj.transformToIntensity(binWeights);
+            auto binProj = proj * volume.averageMassAttenuationFactor(spectralInfo.energyBins[bin], spectralInfo.binWidth);
+            binProj.transformToIntensity(spectralInfo.intensities[bin]);
             sumProj += binProj;
         }
 
-        double intens = 0.0;
-        for(uint bin = 0; bin < _nbSamples; ++bin)
-        {
-            qInfo() << "intens:" << spectraI[bin][0];
-            qInfo() << volume.averageMassAttenuationFactor(samplingPoints[bin],binWidth);
-
-            intens += spectraI[bin][0];
-        }
-
-        //sumProj.transformToExtinction(intens);
+        sumProj.transformToExtinction(spectralInfo.totalIntensities);
 
         return sumProj;
     }
     else
     {
-        qInfo() << "non-linear case";
+        qDebug() << "non-linear case";
 
         ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
         sumProj.allocateMemory(_setup.nbViews(), 0.0f);
@@ -101,37 +74,46 @@ ProjectionData SpectralProjectorExtension::project(const VolumeData& volume)
         ProjectionData binProj(_setup.system()->detector()->viewDimensions());
         binProj.allocateMemory(_setup.nbViews(), 0.0f);
 
+        // create dummy prepare step -> replaced in energy bin loop
+        for(uint view = 0; view < _setup.nbViews(); ++view)
+        {
+            auto dummyPrepareStep = std::make_shared<prepare::SourceParam>();
+            _setup.view(view).addPrepareStep(dummyPrepareStep);
+        }
+
         for(uint bin = 0; bin < _nbSamples; ++bin)
         {
-            const auto& binWeights = spectraN[bin];
-            if(qFuzzyIsNull(std::accumulate(binWeights.cbegin(),binWeights.cend(),0.0)))
+            if(qFuzzyIsNull(std::accumulate(spectralInfo.adjustedFluxMods[bin].cbegin(),
+                                            spectralInfo.adjustedFluxMods[bin].cend(),0.0)))
+            {
+                qDebug() << "SpectralProjectorExtension::project(): Skipped energy bin " << bin;
                 continue;
+            }
 
             // replace dummy prepare step to account for bin specific flux
             for(uint view = 0; view < _setup.nbViews(); ++view)
             {
-                auto binAdjustedFluxMod = fluxMods[bin][view] * binWeights[view];
                 auto sourcePrep = std::make_shared<prepare::SourceParam>();
-                sourcePrep->setFluxModifier(binAdjustedFluxMod);
+                sourcePrep->setFluxModifier(spectralInfo.adjustedFluxMods[bin][view]);
                 _setup.view(view).replacePrepareStep(sourcePrep);
             }
 
             ProjectorExtension::configure(_setup, *_config);
 
-            binProj = ProjectorExtension::project(volume.muVolume(samplingPoints[bin], binWidth));
+            binProj = ProjectorExtension::project(volume.muVolume(spectralInfo.energyBins[bin], spectralInfo.binWidth));
 
-            binProj.transformToIntensity(spectraI[bin]);
+            binProj.transformToIntensity(spectralInfo.intensities[bin]);
             sumProj += binProj;
         }
 
-        double intens = 0.0;
-        for(uint bin = 0; bin < _nbSamples; ++bin)
-            intens += spectraI[bin][0];
+        sumProj.transformToExtinction(spectralInfo.totalIntensities);
 
-        sumProj.transformToExtinction(intens);
+        for(uint v = 0; v < _setup.nbViews(); ++v)
+            _setup.view(v).removeLastPrepareStep();
 
         return sumProj;
     }
+    */
 }
 
 /*!
@@ -146,31 +128,7 @@ ProjectionData SpectralProjectorExtension::project(const VolumeData& volume)
  */
 ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolume& volume)
 {
-    // get (view-dependent) spectra
-    const auto srcPtr = _setup.system()->source();
-
-    IntervalDataSeries spectrum;
-    std::vector<std::vector<double>> relPhotonCnts(_nbSamples);
-    std::vector<std::vector<double>> intensities(_nbSamples);
-    std::vector<std::vector<double>> fluxMods(_nbSamples);
-    for(uint view = 0; view < _setup.nbViews(); ++view)
-    {
-        _setup.prepareView(view);
-        spectrum = srcPtr->spectrum(_from, _to, _nbSamples);
-        for(uint bin = 0; bin < _nbSamples; ++bin)
-        {
-            fluxMods[bin].push_back(srcPtr->fluxModifier());
-            relPhotonCnts[bin].push_back(spectrum.value(bin));
-            intensities[bin].push_back(spectrum.value(bin) * spectrum.samplingPoint(bin));
-        }
-
-        // create dummy prepare step -> replaced in energy bin loop
-        auto dummyPrepareStep = std::make_shared<prepare::SourceParam>();
-        _setup.view(view).addPrepareStep(dummyPrepareStep);
-    }
-
-    const auto energyBins = spectrum.samplingPoints();
-    const auto binWidth = spectrum.binWidth();
+    auto spectralInfo = spectralInformation();
 
     if(ProjectorExtension::isLinear())
     {
@@ -184,8 +142,8 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
 
         for(uint bin = 0; bin < _nbSamples; ++bin)
         {
-            if(qFuzzyIsNull(std::accumulate(intensities[bin].cbegin(),
-                                            intensities[bin].cend(),0.0)))
+            if(qFuzzyIsNull(std::accumulate(spectralInfo.intensities[bin].cbegin(),
+                                            spectralInfo.intensities[bin].cend(),0.0)))
             {
                 qDebug() << "Skipped energy bin " << bin;
                 continue;
@@ -196,33 +154,36 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
 
             for(uint material = 0; material < volume.nbMaterials(); ++material)
                 binProj += materialProjs[material] *
-                        volume.materialVolume(material).averageMassAttenuationFactor(energyBins[bin],
-                                                                                     binWidth);
+                        volume.materialVolume(material).averageMassAttenuationFactor(spectralInfo.energyBins[bin],
+                                                                                     spectralInfo.binWidth);
 
-            binProj.transformToIntensity(intensities[bin]);
+            binProj.transformToIntensity(spectralInfo.intensities[bin]);
 
             sumProj += binProj;
         }
 
-        double totalIntensity = 0.0;
-        for(uint bin = 0; bin < _nbSamples; ++bin)
-            totalIntensity += intensities[bin][0];
-
-        sumProj.transformToExtinction(totalIntensity);
+        sumProj.transformToExtinction(spectralInfo.totalIntensities);
 
         return sumProj;
     }
     else
     {
-        qInfo() << "non-linear case";
+        qDebug() << "non-linear case";
 
         ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
         sumProj.allocateMemory(_setup.nbViews(), 0.0f);
 
+        // create dummy prepare step -> replaced in energy bin loop
+        for(uint view = 0; view < _setup.nbViews(); ++view)
+        {
+            auto dummyPrepareStep = std::make_shared<prepare::SourceParam>();
+            _setup.view(view).addPrepareStep(dummyPrepareStep);
+        }
+
         for(uint bin = 0; bin < _nbSamples; ++bin)
         {
-            if(qFuzzyIsNull(std::accumulate(intensities[bin].cbegin(),
-                                            intensities[bin].cend(),0.0)))
+            if(qFuzzyIsNull(std::accumulate(spectralInfo.adjustedFluxMods[bin].cbegin(),
+                                            spectralInfo.adjustedFluxMods[bin].cend(),0.0)))
             {
                 qDebug() << "Skipped energy bin " << bin;
                 continue;
@@ -234,9 +195,8 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
             // replace dummy prepare step to account for bin specific flux
             for(uint view = 0; view < _setup.nbViews(); ++view)
             {
-                auto binAdjustedFluxMod = fluxMods[bin][view] * relPhotonCnts[bin][view];
                 auto sourcePrep = std::make_shared<prepare::SourceParam>();
-                sourcePrep->setFluxModifier(binAdjustedFluxMod);
+                sourcePrep->setFluxModifier(spectralInfo.adjustedFluxMods[bin][view]);
                 _setup.view(view).replacePrepareStep(sourcePrep);
             }
 
@@ -246,23 +206,21 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
             std::vector<ProjectionData> materialProjs;
             for(uint material = 0; material < volume.nbMaterials(); ++material)
                 binProj += ProjectorExtension::project(volume.muVolume(material,
-                                                                       energyBins[bin],
-                                                                       binWidth));
+                                                                       spectralInfo.energyBins[bin],
+                                                                       spectralInfo.binWidth));
 
-            binProj.transformToIntensity(intensities[bin]);
+            binProj.transformToIntensity(spectralInfo.intensities[bin]);
 
             sumProj += binProj;
-        }
+        } 
 
-        double totalIntensity = 0.0;
-        for(uint bin = 0; bin < _nbSamples; ++bin)
-            totalIntensity += intensities[bin][0];
+        sumProj.transformToExtinction(spectralInfo.totalIntensities);
 
-        sumProj.transformToExtinction(totalIntensity);
+        for(uint v = 0; v < _setup.nbViews(); ++v)
+            _setup.view(v).removeLastPrepareStep();
 
         return sumProj;
     }
-
 
 }
 
@@ -275,6 +233,37 @@ void SpectralProjectorExtension::setSpectralRange(float from, float to)
 void SpectralProjectorExtension::setSpectralSampling(uint nbSamples)
 {
     _nbSamples = nbSamples;
+}
+
+SpectralProjectorExtension::SpectralInformation SpectralProjectorExtension::spectralInformation()
+{
+    SpectralInformation ret;
+
+    // get (view-dependent) spectra
+    const auto srcPtr = _setup.system()->source();
+
+    IntervalDataSeries spectrum;
+    ret.intensities.resize(_nbSamples);
+    ret.adjustedFluxMods.resize(_nbSamples);
+    ret.totalIntensities.resize(_setup.nbViews(), 0.0);
+
+    for(uint view = 0; view < _setup.nbViews(); ++view)
+    {
+        _setup.prepareView(view);
+        spectrum = srcPtr->spectrum(_from, _to, _nbSamples);
+        auto globalFluxMod = srcPtr->fluxModifier();
+        for(uint bin = 0; bin < _nbSamples; ++bin)
+        {
+            ret.adjustedFluxMods[bin].push_back(globalFluxMod * spectrum.value(bin));
+            ret.intensities[bin].push_back(spectrum.value(bin) * spectrum.samplingPoint(bin));
+            ret.totalIntensities[view] += ret.intensities[bin][view];
+        }
+    }
+
+    ret.energyBins = spectrum.samplingPoints();
+    ret.binWidth = spectrum.binWidth();
+
+    return ret;
 }
 
 

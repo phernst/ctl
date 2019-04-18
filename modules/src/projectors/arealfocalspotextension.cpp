@@ -64,7 +64,7 @@ void ArealFocalSpotExtension::configure(const AcquisitionSetup& setup,
  * points. Furthermore, required system memory is doubled, since two full sets of projections need
  * to be kept in memory simultaneously.
  */
-ProjectionData ArealFocalSpotExtension::project(const VolumeData& volume)
+ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nestedProjector)
 {
     ProjectionData ret(0, 0, 0);
 
@@ -117,12 +117,12 @@ ProjectionData ArealFocalSpotExtension::project(const VolumeData& volume)
         // projecting volume
         if(first)
         {
-            ret = ProjectorExtension::project(volume);
+            ret = nestedProjector.project();
             ret.transformToIntensity();
         }
         else
         {
-            auto proj = ProjectorExtension::project(volume);
+            auto proj = nestedProjector.project();
             fut.wait();
             nextProj = std::move(proj);
             fut = std::async(processProj, &nextProj);

@@ -13,7 +13,10 @@ public:
 
     // ProjectorExtension interface
     void configure(const AcquisitionSetup &setup, const AbstractProjectorConfig &config) override;
-    ProjectionData project(const VolumeData &volume) override;
+    bool isLinear() const override;
+
+protected:
+    ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
 
 private:
     AcquisitionSetup _setup;

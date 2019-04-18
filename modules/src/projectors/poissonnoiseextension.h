@@ -5,6 +5,8 @@
 #include "acquisition/acquisitionsetup.h"
 #include "projectors/abstractprojectorconfig.h"
 
+#include <random>
+
 namespace CTL {
 
 class PoissonNoiseExtension : public ProjectorExtension
@@ -14,18 +16,25 @@ public:
 
     // ProjectorExtension interface
     void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
-    ProjectionData project(const VolumeData& volume) override;
+    bool isLinear() const override;
 
+    void setFixedSeed(uint seed);
+    void setRandomSeedMode();
     void setParallelizationEnabled(bool enabled);
+
+protected:
+    ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
 
 private:
     bool _useParallelization = true;
+    bool _useFixedSeed = false;
+    std::mt19937 _rng;
 
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
     std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
 
-    void addNoiseToData(Chunk2D<double>& data);
-    void processView(SingleViewData& view, double i_0);
+    void addNoiseToData(Chunk2D<double>& data, uint seed);
+    void processView(SingleViewData& view, double i_0, uint seed);
     Chunk2D<double> transformedToCounts(const SingleViewData::ModuleData& module, double i_0) const;
     SingleViewData::ModuleData transformedToExtinctions(const Chunk2D<double>& counts,
                                                         double i_0) const;

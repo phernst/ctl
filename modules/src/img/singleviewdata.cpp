@@ -134,6 +134,30 @@ void SingleViewData::transformToIntensity(double i0)
             pix = i0 * exp(-pix);
 }
 
+bool SingleViewData::operator==(const SingleViewData &other) const
+{
+    if(dimensions() != other.dimensions())
+        return false;
+
+    for(uint mod = 0; mod < nbModules(); ++mod)
+        if(module(mod) != other.module(mod))
+            return false;
+
+    return true;
+}
+
+bool SingleViewData::operator!=(const SingleViewData &other) const
+{
+    if(dimensions() != other.dimensions())
+        return true;
+
+    for(uint mod = 0; mod < nbModules(); ++mod)
+        if(module(mod) != other.module(mod))
+            return true;
+
+    return false;
+}
+
 /*!
  * Sets the data of this instance based on the data given by \a dataVector. For this, it
  * is assumed that the data in \a dataVector has row major order, i.e. all values of a module row,

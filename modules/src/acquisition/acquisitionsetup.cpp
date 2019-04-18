@@ -139,8 +139,8 @@ bool AcquisitionSetup::View::replacePrepareStep(int index, PrepareStep newPrepar
  * Replaces a prepare step of the same type as \a newPrepareStep by \a newPrepareStep. Returns
  * true if a prepare step has been replaced.
  *
- * This replaces the first occurrence of a corresponding PrepareStep. If
- * \a searchFromBack = \c true, the last matching element is replaced.
+ * This replaces the last occurrence of a corresponding PrepareStep. If
+ * \a searchFromBack = \c false, the first matching element is replaced.
  *
  * Does nothing (and returns false) if no prepare step of matching type is found and/or
  * \a newPrepareStep is nullptr.
@@ -174,6 +174,33 @@ void AcquisitionSetup::View::removeAllPrepareSteps(int prepareStepType)
             newPrepareSteps.push_back(std::move(prepStep));
 
     _prepareSteps = std::move(newPrepareSteps);
+}
+
+/*!
+ * Removes the last prepare step from this instance.
+ */
+void AcquisitionSetup::View::removeLastPrepareStep()
+{
+    if(!_prepareSteps.empty())
+        _prepareSteps.pop_back();
+}
+
+/*!
+ * Removes one prepare step of type \a prepareStepType from this instance.
+ *
+ * This removes the last occurrence of a corresponding PrepareStep. If
+ * \a searchFromBack = \c false, the first matching element is removed.
+ *
+ * \sa AbstractPrepareStep::type().
+ */
+void AcquisitionSetup::View::removePrepareStep(int prepareStepType, bool searchFromBack)
+{
+    auto idx = indexOfPrepareStep(prepareStepType, searchFromBack);
+
+    if(idx == -1)
+        return;
+
+    _prepareSteps.erase(_prepareSteps.begin() + idx);
 }
 
 /*!
