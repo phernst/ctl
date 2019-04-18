@@ -31,6 +31,8 @@ private:
     // helper methods
     double countsMean(const CTL::ProjectionData& projections, double i_0) const;
     double countsVariance(const CTL::ProjectionData& projections, double i_0) const;
+    double projectionMean(const CTL::ProjectionData& projections) const;
+    double projectionVariance(const CTL::ProjectionData& projections) const;
 
     CTL::Chunk2D<double> repetitionMean(const CTL::ProjectionData& repeatedProjs, double i_0) const;
     CTL::Chunk2D<double> repetitionVariance(const CTL::ProjectionData& repeatedProjs, double i_0) const;

@@ -90,12 +90,22 @@ void ProjectorTest::testSpectralExtension()
     // Non-linear composite
     auto proj = spectralExt->projectComposite(compVol);
     auto groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_composite.den");
-    QVERIFY2(proj == groundTruth, "Non-linear composite failed");
+    auto diff = proj-groundTruth;
+    auto mean = projectionMean(diff);
+    auto var  = projectionVariance(diff);
+    qInfo() << mean << var;
+    QVERIFY2(mean < 0.01, "Non-linear composite failed");
+    QVERIFY2(var < 0.01, "Non-linear composite failed");
 
     // Non-linear simple
     proj = spectralExt->project(volume);
     groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_simple.den");
-    QVERIFY2(proj == groundTruth, "Non-linear simple failed");
+    diff = proj-groundTruth;
+    mean = projectionMean(diff);
+    var  = projectionVariance(diff);
+    qInfo() << mean << var;
+    QVERIFY2(mean < 0.01, "Non-linear simple failed");
+    QVERIFY2(var < 0.01, "Non-linear simple failed");
 
     spectralExt->release();
     noiseExt->release();
@@ -106,12 +116,22 @@ void ProjectorTest::testSpectralExtension()
     // Linear composite
     proj = spectralExt->projectComposite(compVol);
     groundTruth = io.readProjections("testData/spectralExtension/spectral_lin_composite.den");
-    QVERIFY2(proj == groundTruth, "Linear composite failed");
+    diff = proj-groundTruth;
+    mean = projectionMean(diff);
+    var  = projectionVariance(diff);
+    qInfo() << mean << var;
+    QVERIFY2(mean < 0.01, "Linear composite failed");
+    QVERIFY2(var < 0.01, "Linear composite failed");
 
     // Linear simple
     proj = spectralExt->project(volume);
     groundTruth = io.readProjections("testData/spectralExtension/spectral_lin_simple.den");
-    QVERIFY2(proj == groundTruth, "Linear simple failed");
+    diff = proj-groundTruth;
+    mean = projectionMean(diff);
+    var  = projectionVariance(diff);
+    qInfo() << mean << var;
+    QVERIFY2(mean < 0.01, "Linear simple failed");
+    QVERIFY2(var < 0.01, "Linear simple failed");
 }
 
 void ProjectorTest::poissonSimulation(double meanPhotons,
@@ -245,6 +265,44 @@ double ProjectorTest::countsVariance(const ProjectionData& projections, double i
                 auto tmpCount = i_0 * double(std::exp(-pix));
                 totalVariance += (tmpCount - localMean) * (tmpCount - localMean);
             }
+        }
+
+    unsigned long pixelPerView = projections.viewDimensions().nbModules
+        * projections.viewDimensions().nbChannels * projections.viewDimensions().nbRows;
+
+    return totalVariance / static_cast<double>(projections.nbViews() * pixelPerView);
+}
+
+double ProjectorTest::projectionMean(const ProjectionData &projections) const
+{
+    double total = 0.0;
+
+    for(uint view = 0; view < projections.nbViews(); ++view)
+        for(uint mod = 0; mod < projections.view(view).nbModules(); ++mod)
+        {
+            const auto& data = projections.view(view).module(mod).constData();
+            for(auto pix : data)
+                total += pix;
+        }
+
+    unsigned long pixelPerView = projections.viewDimensions().nbModules
+        * projections.viewDimensions().nbChannels * projections.viewDimensions().nbRows;
+
+    return total / static_cast<double>(projections.nbViews() * pixelPerView);
+}
+
+double ProjectorTest::projectionVariance(const ProjectionData &projections) const
+{
+    double localMean = projectionMean(projections);
+
+    double totalVariance = 0.0;
+
+    for(uint view = 0; view < projections.nbViews(); ++view)
+        for(uint mod = 0; mod < projections.view(view).nbModules(); ++mod)
+        {
+            const auto& data = projections.view(view).module(mod).constData();
+            for(auto pix : data)
+                totalVariance += (pix - localMean) * (pix - localMean);
         }
 
     unsigned long pixelPerView = projections.viewDimensions().nbModules
