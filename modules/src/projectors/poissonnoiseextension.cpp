@@ -2,7 +2,6 @@
 #include "components/genericsource.h"
 #include "img/chunk2d.h"
 
-#include <random>
 #include <future>
 
 namespace CTL {
@@ -21,31 +20,38 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
     // compute (clean) projections
     auto ret = nestedProjector.project();
 
-    // add noise
-    if(_useParallelization)
+    if(!_useFixedSeed)
     {
         std::random_device rd;
+        _rng.seed(rd());
+    }
+
+    uint seed = _rng();
+
+    // add noise
+    if(_useParallelization)
+    {        
         std::vector<std::future<void>> futures(ret.nbViews());
         for(uint view = 0; view < ret.nbViews(); ++view)
         {
             _setup.prepareView(view);
             auto i_0 = _setup.system()->source()->photonFlux();
-            uint seed = _useFixedSeed ? _fixedSeed + view : rd();
+
             futures[view] = std::async(processViewCompact,
-                                       &ret.view(view), i_0, rd());
+                                       &ret.view(view), i_0, seed + view);
         }
         for(const auto& future : futures)
             future.wait();
     }
     else
-    {
+    { 
         uint seedShift = 0;
         for(uint view = 0; view < ret.nbViews(); ++view)
         {
             _setup.prepareView(view);
             auto i_0 = _setup.system()->source()->photonFlux();
             seedShift = std::max(seedShift, view * ret.view(view).nbModules());
-            processView(ret.view(view), i_0, seedShift);
+            processView(ret.view(view), i_0, seed + seedShift);
         }
     }
 
@@ -54,16 +60,20 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
 
 bool PoissonNoiseExtension::isLinear() const { return false; }
 
-void PoissonNoiseExtension::setFixedSeed(uint seed) { _fixedSeed = seed; }
+void PoissonNoiseExtension::setFixedSeed(uint seed)
+{
+    _useFixedSeed = true;
+    _rng.seed(seed);
+}
+
+void PoissonNoiseExtension::setRandomSeedMode() { _useFixedSeed = false; }
 
 void PoissonNoiseExtension::setParallelizationEnabled(bool enabled)
 {
     _useParallelization = enabled;
 }
 
-void PoissonNoiseExtension::toggleFixedSeed(bool enabled) { _useFixedSeed = enabled; }
-
-void PoissonNoiseExtension::processView(SingleViewData &view, double i_0, uint seedShift)
+void PoissonNoiseExtension::processView(SingleViewData &view, double i_0, uint seed)
 {
     if(qFuzzyIsNull(i_0))
     {
@@ -76,8 +86,7 @@ void PoissonNoiseExtension::processView(SingleViewData &view, double i_0, uint s
     {
         auto counts = transformedToCounts(view.module(mod), i_0);
 
-        uint seed = _useFixedSeed ? _fixedSeed + mod + seedShift : rd();
-        addNoiseToData(counts, seed);
+        addNoiseToData(counts, seed + mod);
 
         view.module(mod) = transformedToExtinctions(counts, i_0);
     }
@@ -96,10 +105,10 @@ void PoissonNoiseExtension::processViewCompact(SingleViewData* view, double i_0,
     for(auto& module : view->data())
         for(auto& pix : module.data())
         {
-            auto origCount = i_0 * double(exp(-pix)); // mean
+            auto origCount = i_0 * expf(-pix); // mean
             std::poisson_distribution<ulong> d(origCount);
             auto noisyCount = d(gen); // Poisson distributed random number
-            pix = log(float(i_0) / float(noisyCount));
+            pix = logf(float(i_0) / float(noisyCount));
         }
 }
 
@@ -111,7 +120,7 @@ Chunk2D<double> PoissonNoiseExtension::transformedToCounts(const SingleViewData:
     auto rawDataPtr = ret.rawData();
     const auto& moduleDat = module.constData();
     for(uint pix = 0; pix < module.nbElements(); ++pix)
-        rawDataPtr[pix] = i_0 * exp(-moduleDat[pix]);
+        rawDataPtr[pix] = float(i_0) * expf(-moduleDat[pix]);
 
     return ret;
 }
@@ -124,7 +133,7 @@ SingleViewData::ModuleData PoissonNoiseExtension::transformedToExtinctions(const
     auto rawDataPtr = ret.rawData();
     const auto& countsDat = counts.constData();
     for(uint pix = 0; pix < counts.nbElements(); ++pix)
-        rawDataPtr[pix] = static_cast<float>(log(i_0 / countsDat[pix]));
+        rawDataPtr[pix] = logf(float(i_0) / countsDat[pix]);
 
     return ret;
 }
