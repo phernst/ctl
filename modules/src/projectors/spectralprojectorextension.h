@@ -29,6 +29,16 @@ private:
     float _to   = 200.0f;
     uint _nbSamples = 10;
 
+    struct SpectralInformation
+    {
+        std::vector<std::vector<double>> intensities;
+        std::vector<std::vector<double>> adjustedFluxMods;
+        std::vector<double> totalIntensities;
+        std::vector<float> energyBins;
+        float binWidth;
+    };
+
+    SpectralInformation spectralInformation();
 };
 
 
