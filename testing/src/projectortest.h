@@ -18,6 +18,7 @@ public:
 private Q_SLOTS:
     void initTestCase();
     void testPoissonExtension();
+    void testSpectralExtension();
 
 private:
     CTL::VoxelVolume<float> _testVolume = CTL::VoxelVolume<float>(0,0,0);

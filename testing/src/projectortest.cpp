@@ -1,12 +1,15 @@
 #include "projectortest.h"
 #include "acquisition/ctsystembuilder.h"
 #include "acquisition/trajectories.h"
-
+#include "acquisition/preparesteps.h"
 #include "components/allcomponents.h"
 
 #include "projectors/arealfocalspotextension.h"
 #include "projectors/poissonnoiseextension.h"
 #include "projectors/raycasterprojector.h"
+#include "projectors/spectralprojectorextension.h"
+
+#include "io/ctldatabase.h"
 
 using namespace CTL;
 
@@ -31,6 +34,84 @@ void ProjectorTest::testPoissonExtension()
     poissonSimulation(10, 0.1, 200);
     poissonSimulation(1000, 0.1, 200);
     poissonSimulation(100000, 0.1, 200);
+}
+
+void ProjectorTest::testSpectralExtension()
+{
+    // assemble CT system
+    auto flatPanel = makeComponent<FlatPanelDetector>(QSize(50, 50), QSizeF(1.0, 1.0), "Flat panel detector");
+    auto tube = makeComponent<XrayTube>(QSizeF(1.0, 1.0), 80.0, 100000.0, "X-ray tube");
+    auto tubeGantry = makeComponent<CarmGantry>(1200.0);
+
+    tube->setSpectrumModel(new HeuristicCubicSpectrumModel());
+
+    CTsystem system;
+    system.addComponent(std::move(flatPanel));
+    system.addComponent(std::move(tube));
+    system.addComponent(std::move(tubeGantry));
+
+    auto volume = SpectralVolumeData::createBall(40.0f, 0.5f, 0.1f,
+                                                 database::attenuationModel(database::composite::Water));
+    auto volume2 = SpectralVolumeData::createBall(30.0f, 0.5f, 0.03f,
+                                                  database::attenuationModel(database::composite::Bone_Cortical));
+
+    CompositeVolume compVol;
+    compVol.addMaterialVolume(volume);
+    compVol.addMaterialVolume(volume2);
+
+    AcquisitionSetup setup(SimpleCTsystem::fromCTsystem(system));
+    setup.setNbViews(5);
+    setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0));
+
+    for(uint v = 0; v < setup.nbViews(); ++v)
+    {
+        auto srcPrep = std::make_shared<prepare::XrayTubeParam>();
+        srcPrep->setTubeVoltage(80.0 + 20.0/setup.nbViews() * v);
+        srcPrep->setEmissionCurrent(10000.0 + 10000.0/setup.nbViews() * v);
+        setup.view(v).addPrepareStep(srcPrep);
+    }
+
+    // configure a projector and project volume
+    OCL::RayCasterProjector::Config rcConfig;
+    OCL::RayCasterProjector* myProjector = new OCL::RayCasterProjector;
+
+    PoissonNoiseExtension* noiseExt = new PoissonNoiseExtension;
+    noiseExt->setFixedSeed(1337u);
+    noiseExt->use(myProjector);
+
+    SpectralProjectorExtension* spectralExt = new SpectralProjectorExtension;
+    spectralExt->setSpectralSampling(10);
+    spectralExt->setSpectralRange(0,150);
+    spectralExt->use(noiseExt);
+    spectralExt->configure(setup, rcConfig);
+
+
+    io::BaseTypeIO<io::DenFileIO> io;
+    // Non-linear composite
+    auto proj = spectralExt->projectComposite(compVol);
+    auto groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_composite.den");
+    QVERIFY2(proj == groundTruth, "Non-linear composite failed");
+
+    // Non-linear simple
+    proj = spectralExt->project(volume);
+    groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_simple.den");
+    QVERIFY2(proj == groundTruth, "Non-linear simple failed");
+
+    spectralExt->release();
+    noiseExt->release();
+    delete noiseExt;
+
+    spectralExt->use(myProjector);
+
+    // Linear composite
+    proj = spectralExt->projectComposite(compVol);
+    groundTruth = io.readProjections("testData/spectralExtension/spectral_lin_composite.den");
+    QVERIFY2(proj == groundTruth, "Linear composite failed");
+
+    // Linear simple
+    proj = spectralExt->project(volume);
+    groundTruth = io.readProjections("testData/spectralExtension/spectral_lin_simple.den");
+    QVERIFY2(proj == groundTruth, "Linear simple failed");
 }
 
 void ProjectorTest::poissonSimulation(double meanPhotons,
