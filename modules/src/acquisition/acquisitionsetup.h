@@ -48,6 +48,8 @@ public:
         bool replacePrepareStep(int index, PrepareStep newPrepareStep);
         bool replacePrepareStep(PrepareStep newPrepareStep, bool searchFromBack = true);
         void removeAllPrepareSteps(int prepareStepType);
+        void removeLastPrepareStep();
+        void removePrepareStep(int prepareStepType, bool searchFromBack = true);
 
         void fromVariant(const QVariant& variant) override; // de-serialization
         QVariant toVariant() const override; // serialization
