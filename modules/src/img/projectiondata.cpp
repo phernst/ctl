@@ -277,6 +277,30 @@ void ProjectionData::transformToIntensity(const std::vector<double>& viewDepende
                                      *i0Iterator++));
 }
 
+bool ProjectionData::operator==(const ProjectionData &other) const
+{
+    if(dimensions() != other.dimensions())
+        return false;
+
+    for(uint v = 0; v < nbViews(); ++v)
+        if(view(v) != other.view(v))
+            return false;
+
+    return true;
+}
+
+bool ProjectionData::operator!=(const ProjectionData &other) const
+{
+    if(dimensions() != other.dimensions())
+        return true;
+
+    for(uint v = 0; v < nbViews(); ++v)
+        if(view(v) != other.view(v))
+            return true;
+
+    return false;
+}
+
 /*!
  * Returns true if the dimensions of \a other are equal to those of the views in this instance.
  */

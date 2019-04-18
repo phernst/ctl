@@ -63,6 +63,9 @@ public:
     void transformToIntensity(double i0 = 1.0);
     void transformToIntensity(const std::vector<double>& viewDependentI0);
 
+    bool operator==(const ProjectionData& other) const;
+    bool operator!=(const ProjectionData& other) const;
+
     // arithmetic operations
     ProjectionData& operator+=(const ProjectionData& other);
     ProjectionData& operator-=(const ProjectionData& other);

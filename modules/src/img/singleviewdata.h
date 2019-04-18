@@ -62,6 +62,9 @@ public:
     void transformToExtinction(double i0 = 1.0);
     void transformToIntensity(double i0 = 1.0);
 
+    bool operator==(const SingleViewData& other) const;
+    bool operator!=(const SingleViewData& other) const;
+
     SingleViewData& operator+=(const SingleViewData& other);
     SingleViewData& operator-=(const SingleViewData& other);
     SingleViewData& operator*=(float factor);
