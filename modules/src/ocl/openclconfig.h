@@ -10,6 +10,12 @@
 #include <CL/cl.hpp>
 #endif
 
+// OpenCL version < 1.2 compatibility
+ #ifndef CL_VERSION_1_2
+ #define CL_MEM_HOST_WRITE_ONLY 0
+ #define CL_MEM_HOST_READ_ONLY 0
+ #endif
+
 #include <unordered_map>
 
 namespace CTL {
