@@ -14,9 +14,12 @@ public:
     const QList<QPointF>& data() const;
 
     // other methods
+    double max() const;
+    double min() const;
     uint nbSamples() const;
     void normalizeByMaxAbsVal();
     void normalizeByMaxVal();
+    QPair<double,double> yRange() const;
     void scale(float factor);
     uint size() const;
     //void multiplyWith(const std::vector<float>& weights);
@@ -54,6 +57,22 @@ inline const QList<QPointF>& PointSeriesBase::data() const
     return _data;
 }
 
+inline double PointSeriesBase::max() const
+{
+    auto maxEl = std::max_element(_data.begin(), _data.end(),
+                                  [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); });
+
+    return maxEl->y();
+}
+
+inline double PointSeriesBase::min() const
+{
+    auto minEl = std::min_element(_data.begin(), _data.end(),
+                                  [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); });
+
+    return minEl->y();
+}
+
 inline QList<QPointF> &PointSeriesBase::rdata()
 {
     return _data;
@@ -77,6 +96,11 @@ inline void PointSeriesBase::normalizeByMaxVal()
     auto maxEl = std::max_element(_data.begin(), _data.end(),
                                   [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); });
     scale(1.0f / maxEl->y());
+}
+
+inline QPair<double, double> PointSeriesBase::yRange() const
+{
+    return qMakePair(this->min(), this->max());
 }
 
 inline void PointSeriesBase::scale(float factor)
