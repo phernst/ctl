@@ -10,8 +10,8 @@ namespace CTL {
 class DynamicProjector : public AbstractProjector
 {
 public:
-    DynamicProjector(AbstractProjector* projector);
-    DynamicProjector(std::unique_ptr<AbstractProjector> projector);
+    explicit DynamicProjector(AbstractProjector* projector);
+    explicit DynamicProjector(std::unique_ptr<AbstractProjector> projector);
 
     void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
     ProjectionData project(const VolumeData& volume) override;

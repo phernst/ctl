@@ -38,8 +38,8 @@ protected:
 
 
 public:
-    ProjectorExtension(AbstractProjector* projector = nullptr);
-    ProjectorExtension(std::unique_ptr<AbstractProjector> projector);
+    explicit ProjectorExtension(AbstractProjector* projector = nullptr);
+    explicit ProjectorExtension(std::unique_ptr<AbstractProjector> projector);
 
     ~ProjectorExtension() override;
 
