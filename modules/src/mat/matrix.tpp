@@ -196,8 +196,8 @@ inline Matrix<Rows, Cols>::Matrix(const double (&initArray)[Rows * Cols])
 
 template <uint Rows, uint Cols>
 template<typename... Doubles, typename>
-inline Matrix<Rows, Cols>::Matrix(Doubles... matrixElements)
-    : MatrixBase<Rows, Cols>({ static_cast<double>(matrixElements)... })
+inline Matrix<Rows, Cols>::Matrix(double firstElement, Doubles... matrixElements)
+    : MatrixBase<Rows, Cols>({ firstElement, static_cast<double>(matrixElements)... })
 {
 }
 

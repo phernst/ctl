@@ -94,8 +94,8 @@ public:
     explicit Matrix(double fillValue);
     Matrix(const double (&initArray)[Rows * Cols]);
     template<typename... Doubles,
-             typename = typename std::enable_if<sizeof...(Doubles) == Rows * Cols>::type>
-    Matrix(Doubles... matrixElements);
+             typename = typename std::enable_if<sizeof...(Doubles) + 1u == Rows * Cols>::type>
+    Matrix(double firstElement, Doubles... matrixElements);
 
     // factory function that copies (+ cast if necessary) the 'NthMat' matrix from
     // a Container (stack of matrices)

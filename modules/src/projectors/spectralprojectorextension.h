@@ -11,7 +11,8 @@ class SpectralProjectorExtension : public ProjectorExtension
 {
 public:
     using ProjectorExtension::ProjectorExtension;
-    SpectralProjectorExtension(uint nbSamples);
+    SpectralProjectorExtension() = default;
+    explicit SpectralProjectorExtension(uint nbSamples);
 
     void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
     ProjectionData project(const VolumeData& volume) override;
