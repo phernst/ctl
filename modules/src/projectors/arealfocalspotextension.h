@@ -26,6 +26,9 @@ namespace CTL {
  * will be simulated for a grid of sampling points (see figure below) and averaged afterwards. The
  * number of discretization steps can be specified using setDiscretization().
  *
+ * By default, the focal spot discretization defaults to [1, 1], resulting in conventional point
+ * source approximation.
+ *
  * ![Illustration of the focal spot discretization principle.](focalSpotExtension.png)
  *
  * Note that this extension will increase the time required for projection linearly with the number

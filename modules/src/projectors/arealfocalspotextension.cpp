@@ -7,11 +7,6 @@
 
 namespace CTL {
 
-/*! \fn ProjectorExtension::ProjectorExtension(AbstractProjector* projector = nullptr)
- * Constructs an ArealFocalSpotExtension object that uses \a projector. The focal spot
- * discretization defaults to [1, 1], resulting in conventional point source approximation.
- */
-
 /*!
  * Re-implementation of the configuration step. This takes copies of the AcquisitionSetup
  * and the AbstractProjectorConfig. The actual configure() method of the nested projector is
