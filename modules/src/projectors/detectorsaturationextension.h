@@ -25,8 +25,6 @@ private:
     void processIntensities(ProjectionData* projections);
 };
 
-
-
-}
+} // namespace CTL
 
 #endif // DETECTORSATURATIONEXTENSION_H

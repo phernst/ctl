@@ -12,6 +12,8 @@ namespace CTL {
 class AbstractSerializer
 {
 public:
+    virtual ~AbstractSerializer() = default;
+
     // convenience declarations (helps with IDE suggestions)
     void serialize(const AbstractDataModel& model, const QString& fileName) const;
     void serialize(const AbstractPrepareStep& prepStep, const QString& fileName) const;

@@ -14,17 +14,21 @@ QVector<double> toQVector(const Matrix<Rows,Cols> &matrix)
 
 inline Matrix3x3 rotationMatrix(double angle, Qt::Axis axis)
 {
-    double __s = sin(angle), __c = cos(angle);
-    switch(axis) {
-    case Qt::XAxis: return Matrix3x3{ 1.0,  0.0,  0.0,
-                                      0.0,  __c, -__s,
-                                      0.0,  __s,  __c };
-    case Qt::YAxis: return Matrix3x3{ __c,  0.0,  __s,
-                                      0.0,  1.0,  0.0,
-                                     -__s,  0.0,  __c };
-    case Qt::ZAxis: return Matrix3x3{ __c, -__s,  0.0,
-                                      __s,  __c,  0.0,
-                                      0.0,  0.0,  1.0 };
+    const auto sinVal = sin(angle);
+    const auto cosVal = cos(angle);
+    switch(axis)
+    {
+    case Qt::XAxis: return {    1.0,     0.0,     0.0,
+                                0.0,  cosVal, -sinVal,
+                                0.0,  sinVal,  cosVal };
+
+    case Qt::YAxis: return { cosVal,     0.0,  sinVal,
+                                0.0,     1.0,     0.0,
+                            -sinVal,     0.0,  cosVal };
+
+    case Qt::ZAxis: return { cosVal, -sinVal,     0.0,
+                             sinVal,  cosVal,     0.0,
+                                0.0,     0.0,     1.0 };
     }
     return mat::eye<3>();
 }

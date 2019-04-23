@@ -118,5 +118,6 @@ inline std::vector<float> PointSeriesBase::values() const
     return ret;
 }
 
-}
+} // namespace CTL
+
 #endif // POINTSERIESBASE_H
