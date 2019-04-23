@@ -95,9 +95,7 @@ QString GenericGantry::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 void GenericGantry::fromVariant(const QVariant& variant)
 {
     AbstractGantry::fromVariant(variant);
@@ -107,10 +105,7 @@ void GenericGantry::fromVariant(const QVariant& variant)
     _sourceLocation.fromVariant(varMap.value("source location"));
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant GenericGantry::toVariant() const
 {
     QVariantMap ret = AbstractGantry::toVariant().toMap();

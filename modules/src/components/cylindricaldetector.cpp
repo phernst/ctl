@@ -204,9 +204,7 @@ QVector<double> CylindricalDetector::moduleAngulations() const
     return modAngul;
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 void CylindricalDetector::fromVariant(const QVariant& variant)
 {
     AbstractDetector::fromVariant(variant);
@@ -217,10 +215,7 @@ void CylindricalDetector::fromVariant(const QVariant& variant)
     _nbModules = varMap.value("number of modules").toUInt();
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant CylindricalDetector::toVariant() const
 {
     QVariantMap ret = AbstractDetector::toVariant().toMap();

@@ -54,18 +54,13 @@ QString SystemComponent::typeInfoString(const std::type_info& type)
     return QString(" -------" + QString(type.name())).leftJustified(56, '-') + "\n";
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 void SystemComponent::fromVariant(const QVariant& variant)
 {
     _name = variant.toMap().value("name").toString();
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant SystemComponent::toVariant()const
 {
     QVariantMap ret;

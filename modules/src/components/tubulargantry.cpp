@@ -243,9 +243,7 @@ QString TubularGantry::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 void TubularGantry::fromVariant(const QVariant& variant)
 {
     AbstractGantry::fromVariant(variant);
@@ -258,10 +256,7 @@ void TubularGantry::fromVariant(const QVariant& variant)
     _tiltAngle = varMap.value("tilt angle").toDouble();
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant TubularGantry::toVariant() const
 {
     QVariantMap ret = AbstractGantry::toVariant().toMap();

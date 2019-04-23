@@ -63,9 +63,7 @@ QString GenericDetector::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 void GenericDetector::fromVariant(const QVariant& variant)
 {
     AbstractDetector::fromVariant(variant);
@@ -83,10 +81,7 @@ void GenericDetector::fromVariant(const QVariant& variant)
 
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant GenericDetector::toVariant() const
 {
     QVariantMap ret = AbstractDetector::toVariant().toMap();

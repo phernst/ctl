@@ -45,18 +45,13 @@ QString GenericBeamModifier::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 void GenericBeamModifier::fromVariant(const QVariant& variant)
 {
     AbstractBeamModifier::fromVariant(variant);
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant GenericBeamModifier::toVariant() const
 {
     return AbstractBeamModifier::toVariant();

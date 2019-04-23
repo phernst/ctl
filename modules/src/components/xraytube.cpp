@@ -148,9 +148,7 @@ void XrayTube::setEmissionCurrent(double current) { _emissionCurrent = current; 
  */
 void XrayTube::setIntensityConstant(double value) { _intensityConstant = value; }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SystemComponent::fromVariant() documentation.
 void XrayTube::fromVariant(const QVariant& variant)
 {
     AbstractSource::fromVariant(variant);
@@ -160,10 +158,7 @@ void XrayTube::fromVariant(const QVariant& variant)
     _emissionCurrent = varMap.value("emission current").toDouble();
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant XrayTube::toVariant() const
 {
     QVariantMap ret = AbstractSource::toVariant().toMap();

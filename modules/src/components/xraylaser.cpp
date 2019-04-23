@@ -84,9 +84,7 @@ QString XrayLaser::info() const
     return ret;
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SystemComponent::fromVariant() documentation.
 void XrayLaser::fromVariant(const QVariant& variant)
 {
     AbstractSource::fromVariant(variant);
@@ -96,10 +94,7 @@ void XrayLaser::fromVariant(const QVariant& variant)
     _power  = varMap.value("power").toDouble();
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant XrayLaser::toVariant() const
 {
     QVariantMap ret = AbstractSource::toVariant().toMap();

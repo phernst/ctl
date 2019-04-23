@@ -44,7 +44,15 @@ inline int SerializationInterface::type() const
 /*!
  * Interface to read all member variables from the QVariant \a variant.
  *
- * To be reimplemented in derived classes.
+ * Reimplement this method such that it reads all newly introduced content when sub-classing.
+ * A typical reimplementation in sub-classes might look like this:
+ * \code
+ * DirectBaseClass::fromVariant(variant);
+ *
+ * // assuming our class has a member "double _myMemberVariable"
+ *
+ * _myMemberVariable = variant.toMap().value("my member variable").toDouble();
+ * \endcode
  */
 inline void SerializationInterface::fromVariant(const QVariant&)
 {
@@ -53,7 +61,22 @@ inline void SerializationInterface::fromVariant(const QVariant&)
 /*!
  * Interface to store all member variables in a QVariant.
  *
- * To be reimplemented in derived classes.
+ * Stores the object's type-id.
+ *
+ * Reimplement this method such that it stores all newly introduced object data when
+ * sub-classing. This needs to cover everything that is necessary to fully determine the
+ * state of an object.
+ * Best practice is to invoke the base class version of this method to take care
+ * of all content originating from underlying base classes.
+ *
+ * A typical reimplementation in sub-classes might look like this:
+ * \code
+ * QVariantMap ret = DirectBaseClass::toVariant().toMap();
+ *
+ * ret.insert("my member variable", _myMemberVariable);
+ *
+ * return ret;
+ * \endcode
  */
 inline QVariant SerializationInterface::toVariant() const
 {

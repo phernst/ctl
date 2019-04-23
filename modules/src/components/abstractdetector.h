@@ -40,10 +40,10 @@ namespace CTL {
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
  * from GenericComponent::UserType, as these are reserved for user-defined types.
  *
- * To provide full compatibility within existing functionality, it is recommended to reimplement the
- * read() and write() method, such that these cover newly introduced information of the sub-class.
- * The new class should then also be added to switch-case list inside the implementation of
- * parseComponentFromJson(const QJsonObject&) found in the header file "components/jsonparser.h".
+ * To enable de-/serialization of objects of a new sub-class, simply reimplement the toVariant() and
+ * fromVariant() methods. These should take care of all newly introduced information of the
+ * sub-class. Objects of the new class can then be de-/serialized with any of the serializer classes
+ * (see also AbstractSerializer).
  */
 class AbstractDetector : public SystemComponent
 {
@@ -232,9 +232,7 @@ inline QString AbstractDetector::info() const
     return ret;
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 inline void AbstractDetector::fromVariant(const QVariant& variant)
 {
     SystemComponent::fromVariant(variant);
@@ -256,10 +254,7 @@ inline void AbstractDetector::fromVariant(const QVariant& variant)
     _saturationModelType = SaturationModelType(satModTypeVal);
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 inline QVariant AbstractDetector::toVariant() const
 {
     QVariantMap ret = SystemComponent::toVariant().toMap();

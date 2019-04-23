@@ -46,12 +46,14 @@ namespace CTL {
  * When creating a sub-class of AbstractSource, make sure to register the new component in the
  * enumeration using the #CTL_TYPE_ID(newIndex) macro. It is required to specify a value
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
- * from GenericComponent::UserType, as these are reserved for user-defined types.
+ * from SerializationInterface::UserType, as these are reserved for user-defined types.
  *
- * To provide full compatibility within existing functionality, it is recommended to reimplement the
- * read() and write() method, such that these cover newly introduced information of the sub-class.
- * The new class should then also be added to switch-case list inside the implementation of
- * parseComponentFromJson(const QJsonObject&) found in the header file "components/jsonparser.h".
+ * To enable de-/serialization of objects of the new sub-class, reimplement the toVariant() and
+ * fromVariant() methods. These should take care of all newly introduced information of the
+ * sub-class. Additionally, call the macro #DECLARE_SERIALIZABLE_TYPE(YourNewClassName) within the
+ * .cpp file of your new class (substitute "YourNewClassName" with the actual class name). Objects
+ * of the new class can then be de-/serialized with any of the serializer classes (see also
+ * AbstractSerializer).
  */
 class AbstractSource : public SystemComponent
 {
@@ -290,9 +292,7 @@ inline void AbstractSource::setSpectrumModel(std::unique_ptr<AbstractXraySpectru
     _spectrumModel.ptr = std::move(model);
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 inline void AbstractSource::fromVariant(const QVariant& variant)
 {
     SystemComponent::fromVariant(variant);
@@ -313,10 +313,7 @@ inline void AbstractSource::fromVariant(const QVariant& variant)
     _spectrumModel.ptr.reset(SerializationHelper::parseDataModel(specMod));
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 inline QVariant AbstractSource::toVariant() const
 {
     QVariantMap ret = SystemComponent::toVariant().toMap();

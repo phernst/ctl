@@ -74,18 +74,13 @@ inline QString AbstractBeamModifier::info() const
     return ret;
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 inline void AbstractBeamModifier::fromVariant(const QVariant& variant)
 {
     SystemComponent::fromVariant(variant);
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 inline QVariant AbstractBeamModifier::toVariant() const
 {
     return SystemComponent::toVariant();

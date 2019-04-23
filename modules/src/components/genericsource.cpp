@@ -56,9 +56,7 @@ QString GenericSource::info() const
     return ret;
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 void GenericSource::fromVariant(const QVariant& variant)
 {
     AbstractSource::fromVariant(variant);
@@ -66,10 +64,7 @@ void GenericSource::fromVariant(const QVariant& variant)
     _totalFlux = variant.toMap().value("photon flux").toDouble();
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant GenericSource::toVariant() const
 {
     QVariantMap ret = AbstractSource::toVariant().toMap();

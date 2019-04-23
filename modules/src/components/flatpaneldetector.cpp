@@ -49,18 +49,13 @@ QVector<AbstractDetector::ModuleLocation> FlatPanelDetector::moduleLocations() c
     return QVector<ModuleLocation>(1);
 }
 
-/*!
- * Reads all member variables from the QVariant \a variant.
- */
+// Use SerializationInterface::fromVariant() documentation.
 void FlatPanelDetector::fromVariant(const QVariant& variant)
 {
     AbstractDetector::fromVariant(variant);
 }
 
-/*!
- * Stores all member variables in a QVariant. Also includes the component's type-id
- * and generic type-id.
- */
+// Use SerializationInterface::toVariant() documentation.
 QVariant FlatPanelDetector::toVariant() const
 {
     return AbstractDetector::toVariant();
