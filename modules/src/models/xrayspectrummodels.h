@@ -29,8 +29,8 @@ public:
     void addLookupTable(float voltage, const TabulatedDataModel& table);
     void setLookupTables(const QMap<float, TabulatedDataModel>& tables);
 
-    QVariant toVariant() const override;
-    void fromVariant(const QVariant& variant) override;
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
 
     bool hasTabulatedDataFor(float voltage) const;
 

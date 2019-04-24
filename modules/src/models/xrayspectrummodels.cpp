@@ -8,6 +8,7 @@ DECLARE_SERIALIZABLE_TYPE(XraySpectrumTabulatedModel)
 DECLARE_SERIALIZABLE_TYPE(XrayLaserSpectrumModel)
 DECLARE_SERIALIZABLE_TYPE(FixedXraySpectrumModel)
 DECLARE_SERIALIZABLE_TYPE(KramersLawSpectrumModel)
+DECLARE_SERIALIZABLE_TYPE(HeuristicCubicSpectrumModel)
 
 // ____________________________
 // # AbstractXraySpectrumModel
@@ -96,9 +97,9 @@ AbstractDataModel *XraySpectrumTabulatedModel::clone() const
     return new XraySpectrumTabulatedModel(*this);
 }
 
-QVariant XraySpectrumTabulatedModel::toVariant() const
+QVariant XraySpectrumTabulatedModel::parameter() const
 {
-    auto variant = AbstractDataModel::toVariant().toMap();
+    auto variant = AbstractXraySpectrumModel::parameter().toMap();
     QVariantList dataList;
 
     auto i = _lookupTables.constBegin();
@@ -106,7 +107,7 @@ QVariant XraySpectrumTabulatedModel::toVariant() const
     {
         QVariantMap map;
         map.insert("table voltage", i.key());
-        map.insert("table data", i.value().toVariant());
+        map.insert("table data", i.value().parameter());
 
         dataList.append(map);
         ++i;
@@ -117,27 +118,31 @@ QVariant XraySpectrumTabulatedModel::toVariant() const
     return variant;
 }
 
-void XraySpectrumTabulatedModel::fromVariant(const QVariant& variant)
+void XraySpectrumTabulatedModel::setParameter(const QVariant& parameter)
 {
-    AbstractDataModel::fromVariant(variant);
+    AbstractXraySpectrumModel::setParameter(parameter);
 
-    _lookupTables.clear();
-
-    // populate lookup table
-    auto lookupTableData = variant.toMap().value("lookup tables").toList();
-    foreach(const QVariant& var, lookupTableData)
+    if(parameter.toMap().contains("lookup tables"))
     {
-        // each "var" represents a lookup table for a certain tube voltage
-        auto varAsMap = var.toMap();
-        auto voltage = varAsMap.value("table voltage").toFloat();
-        auto tableData = varAsMap.value("table data");
+        _lookupTables.clear();
 
-        TabulatedDataModel table;
-        table.fromVariant(tableData);
+        // populate lookup table
+        auto lookupTableData = parameter.toMap().value("lookup tables").toList();
+        foreach(const QVariant& var, lookupTableData)
+        {
+            // each "var" represents a lookup table for a certain tube voltage
+            auto varAsMap = var.toMap();
+            auto voltage = varAsMap.value("table voltage").toFloat();
+            auto tableData = varAsMap.value("table data");
 
-        addLookupTable(voltage, table);
+            TabulatedDataModel table;
+            table.setParameter(tableData);
+
+            addLookupTable(voltage, table);
+        }
     }
 }
+
 
 void XraySpectrumTabulatedModel::setLookupTables(const QMap<float, TabulatedDataModel>& tables)
 {

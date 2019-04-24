@@ -199,19 +199,19 @@ float TabulatedDataModel::valueAt(float pos) const
     return contribLower + contribUpper;
 }
 
-QVariant TabulatedDataModel::toVariant() const
+QVariant TabulatedDataModel::parameter() const
 {
-    auto variant = AbstractDataModel::toVariant().toMap();
+    auto variant = AbstractIntegrableDataModel::parameter().toMap();
     variant.insert("data", dataAsVariantList());
 
     return variant;
 }
 
-void TabulatedDataModel::fromVariant(const QVariant& variant)
+void TabulatedDataModel::setParameter(const QVariant& parameter)
 {
-    AbstractDataModel::fromVariant(variant);
-    setDataFromVariantList(variant.toMap().value("data").toList());
+    AbstractIntegrableDataModel::setParameter(parameter);
+    if(parameter.toMap().contains("data"))
+        setDataFromVariantList(parameter.toMap().value("data").toList());
 }
-
 
 } // namespace CTL

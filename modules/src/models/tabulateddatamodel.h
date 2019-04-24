@@ -38,8 +38,9 @@ public:
     void setData(const QVector<float>& keys, const QVector<float>& values);
 
     // other methods
-    QVariant toVariant() const override;
-    void fromVariant(const QVariant& variant) override;
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
+
     void insertDataPoint(float key, float value);
 
 private:
