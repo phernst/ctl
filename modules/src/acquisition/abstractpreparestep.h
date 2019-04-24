@@ -28,6 +28,14 @@ class SimpleCTsystem;
  * for the preparation of their state in an AcquisitionSetup. Any sub-class must implement the
  * abstract interface methods prepare() and isApplicableTo().
  *
+ * To enable de-/serialization of objects of the new sub-class, reimplement the toVariant() and
+ * fromVariant() methods. These should take care of all newly introduced information of the
+ * sub-class. Additionally, call the macro #DECLARE_SERIALIZABLE_TYPE(YourNewClassName) within the
+ * .cpp file of your new class (substitute "YourNewClassName" with the actual class name). Objects
+ * of the new class can then be de-/serialized with any of the serializer classes (see also
+ * AbstractSerializer). Note that proper de-/serializability of all individual prepare steps is a
+ * requirement to be able to de-/serialize an AcquisitionSetup.
+ *
  * The isApplicableTo() method shall serve as an option to verify whether a specific prepare step
  * can be applied to a given CTsystem. This usually checks if the required components (which are
  * to be prepared) are present in the system.

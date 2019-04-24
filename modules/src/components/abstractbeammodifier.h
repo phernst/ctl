@@ -28,10 +28,12 @@ namespace CTL {
  * for \a newIndex that is not already in use. This can be easily achieved by use of values starting
  * from GenericComponent::UserType, as these are reserved for user-defined types.
  *
- * To provide full compatibility within existing functionality, it is recommended to reimplement the
- * read() and write() method, such that these cover newly introduced information of the sub-class.
- * The new class should then also be added to switch-case list inside the implementation of
- * parseComponentFromJson(const QJsonObject&) found in the header file "components/jsonparser.h".
+ * To enable de-/serialization of objects of the new sub-class, reimplement the toVariant() and
+ * fromVariant() methods. These should take care of all newly introduced information of the
+ * sub-class. Additionally, call the macro #DECLARE_SERIALIZABLE_TYPE(YourNewClassName) within the
+ * .cpp file of your new class (substitute "YourNewClassName" with the actual class name). Objects
+ * of the new class can then be de-/serialized with any of the serializer classes (see also
+ * AbstractSerializer).
  */
 class AbstractBeamModifier : public SystemComponent
 {
