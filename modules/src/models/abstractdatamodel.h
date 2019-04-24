@@ -20,6 +20,17 @@ namespace CTL {
  * Parameters can be set by passing a QVariant that contains all necessary information.
  * Re-implement the setParameter() method to parse the QVariant into your required format within
  * sub-classes of AbstractDataModel.
+ *
+ * To enable de-/serialization if sub-class objects, also reimplement the parameter() method such
+ * that it stores all parameters of the model in a QVariant. Additionally, call the macro
+ * #DECLARE_SERIALIZABLE_TYPE(YourNewClassName) within the .cpp file of your new class (substitute
+ * "YourNewClassName" with the actual class name). Objects of the new class can then be
+ * de-/serialized with any of the serializer classes (see also AbstractSerializer).
+ *
+ * Alternatively, the de-/serialization interface methods toVariant() and fromVariant() can be
+ * reimplemented directly. This might be required in some specific situations (usually when
+ * polymorphic class members are in use). For the majority of cases, using the parameter() /
+ * setParameter() approach should be sufficient and is recommended.
  */
 
 /*!
@@ -33,6 +44,17 @@ namespace CTL {
  * Parameters can be set by passing a QVariant that contains all necessary information.
  * Re-implement the setParameter() method to parse the QVariant into your required format within
  * sub-classes of AbstractIntegrableDataModel.
+ *
+ * To enable de-/serialization if sub-class objects, also reimplement the parameter() method such
+ * that it stores all parameters of the model in a QVariant. Additionally, call the macro
+ * #DECLARE_SERIALIZABLE_TYPE(YourNewClassName) within the .cpp file of your new class (substitute
+ * "YourNewClassName" with the actual class name). Objects of the new class can then be
+ * de-/serialized with any of the serializer classes (see also AbstractSerializer).
+ *
+ * Alternatively, the de-/serialization interface methods toVariant() and fromVariant() can be
+ * reimplemented directly. This might be required in some specific situations (usually when
+ * polymorphic class members are in use). For the majority of cases, using the parameter() /
+ * setParameter() approach should be sufficient and is recommended.
  */
 
 /*!
@@ -58,10 +80,16 @@ public:
 
     void fromVariant(const QVariant& variant) override;
     QVariant toVariant() const override;
+
+    void setName(const QString& name);
+    const QString& name() const;
+
+private:
+    QString _name;
 };
 
 class AbstractIntegrableDataModel : public AbstractDataModel
-{   
+{
     // abstract interface
     public:virtual float binIntegral(float position, float binWidth) const = 0;
 };
@@ -133,6 +161,18 @@ auto makeDataModel(ConstructorArguments&&... arguments) ->
  *
  * Re-implement this method within your sub-class such that it encapsulates all necessary
  * information into a QVariant.
+ *
+ * Best practice is to invoke the base class version of this method to take care
+ * of all content originating from underlying base classes.
+ *
+ * A typical reimplementation in sub-classes might look like this:
+ * \code
+ * QVariantMap ret = DirectBaseClass::parameter().toMap();
+ *
+ * ret.insert("my new parameter", _myNewParameter);
+ *
+ * return ret;
+ * \endcode
  */
 
 /*!
@@ -142,7 +182,31 @@ auto makeDataModel(ConstructorArguments&&... arguments) ->
  *
  * Encapsulate all necessary information into the passed QVariant and re-implement this method
  * within your sub-class to parse it into your required format.
+ *
+ * Best practice is to invoke the base class version of this method to take care
+ * of all content originating from underlying base classes.
+ *
+ * A typical reimplementation in sub-classes might look like this:
+ * \code
+ * DirectBaseClass::setParameter(parameter);
+ *
+ * // assuming our class has a parameter member "double _myNewParameter"
+ *
+ * _myNewParameter = parameter.toMap().value("my new parameter").toDouble();
+ * \endcode
  */
+
+/*!
+* \fn void AbstractDataModel::setName(const QString& name)
+*
+* Sets the name of this model to \a name.
+*/
+
+/*!
+* \fn const QString& AbstractDataModel::name() const
+*
+* Returns the name of this model.
+*/
 
 /*!
  * \fn bool AbstractDataModel::isIntegrable() const
@@ -165,12 +229,18 @@ inline QVariant AbstractDataModel::parameter() const { return QVariant(); }
 
 inline void AbstractDataModel::setParameter(const QVariant&) {}
 
+inline void AbstractDataModel::setName(const QString &name) { _name = name; }
+
+inline const QString& AbstractDataModel::name() const { return _name; }
+
 // Use SerializationInterface::toVariant() documentation.
 inline QVariant AbstractDataModel::toVariant() const
 {
     QVariantMap ret = SerializationInterface::toVariant().toMap();
 
-    ret.insert("name", typeid(*this).name());
+    QString nameString = _name.isEmpty() ? typeid(*this).name()
+                                         : _name;
+    ret.insert("name", nameString);
     ret.insert("parameters", parameter());
 
     return ret;
@@ -188,6 +258,7 @@ inline void AbstractDataModel::fromVariant(const QVariant& variant)
         return;
     }
 
+    _name = map.value("name").toString();
     setParameter(map.value("parameters").toMap());
 }
 
