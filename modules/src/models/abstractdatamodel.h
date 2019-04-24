@@ -165,17 +165,18 @@ inline QVariant AbstractDataModel::parameter() const { return QVariant(); }
 
 inline void AbstractDataModel::setParameter(const QVariant&) {}
 
+// Use SerializationInterface::toVariant() documentation.
 inline QVariant AbstractDataModel::toVariant() const
 {
-    QVariantMap ret;
+    QVariantMap ret = SerializationInterface::toVariant().toMap();
 
-    ret.insert("type-id", type());
     ret.insert("name", typeid(*this).name());
     ret.insert("parameters", parameter());
 
     return ret;
 }
 
+// Use SerializationInterface::fromVariant() documentation.
 inline void AbstractDataModel::fromVariant(const QVariant& variant)
 {
     auto map = variant.toMap();

@@ -171,9 +171,8 @@ inline void AbstractPrepareStep::fromVariant(const QVariant &variant)
  */
 inline QVariant AbstractPrepareStep::toVariant() const
 {
-    QVariantMap ret;
+    QVariantMap ret = SerializationInterface::toVariant().toMap();
 
-    ret.insert("type-id", type());
     ret.insert("name", typeid(*this).name());
 
     return ret;

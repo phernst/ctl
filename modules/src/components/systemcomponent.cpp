@@ -63,8 +63,8 @@ void SystemComponent::fromVariant(const QVariant& variant)
 // Use SerializationInterface::toVariant() documentation.
 QVariant SystemComponent::toVariant()const
 {
-    QVariantMap ret;
-    ret.insert("type-id", this->type());
+    QVariantMap ret = SerializationInterface::toVariant().toMap();
+
     ret.insert("generic type-id", this->elementalType());
     ret.insert("name", _name);
 

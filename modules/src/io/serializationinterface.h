@@ -80,7 +80,9 @@ inline void SerializationInterface::fromVariant(const QVariant&)
  */
 inline QVariant SerializationInterface::toVariant() const
 {
-    return QVariant();
+    QVariantMap ret;
+    ret.insert("type-id", this->type());
+    return ret;
 }
 
 /*!
