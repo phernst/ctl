@@ -51,15 +51,23 @@ public:
     void assignSystem(const SimpleCTsystem* system);
     SingleViewGeometry encodeSingleViewGeometry() const;
     const SimpleCTsystem* system() const;
+    float effectivePixelArea(uint module) const;
+    std::vector<float> effectivePixelAreas() const;
+    Vector3x1WCS finalModulePosition(uint module) const;
+    Matrix3x3 finalModuleRotation(uint module) const;
+    Vector3x1WCS finalSourcePosition() const;
 
     // static methods
     static FullGeometry encodeFullGeometry(AcquisitionSetup setup);
     static SingleViewGeometry encodeSingleViewGeometry(const SimpleCTsystem& system);
+    static float effectivePixelArea(const SimpleCTsystem& system, uint module);
+    static std::vector<float> effectivePixelAreas(const SimpleCTsystem& system);
+    static Vector3x1WCS finalModulePosition(const SimpleCTsystem& system, uint module);
+    static Matrix3x3 finalModuleRotation(const SimpleCTsystem& system, uint module);
+    static Vector3x1WCS finalSourcePosition(const SimpleCTsystem& system);
 
 private:
     // methods
-    Vector3x1WCS finalSourcePosition() const;
-
     static ProjectionMatrix computeIndividualModulePMat(const Vector3x1WCS& finalSourcePosition,
                                                         const Matrix3x3& detectorRotation,
                                                         const Matrix3x3& K);
