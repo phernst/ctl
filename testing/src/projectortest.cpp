@@ -141,14 +141,18 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
     CTsystem theSystem;
     auto detector = new FlatPanelDetector(QSize(50, 50), QSizeF(2.0, 2.0), "Flat detector");
     auto gantry = new CarmGantry(1200.0, "Gantry");
-    auto source = new XrayLaser(75.0, meanPhotons, "my tube");
+    auto source = new XrayLaser(75.0, 1.0, "my tube");
+
 
     source->setFocalSpotSize(QSizeF(5.0, 5.0));
     theSystem << detector << gantry << source;
 
+    auto calibPower = meanPhotons / SimpleCTsystem::fromCTsystem(theSystem).photonsPerPixelMean();
+    source->setPower(calibPower);
+
     AcquisitionSetup setup(theSystem);
     setup.setNbViews(1);
-    setup.applyPreparationProtocol(protocols::WobbleTrajectory(0.0, 750.0, projAngle, 0.0));
+    setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0, projAngle, 0.0));
 
     auto rcConfig = OCL::RayCasterProjector::Config();
     // rcConfig.interpolate = false;
@@ -176,8 +180,7 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
     auto projsWithNoise = focalSpotExt->project(_testVolume);
 
     // ### evaluate results ###
-    auto intensity = setup.system()->source()->photonFlux();
-    evaluatePoissonSimulation(projsWithNoise, projectionsClean, intensity);
+    evaluatePoissonSimulation(projsWithNoise, projectionsClean, setup.system()->photonsPerPixelMean());
 }
 
 void ProjectorTest::evaluatePoissonSimulation(const ProjectionData& repeatedProjs,
