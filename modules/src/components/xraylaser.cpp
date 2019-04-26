@@ -123,7 +123,7 @@ SystemComponent* XrayLaser::clone() const { return new XrayLaser(*this); }
  *
  * Currently, simply returns the total power.
  */
-double XrayLaser::nominalPhotonFlux() const { return _power; }
+double XrayLaser::nominalPhotonFlux() const { return _power / (ELEC_VOLT * photonEnergy() * 1.0e3); }
 
 /*!
  * Returns the energy of emitted photons (in keV).
@@ -136,7 +136,7 @@ double XrayLaser::photonEnergy() const { return _energy; }
 void XrayLaser::setPhotonEnergy(double energy) { _energy = energy; }
 
 /*!
- * Sets the total emitted power to \a power.
+ * Sets the total power emitted to an area of 1cm² in a distance of 1m to \a power (in mW).
  */
 void XrayLaser::setPower(double power) { _power = power; }
 

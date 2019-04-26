@@ -6,7 +6,7 @@
 
 namespace CTL {
 
-const double DEFAULT_I_CONST = 1.0; // [PHOTONS / (mAs * cm^2)]
+const double DEFAULT_I_CONST = 3.2e8; // [PHOTONS / (mAs * cm^2)]
 const uint   DEFAULT_SPECTRUM_RESOLUTION = 40;
 
 class XrayTube : public AbstractSource

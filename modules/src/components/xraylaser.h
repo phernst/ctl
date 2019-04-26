@@ -5,6 +5,8 @@
 
 namespace CTL {
 
+const double ELEC_VOLT = 1.6021766208e-19; // in Joule (=Ws)
+
 /*!
  * \brief The XrayLaser class represents source components that emit monoenergetic radiation.
  */
