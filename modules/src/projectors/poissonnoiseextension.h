@@ -33,14 +33,7 @@ private:
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
     std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
 
-    void addNoiseToData(Chunk2D<double>& data, uint seed);
-    void processView(SingleViewData& view, double i_0, uint seed);
-    Chunk2D<double> transformedToCounts(const SingleViewData::ModuleData& module, double i_0) const;
-    SingleViewData::ModuleData transformedToExtinctions(const Chunk2D<double>& counts,
-                                                        double i_0) const;
-
-    // for parallel computation
-    static void processViewCompact(SingleViewData* view, double i_0, uint seed);
+    static void processViewCompact(SingleViewData* view, std::vector<float> i_0, uint seed);
 };
 
 } // namespace CTL

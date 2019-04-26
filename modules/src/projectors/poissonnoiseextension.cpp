@@ -1,5 +1,6 @@
 #include "poissonnoiseextension.h"
 #include "components/genericsource.h"
+#include "acquisition/geometryencoder.h"
 #include "img/chunk2d.h"
 
 #include <future>
@@ -29,31 +30,21 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
     uint seed = _rng();
 
     // add noise
+    std::launch launchMode = std::launch::deferred;
     if(_useParallelization)
-    {        
-        std::vector<std::future<void>> futures(ret.nbViews());
-        for(uint view = 0; view < ret.nbViews(); ++view)
-        {
-            _setup.prepareView(view);
-            auto i_0 = _setup.system()->source()->photonFlux();
+        launchMode |= std::launch::async;
 
-            futures[view] = std::async(processViewCompact,
-                                       &ret.view(view), i_0, seed + view);
-        }
-        for(const auto& future : futures)
-            future.wait();
+    std::vector<std::future<void>> futures(ret.nbViews());
+    for(uint view = 0; view < ret.nbViews(); ++view)
+    {
+        _setup.prepareView(view);
+
+        futures[view] = std::async(launchMode, processViewCompact, &ret.view(view),
+                                   _setup.system()->photonsPerPixel(), seed + view);
     }
-    else
-    { 
-        uint seedShift = 0;
-        for(uint view = 0; view < ret.nbViews(); ++view)
-        {
-            _setup.prepareView(view);
-            auto i_0 = _setup.system()->source()->photonFlux();
-            seedShift = std::max(seedShift, view * ret.view(view).nbModules());
-            processView(ret.view(view), i_0, seed + seedShift);
-        }
-    }
+
+    for(const auto& future : futures)
+        future.wait();
 
     return ret;
 }
@@ -73,28 +64,9 @@ void PoissonNoiseExtension::setParallelizationEnabled(bool enabled)
     _useParallelization = enabled;
 }
 
-void PoissonNoiseExtension::processView(SingleViewData &view, double i_0, uint seed)
+void PoissonNoiseExtension::processViewCompact(SingleViewData* view, std::vector<float> i_0, uint seed)
 {
-    if(qFuzzyIsNull(i_0))
-    {
-        qDebug() << "PoissonNoiseExtension::processView(): Skipped view with i_0 = 0.";
-        return;
-    }
-
-    std::random_device rd;
-    for(uint mod = 0; mod < view.nbModules(); ++mod)
-    {
-        auto counts = transformedToCounts(view.module(mod), i_0);
-
-        addNoiseToData(counts, seed + mod);
-
-        view.module(mod) = transformedToExtinctions(counts, i_0);
-    }
-}
-
-void PoissonNoiseExtension::processViewCompact(SingleViewData* view, double i_0, uint seed)
-{
-    if(qFuzzyIsNull(i_0))
+    if(qFuzzyIsNull(std::accumulate(i_0.begin(), i_0.end(), 0.0)))
     {
         qDebug() << "PoissonNoiseExtension::processViewCompact(): Skipped view with i_0 = 0.";
         return;
@@ -102,52 +74,17 @@ void PoissonNoiseExtension::processViewCompact(SingleViewData* view, double i_0,
 
     std::mt19937_64 gen(seed);
 
+    uint mod = 0;
     for(auto& module : view->data())
+    {
         for(auto& pix : module.data())
         {
-            auto origCount = i_0 * expf(-pix); // mean
+            auto origCount = i_0[mod] * expf(-pix); // mean
             std::poisson_distribution<ulong> d(origCount);
             auto noisyCount = d(gen); // Poisson distributed random number
-            pix = logf(float(i_0) / float(noisyCount));
+            pix = logf(float(i_0[mod]) / float(noisyCount));
         }
-}
-
-Chunk2D<double> PoissonNoiseExtension::transformedToCounts(const SingleViewData::ModuleData &module, double i_0) const
-{
-    Chunk2D<double> ret(module.width(), module.height());
-    ret.allocateMemory();
-
-    auto rawDataPtr = ret.rawData();
-    const auto& moduleDat = module.constData();
-    for(uint pix = 0; pix < module.nbElements(); ++pix)
-        rawDataPtr[pix] = float(i_0) * expf(-moduleDat[pix]);
-
-    return ret;
-}
-
-SingleViewData::ModuleData PoissonNoiseExtension::transformedToExtinctions(const Chunk2D<double> &counts, double i_0) const
-{
-    SingleViewData::ModuleData ret(counts.width(), counts.height());
-    ret.allocateMemory();
-
-    auto rawDataPtr = ret.rawData();
-    const auto& countsDat = counts.constData();
-    for(uint pix = 0; pix < counts.nbElements(); ++pix)
-        rawDataPtr[pix] = logf(float(i_0) / countsDat[pix]);
-
-    return ret;
-}
-
-void PoissonNoiseExtension::addNoiseToData(Chunk2D<double> &data, uint seed)
-{
-    std::mt19937_64 gen(seed);
-
-    auto rawDataPtr = data.rawData();
-    for(uint pix = 0; pix < data.nbElements(); ++pix)
-    {
-        std::poisson_distribution<ulong> d(rawDataPtr[pix]);
-
-        rawDataPtr[pix] = static_cast<double>(d(gen));
+        ++mod;
     }
 }
 
