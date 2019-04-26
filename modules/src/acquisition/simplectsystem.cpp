@@ -1,4 +1,5 @@
 #include "simplectsystem.h"
+#include "acquisition/geometryencoder.h"
 #include "components/allgenerictypes.h"
 
 namespace CTL {
@@ -185,6 +186,38 @@ void SimpleCTsystem::addBeamModifier(AbstractBeamModifier* modifier) { addCompon
 void SimpleCTsystem::addBeamModifier(std::unique_ptr<AbstractBeamModifier> modifier)
 {
     addComponent(std::move(modifier));
+}
+
+/*!
+ * Returns the number of photons that incide on a detector pixel avergared over all detector
+ * modules.
+ */
+float SimpleCTsystem::photonsPerPixelMean() const
+{
+    const auto& counts = photonsPerPixel();
+    return std::accumulate(counts.begin(), counts.end(), 0.0f);
+}
+
+/*!
+ * Returns the average number of photons that incide on a detector pixel in module \a module.
+ */
+float SimpleCTsystem::photonsPerPixel(uint module) const
+{
+    return this->source()->photonFlux() * 1.0e-4 *
+            GeometryEncoder::effectivePixelArea(*this, module);
+}
+
+/*!
+ * Returns the average numbers of photons that incide on a detector pixel for all modules.
+ */
+std::vector<float> SimpleCTsystem::photonsPerPixel() const
+{
+    auto nbMod = this->detector()->nbDetectorModules();
+    std::vector<float> ret(nbMod);
+    for(uint mod = 0; mod < nbMod; ++mod)
+        ret[mod] = photonsPerPixel(mod);
+
+    return ret;
 }
 
 // use documentation of CTsystem::clone()

@@ -124,6 +124,9 @@ public:
     // other
     void addBeamModifier(AbstractBeamModifier* modifier);
     void addBeamModifier(std::unique_ptr<AbstractBeamModifier> modifier);
+    float photonsPerPixelMean() const;
+    float photonsPerPixel(uint module) const;
+    std::vector<float> photonsPerPixel() const;
 
 protected:
     SimpleCTsystem() = default;
