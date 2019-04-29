@@ -81,7 +81,7 @@ void ProjectorTest::testSpectralExtension()
 
     SpectralProjectorExtension* spectralExt = new SpectralProjectorExtension;
     spectralExt->setSpectralSampling(10);
-    spectralExt->setSpectralRange(0,150);
+    //spectralExt->setSpectralRange(0,150);
     spectralExt->use(noiseExt);
     spectralExt->configure(setup, rcConfig);
 
@@ -148,7 +148,7 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
     theSystem << detector << gantry << source;
 
     auto calibPower = meanPhotons / SimpleCTsystem::fromCTsystem(theSystem).photonsPerPixelMean();
-    source->setPower(calibPower);
+    source->setRadiationOutput(calibPower);
 
     AcquisitionSetup setup(theSystem);
     setup.setNbViews(1);

@@ -7,29 +7,29 @@ DECLARE_SERIALIZABLE_TYPE(XrayLaser)
 
 /*!
  * Constructs an XrayLaser with a focal spot size of \a focalSpotSize and its focal spot positioned
- * at \a focalSpotPosition. Sets the energy of emitted photons to \a energy and the total emitted
- * power to \a power. Also sets the component's name to \a name.
+ * at \a focalSpotPosition. Sets the energy of emitted photons to \a energy [in keV] and the total
+ * emitted output to \a output [in mWs]. Also sets the component's name to \a name.
  */
 XrayLaser::XrayLaser(const QSizeF &focalSpotSize,
                      const Vector3x1 &focalSpotPosition,
                      double energy,
-                     double power,
+                     double output,
                      const QString &name)
     : AbstractSource(focalSpotSize, focalSpotPosition, new XrayLaserSpectrumModel, name)
-    , _energy(energy)
-    , _power(power)
+    , _output(output)
 {
+    setPhotonEnergy(energy);
 }
 
 /*!
  * Constructs an XrayLaser that emits photons with an energy of \a energy and a total emitted
- * power of \a power. Also sets the component's name to \a name.
+ * output of \a output [in mWs]. Also sets the component's name to \a name.
  *
  * The focal spot size defaults to QSizeF(0.0,0.0) and the focal spot position is set to
  * Vector3x1(0.0f).
  */
-XrayLaser::XrayLaser(double energy, double power, const QString &name)
-    : XrayLaser(QSizeF(0.0,0.0), Vector3x1(0.0f), energy, power, name)
+XrayLaser::XrayLaser(double energy, double output, const QString &name)
+    : XrayLaser(QSizeF(0.0,0.0), Vector3x1(0.0f), energy, output, name)
 {
 }
 
@@ -37,7 +37,7 @@ XrayLaser::XrayLaser(double energy, double power, const QString &name)
  * Constructs an XrayLaser named \a name.
  *
  * The focal spot size defaults to QSizeF(0.0,0.0) and the focal spot position is set to
- * Vector3x1(0.0f). Sets the photon energy to 100 keV and the total power to 1.0.
+ * Vector3x1(0.0f). Sets the photon energy to 100 keV and the total emitted output to 1.0 mWs.
  */
 XrayLaser::XrayLaser(const QString &name)
     : XrayLaser(QSizeF(0.0,0.0), Vector3x1(0.0f), 100.0f, 1.0f, name)
@@ -45,22 +45,21 @@ XrayLaser::XrayLaser(const QString &name)
 }
 
 /*!
- * Returns the emitted radiation spectrum sampled with \a nbSamples bins covering the energy
- * range of [\a from, \a to] keV. Each energy bin is defined to represent the integral over the
- * contribution of all energies within the bin to the total intensity. The spectrum provides
- * relative intensities, i.e. the sum over all bins equals to one.
+ * Returns the nominal photon flux (photons/cm² in 1m distance).
  *
- * Throws std::runtime_error if no spectrum model is available.
+ * This is computed as the quotient between the total emitted output and the energy of an individual
+ * photon.
  */
-IntervalDataSeries XrayLaser::spectrum(float from, float to, uint nbSamples) const
-{
-    if(!hasSpectrumModel())
-        throw std::runtime_error("No spectrum model set.");
+double XrayLaser::nominalPhotonFlux() const { return _output / (ELEC_VOLT * photonEnergy() * 1.0e3); }
 
-    static_cast<XrayLaserSpectrumModel*>(_spectrumModel.get())->setParameter(_energy);
-    IntervalDataSeries spec = IntervalDataSeries::sampledFromModel(*spectrumModel(), from, to, nbSamples);
-    spec.normalizeByIntegral();
-    return spec;
+/*!
+ * Returns the energy range [in keV] of the radiation emitted by this instance.
+ *
+ * This is [photonEnergy, photonEnergy].
+ */
+AbstractSource::EnergyRange XrayLaser::energyRange() const
+{
+    return { float(_energy), float(_energy) };
 }
 
 /*!
@@ -69,7 +68,7 @@ IntervalDataSeries XrayLaser::spectrum(float from, float to, uint nbSamples) con
  * In addition to the information from the base class (SystemComponent), the info string contains
  * the following details:
  * \li Energy of emitted photons
- * \li Total emitted power
+ * \li Total emitted radiation output
  */
 QString XrayLaser::info() const
 {
@@ -78,10 +77,20 @@ QString XrayLaser::info() const
     ret +=
         typeInfoString(typeid(this)) +
         "\tEnergy: " + QString::number(_energy) + " keV\n"
-        "\tPower: " +  QString::number(_power) + "\n";
+        "\tOutput: " +  QString::number(_output) + " mWs\n";
     ret += (this->type() == XrayLaser::Type) ? "}\n" : "";
 
     return ret;
+}
+
+/*!
+ * Returns a hint for a reasonable number of sampling points when querying a spectrum of the
+ * component. This always returns 1, since a single energy bin is sufficient to represent
+ * monochromatic radiation.
+ */
+uint XrayLaser::spectrumDiscretizationHint() const
+{
+    return 1;
 }
 
 // Use SystemComponent::fromVariant() documentation.
@@ -91,7 +100,7 @@ void XrayLaser::fromVariant(const QVariant& variant)
 
     QVariantMap varMap = variant.toMap();
     _energy = varMap.value("energy").toDouble();
-    _power  = varMap.value("power").toDouble();
+    _output  = varMap.value("output").toDouble();
 }
 
 // Use SerializationInterface::toVariant() documentation.
@@ -100,7 +109,7 @@ QVariant XrayLaser::toVariant() const
     QVariantMap ret = AbstractSource::toVariant().toMap();
 
     ret.insert("energy", _energy);
-    ret.insert("power", _power);
+    ret.insert("output", _output);
 
     return ret;
 }
@@ -118,12 +127,6 @@ QString XrayLaser::defaultName()
 // Use the documentation of base class.
 SystemComponent* XrayLaser::clone() const { return new XrayLaser(*this); }
 
-/*!
- * Returns the nominal photon flux.
- *
- * Currently, simply returns the total power.
- */
-double XrayLaser::nominalPhotonFlux() const { return _power / (ELEC_VOLT * photonEnergy() * 1.0e3); }
 
 /*!
  * Returns the energy of emitted photons (in keV).
@@ -131,13 +134,26 @@ double XrayLaser::nominalPhotonFlux() const { return _power / (ELEC_VOLT * photo
 double XrayLaser::photonEnergy() const { return _energy; }
 
 /*!
- * Sets the energy of emitted photons to \a energy (in keV).
+ * Returns the total emission output (in mWs). This refers to all radiation that is emitted to an
+ * area of 1cm² in a distance of 1m from the source.
  */
-void XrayLaser::setPhotonEnergy(double energy) { _energy = energy; }
+double XrayLaser::radiationOutput() const { return _output; }
 
 /*!
- * Sets the total power emitted to an area of 1cm² in a distance of 1m to \a power (in mW).
+ * Sets the energy of emitted photons to \a energy (in keV).
  */
-void XrayLaser::setPower(double power) { _power = power; }
+void XrayLaser::setPhotonEnergy(double energy)
+{
+    _energy = energy;
+
+    if(hasSpectrumModel())
+        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_energy);
+}
+
+/*!
+ * Sets the total radiation output emitted to an area of 1cm² in a distance of 1m to \a output
+ * (in mWs).
+ */
+void XrayLaser::setRadiationOutput(double output) { _output = output; }
 
 } // namespace CTL

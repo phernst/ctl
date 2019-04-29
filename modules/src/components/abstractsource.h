@@ -23,14 +23,19 @@ namespace CTL {
  * emitted X-ray spectrum (relative intensity contribution for each photon energy) and the overall
  * photon flux that is emitted by the source.
  *
- * The AbstractSource class has two abstract interface methods: spectrum() and nominalPhotonFlux().
- * The spectrum() method must provide a sampled representation of the current radiation spectrum
- * emitted by the source component. Spectrum computation may be based on an AbstractSpectralModel,
- * which can be set using the corresponding setter method setSpectrumModel().
+ * The AbstractSource class has two abstract interface methods: energyRange() and
+ * nominalPhotonFlux(). The energyRange() method must provide the energy boundaries within which
+ * all radiation from the source is contained. This range will be used whenenver the source's
+ * radiation spectrum is queried using spectrum() in order to determine the required interval for
+ * a sampled representation of the spectrum.
  * The nominalPhotonFlux() method shall return the (unmodified) flux of photons emitted by the
  * source. This is used whithin the actual getter method photonFlux(), which returns the nominal
  * flux multiplied by an (optional, defaults to 1.0) modifier (see fluxModifier() and
  * setFluxModifier()).
+ *
+ * Spectrum computation is based on an AbstractXraySpectrumModel, which can be set using the
+ * corresponding setter method setSpectrumModel(). To query the current spectrum, use the spectrum()
+ * method, passing the number of desired sampling points as an input.
  *
  * Definition of the focal spot geometry, i.e. both size and position, refers to CT coordinates. The
  * focal spot size is specified in the x-y-plane. Hence, a focal spot with size QSizeF(1.0, 2.0)
@@ -60,8 +65,13 @@ class AbstractSource : public SystemComponent
     CTL_TYPE_ID(300)
     DECLARE_ELEMENTAL_TYPE
 
+public:
+    static const uint DEFAULT_SPECTRUM_RESOLUTION_HINT = 10;
+
+    struct EnergyRange { float from; float to; };
+
     // abstract interface
-    public:virtual IntervalDataSeries spectrum(float from, float to, uint nbSamples) const = 0;
+    public:virtual EnergyRange energyRange() const = 0;
     protected:virtual double nominalPhotonFlux() const = 0;
 
 public:
@@ -75,7 +85,9 @@ public:
                    AbstractXraySpectrumModel* spectumModel,
                    const QString& name);
 
-    // virtual methods
+    // virtual methods  
+    virtual IntervalDataSeries spectrum(uint nbSamples) const;
+    virtual uint spectrumDiscretizationHint() const;
     virtual void setSpectrumModel(AbstractXraySpectrumModel* model);
     QString info() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
@@ -100,6 +112,7 @@ public:
     void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
 
 protected:
+
     QSizeF _focalSpotSize = QSizeF(0.0, 0.0); //!< Size of the focal spot (in mm).
     Vector3x1 _focalSpotPosition = Vector3x1(0.0); //!< Position of the focal spot (relative to source center).
     double _fluxModifier = 1.0; //!< Global (multiplicative) modifier for the photon flux.
@@ -117,16 +130,15 @@ protected:
  */
 
 /*!
- * \fn AbstractSource::spectrum(float from, float to, uint nbSamples) const
+ * \fn AbstractSource::EnergyRange AbstractSource::energyRange() const
  *
- * Abstract interface method. Returns a sampled representation of the current radiation spectrum
- * emitted by the source component. The returned spectrum has \a nbSamples bins covering the energy
- * range of [\a from, \a to] keV. Each energy bin is defined to represent the integral over the
- * contribution of all energies within the bin to the total intensity. The spectrum provides
- * relative intensities, i.e. the sum over all bins equals to one. To
+ * Abstract interface method. Returns the energy range that contains all radiation from the source.
+ */
+
+/*!
+ * \struct AbstractSource::EnergyRange
  *
- * Spectrum computation may be based on an AbstractSpectralModel,
- * which can be set using the corresponding setter method setSpectrumModel().
+ * Holds the borders (i.e. minimum to maximum) of the energy range.
  */
 
 /*!
@@ -178,6 +190,44 @@ inline AbstractSource::AbstractSource(const QSizeF& focalSpotSize,
     , _focalSpotPosition(focalSpotPosition)
     , _spectrumModel(std::unique_ptr<AbstractDataModel>(spectumModel))
 {
+}
+
+
+/*!
+ * Returns the emitted radiation spectrum sampled with \a nbSamples bins covering the energy
+ * range of [energyRange().from, energyRange().to] keV. The method spectrumDiscretizationHint() can
+ * provide a hint for a reasonable number of samples.
+ *
+ * Each energy bin in the returned data series is defined to represent the integral over the
+ * contribution to the total intensity of all energies within that particular bin. The individual
+ * contributions are extracted from the AbstractXraySpectrumModel set to the component.
+ *
+ * The returned spectrum contains relative intensities, i.e. the sum over all bins equals to one.
+ *
+ * Throws std::runtime_error if no spectrum model is available.
+ *
+ * \sa energyRange(), spectrumModel(), setSpectrumModel().
+ */
+inline IntervalDataSeries AbstractSource::spectrum(uint nbSamples) const
+{
+    if(!hasSpectrumModel())
+        throw std::runtime_error("No spectrum model set.");
+
+    auto spec = IntervalDataSeries::sampledFromModel(static_cast<const AbstractIntegrableDataModel&>(*_spectrumModel),
+                                                     energyRange().from, energyRange().to, nbSamples);
+    spec.normalizeByIntegral();
+
+    return spec;
+}
+
+/*!
+ * Returns a hint for a reasonable number of sampling points when querying a spectrum of the
+ * component. By default, this method returns 10. Re-implement this method in sub-classes to return
+ * meaningful hints for your particular source component type.
+ */
+inline uint AbstractSource::spectrumDiscretizationHint() const
+{
+    return DEFAULT_SPECTRUM_RESOLUTION_HINT;
 }
 
 /*!
@@ -259,15 +309,19 @@ inline QString AbstractSource::info() const
     QString ret(SystemComponent::info());
 
     ret += typeInfoString(typeid(this))
+        + "\tEnergy range: [" + QString::number(energyRange().from) + "," +
+            QString::number(energyRange().to) + "] keV\n"
+        + "\tNominal photon flux: " + QString::number(nominalPhotonFlux())
+            + "photons / cm^2 @ 1m\n"
+        + "\tFlux modifier: "
+        + QString::number(_fluxModifier) + "\n";
         + "\tFocal spot size: " + QString::number(_focalSpotSize.width()) + " mm x "
         + QString::number(_focalSpotSize.height())
         + " mm\n"
           "\tFocal spot position: "
         + QString::number(_focalSpotPosition(0, 0)) + " mm, "
         + QString::number(_focalSpotPosition(1, 0)) + " mm, "
-        + QString::number(_focalSpotPosition(2, 0)) + " mm\n"
-        + "\tFlux modifier: "
-        + QString::number(_fluxModifier) + "\n";
+        + QString::number(_focalSpotPosition(2, 0)) + " mm\n";
 
     ret += (this->type() == AbstractSource::Type) ? "}\n" : "";
 

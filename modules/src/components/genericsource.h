@@ -11,8 +11,8 @@ class GenericSource : public AbstractSource
     CTL_TYPE_ID(301)
 
     // implementation of abstract interface
-    public: IntervalDataSeries spectrum(float from, float to, uint nbSamples) const override;
-    protected: double nominalPhotonFlux() const override;
+    public:virtual EnergyRange energyRange() const override;
+    protected:virtual double nominalPhotonFlux() const override;
 
 public:
     GenericSource(const QString& name);
@@ -23,10 +23,12 @@ public:
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
+    uint spectrumDiscretizationHint() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
     // setter methods
+    void setEnergyRange(const EnergyRange& range);
     void setSpectrum(const IntervalDataSeries& spectrum, bool updateFlux = false);
     void setPhotonFlux(double flux);
 
@@ -34,7 +36,10 @@ public:
     static QString defaultName();
 
 protected:
+    EnergyRange _energyRange = { 0.0f, 0.0f }; //!< Energy range of the emitted radiation.
+    uint _samplingHint = 0; //!< Number of samples from last set spectrum.
     double _totalFlux = 0.0f; //!< Total photon flux (photons/cm² in 1m distance).
+
 };
 
 } // namespace CTL

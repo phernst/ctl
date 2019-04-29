@@ -36,21 +36,23 @@ void SpectrumTest::initTestCase()
     _tube = new CTL::XrayTube();
     //_tube->setSpectrumModel(_model);
 
-    qInfo() << _tube->spectrum(0.0f, 120.0f, 100).normalizedByIntegral().values();
-    qInfo() << _tube->spectrum(0.0f, 120.0f, 100).normalizedByIntegral().samplingPoints();
+    qInfo() << _tube->spectrum(100).normalizedByIntegral().values();
+    qInfo() << _tube->spectrum(100).normalizedByIntegral().samplingPoints();
 }
 
 void SpectrumTest::testXrayLaserSpectrum()
 {
     CTL::XrayLaser laser;
-    auto spectrum = laser.spectrum(10.0, 110.0, 10);
+    auto spectrum = laser.spectrum(2);
     qInfo().noquote() << spectrum.data();
-    QCOMPARE(spectrum.value(8), 0.5f);
-    QCOMPARE(spectrum.value(9), 0.5f);
+    QCOMPARE(spectrum.value(0), 0.5f);
+    QCOMPARE(spectrum.value(1), 0.5f);
+    QCOMPARE(spectrum.samplingPoint(0), 100.0f);
     laser.setPhotonEnergy(55.0);
-    spectrum = laser.spectrum(10.0, 110.0, 10);
+    spectrum = laser.spectrum(10);
     qInfo().noquote() << spectrum.data();
-    QCOMPARE(spectrum.value(4), 1.0f);
+    QCOMPARE(spectrum.value(4), 0.1f);
+    QCOMPARE(spectrum.samplingPoint(4), 55.0f);
 
 }
 

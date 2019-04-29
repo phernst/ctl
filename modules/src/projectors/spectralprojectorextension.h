@@ -19,16 +19,15 @@ public:
 
     ProjectionData projectComposite(const CompositeVolume& volume) override;
 
-    void setSpectralRange(float from, float to);
     void setSpectralSampling(uint nbSamples);
 
 private:
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
     std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
 
-    float _from = 0.0f;
-    float _to   = 200.0f;
-    uint _nbSamples = 10;
+    //float _from = 0.0f;
+    //float _to   = 200.0f;
+    uint _nbSamples = 0;
 
     struct SpectralInformation
     {

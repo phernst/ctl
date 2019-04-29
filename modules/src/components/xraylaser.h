@@ -15,30 +15,32 @@ class XrayLaser : public AbstractSource
     CTL_TYPE_ID(310)
 
     // implementation of abstract interface
-    public: IntervalDataSeries spectrum(float from, float to, uint nbSamples) const override;
-    protected: double nominalPhotonFlux() const override;
+    public:virtual EnergyRange energyRange() const override;
+    protected:virtual double nominalPhotonFlux() const override;
 
 public:
     XrayLaser(const QString& name);
-    XrayLaser(double energy, double power, const QString &name = defaultName());
+    XrayLaser(double energy, double output, const QString &name = defaultName());
     XrayLaser(const QSizeF &focalSpotSize = QSizeF(0.0, 0.0),
               const Vector3x1& focalSpotPosition = Vector3x1(0.0f),
               double energy = 100.0f,
-              double power = 1.0f,
+              double output = 1.0f,
               const QString &name = defaultName());
 
     // virtual methods
     SystemComponent* clone() const override;
     QString info() const override;
+    uint spectrumDiscretizationHint() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
     // getter
     double photonEnergy() const;
+    double radiationOutput() const;
 
     // setter
     void setPhotonEnergy(double energy);
-    void setPower(double power);
+    void setRadiationOutput(double output);
 
     // static methods
     static QString defaultName();
@@ -46,7 +48,7 @@ public:
 
 protected:
     double _energy; //!< Energy of the emitted photons (in keV).
-    double _power;  //!< Total emission power.
+    double _output; //!< Total emission output (in mWs).
 
 private:
     using AbstractSource::setSpectrumModel;

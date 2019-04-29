@@ -15,6 +15,9 @@ void SpectralProjectorExtension::configure(const AcquisitionSetup& setup, const 
     _setup = setup;
     _config.reset(config.clone());
 
+    if(_nbSamples == 0)
+        _nbSamples = _setup.system()->source()->spectrumDiscretizationHint();
+
     ProjectorExtension::configure(setup, config);
 }
 
@@ -224,11 +227,11 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
 
 }
 
-void SpectralProjectorExtension::setSpectralRange(float from, float to)
-{
-    _from = from;
-    _to = to;
-}
+//void SpectralProjectorExtension::setSpectralRange(float from, float to)
+//{
+//    _from = from;
+//    _to = to;
+//}
 
 void SpectralProjectorExtension::setSpectralSampling(uint nbSamples)
 {
@@ -250,7 +253,7 @@ SpectralProjectorExtension::SpectralInformation SpectralProjectorExtension::spec
     for(uint view = 0; view < _setup.nbViews(); ++view)
     {
         _setup.prepareView(view);
-        spectrum = srcPtr->spectrum(_from, _to, _nbSamples);
+        spectrum = srcPtr->spectrum(_nbSamples);
         auto globalFluxMod = srcPtr->fluxModifier();
         for(uint bin = 0; bin < _nbSamples; ++bin)
         {

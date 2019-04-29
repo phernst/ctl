@@ -362,7 +362,7 @@ void XrayLaserParam::prepare(SimpleCTsystem* system) const
     if(_newPhotonEnergy.first)
         sourcePtr->setPhotonEnergy(_newPhotonEnergy.second);
     if(_newPower.first)
-        sourcePtr->setPower(_newPower.second);
+        sourcePtr->setRadiationOutput(_newPower.second);
 }
 
 bool XrayLaserParam::isApplicableTo(const CTsystem& system) const
@@ -408,7 +408,7 @@ void XrayTubeParam::prepare(SimpleCTsystem* system) const
     if(_newTubeVoltage.first)
         sourcePtr->setTubeVoltage(_newTubeVoltage.second);
     if(_newEmissionCurrent.first)
-        sourcePtr->setEmissionCurrent(_newEmissionCurrent.second);
+        sourcePtr->setMilliampereSeconds(_newEmissionCurrent.second);
 }
 
 bool XrayTubeParam::isApplicableTo(const CTsystem& system) const
