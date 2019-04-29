@@ -161,7 +161,10 @@ AcquisitionSetup MainWindow::currentSetup() const
 
     // set photons
     auto nbPhotons = ui->_SB_nbPhotons->value();
-    static_cast<XrayLaser*>(_CTSystem.source())->setPower(double(nbPhotons));
+    auto reqOutputFactor = double(nbPhotons) / _CTSystem.photonsPerPixelMean();
+    auto reqOutputValue = static_cast<XrayLaser*>(_CTSystem.source())->radiationOutput() *
+            reqOutputFactor;
+    static_cast<XrayLaser*>(_CTSystem.source())->setRadiationOutput(double(reqOutputValue));
 
     AcquisitionSetup acqSetup(_CTSystem);
     acqSetup.setNbViews(nbViews);
