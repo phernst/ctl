@@ -61,6 +61,16 @@ float IntervalDataSeries::binWidth() const
     return _binWidth;
 }
 
+float IntervalDataSeries::centroid() const
+{
+    float sum = 0.0f;
+
+    for(const auto& pt : _data)
+        sum += pt.x() * pt.y();
+
+    return sum / integral();
+}
+
 
 
 }

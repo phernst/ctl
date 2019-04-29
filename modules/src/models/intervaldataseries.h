@@ -20,6 +20,7 @@ public:
     void normalizeByIntegral();
     IntervalDataSeries normalizedByIntegral() const;
     float binWidth() const;
+    float centroid() const;
 
 private:
     float _binWidth;
