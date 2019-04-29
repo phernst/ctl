@@ -57,6 +57,8 @@ public:
     FixedXraySpectrumModel() = default;
     FixedXraySpectrumModel(const TabulatedDataModel& table);
 
+    void setParameter(const QVariant& parameter) override;
+
     void setLookupTable(const TabulatedDataModel& table);
 
 private:

@@ -197,6 +197,43 @@ FixedXraySpectrumModel::FixedXraySpectrumModel(const TabulatedDataModel &table)
     addLookupTable(0.0f, table);
 }
 
+void FixedXraySpectrumModel::setParameter(const QVariant &parameter)
+{
+    if(parameter.canConvert(QMetaType::Float))
+    {
+        qWarning() << "FixedXraySpectrumModel::setParameter(): Setting energy parameter is not "
+                      "supported in FixedXraySpectrumModel. This call is ignored!";
+        return;
+    }
+
+    if(parameter.toMap().value("energy", 0.0f).toFloat() != 0.0f)
+    {
+        qWarning() << "FixedXraySpectrumModel::setParameter(): Setting energy parameter is not "
+                      "supported in FixedXraySpectrumModel. The corresponding entry in the "
+                      "parameters is ignored!";
+    }
+
+    if(parameter.toMap().contains("lookup tables"))
+    {
+        // populate lookup table
+        auto lookupTableData = parameter.toMap().value("lookup tables").toList();
+        if(lookupTableData.isEmpty())
+            return;
+        if(lookupTableData.size() > 1)
+            qWarning() << "FixedXraySpectrumModel::setParameter(): Parameters contain more than "
+                          "one lookup table. Ignoring all tables but the first!";
+
+        // parse the (first) lookup table
+        auto varAsMap = lookupTableData.first().toMap();
+        auto tableData = varAsMap.value("table data");
+
+        TabulatedDataModel table;
+        table.setParameter(tableData);
+
+        setLookupTable(table);
+    }
+}
+
 void FixedXraySpectrumModel::setLookupTable(const TabulatedDataModel& table)
 {
     QMap<float, TabulatedDataModel> tmp;
