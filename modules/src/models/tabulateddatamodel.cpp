@@ -146,8 +146,8 @@ float TabulatedDataModel::binIntegral(float position, float binWidth) const
         float width = (currentPosition + 1).key() - currentPosition.key();
         float height = 0.5f * ((currentPosition + 1).value() + currentPosition.value());
 
-        qDebug() << "contribution for " << currentPosition.key() << "to" << currentPosition.key()
-                 << ": " << width << height;
+        qDebug() << "contribution for " << currentPosition.key() << "to" << (currentPosition + 1).key()
+                 << ": " << width * height;
 
         ret += width * height;
         ++currentPosition;
