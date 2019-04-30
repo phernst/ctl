@@ -1,0 +1,12 @@
+NRRD0004
+type: float
+dimension: 3
+sizes: 256 256 199
+encoding: raw
+endian: little
+# asd1
+#asd2
+##asd3
+myKey:=myValue
+
+<data>

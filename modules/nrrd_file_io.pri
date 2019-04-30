@@ -7,7 +7,9 @@ CONFIG += NRRD_FILE_IO_MODULE
 INCLUDEPATH += $$PWD/src
 
 HEADERS += \
-    $$PWD/src/io/nrrd/nrrdfileio.h \
+    $$PWD/src/io/nrrd/nrrdfileio.h
+
+SOURCES += \
     $$PWD/src/io/nrrd/nrrdfileio.tpp
 
 

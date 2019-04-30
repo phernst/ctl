@@ -15,6 +15,8 @@ namespace io {
 class NrrdFileIO
 {
 public:
+    enum DataType { Char, UChar, Short, UShort, Int, UInt, Int64, UInt64, Float, Double, Block };
+
     QVariantMap metaInfo(const QString& fileName) const;
 
     template <typename T>
@@ -32,14 +34,18 @@ public:
     bool skipKeyValuePairs() const;
 
 private:
-    enum DataType { Char, UChar, Short, UShort, Int, UInt, Int64, UInt64, Float, Double, Block };
 
     bool _skipComments = true;
     bool _skipKeyValuePairs = false;
 
+    template <typename T>
+    bool checkHeader(const QVariantMap& metaInfo);
+    template <typename T>
+    static DataType dataType();
+    static DataType dataTypeFromString(const QString& typeString);
+    static bool isBigEndian();
     bool parseField(const QString& field, const QString& desc,
                     QVariantMap* metaInfo, int* nbDimension) const;
-    static DataType getType(const QString& typeString);
     static int sizeOfType(DataType type);
 };
 

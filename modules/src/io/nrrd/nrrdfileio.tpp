@@ -1,6 +1,18 @@
 #include "nrrdfileio.h"
 #include <fstream>
 
+// checks format of floating point numbers at compile time and leads to a compiler
+// error if the platform does not support floating point numbers according to IEEE 754
+static_assert(std::numeric_limits<float>::is_iec559, "'float' must be compliant with the IEEE 754 standard");
+static_assert(std::numeric_limits<double>::is_iec559, "'double' must be compliant with the IEEE 754 standard");
+static_assert(sizeof(float)  * CHAR_BIT == 32, "'float' must be 32 Bit");
+static_assert(sizeof(double) * CHAR_BIT == 64, "'double' must be 64 Bit");
+// checks sizes of integer formats
+static_assert(sizeof(char)    * CHAR_BIT == 8,  "'char' must be 8 Bit");
+static_assert(sizeof(short)   * CHAR_BIT == 16, "'short' must be 16 Bit");
+static_assert(sizeof(int)     * CHAR_BIT == 32, "'int' must be 32 Bit");
+static_assert(sizeof(int64_t) * CHAR_BIT == 64, "'int64' must be 64 Bit");
+
 namespace CTL {
 namespace io {
 
@@ -108,14 +120,23 @@ inline void NrrdFileIO::setSkipKeyValuePairs(bool skipKeyValuePairs)
 inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
                                    QVariantMap* metaInfo, int* nbDimension) const
 {
-    if(field.compare("dimension", Qt::CaseInsensitive) == 0)
+    // Nrrd fields which are translated to basetype meta info
+    static const QString dimension = QStringLiteral("dimension");
+    static const QString sizes = QStringLiteral("sizes");
+    static const QString type = QStringLiteral("type");
+    static const QString encoding = QStringLiteral("encoding");
+    static const QString thicknesses = QStringLiteral("thicknesses");
+    static const QString spaceOrigin = QStringLiteral("space origin");
+    static const QString labels = QStringLiteral("labels");
+
+    if(field.compare(dimension, Qt::CaseInsensitive) == 0)
     {
         if(*nbDimension)
             return false;
         *nbDimension = desc.toInt();
         return 0 < *nbDimension && *nbDimension <= 4;
     }
-    else if(field.compare("sizes", Qt::CaseInsensitive) == 0)
+    else if(field.compare(sizes, Qt::CaseInsensitive) == 0)
     {
         if(*nbDimension == 0 && metaInfo->contains(meta_info::dimensions))
             return false;
@@ -147,27 +168,27 @@ inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
             return false;
         }
     }
-    else if(field.compare("type", Qt::CaseInsensitive) == 0)
+    else if(field.compare(type, Qt::CaseInsensitive) == 0)
     {
-        if(metaInfo->contains("type"))
+        if(metaInfo->contains(type))
             return false;
-        auto dataTypeID = getType(desc);
+        auto dataTypeID = dataTypeFromString(desc);
         if(dataTypeID < 0)
             return false;
-        metaInfo->insert("type", desc);
+        metaInfo->insert(type, desc);
         metaInfo->insert("data type enum", dataTypeID);
     }
-    else if(field.compare("encoding", Qt::CaseInsensitive) == 0)
+    else if(field.compare(encoding, Qt::CaseInsensitive) == 0)
     {
-        if(metaInfo->contains("encoding"))
+        if(metaInfo->contains(encoding))
             return false;
 
         if(desc == "raw")
-            metaInfo->insert("encoding", "raw");
+            metaInfo->insert(encoding, "raw");
         else if(desc == "txt" || desc == "text" || desc == "ascii")
-            metaInfo->insert("encoding", "ascii");
+            metaInfo->insert(encoding, "ascii");
     }
-    else if(field.compare("thicknesses", Qt::CaseInsensitive) == 0)
+    else if(field.compare(thicknesses, Qt::CaseInsensitive) == 0)
     {
         if(metaInfo->contains(meta_info::voxSizeX))
             return false;
@@ -177,7 +198,7 @@ inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
         metaInfo->insert(meta_info::voxSizeY, thicknesses.value(1).toFloat());
         metaInfo->insert(meta_info::voxSizeZ, thicknesses.value(2).toFloat());
     }
-    else if(field.compare("space origin", Qt::CaseInsensitive) == 0)
+    else if(field.compare(spaceOrigin, Qt::CaseInsensitive) == 0)
     {
     //space origin: (0.0,1.0,0.3)
         if(metaInfo->contains(meta_info::volOffX))
@@ -191,7 +212,7 @@ inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
         metaInfo->insert(meta_info::volOffY, vector.value(1).toFloat());
         metaInfo->insert(meta_info::volOffZ, vector.value(2).toFloat());
     }
-    else if(field.compare("labels", Qt::CaseInsensitive) == 0)
+    else if(field.compare(labels, Qt::CaseInsensitive) == 0)
     {
     //labels: "<label[0]>" "<label[1]>" ... "<label[dim-1]>"
         if(metaInfo->contains(meta_info::dim1Type))
@@ -207,7 +228,7 @@ inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
         for(int i = 0; i < nbTypes; ++i)
             metaInfo->insert(keys.at(i), dimTypes.at(i));
     }
-    else
+    else // other field
     {
         auto keyString = field.toLower();
         if(metaInfo->contains(keyString))
@@ -218,7 +239,7 @@ inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
     return true;
 }
 
-inline NrrdFileIO::DataType NrrdFileIO::getType(const QString &desc)
+inline NrrdFileIO::DataType NrrdFileIO::dataTypeFromString(const QString &desc)
 {
     if(desc == "signed char" || desc == "int8" || desc == "int8_t")
         return Char;
@@ -259,28 +280,12 @@ std::vector<T> NrrdFileIO::readAll(const QString& fileName) const
     io.setSkipComments(true);
     io.setSkipKeyValuePairs(true);
     auto metaInfo = io.metaInfo(fileName);
-    if(!metaInfo.contains("nrrd header offset") ||
-       !metaInfo.contains(meta_info::dimensions) ||
-       !metaInfo.contains("data type enum"))
-    {
-        qCritical() << "insufficient header information";
+
+    if(!checkHeader<T>(metaInfo))
         return ret;
-    }
 
     const auto headerOffset = metaInfo.value("nrrd header offset").toLongLong();
     const auto dimensions = metaInfo.value(meta_info::dimensions).value<meta_info::Dimensions>();
-    const auto dataType = DataType(metaInfo.value("data type enum").value<int>());
-
-    if(dataType < 0 || dataType >= 10)
-    {
-        qCritical() << "unknown or unsupported data type";
-        return ret;
-    }
-    if(sizeOfType(dataType) != sizeof(T))
-    {
-        qCritical() << "data type size does not fit to nrrd header information";
-        return ret;
-    }
 
     std::ifstream is(fileName.toStdString(), std::ios::binary | std::ios::ate);
     if(!is)
@@ -296,7 +301,7 @@ std::vector<T> NrrdFileIO::readAll(const QString& fileName) const
             (dimensions.nbDim >= 3 ? dimensions.dim3 : 1) *
             (dimensions.nbDim == 4 ? dimensions.dim4 : 1);
 
-    if(nbElements * sizeOfType(dataType) != dataBytes)
+    if(nbElements * sizeof(T) != dataBytes)
     {
         qCritical() << "raw data size of file does not fit to dimensions in nrrd header";
         return ret;
@@ -310,13 +315,126 @@ std::vector<T> NrrdFileIO::readAll(const QString& fileName) const
         qCritical() << "only" << is.gcount() << "could be read";
 
     is.close();
+    return ret;
+}
+
+template<typename T>
+bool NrrdFileIO::checkHeader(const QVariantMap &metaInfo)
+{
+    auto fail = [](const QString& s){
+        qCritical() << s;
+        return false;
+    };
+    // minimum information that is required
+    if(!metaInfo.contains("nrrd header offset") ||
+       !metaInfo.contains(meta_info::dimensions) ||
+       !metaInfo.contains("data type enum"))
+    {
+        return fail("insufficient header information");
+    }
+    // the only supported encoding so far (TBD: add ascii support)
+    if(metaInfo.value("encoding").toString().compare("raw", Qt::CaseInsensitive))
+    {
+        return fail("unsupported data encoding:" + metaInfo.value("encoding").toString());
+    }
+
+    // check data type
+    const auto dataTypeFromHeader = DataType(metaInfo.value("data type enum").value<int>());
+    if(dataTypeFromHeader < 0 || dataTypeFromHeader > 10)
+    {
+        return fail("unknown or unsupported data type");
+    }
+    if(dataType<T>() != dataTypeFromHeader)
+    {
+        return fail("data type does not fit to nrrd header information");
+    }
+    if(dataTypeFromHeader == DataType::Block)
+    {
+        auto blockSize = metaInfo.contains("blocksize")
+                ? metaInfo.value("blocksize").toInt()
+                : metaInfo.value("block size").toInt();
+        if(blockSize <= 0)
+            return fail("invalid or missing block size");
+        if(blockSize != sizeof(T))
+            return fail("block size in nrrd header does not match to requested data type size");
+    }
+    else if(sizeOfType(dataTypeFromHeader) != sizeof(T))
+    {
+        return fail("data type size does not fit to nrrd header information");
+    }
+
+    // raw data endianness
+    if(metaInfo.contains("endian") && dataTypeFromHeader > int(DataType::UChar))
+    {
+        auto endianness = metaInfo.value("endian").toString();
+        if(endianness.compare("little", Qt::CaseInsensitive))
+        {
+            if(isBigEndian())
+                return fail("conversion little to big endian not implemented");
+        }
+        else if(endianness.compare("big", Qt::CaseInsensitive))
+        {
+            if(!isBigEndian())
+                return fail("conversion big to little endian not implemented");
+        }
+        else
+        {
+            return fail("unknown endianness:" + endianness);
+        }
+    }
+
+    return true;
 }
 
 inline int NrrdFileIO::sizeOfType(DataType type)
 {
     // enum DataType { Char, UChar, Short, UShort, Int, UInt, Int64, UInt64, Float, Double, Block };
-    const int sizes[] = { 1, 1, 2, 2, 4, 4, 8, 8, 4, 8 }; // block?
+    const int sizes[] = { 1, 1, 2, 2, 4, 4, 8, 8, 4, 8, 0 }; // block size is unspecified (0)
     return sizes[type];
+}
+
+// translate supported data types to enum
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<char>() { return DataType::Char; }
+
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<uchar>() { return DataType::UChar; }
+
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<short>() { return DataType::Short; }
+
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<ushort>() { return DataType::UShort; }
+
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<int>() { return DataType::Int; }
+
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<uint>() { return DataType::UInt; }
+
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<int64_t>() { return DataType::Int64; }
+
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<uint64_t>() { return DataType::UInt64; }
+
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<float>() { return DataType::Float; }
+
+template <>
+inline NrrdFileIO::DataType NrrdFileIO::dataType<double>() { return DataType::Double; }
+
+template <typename T>
+NrrdFileIO::DataType NrrdFileIO::dataType() { return DataType::Block; }
+
+inline bool NrrdFileIO::isBigEndian()
+{
+    union {
+        uint32_t i;
+        char c[4];
+    } bint = { 0x01020304 };
+
+    return bint.c[0] == 1;
 }
 
 } // namespace io
