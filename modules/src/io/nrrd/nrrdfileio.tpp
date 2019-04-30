@@ -203,7 +203,7 @@ inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
     //space origin: (0.0,1.0,0.3)
         if(metaInfo->contains(meta_info::volOffX))
             return false;
-        if(desc.front() != '(' || desc.back() != ')')
+        if(!desc.startsWith('(') || !desc.endsWith(')'))
             return false;
         auto offSet = desc.mid(1);
         offSet.chop(1);

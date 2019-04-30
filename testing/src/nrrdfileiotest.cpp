@@ -37,13 +37,13 @@ void NrrdFileIOtest::testFields()
 
     QString fieldName;
     fieldName = metaInfo.value("encoding").toString();
-    QCOMPARE(fieldName, "raw");
+    QCOMPARE(fieldName, QStringLiteral("raw"));
     fieldName = metaInfo.value("endian").toString();
-    QCOMPARE(fieldName, "little");
+    QCOMPARE(fieldName, QStringLiteral("little"));
 
     fieldName = metaInfo.value("type").toString();
-    QCOMPARE(fieldName, "float");
-    QCOMPARE(metaInfo.value("data type enum").toInt(), CTL::io::NrrdFileIO::DataType::Float);
+    QCOMPARE(fieldName, QStringLiteral("float"));
+    QCOMPARE(metaInfo.value("data type enum").toInt(), int(CTL::io::NrrdFileIO::DataType::Float));
 }
 
 void NrrdFileIOtest::testHeaderProperties()
