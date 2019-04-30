@@ -1,4 +1,4 @@
-# *attenuation_spectra* extracted from [NIST database](https://www.nist.gov/pml/x-ray-mass-attenuation-coefficients) (April 09, 2019)
+# *attenuation_spectra* extracted from [NIST database](https://www.nist.gov/pml/x-ray-mass-attenuation-coefficients) (April 24, 2019)
 
 Hubbell, J. H. and Seltzer, Stephen M. and National Institute of Standards and Technology (U.S.).  *Tables of X-ray mass attenuation coefficients and mass energy-absorption coefficients 1 keV to 20 MeV for elements Z=1 to 92 and 48 additional substances of dosimetric interest [electronic resource] / J.H. Hubbell and S.M. Seltzer*  U.S. Department of Commerce, Technology Administration, National Institute of Standards and Technology Gaithersburg, MD  1996  <http://physics.nist.gov/PhysRefData/XrayMassCoef/cover.html>
 
