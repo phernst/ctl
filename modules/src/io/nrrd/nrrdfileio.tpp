@@ -106,6 +106,166 @@ inline QVariantMap NrrdFileIO::metaInfo(const QString& fileName) const
     return ret;
 }
 
+template <typename T>
+std::vector<T> NrrdFileIO::readAll(const QString& fileName) const
+{
+    std::vector<T> ret;
+
+    NrrdFileIO io;
+    io.setSkipComments(true);
+    io.setSkipKeyValuePairs(true);
+    auto metaInfo = io.metaInfo(fileName);
+
+    if(!checkHeader<T>(metaInfo))
+        return ret;
+
+    const auto headerOffset = metaInfo.value("nrrd header offset").toLongLong();
+    const auto dimensions = metaInfo.value(meta_info::dimensions).value<meta_info::Dimensions>();
+
+    std::ifstream is(fileName.toStdString(), std::ios::binary | std::ios::ate);
+    if(!is)
+    {
+        qCritical() << "unable to open file" << fileName;
+        return ret;
+    }
+
+    // get length data block
+    const int64_t bytesOfFile = is.tellg();
+    const int64_t dataBytes = bytesOfFile - headerOffset;
+    const int64_t nbElements = dimensions.dim1 * dimensions.dim2 *
+            (dimensions.nbDim >= 3 ? dimensions.dim3 : 1) *
+            (dimensions.nbDim == 4 ? dimensions.dim4 : 1);
+
+    if(nbElements * sizeof(T) != dataBytes)
+    {
+        qCritical() << "raw data size of file does not fit to dimensions in nrrd header";
+        return ret;
+    }
+
+    ret.resize(nbElements);
+    is.seekg(headerOffset);
+    is.read(reinterpret_cast<char*>(ret.data()), dataBytes);
+
+    if(!is)
+        qCritical() << "only" << is.gcount() << "could be read";
+
+    is.close();
+    return ret;
+}
+
+template <typename T>
+bool NrrdFileIO::write(const std::vector<T>& data,
+                       const QVariantMap& metaInfo,
+                       const QString& fileName) const
+{
+    // open file
+    std::ofstream file(fileName.toStdString(), std::ios::binary);
+    if(!file.is_open())
+    {
+        qCritical("cannot open file");
+        return false;
+    }
+
+    // header
+    if(!writeHeader<T>(file, metaInfo))
+        return false;
+
+    // binary data
+    auto bytes2write = data.size() * sizeof(T);
+    auto inputBuffer = reinterpret_cast<const char*>(data.data());
+    file.write(inputBuffer, bytes2write);
+
+    file.close();
+    return true;
+}
+
+template<typename T>
+bool NrrdFileIO::writeHeader(std::ofstream& file, const QVariantMap& metaInfo) const
+{
+    auto type = dataType<T>();
+    auto dims = metaInfo.value(meta_info::dimensions).value<meta_info::Dimensions>();
+    QString dimensionTypes;
+
+    // first line
+    static const char nrrdVersion[] = "NRRD0004\n";
+    file.write(nrrdVersion, sizeof(nrrdVersion)-1);
+
+    // fields
+    file << _fType.toStdString() << ": " << stringOfType(type) << '\n';
+
+    file << _fDimension.toStdString() << ": " << dims.nbDim << '\n';
+
+    file << _fSizes.toStdString() << ": ";
+    switch (dims.nbDim) {
+    case 2: file << dims.dim1 << " " << dims.dim2;
+        dimensionTypes = '"' + metaInfo.value(meta_info::dim1Type).toString()
+                   + "\" \"" + metaInfo.value(meta_info::dim2Type).toString() + '"';
+        break;
+    case 3: file << dims.dim1 << " " << dims.dim2 << " " << dims.dim3;
+        dimensionTypes = '"' + metaInfo.value(meta_info::dim1Type).toString()
+                   + "\" \"" + metaInfo.value(meta_info::dim2Type).toString()
+                   + "\" \"" + metaInfo.value(meta_info::dim3Type).toString() + '"';
+        break;
+    case 4: file << dims.dim1 << " " << dims.dim2 << " " << dims.dim3 << " " << dims.dim4;
+        dimensionTypes = '"' + metaInfo.value(meta_info::dim1Type).toString()
+                   + "\" \"" + metaInfo.value(meta_info::dim2Type).toString()
+                   + "\" \"" + metaInfo.value(meta_info::dim3Type).toString()
+                   + "\" \"" + metaInfo.value(meta_info::dim4Type).toString() + '"';
+        break;
+    default: qCritical("invalid number of dimensions");
+        return false;
+    }
+    file.put('\n');
+
+    file << _fLabels.toStdString() << ": " << dimensionTypes.toStdString() << '\n';
+
+    file << "units:";
+    for (uint d = 0; d < dims.nbDim; ++d) {
+        file << " \"mm\"";
+    }
+    file.put('\n');
+
+    file << _fEncoding.toStdString() << ": raw\n";
+
+    file << _fEndianness.toStdString() << ": " << (isBigEndian() ? "big" : "little") << '\n';
+
+    if(metaInfo.contains(meta_info::voxSizeX))
+        file << _fSpacings.toStdString() << ": "
+             << metaInfo.value(meta_info::voxSizeX).toString().toStdString() << ' '
+             << metaInfo.value(meta_info::voxSizeY).toString().toStdString() << ' '
+             << metaInfo.value(meta_info::voxSizeZ).toString().toStdString() << '\n';
+
+    if(metaInfo.contains(meta_info::volOffX))
+        file << "space: scanner-xyz\n"
+             << _fSpaceOrigin.toStdString() << ": ("
+             << metaInfo.value(meta_info::volOffX).toString().toStdString() << ','
+             << metaInfo.value(meta_info::volOffY).toString().toStdString() << ','
+             << metaInfo.value(meta_info::volOffZ).toString().toStdString() << ")\n";
+
+    if(type == DataType::Block)
+    {
+        file << "blocksize: " << sizeof(T);
+        file.put('\n');
+    }
+
+    // key-value pairs
+    auto isField = [](const QString& s) {
+        return s == meta_info::dimensions ||
+               s == meta_info::dim1Type || s == meta_info::dim2Type || s == meta_info::dim3Type ||
+               s == meta_info::dim4Type ||
+               s == meta_info::voxSizeX || s == meta_info::voxSizeY || s == meta_info::voxSizeZ ||
+               s == meta_info::volOffX || s == meta_info::volOffY || s == meta_info::volOffZ;
+    };
+    for(auto it = metaInfo.begin(), end = metaInfo.end(); it != end; ++it)
+        if(it.value().canConvert<QString>() && !isField(it.key()))
+            file << it.key().toStdString() << ":=" << it.value().toString().toStdString() << '\n';
+
+    // end of header
+    file.put('\n');
+
+    return true;
+}
+
 inline bool NrrdFileIO::skipComments() const { return _skipComments; }
 
 inline void NrrdFileIO::setSkipComments(bool skipComments) { _skipComments = skipComments; }
@@ -120,23 +280,14 @@ inline void NrrdFileIO::setSkipKeyValuePairs(bool skipKeyValuePairs)
 inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
                                    QVariantMap* metaInfo, int* nbDimension) const
 {
-    // Nrrd fields which are translated to basetype meta info
-    static const QString dimension = QStringLiteral("dimension");
-    static const QString sizes = QStringLiteral("sizes");
-    static const QString type = QStringLiteral("type");
-    static const QString encoding = QStringLiteral("encoding");
-    static const QString thicknesses = QStringLiteral("thicknesses");
-    static const QString spaceOrigin = QStringLiteral("space origin");
-    static const QString labels = QStringLiteral("labels");
-
-    if(field.compare(dimension, Qt::CaseInsensitive) == 0)
+    if(field.compare(_fDimension, Qt::CaseInsensitive) == 0)
     {
         if(*nbDimension)
             return false;
         *nbDimension = desc.toInt();
         return 0 < *nbDimension && *nbDimension <= 4;
     }
-    else if(field.compare(sizes, Qt::CaseInsensitive) == 0)
+    else if(field.compare(_fSizes, Qt::CaseInsensitive) == 0)
     {
         if(*nbDimension == 0 && metaInfo->contains(meta_info::dimensions))
             return false;
@@ -168,37 +319,37 @@ inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
             return false;
         }
     }
-    else if(field.compare(type, Qt::CaseInsensitive) == 0)
+    else if(field.compare(_fType, Qt::CaseInsensitive) == 0)
     {
-        if(metaInfo->contains(type))
+        if(metaInfo->contains(_fType))
             return false;
         auto dataTypeID = dataTypeFromString(desc);
         if(dataTypeID < 0)
             return false;
-        metaInfo->insert(type, desc);
+        metaInfo->insert(_fType, desc);
         metaInfo->insert("data type enum", dataTypeID);
     }
-    else if(field.compare(encoding, Qt::CaseInsensitive) == 0)
+    else if(field.compare(_fEncoding, Qt::CaseInsensitive) == 0)
     {
-        if(metaInfo->contains(encoding))
+        if(metaInfo->contains(_fEncoding))
             return false;
 
         if(desc == "raw")
-            metaInfo->insert(encoding, "raw");
+            metaInfo->insert(_fEncoding, "raw");
         else if(desc == "txt" || desc == "text" || desc == "ascii")
-            metaInfo->insert(encoding, "ascii");
+            metaInfo->insert(_fEncoding, "ascii");
     }
-    else if(field.compare(thicknesses, Qt::CaseInsensitive) == 0)
+    else if(field.compare(_fSpacings, Qt::CaseInsensitive) == 0)
     {
         if(metaInfo->contains(meta_info::voxSizeX))
             return false;
 
-        auto thicknesses = desc.split(' ');
-        metaInfo->insert(meta_info::voxSizeX, thicknesses.value(0).toFloat());
-        metaInfo->insert(meta_info::voxSizeY, thicknesses.value(1).toFloat());
-        metaInfo->insert(meta_info::voxSizeZ, thicknesses.value(2).toFloat());
+        auto spacings = desc.split(' ');
+        metaInfo->insert(meta_info::voxSizeX, spacings.value(0).toFloat());
+        metaInfo->insert(meta_info::voxSizeY, spacings.value(1).toFloat());
+        metaInfo->insert(meta_info::voxSizeZ, spacings.value(2).toFloat());
     }
-    else if(field.compare(spaceOrigin, Qt::CaseInsensitive) == 0)
+    else if(field.compare(_fSpaceOrigin, Qt::CaseInsensitive) == 0)
     {
     //space origin: (0.0,1.0,0.3)
         if(metaInfo->contains(meta_info::volOffX))
@@ -212,13 +363,15 @@ inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
         metaInfo->insert(meta_info::volOffY, vector.value(1).toFloat());
         metaInfo->insert(meta_info::volOffZ, vector.value(2).toFloat());
     }
-    else if(field.compare(labels, Qt::CaseInsensitive) == 0)
+    else if(field.compare(_fLabels, Qt::CaseInsensitive) == 0)
     {
     //labels: "<label[0]>" "<label[1]>" ... "<label[dim-1]>"
         if(metaInfo->contains(meta_info::dim1Type))
             return false;
 
-        auto dimTypes = desc.split(' ');
+        auto dimTypes = desc.split(QStringLiteral(" \""));
+        dimTypes.first().remove(0, 1);
+        for(auto& s : dimTypes) s.chop(1);
         auto nbTypes = dimTypes.length();
         if(nbTypes > 4)
             return false;
@@ -271,55 +424,8 @@ inline NrrdFileIO::DataType NrrdFileIO::dataTypeFromString(const QString &desc)
     return DataType(-1); // invalid type
 }
 
-template <typename T>
-std::vector<T> NrrdFileIO::readAll(const QString& fileName) const
-{
-    std::vector<T> ret;
-
-    NrrdFileIO io;
-    io.setSkipComments(true);
-    io.setSkipKeyValuePairs(true);
-    auto metaInfo = io.metaInfo(fileName);
-
-    if(!checkHeader<T>(metaInfo))
-        return ret;
-
-    const auto headerOffset = metaInfo.value("nrrd header offset").toLongLong();
-    const auto dimensions = metaInfo.value(meta_info::dimensions).value<meta_info::Dimensions>();
-
-    std::ifstream is(fileName.toStdString(), std::ios::binary | std::ios::ate);
-    if(!is)
-    {
-        qCritical() << "unable to open file" << fileName;
-        return ret;
-    }
-
-    // get length data block
-    const int64_t bytesOfFile = is.tellg();
-    const int64_t dataBytes = bytesOfFile - headerOffset;
-    const int64_t nbElements = dimensions.dim1 * dimensions.dim2 *
-            (dimensions.nbDim >= 3 ? dimensions.dim3 : 1) *
-            (dimensions.nbDim == 4 ? dimensions.dim4 : 1);
-
-    if(nbElements * sizeof(T) != dataBytes)
-    {
-        qCritical() << "raw data size of file does not fit to dimensions in nrrd header";
-        return ret;
-    }
-
-    ret.resize(nbElements);
-    is.seekg(headerOffset);
-    is.read(reinterpret_cast<char*>(ret.data()), dataBytes);
-
-    if(!is)
-        qCritical() << "only" << is.gcount() << "could be read";
-
-    is.close();
-    return ret;
-}
-
 template<typename T>
-bool NrrdFileIO::checkHeader(const QVariantMap &metaInfo)
+bool NrrdFileIO::checkHeader(const QVariantMap &metaInfo) const
 {
     auto fail = [](const QString& s){
         qCritical() << s;
@@ -333,9 +439,9 @@ bool NrrdFileIO::checkHeader(const QVariantMap &metaInfo)
         return fail("insufficient header information");
     }
     // the only supported encoding so far (TBD: add ascii support)
-    if(metaInfo.value("encoding").toString().compare("raw", Qt::CaseInsensitive))
+    if(metaInfo.value(_fEncoding).toString().compare("raw", Qt::CaseInsensitive) != 0)
     {
-        return fail("unsupported data encoding:" + metaInfo.value("encoding").toString());
+        return fail("unsupported data encoding: " + metaInfo.value(_fEncoding).toString());
     }
 
     // check data type
@@ -364,22 +470,22 @@ bool NrrdFileIO::checkHeader(const QVariantMap &metaInfo)
     }
 
     // raw data endianness
-    if(metaInfo.contains("endian") && dataTypeFromHeader > int(DataType::UChar))
+    if(metaInfo.contains(_fEndianness) && dataTypeFromHeader > int(DataType::UChar))
     {
-        auto endianness = metaInfo.value("endian").toString();
-        if(endianness.compare("little", Qt::CaseInsensitive))
+        auto endianness = metaInfo.value(_fEndianness).toString();
+        if(endianness.compare("little", Qt::CaseInsensitive) == 0)
         {
             if(isBigEndian())
                 return fail("conversion little to big endian not implemented");
         }
-        else if(endianness.compare("big", Qt::CaseInsensitive))
+        else if(endianness.compare("big", Qt::CaseInsensitive) == 0)
         {
             if(!isBigEndian())
                 return fail("conversion big to little endian not implemented");
         }
         else
         {
-            return fail("unknown endianness:" + endianness);
+            return fail("unknown endianness: " + endianness);
         }
     }
 
@@ -391,6 +497,22 @@ inline int NrrdFileIO::sizeOfType(DataType type)
     // enum DataType { Char, UChar, Short, UShort, Int, UInt, Int64, UInt64, Float, Double, Block };
     const int sizes[] = { 1, 1, 2, 2, 4, 4, 8, 8, 4, 8, 0 }; // block size is unspecified (0)
     return sizes[type];
+}
+
+inline const char* NrrdFileIO::stringOfType(DataType type)
+{
+    static const char* const stringList[] = { { "int8" },
+                                              { "uint8" },
+                                              { "int16" },
+                                              { "uint16" },
+                                              { "int32" },
+                                              { "uint32" },
+                                              { "int64" },
+                                              { "uint64" },
+                                              { "float" },
+                                              { "double" },
+                                              { "block" } };
+    return stringList[type];
 }
 
 // translate supported data types to enum
