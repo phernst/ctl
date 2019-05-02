@@ -501,17 +501,17 @@ inline int NrrdFileIO::sizeOfType(DataType type)
 
 inline const char* NrrdFileIO::stringOfType(DataType type)
 {
-    static const char* const stringList[] = { { "int8" },
-                                              { "uint8" },
-                                              { "int16" },
-                                              { "uint16" },
-                                              { "int32" },
-                                              { "uint32" },
-                                              { "int64" },
-                                              { "uint64" },
-                                              { "float" },
-                                              { "double" },
-                                              { "block" } };
+    static const char* const stringList[] = { "int8",
+                                              "uint8",
+                                              "int16",
+                                              "uint16",
+                                              "int32",
+                                              "uint32",
+                                              "int64",
+                                              "uint64",
+                                              "float",
+                                              "double",
+                                              "block" };
     return stringList[type];
 }
 
