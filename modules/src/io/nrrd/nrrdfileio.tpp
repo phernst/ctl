@@ -122,15 +122,15 @@ std::vector<T> NrrdFileIO::readAll(const QString& fileName) const
     const auto headerOffset = metaInfo.value("nrrd header offset").toLongLong();
     const auto dimensions = metaInfo.value(meta_info::dimensions).value<meta_info::Dimensions>();
 
-    std::ifstream is(fileName.toStdString(), std::ios::binary | std::ios::ate);
-    if(!is)
+    std::ifstream file(fileName.toStdString(), std::ios::binary | std::ios::ate);
+    if(!file)
     {
         qCritical() << "unable to open file" << fileName;
         return ret;
     }
 
     // get length data block
-    const int64_t bytesOfFile = is.tellg();
+    const int64_t bytesOfFile = file.tellg();
     const int64_t dataBytes = bytesOfFile - headerOffset;
     const int64_t nbElements = dimensions.dim1 * dimensions.dim2 *
             (dimensions.nbDim >= 3 ? dimensions.dim3 : 1) *
@@ -143,13 +143,77 @@ std::vector<T> NrrdFileIO::readAll(const QString& fileName) const
     }
 
     ret.resize(nbElements);
-    is.seekg(headerOffset);
-    is.read(reinterpret_cast<char*>(ret.data()), dataBytes);
+    file.seekg(headerOffset);
+    file.read(reinterpret_cast<char*>(ret.data()), dataBytes);
 
-    if(!is)
-        qCritical() << "only" << is.gcount() << "could be read";
+    if(!file)
+        qCritical() << "only" << file.gcount() << "could be read";
 
-    is.close();
+    file.close();
+    return ret;
+}
+
+template<typename T>
+std::vector<T> NrrdFileIO::readChunk(const QString &fileName, uint chunkNb) const
+{
+    std::vector<T> ret;
+
+    NrrdFileIO io;
+    io.setSkipComments(true);
+    io.setSkipKeyValuePairs(true);
+    auto metaInfo = io.metaInfo(fileName);
+
+    if(!checkHeader<T>(metaInfo))
+        return ret;
+
+    const auto headerOffset = metaInfo.value("nrrd header offset").toLongLong();
+    const auto dimensions = metaInfo.value(meta_info::dimensions).value<meta_info::Dimensions>();
+
+    size_t nbChunks;
+    switch (dimensions.nbDim) {
+    case 2: nbChunks = 1;
+        break;
+    case 3: nbChunks = dimensions.dim3;
+        break;
+    case 4: nbChunks = dimensions.dim3 * dimensions.dim4;
+        break;
+    default: qCritical("invalid number of dimensions");
+        return ret;
+    }
+    if(chunkNb >= nbChunks)
+    {
+        qCritical() << "chunk exceeds total number of chunks in file: "
+                    << chunkNb << '/' << nbChunks;
+        return ret;
+    }
+
+    std::ifstream file(fileName.toStdString(), std::ios::binary | std::ios::ate);
+    if(!file)
+    {
+        qCritical() << "unable to open file" << fileName;
+        return ret;
+    }
+
+    // get length data block
+    const int64_t bytesOfFile = file.tellg();
+    const int64_t dataBytes = bytesOfFile - headerOffset;
+    const size_t nbElements = dimensions.dim1 * dimensions.dim2;
+    const size_t bytes2read = nbElements * sizeof(T);
+
+    if(nbElements * nbChunks * sizeof(T) != size_t(dataBytes))
+    {
+        qCritical() << "raw data size of file does not fit to dimensions in nrrd header";
+        return ret;
+    }
+
+    ret.resize(nbElements);
+    file.seekg(headerOffset + chunkNb * bytes2read);
+    file.read(reinterpret_cast<char*>(ret.data()), bytes2read);
+
+    if(!file)
+        qCritical() << "only" << file.gcount() << "could be read";
+
+    file.close();
     return ret;
 }
 
@@ -172,10 +236,15 @@ bool NrrdFileIO::write(const std::vector<T>& data,
 
     // binary data
     auto bytes2write = data.size() * sizeof(T);
-    auto inputBuffer = reinterpret_cast<const char*>(data.data());
-    file.write(inputBuffer, bytes2write);
+    file.write(reinterpret_cast<const char*>(data.data()), bytes2write);
 
     file.close();
+    if(!file)
+    {
+        qCritical("writing to file failed");
+        return false;
+    }
+
     return true;
 }
 
