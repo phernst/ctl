@@ -9,6 +9,7 @@ DEFINES += QT_DEPRECATED_WARNINGS \
 
 SOURCES += \
     main.cpp \
+    nrrdfileiotest.cpp \
     projectionmatrixtest.cpp \
     ctsystemtest.cpp \
     datatypetest.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
     acquisitionsetuptest.cpp
 
 HEADERS += \
+    nrrdfileiotest.h \
     projectionmatrixtest.h \
     ctsystemtest.h \
     datatypetest.h \
@@ -38,6 +40,10 @@ include(../../modules/ctl.pri)
 # DEN_FILE_IO_MODULE: den file handling
 # -> dependencies: no
 include(../../modules/den_file_io.pri)
+
+# NRRD_FILE_IO_MODULE: nrrd file handling
+# -> dependencies: no
+include(../../modules/nrrd_file_io.pri)
 
 # OCL_CONFIG_MODULE: OpenCLConfig
 # -> dependencies: no

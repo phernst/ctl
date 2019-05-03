@@ -5,6 +5,7 @@
 #include "datatypetest.h"
 #include "geometrytest.h"
 #include "denfileiotest.h"
+#include "nrrdfileiotest.h"
 #include "projectortest.h"
 #include "spectrumtest.h"
 #include "acquisitionsetuptest.h"
@@ -17,7 +18,8 @@ int main(int argc, char* argv[])
     CTsystemTest ctSys;
     DataTypeTest dataTest;
     GeometryTest geoTest;
-    DenFileIOtest dFileTest;
+    DenFileIOtest denFileTest;
+    NrrdFileIOtest nrrdFileTest;
     ProjectorTest projectorTest;
     SpectrumTest spectrumTest;
     AcquisitionSetupTest acqSetupTest;
@@ -27,7 +29,8 @@ int main(int argc, char* argv[])
     failedTests += QTest::qExec(&ctSys, argc, argv);
     failedTests += QTest::qExec(&dataTest, argc, argv);
     failedTests += QTest::qExec(&geoTest, argc, argv);
-    failedTests += QTest::qExec(&dFileTest, argc, argv);
+    failedTests += QTest::qExec(&denFileTest, argc, argv);
+    failedTests += QTest::qExec(&nrrdFileTest, argc, argv);
     failedTests += QTest::qExec(&projectorTest, argc, argv);
     failedTests += QTest::qExec(&spectrumTest, argc, argv);
     failedTests += QTest::qExec(&acqSetupTest, argc, argv);
