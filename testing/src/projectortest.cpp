@@ -13,6 +13,8 @@
 
 using namespace CTL;
 
+const bool ENABLE_INTERPOLATION_IN_RAYCASTER = true;
+
 void ProjectorTest::initTestCase()
 {
     // Volume
@@ -73,6 +75,7 @@ void ProjectorTest::testSpectralExtension()
 
     // configure a projector and project volume
     OCL::RayCasterProjector::Config rcConfig;
+    rcConfig.interpolate = ENABLE_INTERPOLATION_IN_RAYCASTER;
     OCL::RayCasterProjector* myProjector = new OCL::RayCasterProjector;
 
     PoissonNoiseExtension* noiseExt = new PoissonNoiseExtension;
@@ -155,7 +158,7 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
     setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0, projAngle, 0.0));
 
     auto rcConfig = OCL::RayCasterProjector::Config();
-    // rcConfig.interpolate = false;
+    rcConfig.interpolate = ENABLE_INTERPOLATION_IN_RAYCASTER;
     auto projector = makeProjector<OCL::RayCasterProjector>();
     projector->configure(setup, rcConfig);
 
