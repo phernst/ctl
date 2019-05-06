@@ -136,7 +136,7 @@ std::vector<T> NrrdFileIO::readAll(const QString& fileName) const
             (dimensions.nbDim >= 3 ? dimensions.dim3 : 1) *
             (dimensions.nbDim == 4 ? dimensions.dim4 : 1);
 
-    if(nbElements * sizeof(T) != dataBytes)
+    if(nbElements * int64_t(sizeof(T)) != dataBytes)
     {
         qCritical() << "raw data size of file does not fit to dimensions in nrrd header";
         return ret;
@@ -288,21 +288,24 @@ bool NrrdFileIO::writeHeader(std::ofstream& file, const QVariantMap& metaInfo) c
 
     file << _fLabels.toStdString() << ": " << dimensionTypes.toStdString() << '\n';
 
-    file << "units:";
-    for (uint d = 0; d < dims.nbDim; ++d) {
-        file << " \"mm\"";
-    }
-    file.put('\n');
-
     file << _fEncoding.toStdString() << ": raw\n";
 
     file << _fEndianness.toStdString() << ": " << (isBigEndian() ? "big" : "little") << '\n';
 
     if(metaInfo.contains(meta_info::voxSizeX))
+    {
         file << _fSpacings.toStdString() << ": "
              << metaInfo.value(meta_info::voxSizeX).toString().toStdString() << ' '
              << metaInfo.value(meta_info::voxSizeY).toString().toStdString() << ' '
              << metaInfo.value(meta_info::voxSizeZ).toString().toStdString() << '\n';
+
+        file << "units:";
+        for(uint d = 0; d < dims.nbDim; ++d)
+        {
+            file << " \"mm\"";
+        }
+        file.put('\n');
+    }
 
     if(metaInfo.contains(meta_info::volOffX))
         file << "space: scanner-xyz\n"
