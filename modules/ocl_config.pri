@@ -1,7 +1,8 @@
+# completely independent module
+!CTL_CORE_MODULE: INCLUDEPATH += $$PWD/src
+
 # declare module
 CONFIG += OCL_CONFIG_MODULE
-
-INCLUDEPATH += $$PWD/src
 
 HEADERS += \
     $$PWD/src/ocl/clfileloader.h \

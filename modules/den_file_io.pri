@@ -2,12 +2,12 @@
 !CTL_CORE_MODULE {
     warning("DenFileIO is not available because CTL_CORE_MODULE is missing")
     DEFINES += CTL_CORE_MODULE_NOT_AVAILABLE
+    
+    INCLUDEPATH += $$PWD/src
 }
 
 # declare module
 CONFIG += DEN_FILE_IO_MODULE
-
-INCLUDEPATH += $$PWD/src
 
 HEADERS += \
     $$PWD/src/io/den/den.h \
