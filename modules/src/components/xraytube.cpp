@@ -159,4 +159,12 @@ QVariant XrayTube::toVariant() const
     return ret;
 }
 
+void XrayTube::setSpectrumModel(AbstractXraySpectrumModel* model)
+{
+    AbstractSource::setSpectrumModel(model);
+
+    if(model)
+        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+}
+
 } // namespace CTL

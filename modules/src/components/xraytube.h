@@ -29,6 +29,7 @@ public:
     QString info() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
+    void setSpectrumModel(AbstractXraySpectrumModel* model) override;
 
     // getter methods
     double tubeVoltage() const;
