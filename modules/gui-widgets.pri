@@ -6,8 +6,6 @@ CONFIG += GUI_WIDGETS_MODULE
 
 QT += gui widgets 3dcore 3drender 3dextras
 
-INCLUDEPATH += $$PWD/src
-
 HEADERS += \
     $$PWD/src/gui/widgets/acquisitionvisualizerwidget.h \
     $$PWD/src/gui/widgets/systemvisualizerwidget.h \

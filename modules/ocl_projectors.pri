@@ -5,8 +5,6 @@
 # declare module
 CONFIG += OCL_PROJECTORS_MODULE
 
-INCLUDEPATH += $$PWD/src
-
 HEADERS += \
     $$PWD/src/projectors/raycaster.h \
     $$PWD/src/projectors/raycasteradapter.h \
