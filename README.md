@@ -156,6 +156,7 @@ include into your qmake project (.pro file) using the syntax
 So far, the following modules are available:
  * ctl.pri: the core library
  * den_file_io.pri: .den file handling
+ * nrrd_file_io.pri: .nrrd file handling
  * ocl_config.pri: uniform OpenCL environment/configuration
  * ocl_projectors.pri: OpenCL based projectors
  * gui-widgets.pri: widgets for visualization purposes
@@ -187,7 +188,7 @@ include further geometric/physical/measuring effects.
 #include "acquisition/acquisitionsetup.h"
 #include "acquisition/systemblueprints.h"
 #include "acquisition/trajectories.h"
-#include "io/den/denfileio.h"
+#include "io/nrrd/nrrdfileio.h"
 #include "mat/mat.h"
 #include "projectors/raycasterprojector.h"
 #include <QCoreApplication>
@@ -198,11 +199,10 @@ int main(int argc, char* argv[])
 
     // IO object (reads/writes basic types) with a certain IO type
     // as a template argument - here for DEN files
-    CTL::io::BaseTypeIO<CTL::io::DenFileIO> io;
+    CTL::io::BaseTypeIO<CTL::io::NrrdFileIO> io;
 
     // load volume
-    auto volume = io.readVolume<float>("path/to/volume.den");
-    volume.setVoxelSize(1.0f, 1.0f, 1.0f); // not encoded in DEN files
+    auto volume = io.readVolume<float>("path/to/volume.nrrd");
 
     // use of a predefined system from "acquisition/systemblueprints.h"
     auto system = CTL::CTsystemBuilder::createFromBlueprint(CTL::blueprints::GenericCarmCT());
@@ -225,8 +225,9 @@ int main(int argc, char* argv[])
     auto projections = myProjector.project(volume); // project
 
     // save projections
-    io.write(projections, "path/to/projections.den");
+    io.write(projections, "path/to/projections.nrrd");
 
+    std::cout << "end of program" << std::endl;
     return 0;
 }
 
@@ -235,7 +236,7 @@ int main(int argc, char* argv[])
  * able to compile this example program:
  *
  *  include(path/to/ctl.pri)
- *  include(path/to/den_file_io.pri)
+ *  include(path/to/nrrd_file_io.pri)
  *  include(path/to/ocl_config.pri)
  *  include(path/to/ocl_projectors.pri)
  */
