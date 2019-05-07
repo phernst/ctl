@@ -59,8 +59,9 @@ public:
     float min() const;
     void setDataFromVector(const std::vector<float>& dataVector);
     std::vector<float> toVector() const;
-    void transformToExtinction(double i0 = 1.0);
+    void transformToExtinction(double i0orN0 = 1.0);
     void transformToIntensity(double i0 = 1.0);
+    void transformToCounts(double n0 = 1.0);
 
     bool operator==(const SingleViewData& other) const;
     bool operator!=(const SingleViewData& other) const;

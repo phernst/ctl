@@ -62,6 +62,8 @@ public:
     void transformToExtinction(const std::vector<double>& viewDependentI0);
     void transformToIntensity(double i0 = 1.0);
     void transformToIntensity(const std::vector<double>& viewDependentI0);
+    void transformToCounts(double n0 = 1.0);
+    void transformToCounts(const std::vector<double>& viewDependentN0);
 
     bool operator==(const ProjectionData& other) const;
     bool operator!=(const ProjectionData& other) const;

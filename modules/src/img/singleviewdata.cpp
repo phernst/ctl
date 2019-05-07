@@ -105,18 +105,18 @@ std::vector<float> SingleViewData::toVector() const
 }
 
 /*!
- * Transforms all data values in this instance to extinction (w.r.t. the initial intensity passed
- * by \a i0) using the following formula:
+ * Transforms all data values in this instance to extinction (w.r.t. the initial intensity \a i0 or
+ * photon count \a n0) using the following formula:
  *
  * \f$
  * \mathtt{newValue}=\ln\frac{i0}{\mathtt{oldValue}}.
  * \f$
  */
-void SingleViewData::transformToExtinction(double i0)
+void SingleViewData::transformToExtinction(double i0orN0)
 {
     for(auto& chunk : _data)
         for(auto& pix : chunk.data())
-            pix = log(i0/pix);
+            pix = std::log(i0orN0/pix);
 }
 
 /*!
@@ -131,7 +131,22 @@ void SingleViewData::transformToIntensity(double i0)
 {
     for(auto& chunk : _data)
         for(auto& pix : chunk.data())
-            pix = i0 * exp(-pix);
+            pix = i0 * std::exp(-pix);
+}
+
+/*!
+ * Transforms all data values in this instance to photon counts (w.r.t. the initial photon count
+ * passed by \a n0) using the following formula:
+ *
+ * \f$
+ * \mathtt{newValue}=n0\cdot\exp(-\mathtt{oldValue}).
+ * \f$
+ */
+void SingleViewData::transformToCounts(double n0)
+{
+    for(auto& chunk : _data)
+        for(auto& pix : chunk.data())
+            pix = n0 * std::exp(-pix);
 }
 
 bool SingleViewData::operator==(const SingleViewData &other) const

@@ -252,9 +252,28 @@ void ProjectionData::transformToIntensity(double i0)
     futures.reserve(nbViews());
 
     for(auto& singleView : _data)
-        futures.push_back(std::async(&SingleViewData::transformToIntensity,
+        futures.push_back(std::async(&SingleViewData::transformToCounts,
                                      &singleView,
                                      i0));
+}
+
+/*!
+ * Transforms all data values in this instance to photon counts (w.r.t. the initial photon count
+ * passed by \a n0) using the following formula:
+ *
+ * \f$
+ * \mathtt{newValue}=n0\cdot\exp(-\mathtt{oldValue}).
+ * \f$
+ */
+void ProjectionData::transformToCounts(double n0)
+{
+    std::vector<std::future<void>> futures;
+    futures.reserve(nbViews());
+
+    for(auto& singleView : _data)
+        futures.push_back(std::async(&SingleViewData::transformToCounts,
+                                     &singleView,
+                                     n0));
 }
 
 /*!
@@ -272,9 +291,29 @@ void ProjectionData::transformToIntensity(const std::vector<double>& viewDepende
 
     auto i0Iterator = viewDependentI0.begin();
     for(auto& singleView : _data)
-        futures.push_back(std::async(&SingleViewData::transformToIntensity,
+        futures.push_back(std::async(&SingleViewData::transformToCounts,
                                      &singleView,
                                      *i0Iterator++));
+}
+
+/*!
+ * Transforms all data values in this instance to photon counts (w.r.t. the view-dependent initial
+ * photon counts passed by \a viewDependentN0) using the following formula:
+ *
+ * \f$
+ * \mathtt{newValue}_{v}=n0_{v}\cdot\exp(-\mathtt{oldValue}_{v})\,,\quad v=1,...,\textrm{nbViews}.
+ * \f$
+ */
+void ProjectionData::transformToCounts(const std::vector<double>& viewDependentN0)
+{
+    std::vector<std::future<void>> futures;
+    futures.reserve(nbViews());
+
+    auto n0Iterator = viewDependentN0.begin();
+    for(auto& singleView : _data)
+        futures.push_back(std::async(&SingleViewData::transformToCounts,
+                                     &singleView,
+                                     *n0Iterator++));
 }
 
 bool ProjectionData::operator==(const ProjectionData &other) const
