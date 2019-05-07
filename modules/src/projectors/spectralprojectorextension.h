@@ -18,6 +18,7 @@ public:
     ProjectionData project(const VolumeData& volume) override;
 
     ProjectionData projectComposite(const CompositeVolume& volume) override;
+    bool isLinear() const override;
 
     void setSpectralSampling(uint nbSamples);
 

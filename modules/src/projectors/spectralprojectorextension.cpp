@@ -227,6 +227,11 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
 
 }
 
+bool SpectralProjectorExtension::isLinear() const
+{
+    return false;
+}
+
 //void SpectralProjectorExtension::setSpectralRange(float from, float to)
 //{
 //    _from = from;
