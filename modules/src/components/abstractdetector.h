@@ -54,7 +54,7 @@ class AbstractDetector : public SystemComponent
 
 public:
     typedef mat::Location ModuleLocation;
-    enum SaturationModelType { Extinction, Intensity, Undefined };
+    enum SaturationModelType { Extinction, PhotonCount, Intensity, Undefined };
 
     // abstract interface
     public:virtual QVector<ModuleLocation> moduleLocations() const = 0;

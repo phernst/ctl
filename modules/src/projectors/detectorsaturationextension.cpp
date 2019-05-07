@@ -11,12 +11,20 @@ void DetectorSaturationExtension::configure(const AcquisitionSetup& setup,
 {
     _setup = setup;
 
+    if(_nbSamples == 0)
+        _nbSamples = _setup.system()->source()->spectrumDiscretizationHint();
+
     ProjectorExtension::configure(setup, config);
 }
 
 bool DetectorSaturationExtension::isLinear() const
 {
     return false;
+}
+
+void DetectorSaturationExtension::setIntensitySampling(uint nbSamples)
+{
+    _nbSamples = nbSamples;
 }
 
 ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector& nestedProjector)
@@ -30,6 +38,9 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
     case AbstractDetector::Extinction:
         processExtinctions(&ret);
         break;
+    case AbstractDetector::PhotonCount:
+        processCounts(&ret);
+        break;
     case AbstractDetector::Intensity:
         processIntensities(&ret);
         break;
@@ -39,6 +50,39 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
     }
 
     return ret;
+}
+
+void DetectorSaturationExtension::processCounts(ProjectionData *projections)
+{
+    auto saturationModel = _setup.system()->detector()->saturationModel();
+
+    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& n0)
+    {
+        float count;
+        uint mod = 0;
+        for(auto& module : view->data())
+        {
+            for(auto& pix : module.data())
+            {
+                // transform extinction to photon count
+                count = n0[mod] * exp(-pix);
+                // pass intensity through saturation model
+                count = saturationModel->valueAt(count);
+                // back-transform to extinction and overwrite projection pixel value
+                pix = log(n0[mod] / count);
+            }
+        }
+    };
+
+    std::vector<std::future<void>> futures;
+    futures.reserve(_setup.nbViews());
+    int v = 0;
+
+    for(auto& view : projections->data())
+    {
+        _setup.prepareView(v++);
+        futures.push_back(std::async(processView, &view, _setup.system()->photonsPerPixel()));
+    }
 }
 
 void DetectorSaturationExtension::processExtinctions(ProjectionData* projections)
@@ -63,29 +107,36 @@ void DetectorSaturationExtension::processIntensities(ProjectionData* projections
     auto saturationModel = _setup.system()->detector()->saturationModel();
     auto sourcePtr = _setup.system()->source();
 
-    auto processView = [saturationModel](SingleViewData* view, float i0)
+    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& i0)
     {
         float intensity;
+        uint mod = 0;
         for(auto& module : view->data())
+        {
             for(auto& pix : module.data())
             {
                 // transform extinction to intensity
-                intensity = i0 * exp(-pix);
+                intensity = i0[mod] * exp(-pix);
                 // pass intensity through saturation model
                 intensity = saturationModel->valueAt(intensity);
                 // back-transform to extinction and overwrite projection pixel value
-                pix = log(i0 / intensity);
+                pix = log(i0[mod] / intensity);
             }
+        }
     };
 
     std::vector<std::future<void>> futures;
     futures.reserve(_setup.nbViews());
     int v = 0;
-    float i0;
+    std::vector<float> i0(_setup.system()->detector()->nbDetectorModules());
+
     for(auto& view : projections->data())
     {
         _setup.prepareView(v++);
-        i0 = sourcePtr->photonFlux();
+        auto n0 = _setup.system()->photonsPerPixel();
+        auto meanEnergy = sourcePtr->spectrum(_nbSamples).centroid();
+        std::transform(n0.begin(), n0.end(), i0.begin(),
+                       [meanEnergy] (float count) { return count * meanEnergy; });
 
         futures.push_back(std::async(processView, &view, i0));
     }
