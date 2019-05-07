@@ -6,6 +6,8 @@
 
 namespace CTL {
 
+class SimpleCTsystem;
+
 class GenericSource : public AbstractSource
 {
     CTL_TYPE_ID(301)
@@ -16,6 +18,11 @@ class GenericSource : public AbstractSource
 
 public:
     GenericSource(const QString& name);
+    GenericSource(const IntervalDataSeries& spectrum,
+                  double photonFlux = -1.0,
+                  const QSizeF& focalSpotSize = QSizeF(0.0, 0.0),
+                  const Vector3x1& focalSpotPosition = Vector3x1(0.0f),
+                  const QString& name = defaultName());
     GenericSource(const QSizeF& focalSpotSize = QSizeF(0.0, 0.0),
                   const Vector3x1& focalSpotPosition = Vector3x1(0.0f),
                   const QString& name = defaultName());
@@ -34,6 +41,7 @@ public:
 
     // static methods
     static QString defaultName();
+    static void setPhotonCountInSystem(SimpleCTsystem* system, double photonsPerPixel);
 
 protected:
     EnergyRange _energyRange = { 0.0f, 0.0f }; //!< Energy range of the emitted radiation.

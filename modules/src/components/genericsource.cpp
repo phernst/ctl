@@ -1,6 +1,7 @@
 #include "genericsource.h"
 #include <QDebug>
 #include <stdexcept>
+#include "acquisition/simplectsystem.h"
 
 namespace CTL {
 
@@ -14,6 +15,16 @@ DECLARE_SERIALIZABLE_TYPE(GenericSource)
 GenericSource::GenericSource(const QString& name)
     : AbstractSource(name)
 {
+}
+
+GenericSource::GenericSource(const IntervalDataSeries& spectrum, double photonFlux,
+                             const QSizeF& focalSpotSize, const Vector3x1& focalSpotPosition,
+                             const QString& name)
+    : GenericSource(focalSpotSize, focalSpotPosition, name)
+{
+    setSpectrum(spectrum, true);
+    if(photonFlux != -1.0)
+        setPhotonFlux(photonFlux);
 }
 
 /*!
@@ -35,6 +46,17 @@ QString GenericSource::defaultName()
     static const QString defName(QStringLiteral("Generic source"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
+}
+
+void GenericSource::setPhotonCountInSystem(SimpleCTsystem* system, double photonsPerPixel)
+{
+    if(system->source()->type() != GenericSource::Type)
+        throw std::runtime_error("GenericSource::setPhotonCountInSystem(): Cannot set photon count,"
+                                 " system does not contain a GenericSource.");
+
+    auto fluxAdjustFactor = photonsPerPixel / system->photonsPerPixelMean();
+    auto srcPtr = static_cast<GenericSource*>(system->source());
+    srcPtr->setPhotonFlux(srcPtr->photonFlux() * fluxAdjustFactor);
 }
 
 /*!
