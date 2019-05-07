@@ -136,8 +136,14 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
     // construct a generic system
     CTsystem theSystem;
 
-    auto detector
-        = makeComponent<GenericDetector>(pixelPerModule, pixelDimensions, QVector<mat::Location>());
+    uint nbModules = 0;
+    if(geometry.size() == 0u)
+        qWarning() << "empty geometry passed (no views available)";
+    else
+        nbModules = geometry.first().nbModules();
+
+    auto detector = makeComponent<GenericDetector>(pixelPerModule, nbModules);
+    detector->setPixelSize(pixelDimensions);
     auto source = makeComponent<GenericSource>(QSizeF(0.0, 0.0), Vector3x1(0.0));
     auto gantry = makeComponent<GenericGantry>();
 
@@ -186,8 +192,13 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry &geometr
     // construct a generic system
     CTsystem theSystem;
 
-    auto detector
-        = makeComponent<GenericDetector>(pixelPerModule, QSizeF(0.0, 0.0), QVector<mat::Location>());
+    uint nbModules = 0;
+    if(geometry.size() == 0u)
+        qWarning() << "empty geometry passed (no views available)";
+    else
+        nbModules = geometry.first().nbModules();
+
+    auto detector = makeComponent<GenericDetector>(pixelPerModule, nbModules);
     auto source = makeComponent<GenericSource>(QSizeF(0.0, 0.0), Vector3x1(0.0));
     auto gantry = makeComponent<GenericGantry>();
 

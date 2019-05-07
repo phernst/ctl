@@ -44,7 +44,7 @@ void CTsystemTest::simpleSystem()
     QVERIFY(_theTestSystem->isSimple());
 
     // add another detector --> should no longer be simple
-    _theTestSystem->addComponent(new GenericDetector());
+    _theTestSystem->addComponent(new GenericDetector({ 5, 5 }, 1u));
     QVERIFY(!_theTestSystem->isSimple());
 }
 

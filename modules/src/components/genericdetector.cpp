@@ -13,6 +13,19 @@ GenericDetector::GenericDetector(const QString &name)
 }
 
 /*!
+ * Constructs a generic detector element with \a nbModules modules that have \a nbPixelPerModule pixels
+ * (`channels` x `rows`) with. The moduleLocation will have default constructed locations
+ * (position (0,0,0) and unity rotation matrix). Make sure to properly set the module locations using
+ * setModuleLocations().
+ * The pixel dimensions are initialized with default values of 1mm x 1mm (`width` x `height`).
+ * If necessary, adjust them using setPixelSize().
+ */
+GenericDetector::GenericDetector(const QSize& nbPixelPerModule, uint nbModules, const QString& name)
+    : GenericDetector(nbPixelPerModule, { 1.0, 1.0 }, QVector<ModuleLocation>(nbModules), name)
+{
+}
+
+/*!
  * Constructs a generic detector element with modules that have \a nbPixelPerModule pixels
  * (`channels` x `rows`) with dimensions of \a pixelDimensions (`width` x `height`). The arrangement
  * of the individual modules with respect to the entire detector system are specified in \a
@@ -113,8 +126,10 @@ QVector<AbstractDetector::ModuleLocation> GenericDetector::moduleLocations() con
 /*!
  * Sets the module locations to \a moduleLocations.
  */
-void GenericDetector::setModuleLocations(QVector<AbstractDetector::ModuleLocation> moduleLocations)
+void GenericDetector::setModuleLocations(QVector<ModuleLocation> moduleLocations)
 {
+    if(moduleLocations.size() != _moduleLocations.size())
+        throw std::domain_error("number of modules must not change");
     _moduleLocations = std::move(moduleLocations);
 }
 

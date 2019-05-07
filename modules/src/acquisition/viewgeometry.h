@@ -70,7 +70,7 @@ public:
     typedef typename QVector<SingleViewGeometry>::const_iterator const_iterator;
 
     FullGeometry() = default;
-    explicit FullGeometry(uint nbModules);
+    explicit FullGeometry(uint nbViews);
     explicit FullGeometry(QVector<SingleViewGeometry>&& pMats);
     explicit FullGeometry(const QVector<SingleViewGeometry>& pMats);
 

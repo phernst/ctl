@@ -51,8 +51,8 @@ void SingleViewGeometry::clear() { _pMats.clear(); }
 
 void SingleViewGeometry::reserve(uint nbModules) { _pMats.reserve(static_cast<int>(nbModules)); }
 
-FullGeometry::FullGeometry(uint nbModules)
-    : _viewGeos(nbModules)
+FullGeometry::FullGeometry(uint nbViews)
+    : _viewGeos(nbViews)
 {
 }
 

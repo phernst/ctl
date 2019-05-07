@@ -27,7 +27,9 @@ class GenericDetector : public AbstractDetector
     public: QVector<ModuleLocation> moduleLocations() const override;
 
 public:
-    GenericDetector(const QString& name = defaultName());
+    GenericDetector(const QSize& nbPixelPerModule,
+                    uint nbModules,
+                    const QString& name = defaultName());
     GenericDetector(const QSize& nbPixelPerModule,
                     const QSizeF& pixelDimensions,
                     QVector<ModuleLocation> moduleLocations,
@@ -50,6 +52,9 @@ public:
 
 protected:
     QVector<ModuleLocation> _moduleLocations; //!< Vector of locations of all detector modules.
+
+private:
+    GenericDetector(const QString& name = defaultName());
 };
 
 } // namespace CTL
