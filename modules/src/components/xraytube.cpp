@@ -4,6 +4,8 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(XrayTube)
 
+const float DEFAULT_SPECTRUM_BIN_WIDTH = 10;
+
 /*!
  * Constructs an XrayTube with a focal spot size of \a focalSpotSize and its focal spot positioned
  * at \a focalSpotPosition. Sets the tube (acceleration) voltage to \a tubeVoltage and the emission-
@@ -165,6 +167,11 @@ void XrayTube::setSpectrumModel(AbstractXraySpectrumModel* model)
 
     if(model)
         static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+}
+
+uint XrayTube::spectrumDiscretizationHint() const
+{
+    return std::max(uint(std::ceil(energyRange().width() / DEFAULT_SPECTRUM_BIN_WIDTH)), 1u);
 }
 
 } // namespace CTL

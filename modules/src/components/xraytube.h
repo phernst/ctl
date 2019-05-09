@@ -30,6 +30,7 @@ public:
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
     void setSpectrumModel(AbstractXraySpectrumModel* model) override;
+    uint spectrumDiscretizationHint() const override;
 
     // getter methods
     double tubeVoltage() const;
