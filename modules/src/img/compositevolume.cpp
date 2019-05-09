@@ -67,7 +67,7 @@ const QString& SpectralVolumeData::materialName() const
 
 VoxelVolume<float> SpectralVolumeData::muVolume(float centerEnergy, float binWidth) const
 {
-    return (*this) * averageMassAttenuationFactor(centerEnergy, binWidth);
+    return (*this) * (averageMassAttenuationFactor(centerEnergy, binWidth) * 0.1f);
 }
 
 SpectralVolumeData SpectralVolumeData::createBall(float radius, float voxelSize, float density,

@@ -160,6 +160,7 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
                         volume.materialVolume(material).averageMassAttenuationFactor(spectralInfo.energyBins[bin],
                                                                                      spectralInfo.binWidth);
 
+            binProj *= 0.1f; // cm^-1 --> mm^-1
             binProj.transformToIntensity(spectralInfo.intensities[bin]);
 
             sumProj += binProj;
