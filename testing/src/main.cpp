@@ -14,6 +14,16 @@ int main(int argc, char* argv[])
 {
     QCoreApplication a(argc, argv);
 
+    // make sure that application starts from the app dir so that "testData" can be found
+    auto appPath = QCoreApplication::applicationDirPath();
+    if(QDir::current() != appPath &&
+       !QDir::setCurrent(appPath))
+    {
+        std::cerr << "unable to set the current working directory. "
+                  << "start app from inside the application directory.";
+        return -1;
+    }
+
     ProjectionMatrixTest pMat;
     CTsystemTest ctSys;
     DataTypeTest dataTest;
