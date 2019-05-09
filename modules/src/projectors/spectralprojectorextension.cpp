@@ -5,8 +5,8 @@
 
 namespace CTL {
 
-SpectralProjectorExtension::SpectralProjectorExtension(uint nbSamples)
-    : _nbSamples(nbSamples)
+SpectralProjectorExtension::SpectralProjectorExtension(float energyBinWidth)
+    : _deltaE(energyBinWidth)
 {
 }
 
@@ -15,8 +15,7 @@ void SpectralProjectorExtension::configure(const AcquisitionSetup& setup, const 
     _setup = setup;
     _config.reset(config.clone());
 
-    if(_nbSamples == 0)
-        _nbSamples = _setup.system()->source()->spectrumDiscretizationHint();
+    updateSpectralInformation();
 
     ProjectorExtension::configure(setup, config);
 }
@@ -131,8 +130,6 @@ ProjectionData SpectralProjectorExtension::project(const VolumeData& volume)
  */
 ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolume& volume)
 {
-    auto spectralInfo = spectralInformation();
-
     if(ProjectorExtension::isLinear())
     {
         // project all material densities
@@ -143,10 +140,10 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
         ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
         sumProj.allocateMemory(_setup.nbViews(), 0.0f);
 
-        for(uint bin = 0; bin < _nbSamples; ++bin)
+        for(uint bin = 0; bin < _spectralInfo.nbSamples; ++bin)
         {
-            if(qFuzzyIsNull(std::accumulate(spectralInfo.intensities[bin].cbegin(),
-                                            spectralInfo.intensities[bin].cend(),0.0)))
+            if(qFuzzyIsNull(std::accumulate(_spectralInfo.intensities[bin].cbegin(),
+                                            _spectralInfo.intensities[bin].cend(),0.0)))
             {
                 qDebug() << "Skipped energy bin " << bin;
                 continue;
@@ -157,16 +154,16 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
 
             for(uint material = 0; material < volume.nbMaterials(); ++material)
                 binProj += materialProjs[material] *
-                        volume.materialVolume(material).averageMassAttenuationFactor(spectralInfo.energyBins[bin],
-                                                                                     spectralInfo.binWidth);
+                        volume.materialVolume(material).averageMassAttenuationFactor(_spectralInfo.energyBins[bin],
+                                                                                     _spectralInfo.binWidth);
 
             binProj *= 0.1f; // cm^-1 --> mm^-1
-            binProj.transformToIntensity(spectralInfo.intensities[bin]);
+            binProj.transformToIntensity(_spectralInfo.intensities[bin]);
 
             sumProj += binProj;
         }
 
-        sumProj.transformToExtinction(spectralInfo.totalIntensities);
+        sumProj.transformToExtinction(_spectralInfo.totalIntensities);
 
         return sumProj;
     }
@@ -184,10 +181,10 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
             _setup.view(view).addPrepareStep(dummyPrepareStep);
         }
 
-        for(uint bin = 0; bin < _nbSamples; ++bin)
+        for(uint bin = 0; bin < _spectralInfo.nbSamples; ++bin)
         {
-            if(qFuzzyIsNull(std::accumulate(spectralInfo.adjustedFluxMods[bin].cbegin(),
-                                            spectralInfo.adjustedFluxMods[bin].cend(),0.0)))
+            if(qFuzzyIsNull(std::accumulate(_spectralInfo.adjustedFluxMods[bin].cbegin(),
+                                            _spectralInfo.adjustedFluxMods[bin].cend(),0.0)))
             {
                 qDebug() << "Skipped energy bin " << bin;
                 continue;
@@ -200,7 +197,7 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
             for(uint view = 0; view < _setup.nbViews(); ++view)
             {
                 auto sourcePrep = std::make_shared<prepare::SourceParam>();
-                sourcePrep->setFluxModifier(spectralInfo.adjustedFluxMods[bin][view]);
+                sourcePrep->setFluxModifier(_spectralInfo.adjustedFluxMods[bin][view]);
                 _setup.view(view).replacePrepareStep(sourcePrep);
             }
 
@@ -210,15 +207,15 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
             std::vector<ProjectionData> materialProjs;
             for(uint material = 0; material < volume.nbMaterials(); ++material)
                 binProj += ProjectorExtension::project(volume.muVolume(material,
-                                                                       spectralInfo.energyBins[bin],
-                                                                       spectralInfo.binWidth));
+                                                                       _spectralInfo.energyBins[bin],
+                                                                       _spectralInfo.binWidth));
 
-            binProj.transformToIntensity(spectralInfo.intensities[bin]);
+            binProj.transformToIntensity(_spectralInfo.intensities[bin]);
 
             sumProj += binProj;
         } 
 
-        sumProj.transformToExtinction(spectralInfo.totalIntensities);
+        sumProj.transformToExtinction(_spectralInfo.totalIntensities);
 
         for(uint v = 0; v < _setup.nbViews(); ++v)
             _setup.view(v).removeLastPrepareStep();
@@ -239,41 +236,72 @@ bool SpectralProjectorExtension::isLinear() const
 //    _to = to;
 //}
 
-void SpectralProjectorExtension::setSpectralSampling(uint nbSamples)
+void SpectralProjectorExtension::setSpectralSamplingResolution(float energyBinWidth)
 {
-    _nbSamples = nbSamples;
+    _deltaE = energyBinWidth;
 }
 
-SpectralProjectorExtension::SpectralInformation SpectralProjectorExtension::spectralInformation()
+void SpectralProjectorExtension::updateSpectralInformation()
 {
-    SpectralInformation ret;
+    const auto srcPtr = _setup.system()->source();
+    const uint nbViews = _setup.nbViews();
+
+    if(_deltaE < 0.0f)
+        throw std::runtime_error("SpectralProjectorExtension::updateSpectralInformation():"
+                                 " Requested negative energy resolution!");
+
+    // analyze maximum required resolution
+    float highestResolution = MAXFLOAT;
+    float widestEnergyInterval = 0.0f;
+    AbstractSource::EnergyRange fullCoverageInterval{ MAXFLOAT, 0.0f };
+
+    for(uint view = 0; view < nbViews; ++view)
+    {
+        _setup.prepareView(view);
+        auto viewEnergyRange = srcPtr->energyRange();
+        auto viewReso = viewEnergyRange.width() / float(srcPtr->spectrumDiscretizationHint());
+        highestResolution = std::min(highestResolution, viewReso);
+        fullCoverageInterval.from = std::min(fullCoverageInterval.from, viewEnergyRange.from);
+        fullCoverageInterval.to   = std::max(fullCoverageInterval.to, viewEnergyRange.to);
+    }
+
+    qDebug() << "highestResolution: " << highestResolution;
+    qDebug() << "fullCoverageInterval: [" << fullCoverageInterval.from << " , "
+                                          << fullCoverageInterval.to << "]";
+
+    // energy resolution is unset --> use automatic determination of highest resolution
+    if(_deltaE == 0.0f)
+        _deltaE = std::max(highestResolution, 0.1f); // minimum (automatic) bin width: 0.1 keV
+
+    // set required number of samples with a minimum of one sample
+    uint nbSamples = std::max(uint(std::ceil(fullCoverageInterval.width() / _deltaE)), 1u);
+    _spectralInfo.nbSamples = nbSamples;
+
+    fullCoverageInterval.to = fullCoverageInterval.from + nbSamples * _deltaE;
 
     // get (view-dependent) spectra
-    const auto srcPtr = _setup.system()->source();
-
     IntervalDataSeries spectrum;
-    ret.intensities.resize(_nbSamples);
-    ret.adjustedFluxMods.resize(_nbSamples);
-    ret.totalIntensities.resize(_setup.nbViews(), 0.0);
+    _spectralInfo.intensities.resize(nbSamples);
+    _spectralInfo.adjustedFluxMods.resize(nbSamples);
+    _spectralInfo.totalIntensities.resize(_setup.nbViews(), 0.0);
 
     for(uint view = 0; view < _setup.nbViews(); ++view)
     {
         _setup.prepareView(view);
-        spectrum = srcPtr->spectrum(_nbSamples);
+        spectrum = srcPtr->spectrum(fullCoverageInterval, nbSamples);
         auto globalFluxMod = srcPtr->fluxModifier();
-        for(uint bin = 0; bin < _nbSamples; ++bin)
+        for(uint bin = 0; bin < nbSamples; ++bin)
         {
-            ret.adjustedFluxMods[bin].push_back(globalFluxMod * spectrum.value(bin));
-            ret.intensities[bin].push_back(spectrum.value(bin) * spectrum.samplingPoint(bin));
-            ret.totalIntensities[view] += ret.intensities[bin][view];
+            _spectralInfo.adjustedFluxMods[bin].push_back(globalFluxMod * spectrum.value(bin));
+            _spectralInfo.intensities[bin].push_back(spectrum.value(bin) * spectrum.samplingPoint(bin));
+            _spectralInfo.totalIntensities[view] += _spectralInfo.intensities[bin][view];
         }
     }
 
-    ret.energyBins = spectrum.samplingPoints();
-    ret.binWidth = spectrum.binWidth();
+    _spectralInfo.energyBins = spectrum.samplingPoints();
+    _spectralInfo.binWidth = spectrum.binWidth();
 
-    return ret;
+    qDebug() << "binWidth: " << _spectralInfo.binWidth;
 }
-
 
 }

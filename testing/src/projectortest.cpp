@@ -52,16 +52,20 @@ void ProjectorTest::testSpectralExtension()
     system.addComponent(std::move(tube));
     system.addComponent(std::move(tubeGantry));
 
-    auto volume = SpectralVolumeData::createBall(40.0f, 0.5f, 0.1f,
+    auto volume = SpectralVolumeData::createBall(40.0f, 0.5f, 1.0f,
                                                  database::attenuationModel(database::composite::Water));
-    auto volume2 = SpectralVolumeData::createBall(30.0f, 0.5f, 0.03f,
+    auto volume2 = SpectralVolumeData::createBall(30.0f, 0.5f, 0.3f,
                                                   database::attenuationModel(database::composite::Bone_Cortical));
 
     CompositeVolume compVol;
     compVol.addMaterialVolume(volume);
     compVol.addMaterialVolume(volume2);
 
-    AcquisitionSetup setup(SimpleCTsystem::fromCTsystem(system));
+    auto photonsPerPixel = 100000.0;
+    auto simpleSys = SimpleCTsystem::fromCTsystem(system);
+    auto fluxAdjustFactor = photonsPerPixel / simpleSys.photonsPerPixelMean();
+
+    AcquisitionSetup setup(simpleSys);
     setup.setNbViews(5);
     setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0));
 
@@ -69,7 +73,7 @@ void ProjectorTest::testSpectralExtension()
     {
         auto srcPrep = std::make_shared<prepare::XrayTubeParam>();
         srcPrep->setTubeVoltage(80.0 + 20.0/setup.nbViews() * v);
-        srcPrep->setEmissionCurrent(10000.0 + 10000.0/setup.nbViews() * v);
+        srcPrep->setEmissionCurrent(fluxAdjustFactor*(10000.0 + 10000.0/setup.nbViews() * v));
         setup.view(v).addPrepareStep(srcPrep);
     }
 
@@ -83,7 +87,7 @@ void ProjectorTest::testSpectralExtension()
     noiseExt->use(myProjector);
 
     SpectralProjectorExtension* spectralExt = new SpectralProjectorExtension;
-    spectralExt->setSpectralSampling(10);
+    spectralExt->setSpectralSamplingResolution(15.0f);
     //spectralExt->setSpectralRange(0,150);
     spectralExt->use(noiseExt);
     spectralExt->configure(setup, rcConfig);
@@ -93,11 +97,12 @@ void ProjectorTest::testSpectralExtension()
     // Non-linear composite
     auto proj = spectralExt->projectComposite(compVol);
     auto groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_composite.den");
+    io.write(proj, "sdfsdf.den");
     auto diff = proj-groundTruth;
     auto mean = projectionMean(diff);
     auto var  = projectionVariance(diff);
     qInfo() << mean << var;
-    QVERIFY2(mean < 0.01, "Non-linear composite failed");
+    QVERIFY2(std::abs(mean) < 0.01, "Non-linear composite failed");
     QVERIFY2(var < 0.01, "Non-linear composite failed");
 
     // Non-linear simple
@@ -107,7 +112,7 @@ void ProjectorTest::testSpectralExtension()
     mean = projectionMean(diff);
     var  = projectionVariance(diff);
     qInfo() << mean << var;
-    QVERIFY2(mean < 0.01, "Non-linear simple failed");
+    QVERIFY2(std::abs(mean) < 0.01, "Non-linear simple failed");
     QVERIFY2(var < 0.01, "Non-linear simple failed");
 
     spectralExt->release();
@@ -123,7 +128,7 @@ void ProjectorTest::testSpectralExtension()
     mean = projectionMean(diff);
     var  = projectionVariance(diff);
     qInfo() << mean << var;
-    QVERIFY2(mean < 0.01, "Linear composite failed");
+    QVERIFY2(std::abs(mean) < 0.01, "Linear composite failed");
     QVERIFY2(var < 0.01, "Linear composite failed");
 
     // Linear simple
@@ -133,7 +138,7 @@ void ProjectorTest::testSpectralExtension()
     mean = projectionMean(diff);
     var  = projectionVariance(diff);
     qInfo() << mean << var;
-    QVERIFY2(mean < 0.01, "Linear simple failed");
+    QVERIFY2(std::abs(mean) < 0.01, "Linear simple failed");
     QVERIFY2(var < 0.01, "Linear simple failed");
 }
 
