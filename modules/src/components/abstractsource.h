@@ -68,7 +68,13 @@ class AbstractSource : public SystemComponent
 public:
     static const uint DEFAULT_SPECTRUM_RESOLUTION_HINT = 10;
 
-    struct EnergyRange { float from; float to; };
+    struct EnergyRange
+    {
+        float from;
+        float to;
+
+        float width() const { return to - from; }
+    };
 
     // abstract interface
     public:virtual EnergyRange energyRange() const = 0;
@@ -108,6 +114,7 @@ public:
     void setFocalSpotPosition(double x, double y, double z); // convenience alternative
 
     // other methods
+    IntervalDataSeries spectrum(EnergyRange range, uint nbSamples) const;
     bool hasSpectrumModel() const;
     void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
 
@@ -289,6 +296,18 @@ inline void AbstractSource::setFocalSpotPosition(const Vector3x1& position)
 inline void AbstractSource::setFocalSpotPosition(double x, double y, double z)
 {
     _focalSpotPosition = Vector3x1({ x, y, z });
+}
+
+inline IntervalDataSeries AbstractSource::spectrum(EnergyRange range, uint nbSamples) const
+{
+    if(!hasSpectrumModel())
+        throw std::runtime_error("No spectrum model set.");
+
+    auto spec = IntervalDataSeries::sampledFromModel(static_cast<const AbstractIntegrableDataModel&>(*_spectrumModel),
+                                                     range.from, range.to, nbSamples);
+    spec.normalizeByIntegral();
+
+    return spec;
 }
 
 /*!
