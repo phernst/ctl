@@ -2,6 +2,7 @@
 #include "acquisition/preparesteps.h"
 #include "components/abstractdetector.h"
 #include "components/abstractsource.h"
+#include <limits>
 
 namespace CTL {
 
@@ -161,8 +162,8 @@ void SpectralProjectorExtension::updateSpectralInformation()
                                  " Requested negative energy resolution!");
 
     // analyze maximum required resolution
-    float highestResolution = FLT_MAX;
-    AbstractSource::EnergyRange fullCoverageInterval{ FLT_MAX, 0.0f };
+    float highestResolution = std::numeric_limits<float>::max();
+    AbstractSource::EnergyRange fullCoverageInterval{ std::numeric_limits<float>::max(), 0.0f };
 
     for(uint view = 0; view < nbViews; ++view)
     {
