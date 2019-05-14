@@ -377,7 +377,32 @@ bool OpenCLConfig::Program::build(const OpenCLConfig& parent)
         return false;
 
     // build program
-    err = _clProgram.build(parent.devices());
+    try
+    {
+        err = _clProgram.build(parent.devices());
+    }
+    // catch OpenCL compiler error
+    catch(const cl::Error& e)
+    {
+        if(e.err() == CL_BUILD_PROGRAM_FAILURE)
+        {
+            for(const cl::Device& dev : parent.devices())
+            {
+                // check the build status
+                cl_build_status status = _clProgram.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(dev);
+                if (status != CL_BUILD_ERROR)
+                    continue;
+
+                // get the build log
+                std::string buildlog = _clProgram.getBuildInfo<CL_PROGRAM_BUILD_LOG>(dev);
+                throw std::runtime_error("Failed to build OpenCL program. Build log:\n" + buildlog);
+            }
+        }
+        else
+        {
+            throw e;
+        }
+    }
     if(err != CL_SUCCESS)
         return false;
 
