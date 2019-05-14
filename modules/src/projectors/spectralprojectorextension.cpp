@@ -161,8 +161,8 @@ void SpectralProjectorExtension::updateSpectralInformation()
                                  " Requested negative energy resolution!");
 
     // analyze maximum required resolution
-    float highestResolution = MAXFLOAT;
-    AbstractSource::EnergyRange fullCoverageInterval{ MAXFLOAT, 0.0f };
+    float highestResolution = FLT_MAX;
+    AbstractSource::EnergyRange fullCoverageInterval{ FLT_MAX, 0.0f };
 
     for(uint view = 0; view < nbViews; ++view)
     {
