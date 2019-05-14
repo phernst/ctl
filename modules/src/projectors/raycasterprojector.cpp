@@ -320,13 +320,13 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
 
     } catch(const cl::Error& err)
     {
-        qCritical() << "OpenCL error: " << err.what() << "(" << err.err() << ")";
+        qCritical() << "OpenCL error:" << err.what() << "(" << err.err() << ")";
     } catch(const std::bad_alloc& except)
     {
-        qCritical() << "Allocation error: " << except.what();
+        qCritical() << "Allocation error:" << except.what();
     } catch(const std::exception& except)
     {
-        qCritical() << "std exception: " << except.what();
+        qCritical() << "std exception:" << except.what();
     }
 
     return ret;
@@ -380,14 +380,11 @@ void RayCasterProjector::initOpenCL()
         const auto clSourceCode = clFile.loadSourceCode();
 
         // add kernel to OCLConfig
-        if(!oclConfig.addKernel(CL_KERNEL_NAME, clSourceCode, _oclProgramName))
-            qDebug() << "no kernel added: kernel name "
-                     << QString::fromStdString(CL_KERNEL_NAME) << " within ocl program "
-                     << QString::fromStdString(_oclProgramName) << " already exists";
+        oclConfig.addKernel(CL_KERNEL_NAME, clSourceCode, _oclProgramName);
 
     } catch(const cl::Error& err)
     {
-        qCritical() << "OpenCL error: " << err.what() << "(" << err.err() << ")";
+        qCritical() << "OpenCL error:" << err.what() << "(" << err.err() << ")";
         throw std::runtime_error("OpenCL error");
     }
 }
