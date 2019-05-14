@@ -354,6 +354,15 @@ void DataTypeTest::testProjectionData()
     QCOMPARE(singleViewData.dimensions().nbChannels, svDim.nbChannels);
     QCOMPARE(singleViewData.dimensions().nbRows, svDim.nbRows);
     QCOMPARE(singleViewData.dimensions().nbModules, 1u);
+
+    // implicit construction of a single module
+    ProjectionData zeroInitializedModule{ { { 640, 480, 0.0f } } };
+    QCOMPARE(zeroInitializedModule.dimensions().nbChannels, 640u);
+    QCOMPARE(zeroInitializedModule.dimensions().nbRows, 480u);
+    QCOMPARE(zeroInitializedModule.dimensions().nbModules, 1u);
+    QCOMPARE(zeroInitializedModule.dimensions().nbViews, 1u);
+    for(auto val : zeroInitializedModule.toVector())
+        QCOMPARE(val, 0.0f);
 }
 
 void DataTypeTest::testCompositeVolume()
