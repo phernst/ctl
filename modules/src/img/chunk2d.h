@@ -38,7 +38,7 @@ public:
         std::string info() const;
     };
 
-    Chunk2D(const Dimensions& dimensions);
+    explicit Chunk2D(const Dimensions& dimensions);
     Chunk2D(const Dimensions& dimensions, const T& fillValue);
     Chunk2D(const Dimensions& dimensions, std::vector<T>&& data);
     Chunk2D(const Dimensions& dimensions, const std::vector<T>& data);

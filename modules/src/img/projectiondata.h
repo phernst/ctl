@@ -34,8 +34,10 @@ public:
         uint totalNbElements() const;
     };
 
-    ProjectionData(const SingleViewData::Dimensions& viewDimensions);
+    explicit ProjectionData(const SingleViewData::Dimensions& viewDimensions);
     ProjectionData(uint channelsPerModule, uint rowsPerModule, uint nbModules);
+    ProjectionData(const SingleViewData& singleViewData);
+    ProjectionData(SingleViewData&& singleViewData);
 
     // getter methods
     const std::vector<SingleViewData>& constData() const;

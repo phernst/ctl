@@ -28,6 +28,26 @@ SingleViewData::SingleViewData(uint channelsPerModule, uint rowsPerModule)
 }
 
 /*!
+ * Constructs a SingleViewData object containing only data of one module that is initialized with
+ * \a moduleData. You may use append() to add further modules.
+ */
+SingleViewData::SingleViewData(const SingleViewData::ModuleData& moduleData)
+    : SingleViewData(moduleData.dimensions())
+{
+    this->append(moduleData);
+}
+
+/*!
+ * Constructs a SingleViewData object containing only data of one module that is move-initialized
+ * with \a moduleData that is passed as an rvalue.
+ */
+SingleViewData::SingleViewData(SingleViewData::ModuleData&& moduleData)
+    : SingleViewData(moduleData.dimensions())
+{
+    this->append(std::move(moduleData));
+}
+
+/*!
  * Appends the data from \a moduleData to this single view. The dimensions of \a moduleData must
  * match the dimensions of this view. Throws std::domain_error in case of mismatching dimensions.
  *

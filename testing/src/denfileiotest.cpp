@@ -275,8 +275,8 @@ void DenFileIOtest::oneModuleOneView(const ProjectionMatrix& pMat, const Project
     // check content
     verifyProjDiff(load_pD_1, projImage, 0.0);
     verifyProjDiff(load_pD_2, projImage, 0.0);
-    ProjectionData tmp1(load_sV_1.dimensions()); tmp1.append(load_sV_1);
-    ProjectionData tmp2(load_sV_2.dimensions()); tmp2.append(load_sV_2);
+    ProjectionData tmp1(load_sV_1);
+    ProjectionData tmp2(load_sV_2);
     verifyProjDiff(tmp1, projImage, 0.0);
     verifyProjDiff(tmp2, projImage, 0.0);
 }
@@ -327,10 +327,8 @@ void DenFileIOtest::oneModuleMultipleViews(const ProjectionMatrix& pMat, const P
 
     auto sV1 = io.readSingleView(fileNameImg, 0);
     auto sV2 = io.readSingleView(fileNameImg, 0, 1);
-    ProjectionData load_sV1_img(sV1.dimensions());
-    load_sV1_img.append(std::move(sV1));
-    ProjectionData load_sV2_img(sV2.dimensions());
-    load_sV2_img.append(std::move(sV2));
+    ProjectionData load_sV1_img(std::move(sV1));
+    ProjectionData load_sV2_img(std::move(sV2));
 
     for(uint view = 1; view < nbViews; ++view)
     {

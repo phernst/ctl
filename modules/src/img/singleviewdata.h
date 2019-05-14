@@ -32,8 +32,10 @@ public:
         std::string info() const;
     };
 
-    SingleViewData(const ModuleData::Dimensions& moduleDimensions);
+    explicit SingleViewData(const ModuleData::Dimensions& moduleDimensions);
     SingleViewData(uint channelsPerModule, uint rowsPerModule);
+    SingleViewData(const ModuleData& moduleData);
+    SingleViewData(ModuleData&& moduleData);
 
     // getter methods
     const std::vector<ModuleData>& constData() const;

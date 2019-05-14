@@ -13,6 +13,7 @@ ProjectionData::ProjectionData(const SingleViewData::Dimensions &viewDimensions)
 {
 
 }
+
 /*!
  * Constructs a ProjectionData object with dimensions for the individual single views specified
  * by \a channelsPerModule, \a rowsPerModule and \a nbModules. This does not allocate any memory
@@ -22,6 +23,26 @@ ProjectionData::ProjectionData(uint channelsPerModule, uint rowsPerModule, uint 
     : _viewDim({channelsPerModule, rowsPerModule, nbModules})
 {
 
+}
+
+/*!
+ * Constructs a ProjectionData object containing only data of one view that is initialized with
+ * \a singleViewData. You may use append() to add further projections.
+ */
+ProjectionData::ProjectionData(const SingleViewData& singleViewData)
+    : ProjectionData(singleViewData.dimensions())
+{
+    this->append(singleViewData);
+}
+
+/*!
+ * Constructs a ProjectionData object containing only data of one view that is move-initialized
+ * with \a singleViewData that is passed as an rvalue.
+ */
+ProjectionData::ProjectionData(SingleViewData&& singleViewData)
+    : ProjectionData(singleViewData.dimensions())
+{
+    this->append(std::move(singleViewData));
 }
 
 /*!

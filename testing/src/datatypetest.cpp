@@ -348,6 +348,12 @@ void DataTypeTest::testProjectionData()
     QCOMPARE(testProj.view(0).module(2)(0,0), 201.0f);
     QCOMPARE(testProj.view(1).module(0)(0,0), 501.0f);
     QCOMPARE(testProj.view(1).module(0)(2,1), 513.0f);
+
+    // single view with one module init
+    SingleViewData singleViewData(testProj.view(0).module(0));
+    QCOMPARE(singleViewData.dimensions().nbChannels, svDim.nbChannels);
+    QCOMPARE(singleViewData.dimensions().nbRows, svDim.nbRows);
+    QCOMPARE(singleViewData.dimensions().nbModules, 1u);
 }
 
 void DataTypeTest::testCompositeVolume()
