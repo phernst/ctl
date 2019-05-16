@@ -184,27 +184,27 @@ void SpectralProjectorExtension::updateSpectralInformation()
         _deltaE = std::max(highestResolution, 0.1f); // minimum (automatic) bin width: 0.1 keV
 
     // set required number of samples with a minimum of one sample
-    uint nbSamples = std::max(uint(std::ceil(fullCoverageInterval.width() / _deltaE)), 1u);
-    _spectralInfo.nbSamples = nbSamples;
+    uint nbEnergyBins = std::max(uint(std::ceil(fullCoverageInterval.width() / _deltaE)), 1u);
+    _spectralInfo.nbSamples = nbEnergyBins;
 
-    fullCoverageInterval.to = fullCoverageInterval.from + nbSamples * _deltaE;
+    fullCoverageInterval.to = fullCoverageInterval.from + nbEnergyBins * _deltaE;
 
     // get (view-dependent) spectra
     IntervalDataSeries spectrum;
-    _spectralInfo.intensities.resize(nbSamples);
-    _spectralInfo.adjustedFluxMods.resize(nbSamples);
-    _spectralInfo.totalIntensities.resize(_setup.nbViews(), 0.0);
+    _spectralInfo.intensities      = std::vector<std::vector<double>>(nbEnergyBins, std::vector<double>(nbViews));
+    _spectralInfo.adjustedFluxMods = std::vector<std::vector<double>>(nbEnergyBins, std::vector<double>(nbViews));
+    _spectralInfo.totalIntensities = std::vector<double>(nbViews, 0.0);
 
-    for(uint view = 0; view < _setup.nbViews(); ++view)
+    for(uint view = 0; view < nbViews; ++view)
     {
         _setup.prepareView(view);
-        spectrum = srcPtr->spectrum(fullCoverageInterval, nbSamples);
+        spectrum = srcPtr->spectrum(fullCoverageInterval, nbEnergyBins);
         auto globalFluxMod = srcPtr->fluxModifier();
-        for(uint bin = 0; bin < nbSamples; ++bin)
+        for(uint bin = 0; bin < nbEnergyBins; ++bin)
         {
-            _spectralInfo.adjustedFluxMods[bin].push_back(globalFluxMod * spectrum.value(bin));
-            _spectralInfo.intensities[bin].push_back(spectrum.value(bin)
-                                                     * spectrum.samplingPoint(bin));
+            _spectralInfo.adjustedFluxMods[bin][view] = globalFluxMod * spectrum.value(bin);
+            _spectralInfo.intensities[bin][view] = spectrum.value(bin)
+                                                     * spectrum.samplingPoint(bin);
             _spectralInfo.totalIntensities[view] += _spectralInfo.intensities[bin][view];
         }
     }
