@@ -82,11 +82,12 @@ SpectralVolumeData SpectralVolumeData::createBall(float radius, float voxelSize,
     volume.setAbsorptionModel(absorptionModel);
 
     float center = float(nbVox-1)/2.0;
+    float rSquaredInVoxel = radius/voxelSize * radius/voxelSize ;
 
     for(float x = 0.0f; x < nbVox; ++x)
         for(float y = 0.0f; y < nbVox; ++y)
             for(float z = 0.0f; z < nbVox; ++z)
-                if((x-center)*(x-center) + (y-center)*(y-center) + (z-center)*(z-center) > radius*radius)
+                if((x-center)*(x-center) + (y-center)*(y-center) + (z-center)*(z-center) > rSquaredInVoxel)
                     volume(x,y,z) = 0.0f;
 
     return volume;
