@@ -30,16 +30,13 @@ float SpectralVolumeData::averageMassAttenuationFactor(float centerEnergy, float
 {
     if(qFuzzyIsNull(binWidth))
     {
-        qWarning("RealisticVolumeData::averageMassAttenuationFactor: Interval width is zero!"
-                 "Delegating call to RealisticVolumeData::massAttenuationFactor.");
+        qWarning("SpectralVolumeData::averageMassAttenuationFactor: Interval width is zero!"
+                 "Delegating call to SpectralVolumeData::massAttenuationFactor.");
         return massAttenuationFactor(centerEnergy);
     }
 
     if(!_absorptionModel)
-    {
-        qWarning("RealisticVolumeData::averageMassAttenuationFactor: No absorption model set!");
-        return -1.0f;
-    }
+        throw std::runtime_error("SpectralVolumeData::averageMassAttenuationFactor: No absorption model set!");
 
     return _absorptionModel->binIntegral(centerEnergy, binWidth) / binWidth;
 }
@@ -52,10 +49,7 @@ const VoxelVolume<float>& SpectralVolumeData::density() const
 float SpectralVolumeData::massAttenuationFactor(float atEnergy) const
 {
     if(!_absorptionModel)
-    {
-        qWarning("RealisticVolumeData::massAttenuationFactor: No absorption model set!");
-        return -1.0f;
-    }
+        throw std::runtime_error("SpectralVolumeData::massAttenuationFactor: No absorption model set!");
 
     return _absorptionModel->valueAt(atEnergy);
 }
