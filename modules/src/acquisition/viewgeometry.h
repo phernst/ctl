@@ -35,6 +35,7 @@ public:
     iterator begin();
     const_iterator begin() const;
     void clear();
+    std::vector<float> concatenatedStdVector() const;
     iterator end();
     const_iterator end() const;
     const mat::ProjectionMatrix& first() const;
@@ -81,6 +82,7 @@ public:
     iterator begin();
     const_iterator begin() const;
     void clear();
+    std::vector<float> concatenatedStdVector() const;
     iterator end();
     const_iterator end() const;
     const SingleViewGeometry& first() const;

@@ -49,6 +49,17 @@ void SingleViewGeometry::append(const SingleViewGeometry& other) { _pMats.append
 
 void SingleViewGeometry::clear() { _pMats.clear(); }
 
+std::vector<float> SingleViewGeometry::concatenatedStdVector() const
+{
+    std::vector<float> ret;
+
+    for(int mod = 0; mod < _pMats.size(); ++mod)
+        for(uint el = 0; el < 12u; ++el)
+            ret.push_back(static_cast<float>(_pMats.at(mod)(el)));
+
+    return ret;
+}
+
 void SingleViewGeometry::reserve(uint nbModules) { _pMats.reserve(static_cast<int>(nbModules)); }
 
 FullGeometry::FullGeometry(uint nbViews)
@@ -97,5 +108,19 @@ void FullGeometry::append(const FullGeometry &other) { _viewGeos.append(other._v
 void FullGeometry::clear() { _viewGeos.clear(); }
 
 void FullGeometry::reserve(uint nbViews) { _viewGeos.reserve(static_cast<int>(nbViews)); }
+
+std::vector<float> FullGeometry::concatenatedStdVector() const
+{
+    std::vector<float> ret;
+
+    for(uint view = 0; view < nbViews(); ++view)
+    {
+        const auto& viewPMats = this->view(view).concatenatedStdVector();
+        for(uint el = 0; el < viewPMats.size(); ++el)
+            ret.push_back(viewPMats[el]);
+    }
+
+    return ret;
+}
 
 } // namespace CTL
