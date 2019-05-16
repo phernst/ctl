@@ -53,6 +53,7 @@ public:
 
     // getter methods
     double angulationOfModule(uint module) const;
+    double moduleSpacing() const;
 
     // other methods
     double coneAngle() const;

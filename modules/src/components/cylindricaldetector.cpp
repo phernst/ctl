@@ -237,6 +237,15 @@ double CylindricalDetector::angulationOfModule(uint module) const
     return moduleAngulations().at(module);
 }
 
+/*!
+ * Returns the spacing between individual modules in this instance. Spacing refers to the
+ * edge-to-edge distance between adjacent modules in x-direction.
+ */
+double CylindricalDetector::moduleSpacing() const
+{
+    return _moduleSpacing;
+}
+
 SystemComponent* CylindricalDetector::clone() const { return new CylindricalDetector(*this); }
 
 /*!
