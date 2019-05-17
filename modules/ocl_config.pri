@@ -6,7 +6,8 @@ CONFIG += OCL_CONFIG_MODULE
 
 HEADERS += \
     $$PWD/src/ocl/clfileloader.h \
-    $$PWD/src/ocl/openclconfig.h
+    $$PWD/src/ocl/openclconfig.h \
+    $$PWD/src/ocl/pinnedmem.h
 
 SOURCES += \
     $$PWD/src/ocl/clfileloader.cpp \
