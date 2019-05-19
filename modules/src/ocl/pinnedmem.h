@@ -2,6 +2,7 @@
 #define PINNEDMEM_H
 
 #include "openclconfig.h"
+#include <algorithm>
 #include <array>
 
 namespace CTL {
@@ -162,21 +163,21 @@ PinnedBufHostWrite<T>::PinnedBufHostWrite(size_t nbElements, const cl::CommandQu
     , _pinned_mem_details::PinnedBufBase<T>(nbElements, CL_MEM_HOST_WRITE_ONLY |
                                             (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
 {
-    setHostPtr(queue.enqueueMapBuffer(pinnedBuffer(), CL_TRUE, CL_MAP_WRITE, 0,
+    this->setHostPtr(queue.enqueueMapBuffer(this->pinnedBuffer(), CL_TRUE, CL_MAP_WRITE, 0,
                                       sizeof(T) * this->nbElements()));
 }
 
 template<typename T>
 void PinnedBufHostWrite<T>::copyPinnedMemToDev(bool blocking, cl::Event* event)
 {
-    queue().enqueueWriteBuffer(devBuffer(), blocking ? CL_TRUE : CL_FALSE, 0,
-                               sizeof(T) * nbElements(), hostPtr(), nullptr, event);
+    this->queue().enqueueWriteBuffer(this->devBuffer(), blocking ? CL_TRUE : CL_FALSE, 0,
+                                     sizeof(T) * this->nbElements(), this->hostPtr(), nullptr, event);
 }
 
 template<typename T>
 void PinnedBufHostWrite<T>::copyToPinnedMem(const T* srcPtr)
 {
-    std::copy_n(srcPtr, nbElements(), hostPtr());
+    std::copy_n(srcPtr, this->nbElements(), this->hostPtr());
 }
 
 // write-only Buffer
@@ -186,21 +187,21 @@ PinnedBufHostRead<T>::PinnedBufHostRead(size_t nbElements, const cl::CommandQueu
     , _pinned_mem_details::PinnedBufBase<T>(nbElements, CL_MEM_HOST_READ_ONLY |
                                             (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE))
 {
-    setHostPtr(queue.enqueueMapBuffer(pinnedBuffer(), CL_TRUE, CL_MAP_READ, 0,
-                                      sizeof(T) * this->nbElements()));
+    this->setHostPtr(queue.enqueueMapBuffer(this->pinnedBuffer(), CL_TRUE, CL_MAP_READ, 0,
+                                            sizeof(T) * this->nbElements()));
 }
 
 template<typename T>
 void PinnedBufHostRead<T>::copyDevToPinnedMem(bool blocking, cl::Event *event)
 {
-    queue().enqueueReadBuffer(devBuffer(), blocking ? CL_TRUE : CL_FALSE, 0,
-                              sizeof(T) * nbElements(), hostPtr(), nullptr, event);
+    this->queue().enqueueReadBuffer(this->devBuffer(), blocking ? CL_TRUE : CL_FALSE, 0,
+                                    sizeof(T) * this->nbElements(), this->hostPtr(), nullptr, event);
 }
 
 template<typename T>
 void PinnedBufHostRead<T>::copyFromPinnedMem(float* dstPtr)
 {
-    std::copy_n(hostPtr(), nbElements(), dstPtr);
+    std::copy_n(this->hostPtr(), this->nbElements(), dstPtr);
 }
 
 // read-only Image3D
