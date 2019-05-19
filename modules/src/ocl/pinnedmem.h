@@ -70,7 +70,7 @@ private:
 // Acess interfaces
 // host write
 template<typename T>
-class AbstractHostWriteMem : virtual public _pinned_mem_details::PinnedMem<T>
+class AbstractPinnedHostWriteMem : public _pinned_mem_details::PinnedMem<T>
 {
     // copy from pinned memory to device (all elements)
     public:virtual void copyPinnedMemToDev(bool blocking, cl::Event* event) = 0;
@@ -78,15 +78,16 @@ class AbstractHostWriteMem : virtual public _pinned_mem_details::PinnedMem<T>
     public:virtual void copyToPinnedMem(const T* srcPtr) = 0;
 
 public:
+    AbstractPinnedHostWriteMem(const cl::CommandQueue& queue);
+    virtual ~AbstractPinnedHostWriteMem() = default;
+
     // first copy from srcPtr to pinned memory and then to device (all elements)
     void copyToDev(const T* srcPtr, bool blocking = true, cl::Event* event = nullptr);
-
-    virtual ~AbstractHostWriteMem() = default;
 };
 
 // host read
 template<typename T>
-class AbstractHostReadMem : virtual public _pinned_mem_details::PinnedMem<T>
+class AbstractPinnedHostReadMem : public _pinned_mem_details::PinnedMem<T>
 {
     // copy from pinned memory to device (all elements)
     public:virtual void copyDevToPinnedMem(bool blocking, cl::Event* event) = 0;
@@ -94,19 +95,21 @@ class AbstractHostReadMem : virtual public _pinned_mem_details::PinnedMem<T>
     public:virtual void copyFromPinnedMem(T* dstPtr) = 0;
 
 public:
+    AbstractPinnedHostReadMem(const cl::CommandQueue& queue);
+    virtual ~AbstractPinnedHostReadMem() = default;
+
     // first copy from srcPtr to pinned memory and then to device (all elements)
     void copyFromDev(T* dstPtr, bool blocking = true, cl::Event* event = nullptr);
-
-    virtual ~AbstractHostReadMem() = default;
 };
 
 // Buffer with host write access and device read access
 template<typename T>
-class PinnedBufHostWrite : public AbstractHostWriteMem<T>
+class PinnedBufHostWrite : public AbstractPinnedHostWriteMem<T>
                          , public _pinned_mem_details::PinnedBufBase<T>
 {
 public:
-    PinnedBufHostWrite(size_t nbElements, const cl::CommandQueue& queue, bool deviceOnlyReads = true);
+    PinnedBufHostWrite(size_t nbElements, const cl::CommandQueue& queue,
+                       bool deviceOnlyReads = true);
 
     // copy from pinned memory to device (all elements)
     void copyPinnedMemToDev(bool blocking = true, cl::Event* event = nullptr) override;
@@ -116,11 +119,12 @@ public:
 
 // Buffer with host read access and device write access
 template<typename T>
-class PinnedBufHostRead : public AbstractHostReadMem<T>
+class PinnedBufHostRead : public AbstractPinnedHostReadMem<T>
                         , public _pinned_mem_details::PinnedBufBase<T>
 {
 public:
-    PinnedBufHostRead(size_t nbElements, const cl::CommandQueue& queue, bool deviceOnlyWrites = true);
+    PinnedBufHostRead(size_t nbElements, const cl::CommandQueue& queue,
+                      bool deviceOnlyWrites = true);
 
     // copy from device to pinned memory (all elements)
     void copyDevToPinnedMem(bool blocking = true, cl::Event* event = nullptr) override;
@@ -129,7 +133,7 @@ public:
 };
 
 // Image3D with host write access and device read access
-class PinnedImg3DHostWrite : public AbstractHostWriteMem<float>
+class PinnedImg3DHostWrite : public AbstractPinnedHostWriteMem<float>
                            , public _pinned_mem_details::PinnedImag3DBase
 {
     PinnedImg3DHostWrite(size_t xDim, size_t yDim, size_t zDim, const cl::CommandQueue& queue,
@@ -142,7 +146,7 @@ class PinnedImg3DHostWrite : public AbstractHostWriteMem<float>
 };
 
 // Image3D with host read access and device write access
-class PinnedImg3DHostRead : public AbstractHostReadMem<float>
+class PinnedImg3DHostRead : public AbstractPinnedHostReadMem<float>
                           , public _pinned_mem_details::PinnedImag3DBase
 {
     PinnedImg3DHostRead(size_t xDim, size_t yDim, size_t zDim, const cl::CommandQueue& queue,
@@ -158,10 +162,11 @@ class PinnedImg3DHostRead : public AbstractHostReadMem<float>
 // ### IMPLEMENTATION ###
 // read-only Buffer
 template<typename T>
-PinnedBufHostWrite<T>::PinnedBufHostWrite(size_t nbElements, const cl::CommandQueue& queue, bool deviceOnlyReads)
-    : _pinned_mem_details::PinnedMem<T>(queue)
+PinnedBufHostWrite<T>::PinnedBufHostWrite(size_t nbElements, const cl::CommandQueue& queue,
+                                          bool deviceOnlyReads)
+    : AbstractPinnedHostWriteMem<T>(queue)
     , _pinned_mem_details::PinnedBufBase<T>(nbElements, CL_MEM_HOST_WRITE_ONLY |
-                                            (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
+                                         (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
 {
     this->setHostPtr(queue.enqueueMapBuffer(this->pinnedBuffer(), CL_TRUE, CL_MAP_WRITE, 0,
                                       sizeof(T) * this->nbElements()));
@@ -171,7 +176,8 @@ template<typename T>
 void PinnedBufHostWrite<T>::copyPinnedMemToDev(bool blocking, cl::Event* event)
 {
     this->queue().enqueueWriteBuffer(this->devBuffer(), blocking ? CL_TRUE : CL_FALSE, 0,
-                                     sizeof(T) * this->nbElements(), this->hostPtr(), nullptr, event);
+                                     sizeof(T) * this->nbElements(), this->hostPtr(),
+                                     nullptr, event);
 }
 
 template<typename T>
@@ -182,10 +188,11 @@ void PinnedBufHostWrite<T>::copyToPinnedMem(const T* srcPtr)
 
 // write-only Buffer
 template<typename T>
-PinnedBufHostRead<T>::PinnedBufHostRead(size_t nbElements, const cl::CommandQueue& queue, bool deviceOnlyWrites)
-    : _pinned_mem_details::PinnedMem<T>(queue)
+PinnedBufHostRead<T>::PinnedBufHostRead(size_t nbElements, const cl::CommandQueue& queue,
+                                        bool deviceOnlyWrites)
+    : AbstractPinnedHostReadMem<T>(queue)
     , _pinned_mem_details::PinnedBufBase<T>(nbElements, CL_MEM_HOST_READ_ONLY |
-                                            (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE))
+                                         (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE))
 {
     this->setHostPtr(queue.enqueueMapBuffer(this->pinnedBuffer(), CL_TRUE, CL_MAP_READ, 0,
                                             sizeof(T) * this->nbElements()));
@@ -195,7 +202,8 @@ template<typename T>
 void PinnedBufHostRead<T>::copyDevToPinnedMem(bool blocking, cl::Event *event)
 {
     this->queue().enqueueReadBuffer(this->devBuffer(), blocking ? CL_TRUE : CL_FALSE, 0,
-                                    sizeof(T) * this->nbElements(), this->hostPtr(), nullptr, event);
+                                    sizeof(T) * this->nbElements(), this->hostPtr(),
+                                    nullptr, event);
 }
 
 template<typename T>
@@ -206,10 +214,11 @@ void PinnedBufHostRead<T>::copyFromPinnedMem(float* dstPtr)
 
 // read-only Image3D
 inline PinnedImg3DHostWrite::PinnedImg3DHostWrite(size_t xDim, size_t yDim, size_t zDim,
-                                                  const cl::CommandQueue& queue, bool deviceOnlyReads)
-    : _pinned_mem_details::PinnedMem<float>(queue)
+                                                  const cl::CommandQueue& queue,
+                                                  bool deviceOnlyReads)
+    : AbstractPinnedHostWriteMem(queue)
     , _pinned_mem_details::PinnedImag3DBase(xDim, yDim, zDim, CL_MEM_HOST_WRITE_ONLY |
-                                            (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
+                                         (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
 {
     size_t rowPitch, slicePitch;
     setHostPtr(queue.enqueueMapImage(pinnedImage(), CL_TRUE, CL_MAP_WRITE, zeros(), dimensions(),
@@ -218,8 +227,8 @@ inline PinnedImg3DHostWrite::PinnedImg3DHostWrite(size_t xDim, size_t yDim, size
 
 inline void PinnedImg3DHostWrite::copyPinnedMemToDev(bool blocking, cl::Event* event)
 {
-    queue().enqueueWriteImage(devImage(), blocking ? CL_TRUE : CL_FALSE, zeros(), dimensions(), 0, 0,
-                              hostPtr(), nullptr, event);
+    queue().enqueueWriteImage(devImage(), blocking ? CL_TRUE : CL_FALSE, zeros(), dimensions(),
+                              0, 0, hostPtr(), nullptr, event);
 }
 
 inline void PinnedImg3DHostWrite::copyToPinnedMem(const float* srcPtr)
@@ -231,9 +240,9 @@ inline void PinnedImg3DHostWrite::copyToPinnedMem(const float* srcPtr)
 inline PinnedImg3DHostRead::PinnedImg3DHostRead(size_t xDim, size_t yDim, size_t zDim,
                                                 const cl::CommandQueue &queue,
                                                 bool deviceOnlyWrites)
-    : _pinned_mem_details::PinnedMem<float>(queue)
+    : AbstractPinnedHostReadMem<float>(queue)
     , _pinned_mem_details::PinnedImag3DBase(xDim, yDim, zDim, CL_MEM_HOST_READ_ONLY |
-                                            (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE))
+                                         (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE))
 {
     size_t rowPitch, slicePitch;
     setHostPtr(queue.enqueueMapImage(pinnedImage(), CL_TRUE, CL_MAP_READ,
@@ -242,8 +251,8 @@ inline PinnedImg3DHostRead::PinnedImg3DHostRead(size_t xDim, size_t yDim, size_t
 
 inline void PinnedImg3DHostRead::copyDevToPinnedMem(bool blocking, cl::Event* event)
 {
-    queue().enqueueReadImage(devImage(), blocking ? CL_TRUE : CL_FALSE, zeros(), dimensions(), 0, 0,
-                             hostPtr(), nullptr, event);
+    queue().enqueueReadImage(devImage(), blocking ? CL_TRUE : CL_FALSE, zeros(), dimensions(),
+                             0, 0, hostPtr(), nullptr, event);
 }
 
 inline void PinnedImg3DHostRead::copyFromPinnedMem(float* dstPtr)
@@ -253,7 +262,13 @@ inline void PinnedImg3DHostRead::copyFromPinnedMem(float* dstPtr)
 
 // Abstract read-only class
 template<typename T>
-void AbstractHostWriteMem<T>::copyToDev(const T* srcPtr, bool blocking, cl::Event* event)
+AbstractPinnedHostWriteMem<T>::AbstractPinnedHostWriteMem(const cl::CommandQueue& queue)
+    : _pinned_mem_details::PinnedMem<T>(queue)
+{
+}
+
+template<typename T>
+void AbstractPinnedHostWriteMem<T>::copyToDev(const T* srcPtr, bool blocking, cl::Event* event)
 {
     copyToPinnedMem(srcPtr);
     copyPinnedMemToDev(blocking, event);
@@ -261,7 +276,13 @@ void AbstractHostWriteMem<T>::copyToDev(const T* srcPtr, bool blocking, cl::Even
 
 // Abstract write-only class
 template<typename T>
-void AbstractHostReadMem<T>::copyFromDev(T *dstPtr, bool blocking, cl::Event* event)
+AbstractPinnedHostReadMem<T>::AbstractPinnedHostReadMem(const cl::CommandQueue &queue)
+    : _pinned_mem_details::PinnedMem<T>(queue)
+{
+}
+
+template<typename T>
+void AbstractPinnedHostReadMem<T>::copyFromDev(T *dstPtr, bool blocking, cl::Event* event)
 {
     copyDevToPinnedMem(blocking, event);
     copyFromPinnedMem(dstPtr);
@@ -276,7 +297,8 @@ namespace _pinned_mem_details {
 template<typename T>
 PinnedMem<T>::PinnedMem(const cl::CommandQueue &queue)
     : _q(queue)
-{}
+{
+}
 
 template<typename T>
 T* PinnedMem<T>::hostPtr() const { return _hostPtr; }
