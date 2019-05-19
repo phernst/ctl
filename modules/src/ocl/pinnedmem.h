@@ -78,7 +78,7 @@ class AbstractHostWriteMem : virtual public _pinned_mem_details::PinnedMem<T>
 
 public:
     // first copy from srcPtr to pinned memory and then to device (all elements)
-    void copyToDev(const T* srcPtr, bool blocking, cl::Event* event);
+    void copyToDev(const T* srcPtr, bool blocking = true, cl::Event* event = nullptr);
 
     virtual ~AbstractHostWriteMem() = default;
 };
@@ -94,7 +94,7 @@ class AbstractHostReadMem : virtual public _pinned_mem_details::PinnedMem<T>
 
 public:
     // first copy from srcPtr to pinned memory and then to device (all elements)
-    void copyFromDev(T* dstPtr, bool blocking, cl::Event* event);
+    void copyFromDev(T* dstPtr, bool blocking = true, cl::Event* event = nullptr);
 
     virtual ~AbstractHostReadMem() = default;
 };
@@ -160,7 +160,7 @@ template<typename T>
 PinnedBufHostWrite<T>::PinnedBufHostWrite(size_t nbElements, const cl::CommandQueue& queue, bool deviceOnlyReads)
     : _pinned_mem_details::PinnedMem<T>(queue)
     , _pinned_mem_details::PinnedBufBase<T>(nbElements, CL_MEM_HOST_WRITE_ONLY |
-                                            (devReadOnly ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
+                                            (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
 {
     setHostPtr(queue.enqueueMapBuffer(pinnedBuffer(), CL_TRUE, CL_MAP_WRITE, 0,
                                       sizeof(T) * this->nbElements()));
