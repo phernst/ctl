@@ -79,7 +79,7 @@ class AbstractPinnedHostWriteMem : public _pinned_mem_details::PinnedMem<T>
 {
     // copy from pinned memory to device (all elements)
 public:
-    virtual void copyPinnedMemToDev(bool blocking, cl::Event* event) = 0;
+    virtual void copyPinnedMemToDev(bool blocking = true, cl::Event* event = nullptr) = 0;
     // copy from srcPtr to pinned memory (all elements)
 public:
     virtual void copyToPinnedMem(const T* srcPtr) = 0;
@@ -98,7 +98,7 @@ class AbstractPinnedHostReadMem : public _pinned_mem_details::PinnedMem<T>
 {
     // copy from pinned memory to device (all elements)
 public:
-    virtual void copyDevToPinnedMem(bool blocking, cl::Event* event) = 0;
+    virtual void copyDevToPinnedMem(bool blocking = true, cl::Event* event = nullptr) = 0;
     // copy from srcPtr to pinned memory (all elements)
 public:
     virtual void copyFromPinnedMem(T* dstPtr) = 0;
