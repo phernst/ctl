@@ -78,11 +78,9 @@ template <typename T>
 class AbstractPinnedHostWriteMem : public _pinned_mem_details::PinnedMem<T>
 {
     // copy from pinned memory to device (all elements)
-public:
-    virtual void copyPinnedMemToDev(bool blocking = true, cl::Event* event = nullptr) = 0;
+    public:virtual void copyPinnedMemToDev(bool blocking = true, cl::Event* event = nullptr) = 0;
     // copy from srcPtr to pinned memory (all elements)
-public:
-    virtual void copyToPinnedMem(const T* srcPtr) = 0;
+    public:virtual void copyToPinnedMem(const T* srcPtr) = 0;
 
 public:
     AbstractPinnedHostWriteMem(const cl::CommandQueue& queue);
@@ -97,11 +95,9 @@ template <typename T>
 class AbstractPinnedHostReadMem : public _pinned_mem_details::PinnedMem<T>
 {
     // copy from pinned memory to device (all elements)
-public:
-    virtual void copyDevToPinnedMem(bool blocking = true, cl::Event* event = nullptr) = 0;
+    public:virtual void copyDevToPinnedMem(bool blocking = true, cl::Event* event = nullptr) = 0;
     // copy from srcPtr to pinned memory (all elements)
-public:
-    virtual void copyFromPinnedMem(T* dstPtr) = 0;
+    public:virtual void copyFromPinnedMem(T* dstPtr) = 0;
 
 public:
     AbstractPinnedHostReadMem(const cl::CommandQueue& queue);
