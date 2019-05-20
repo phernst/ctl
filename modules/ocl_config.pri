@@ -11,7 +11,8 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/src/ocl/clfileloader.cpp \
-    $$PWD/src/ocl/openclconfig.cpp
+    $$PWD/src/ocl/openclconfig.cpp \
+    $$PWD/src/ocl/pinnedmem.cpp
 
 LIBS += -lOpenCL
 
