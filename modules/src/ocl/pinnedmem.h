@@ -59,8 +59,8 @@ public:
 
 protected:
     cl::Image3D& pinnedImage();
-    cl::size_t<3> zeros();
     cl::size_t<3> dimensions() const;
+    static const cl::size_t<3>& zeros();
 
 private:
     std::array<size_t, 3> _nbElements;
@@ -146,6 +146,7 @@ public:
 class PinnedImg3DHostWrite : public AbstractPinnedMemHostWrite<float>,
                              public _pinned_mem_details::PinnedImag3DBase
 {
+public:
     PinnedImg3DHostWrite(size_t xDim,
                          size_t yDim,
                          size_t zDim,
@@ -162,6 +163,7 @@ class PinnedImg3DHostWrite : public AbstractPinnedMemHostWrite<float>,
 class PinnedImg3DHostRead : public AbstractPinnedMemHostRead<float>,
                             public _pinned_mem_details::PinnedImag3DBase
 {
+public:
     PinnedImg3DHostRead(size_t xDim,
                         size_t yDim,
                         size_t zDim,

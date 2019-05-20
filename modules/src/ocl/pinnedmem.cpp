@@ -81,12 +81,9 @@ cl::Image3D& PinnedImag3DBase::devImage() { return _deviceImg; }
 
 cl::Image3D& PinnedImag3DBase::pinnedImage() { return _pinnedImg; }
 
-cl::size_t<3> PinnedImag3DBase::zeros()
+const cl::size_t<3>& PinnedImag3DBase::zeros()
 {
-    static cl::size_t<3> zeros;
-    zeros[0] = 0;
-    zeros[1] = 0;
-    zeros[2] = 0;
+    static const cl::size_t<3> zeros; // auto initialized to zero
     return zeros;
 }
 
