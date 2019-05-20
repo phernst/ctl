@@ -263,13 +263,13 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
 
             // all modules have same source position --> use first module PMat (arbitrary)
             auto sourcePosition = determineSource(currentViewPMats.first());
-            sourceBufs[device].copyToPinnedMem(&sourcePosition);
-            sourceBufs[device].copyPinnedMemToDev(false);
+            sourceBufs[device].writeToPinnedMem(&sourcePosition);
+            sourceBufs[device].transferPinnedMemToDev(false);
 
             // individual module geometry: QR is only determined by M, where P=[M|p4]
             for(uint module = 0; module < _viewDim.nbModules; ++module)
                 QRs[device][module] = decomposeM(currentViewPMats.at(module).M());
-            qrBufs[device].copyToDev(QRs[device].data(), false);
+            qrBufs[device].writeToDev(QRs[device].data(), false);
 
             // Launch kernel on the compute device
             setKernelArgs(device);
@@ -279,7 +279,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
                                                             _viewDim.nbModules));
 
             // Get result back to (pinned) host memory
-            projectionBuffers[device].copyDevToPinnedMem(false, &readViewFinished[device]);
+            projectionBuffers[device].transferDevToPinnedMem(false, &readViewFinished[device]);
             // copy to "ret" (pushed into background)
             cpyThreads[device] = std::thread(cpyProjections, view, projectionBuffers[device].hostPtr(),
                                              &readViewFinished[device]);
