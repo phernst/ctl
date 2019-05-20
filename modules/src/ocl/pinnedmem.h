@@ -8,10 +8,13 @@
 namespace CTL {
 namespace OCL {
 
+// Helper classes
+// ==============
+
 namespace _pinned_mem_details {
 
 // Pinned memory base class - manages command queue and host pointer to pinned memory
-template<typename T>
+template <typename T>
 class PinnedMem
 {
 public:
@@ -27,7 +30,7 @@ protected:
 };
 
 // Base for Buffer classes
-template<typename T>
+template <typename T>
 class PinnedBufBase
 {
 public:
@@ -45,7 +48,7 @@ private:
     cl::Buffer _deviceBuf;
 };
 
-// Base for Image3D (float) classes
+// Base for Image3D (with float/intensity format) classes
 class PinnedImag3DBase
 {
 public:
@@ -67,15 +70,19 @@ private:
 
 } // namespace _pinned_mem_details
 
-// Acess interfaces
+// Access interfaces
+// =================
+
 // host write
-template<typename T>
+template <typename T>
 class AbstractPinnedHostWriteMem : public _pinned_mem_details::PinnedMem<T>
 {
     // copy from pinned memory to device (all elements)
-    public:virtual void copyPinnedMemToDev(bool blocking, cl::Event* event) = 0;
+public:
+    virtual void copyPinnedMemToDev(bool blocking, cl::Event* event) = 0;
     // copy from srcPtr to pinned memory (all elements)
-    public:virtual void copyToPinnedMem(const T* srcPtr) = 0;
+public:
+    virtual void copyToPinnedMem(const T* srcPtr) = 0;
 
 public:
     AbstractPinnedHostWriteMem(const cl::CommandQueue& queue);
@@ -86,13 +93,15 @@ public:
 };
 
 // host read
-template<typename T>
+template <typename T>
 class AbstractPinnedHostReadMem : public _pinned_mem_details::PinnedMem<T>
 {
     // copy from pinned memory to device (all elements)
-    public:virtual void copyDevToPinnedMem(bool blocking, cl::Event* event) = 0;
+public:
+    virtual void copyDevToPinnedMem(bool blocking, cl::Event* event) = 0;
     // copy from srcPtr to pinned memory (all elements)
-    public:virtual void copyFromPinnedMem(T* dstPtr) = 0;
+public:
+    virtual void copyFromPinnedMem(T* dstPtr) = 0;
 
 public:
     AbstractPinnedHostReadMem(const cl::CommandQueue& queue);
@@ -102,13 +111,17 @@ public:
     void copyFromDev(T* dstPtr, bool blocking = true, cl::Event* event = nullptr);
 };
 
+// Concrete subclasses providing pinned memory for Buffer/Image3D with host read/write access
+// ==========================================================================================
+
 // Buffer with host write access and device read access
-template<typename T>
-class PinnedBufHostWrite : public AbstractPinnedHostWriteMem<T>
-                         , public _pinned_mem_details::PinnedBufBase<T>
+template <typename T>
+class PinnedBufHostWrite : public AbstractPinnedHostWriteMem<T>,
+                           public _pinned_mem_details::PinnedBufBase<T>
 {
 public:
-    PinnedBufHostWrite(size_t nbElements, const cl::CommandQueue& queue,
+    PinnedBufHostWrite(size_t nbElements,
+                       const cl::CommandQueue& queue,
                        bool deviceOnlyReads = true);
 
     // copy from pinned memory to device (all elements)
@@ -118,12 +131,13 @@ public:
 };
 
 // Buffer with host read access and device write access
-template<typename T>
-class PinnedBufHostRead : public AbstractPinnedHostReadMem<T>
-                        , public _pinned_mem_details::PinnedBufBase<T>
+template <typename T>
+class PinnedBufHostRead : public AbstractPinnedHostReadMem<T>,
+                          public _pinned_mem_details::PinnedBufBase<T>
 {
 public:
-    PinnedBufHostRead(size_t nbElements, const cl::CommandQueue& queue,
+    PinnedBufHostRead(size_t nbElements,
+                      const cl::CommandQueue& queue,
                       bool deviceOnlyWrites = true);
 
     // copy from device to pinned memory (all elements)
@@ -133,10 +147,13 @@ public:
 };
 
 // Image3D with host write access and device read access
-class PinnedImg3DHostWrite : public AbstractPinnedHostWriteMem<float>
-                           , public _pinned_mem_details::PinnedImag3DBase
+class PinnedImg3DHostWrite : public AbstractPinnedHostWriteMem<float>,
+                             public _pinned_mem_details::PinnedImag3DBase
 {
-    PinnedImg3DHostWrite(size_t xDim, size_t yDim, size_t zDim, const cl::CommandQueue& queue,
+    PinnedImg3DHostWrite(size_t xDim,
+                         size_t yDim,
+                         size_t zDim,
+                         const cl::CommandQueue& queue,
                          bool deviceOnlyReads = true);
 
     // copy from pinned memory to device (all elements)
@@ -146,80 +163,88 @@ class PinnedImg3DHostWrite : public AbstractPinnedHostWriteMem<float>
 };
 
 // Image3D with host read access and device write access
-class PinnedImg3DHostRead : public AbstractPinnedHostReadMem<float>
-                          , public _pinned_mem_details::PinnedImag3DBase
+class PinnedImg3DHostRead : public AbstractPinnedHostReadMem<float>,
+                            public _pinned_mem_details::PinnedImag3DBase
 {
-    PinnedImg3DHostRead(size_t xDim, size_t yDim, size_t zDim, const cl::CommandQueue& queue,
+    PinnedImg3DHostRead(size_t xDim,
+                        size_t yDim,
+                        size_t zDim,
+                        const cl::CommandQueue& queue,
                         bool deviceOnlyWrites = true);
 
     // copy from device to pinned memory (all elements)
     void copyDevToPinnedMem(bool blocking = true, cl::Event* event = nullptr) override;
     // copy from pinned memory to dstPtr (all elements)
-    void copyFromPinnedMem(float *dstPtr) override;
+    void copyFromPinnedMem(float* dstPtr) override;
 };
 
+// Template implementation
+// =======================
 
-// ### IMPLEMENTATION ###
 // read-only Buffer
-template<typename T>
-PinnedBufHostWrite<T>::PinnedBufHostWrite(size_t nbElements, const cl::CommandQueue& queue,
+template <typename T>
+PinnedBufHostWrite<T>::PinnedBufHostWrite(size_t nbElements,
+                                          const cl::CommandQueue& queue,
                                           bool deviceOnlyReads)
     : AbstractPinnedHostWriteMem<T>(queue)
-    , _pinned_mem_details::PinnedBufBase<T>(nbElements, CL_MEM_HOST_WRITE_ONLY |
-                                         (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
+    , _pinned_mem_details::PinnedBufBase<T>(
+          nbElements,
+          CL_MEM_HOST_WRITE_ONLY | (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
 {
     this->setHostPtr(queue.enqueueMapBuffer(this->pinnedBuffer(), CL_TRUE, CL_MAP_WRITE, 0,
                                             sizeof(T) * nbElements));
 }
 
-template<typename T>
+template <typename T>
 void PinnedBufHostWrite<T>::copyPinnedMemToDev(bool blocking, cl::Event* event)
 {
     this->queue().enqueueWriteBuffer(this->devBuffer(), blocking ? CL_TRUE : CL_FALSE, 0,
-                                     sizeof(T) * this->nbElements(), this->hostPtr(),
-                                     nullptr, event);
+                                     sizeof(T) * this->nbElements(), this->hostPtr(), nullptr,
+                                     event);
 }
 
-template<typename T>
+template <typename T>
 void PinnedBufHostWrite<T>::copyToPinnedMem(const T* srcPtr)
 {
     std::copy_n(srcPtr, this->nbElements(), this->hostPtr());
 }
 
 // write-only Buffer
-template<typename T>
-PinnedBufHostRead<T>::PinnedBufHostRead(size_t nbElements, const cl::CommandQueue& queue,
+template <typename T>
+PinnedBufHostRead<T>::PinnedBufHostRead(size_t nbElements,
+                                        const cl::CommandQueue& queue,
                                         bool deviceOnlyWrites)
     : AbstractPinnedHostReadMem<T>(queue)
-    , _pinned_mem_details::PinnedBufBase<T>(nbElements, CL_MEM_HOST_READ_ONLY |
-                                         (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE))
+    , _pinned_mem_details::PinnedBufBase<T>(
+          nbElements,
+          CL_MEM_HOST_READ_ONLY | (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE))
 {
     this->setHostPtr(queue.enqueueMapBuffer(this->pinnedBuffer(), CL_TRUE, CL_MAP_READ, 0,
                                             sizeof(T) * nbElements));
 }
 
-template<typename T>
-void PinnedBufHostRead<T>::copyDevToPinnedMem(bool blocking, cl::Event *event)
+template <typename T>
+void PinnedBufHostRead<T>::copyDevToPinnedMem(bool blocking, cl::Event* event)
 {
     this->queue().enqueueReadBuffer(this->devBuffer(), blocking ? CL_TRUE : CL_FALSE, 0,
-                                    sizeof(T) * this->nbElements(), this->hostPtr(),
-                                    nullptr, event);
+                                    sizeof(T) * this->nbElements(), this->hostPtr(), nullptr,
+                                    event);
 }
 
-template<typename T>
+template <typename T>
 void PinnedBufHostRead<T>::copyFromPinnedMem(float* dstPtr)
 {
     std::copy_n(this->hostPtr(), this->nbElements(), dstPtr);
 }
 
 // Abstract read-only class
-template<typename T>
+template <typename T>
 AbstractPinnedHostWriteMem<T>::AbstractPinnedHostWriteMem(const cl::CommandQueue& queue)
     : _pinned_mem_details::PinnedMem<T>(queue)
 {
 }
 
-template<typename T>
+template <typename T>
 void AbstractPinnedHostWriteMem<T>::copyToDev(const T* srcPtr, bool blocking, cl::Event* event)
 {
     copyToPinnedMem(srcPtr);
@@ -227,59 +252,74 @@ void AbstractPinnedHostWriteMem<T>::copyToDev(const T* srcPtr, bool blocking, cl
 }
 
 // Abstract write-only class
-template<typename T>
-AbstractPinnedHostReadMem<T>::AbstractPinnedHostReadMem(const cl::CommandQueue &queue)
+template <typename T>
+AbstractPinnedHostReadMem<T>::AbstractPinnedHostReadMem(const cl::CommandQueue& queue)
     : _pinned_mem_details::PinnedMem<T>(queue)
 {
 }
 
-template<typename T>
-void AbstractPinnedHostReadMem<T>::copyFromDev(T *dstPtr, bool blocking, cl::Event* event)
+template <typename T>
+void AbstractPinnedHostReadMem<T>::copyFromDev(T* dstPtr, bool blocking, cl::Event* event)
 {
     copyDevToPinnedMem(blocking, event);
     copyFromPinnedMem(dstPtr);
 }
 
-
-// ### DETAILS ###
-
 namespace _pinned_mem_details {
 
 // Generic pinned memory class
-template<typename T>
-PinnedMem<T>::PinnedMem(const cl::CommandQueue &queue)
+template <typename T>
+PinnedMem<T>::PinnedMem(const cl::CommandQueue& queue)
     : _q(queue)
 {
 }
 
-template<typename T>
-T* PinnedMem<T>::hostPtr() const { return _hostPtr; }
+template <typename T>
+T* PinnedMem<T>::hostPtr() const
+{
+    return _hostPtr;
+}
 
-template<typename T>
-void PinnedMem<T>::setHostPtr(void* hostPtr) { _hostPtr = reinterpret_cast<T*>(hostPtr); }
+template <typename T>
+void PinnedMem<T>::setHostPtr(void* hostPtr)
+{
+    _hostPtr = reinterpret_cast<T*>(hostPtr);
+}
 
-template<typename T>
-const cl::CommandQueue& PinnedMem<T>::queue() const { return _q; }
-
+template <typename T>
+const cl::CommandQueue& PinnedMem<T>::queue() const
+{
+    return _q;
+}
 
 // PinnedMemBufBase
-template<typename T>
+template <typename T>
 PinnedBufBase<T>::PinnedBufBase(size_t nbElements, cl_mem_flags devAccess)
     : _nbElements(nbElements)
-    , _pinnedBuf(OpenCLConfig::instance().context(), CL_MEM_ALLOC_HOST_PTR | devAccess,
+    , _pinnedBuf(OpenCLConfig::instance().context(),
+                 CL_MEM_ALLOC_HOST_PTR | devAccess,
                  sizeof(T) * nbElements)
     , _deviceBuf(OpenCLConfig::instance().context(), devAccess, sizeof(T) * nbElements)
 {
 }
 
-template<typename T>
-const size_t& PinnedBufBase<T>::nbElements() const { return _nbElements; }
+template <typename T>
+const size_t& PinnedBufBase<T>::nbElements() const
+{
+    return _nbElements;
+}
 
-template<typename T>
-cl::Buffer& PinnedBufBase<T>::devBuffer() { return _deviceBuf; }
+template <typename T>
+cl::Buffer& PinnedBufBase<T>::devBuffer()
+{
+    return _deviceBuf;
+}
 
-template<typename T>
-cl::Buffer& PinnedBufBase<T>::pinnedBuffer() { return _pinnedBuf; }
+template <typename T>
+cl::Buffer& PinnedBufBase<T>::pinnedBuffer()
+{
+    return _pinnedBuf;
+}
 
 } // namespace _pinned_mem_details
 
