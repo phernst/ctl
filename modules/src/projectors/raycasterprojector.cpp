@@ -150,8 +150,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         // Prepare input data
         cl_uint2 raysPerPixel{ { _config.raysPerPixel[0], _config.raysPerPixel[1] } };
         cl_float3 volCorner = volumeCorner(volDim, voxelSize, volOffset);
-        std::vector<std::vector<cl_double16>> QRs(nbUsedDevs,
-                                                  std::vector<cl_double16>(_viewDim.nbModules));
+        std::vector<cl_double16> QRs(_viewDim.nbModules);
 
         // view/device specific buffers
         std::vector<PinnedBufHostWrite<cl_float3>> sourceBufs;
@@ -260,16 +259,19 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         for(uint view = 0; view < nbViews; ++view)
         {
             const auto& currentViewPMats = _pMats.at(view);
-
             // all modules have same source position --> use first module PMat (arbitrary)
             auto sourcePosition = determineSource(currentViewPMats.first());
-            sourceBufs[device].writeToPinnedMem(&sourcePosition);
-            sourceBufs[device].transferPinnedMemToDev(false);
-
             // individual module geometry: QR is only determined by M, where P=[M|p4]
             for(uint module = 0; module < _viewDim.nbModules; ++module)
-                QRs[device][module] = decomposeM(currentViewPMats.at(module).M());
-            qrBufs[device].writeToDev(QRs[device].data(), false);
+                QRs[module] = decomposeM(currentViewPMats.at(module).M());
+
+            // wait for previous job of the device
+            if(cpyThreads[device].joinable())
+                cpyThreads[device].join();
+
+            // start (non-blocking) transfer to device
+            sourceBufs[device].writeToDev(&sourcePosition, false);
+            qrBufs[device].writeToDev(QRs.data(), false);
 
             // Launch kernel on the compute device
             setKernelArgs(device);
@@ -280,23 +282,21 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
 
             // Get result back to (pinned) host memory
             projectionBuffers[device].transferDevToPinnedMem(false, &readViewFinished[device]);
-            // copy to "ret" (pushed into background)
-            cpyThreads[device] = std::thread(cpyProjections, view, projectionBuffers[device].hostPtr(),
+            // copy to "ret" (push into background)
+            cpyThreads[device] = std::thread(cpyProjections,
+                                             view, projectionBuffers[device].hostPtr(),
                                              &readViewFinished[device]);
 
             // Increment to next device
             ++device;
             device = device % nbUsedDevs;
-            // when device sub-loop finishes, wait for all "cpyThreads" and thus all device queues
-            if(device == 0)
-                for(uint dev = 0; dev < nbUsedDevs; ++dev)
-                    cpyThreads[dev].join();
 
             emit notifier()->projectionFinished(view);
         }
         // wait for remaining devices
-        for(uint remainingDev = 0; remainingDev < device; ++remainingDev)
-            cpyThreads[remainingDev].join();
+        for(uint remainingDev = 0; remainingDev < nbUsedDevs; ++remainingDev)
+            if(cpyThreads[remainingDev].joinable())
+                cpyThreads[remainingDev].join();
 
     } catch(const cl::Error& err)
     {
