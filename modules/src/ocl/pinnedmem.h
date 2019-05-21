@@ -35,7 +35,7 @@ template <typename T>
 class PinnedBufBase
 {
 public:
-    PinnedBufBase(size_t nbElements, cl_mem_flags devAccess);
+    PinnedBufBase(size_t nbElements, cl_mem_flags devAccess, bool createDevBuffer);
     PinnedBufBase(const PinnedBufBase& usedPinnedMem, cl_mem_flags devAccess);
 
     const size_t& nbElements() const;
@@ -54,7 +54,7 @@ private:
 class PinnedImag3DBase
 {
 public:
-    PinnedImag3DBase(size_t xDim, size_t yDim, size_t zDim, cl_mem_flags devAccess);
+    PinnedImag3DBase(size_t xDim, size_t yDim, size_t zDim, cl_mem_flags devAccess, bool createDevBuffer);
     PinnedImag3DBase(const PinnedImag3DBase& usedPinnedMem, cl_mem_flags devAccess);
 
     const std::array<size_t, 3>& nbElements() const;
@@ -122,6 +122,7 @@ class PinnedBufHostWrite : public AbstractPinnedMemHostWrite<T>,
 public:
     PinnedBufHostWrite(size_t nbElements,
                        const cl::CommandQueue& queue,
+                       bool createDevBuffer = true,
                        bool deviceOnlyReads = true);
     PinnedBufHostWrite(const PinnedBufHostWrite& usedPinnedMem,
                        const cl::CommandQueue& queue,
@@ -141,6 +142,7 @@ class PinnedBufHostRead : public AbstractPinnedMemHostRead<T>,
 public:
     PinnedBufHostRead(size_t nbElements,
                       const cl::CommandQueue& queue,
+                      bool createDevBuffer = true,
                       bool deviceOnlyWrites = true);
     PinnedBufHostRead(const PinnedBufHostRead& usedPinnedMem,
                       const cl::CommandQueue& queue,
@@ -161,6 +163,7 @@ public:
                          size_t yDim,
                          size_t zDim,
                          const cl::CommandQueue& queue,
+                         bool createDevBuffer = true,
                          bool deviceOnlyReads = true);
     PinnedImg3DHostWrite(const PinnedImg3DHostWrite& usedPinnedMem,
                          const cl::CommandQueue& queue,
@@ -181,6 +184,7 @@ public:
                         size_t yDim,
                         size_t zDim,
                         const cl::CommandQueue& queue,
+                        bool createDevBuffer = true,
                         bool deviceOnlyWrites = true);
     PinnedImg3DHostRead(const PinnedImg3DHostRead& usedPinnedMem,
                         const cl::CommandQueue& queue,
@@ -199,11 +203,13 @@ public:
 template <typename T>
 PinnedBufHostWrite<T>::PinnedBufHostWrite(size_t nbElements,
                                           const cl::CommandQueue& queue,
+                                          bool createDevBuffer,
                                           bool deviceOnlyReads)
     : AbstractPinnedMemHostWrite<T>(queue)
     , _pinned_mem_details::PinnedBufBase<T>(
           nbElements,
-          CL_MEM_HOST_WRITE_ONLY | (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
+          CL_MEM_HOST_WRITE_ONLY | (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE),
+          createDevBuffer)
 {
     this->setHostPtr(queue.enqueueMapBuffer(this->pinnedBuffer(), CL_TRUE, CL_MAP_WRITE, 0,
                                             sizeof(T) * nbElements));
@@ -239,11 +245,13 @@ void PinnedBufHostWrite<T>::writeToPinnedMem(const T* srcPtr)
 template <typename T>
 PinnedBufHostRead<T>::PinnedBufHostRead(size_t nbElements,
                                         const cl::CommandQueue& queue,
+                                        bool createDevBuffer,
                                         bool deviceOnlyWrites)
     : AbstractPinnedMemHostRead<T>(queue)
     , _pinned_mem_details::PinnedBufBase<T>(
           nbElements,
-          CL_MEM_HOST_READ_ONLY | (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE))
+          CL_MEM_HOST_READ_ONLY | (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE),
+          createDevBuffer)
 {
     this->setHostPtr(queue.enqueueMapBuffer(this->pinnedBuffer(), CL_TRUE, CL_MAP_READ, 0,
                                             sizeof(T) * nbElements));
@@ -343,12 +351,14 @@ const cl::CommandQueue& PinnedMem<T>::queue() const
 
 // PinnedMemBufBase
 template <typename T>
-PinnedBufBase<T>::PinnedBufBase(size_t nbElements, cl_mem_flags devAccess)
+PinnedBufBase<T>::PinnedBufBase(size_t nbElements, cl_mem_flags devAccess, bool createDevBuffer)
     : _nbElements(nbElements)
     , _pinnedBuf(OpenCLConfig::instance().context(),
                  CL_MEM_ALLOC_HOST_PTR | devAccess,
                  sizeof(T) * nbElements)
-    , _deviceBuf(OpenCLConfig::instance().context(), devAccess, sizeof(T) * nbElements)
+    , _deviceBuf(createDevBuffer
+                 ? cl::Buffer(OpenCLConfig::instance().context(), devAccess, sizeof(T) * nbElements)
+                 : cl::Buffer())
 {
 }
 
