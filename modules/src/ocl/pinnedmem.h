@@ -4,6 +4,7 @@
 #include "openclconfig.h"
 #include <algorithm>
 #include <array>
+#include <future>
 
 namespace CTL {
 namespace OCL {
@@ -106,7 +107,8 @@ public:
     virtual ~AbstractPinnedMemHostRead() = default;
 
     // first copy from srcPtr to pinned memory and then to device (all elements)
-    void readFromDev(T* dstPtr, bool blocking = true, cl::Event* event = nullptr);
+    void readFromDev(T* dstPtr);
+    std::future<T*> readFromDevAsync(T* dstPtr);
 };
 
 // Concrete subclasses providing pinned memory for Buffer/Image3D with host read/write access
@@ -295,10 +297,21 @@ AbstractPinnedMemHostRead<T>::AbstractPinnedMemHostRead(const cl::CommandQueue& 
 }
 
 template <typename T>
-void AbstractPinnedMemHostRead<T>::readFromDev(T* dstPtr, bool blocking, cl::Event* event)
+void AbstractPinnedMemHostRead<T>::readFromDev(T* dstPtr)
 {
-    transferDevToPinnedMem(blocking, event);
+    transferDevToPinnedMem();
     readFromPinnedMem(dstPtr);
+}
+
+template <typename T>
+std::future<T*> AbstractPinnedMemHostRead<T>::readFromDevAsync(T* dstPtr)
+{
+    cl::Event e;
+    transferDevToPinnedMem(false, &e);
+    return std::async([this, e, dstPtr]() {
+        e.wait();
+        readFromPinnedMem(dstPtr);
+    });
 }
 
 namespace _pinned_mem_details {
