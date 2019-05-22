@@ -7,28 +7,15 @@ namespace OCL {
 PinnedImg3DHostWrite::PinnedImg3DHostWrite(size_t xDim, size_t yDim, size_t zDim,
                                            const cl::CommandQueue& queue,
                                            bool createDevBuffer, bool deviceOnlyReads)
-    : AbstractPinnedMemHostWrite(queue)
-    , _pinned_mem_details::PinnedImag3DBase(
+    : _pinned_mem_details::PinnedImag3DBase(
           xDim,
           yDim,
           zDim,
           CL_MEM_HOST_WRITE_ONLY | (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE),
-          createDevBuffer)
+          CL_MAP_WRITE,
+          createDevBuffer,
+          queue)
 {
-    size_t rowPitch, slicePitch;
-    setHostPtr(queue.enqueueMapImage(pinnedImage(), CL_TRUE, CL_MAP_WRITE, zeros(), dimensions(),
-                                     &rowPitch, &slicePitch));
-}
-
-PinnedImg3DHostWrite::PinnedImg3DHostWrite(const PinnedImg3DHostWrite& usedPinnedMem,
-                                           const cl::CommandQueue& queue,
-                                           bool deviceOnlyReads)
-    : AbstractPinnedMemHostWrite(queue)
-    , _pinned_mem_details::PinnedImag3DBase(
-          usedPinnedMem,
-          CL_MEM_HOST_WRITE_ONLY | (deviceOnlyReads ? CL_MEM_READ_ONLY : CL_MEM_READ_WRITE))
-{
-    setHostPtr(usedPinnedMem.hostPtr());
 }
 
 void PinnedImg3DHostWrite::transferPinnedMemToDev(bool blocking, cl::Event* event)
@@ -46,28 +33,15 @@ void PinnedImg3DHostWrite::writeToPinnedMem(const float* srcPtr)
 PinnedImg3DHostRead::PinnedImg3DHostRead(size_t xDim, size_t yDim, size_t zDim,
                                          const cl::CommandQueue& queue,
                                          bool createDevBuffer, bool deviceOnlyWrites)
-    : AbstractPinnedMemHostRead<float>(queue)
-    , _pinned_mem_details::PinnedImag3DBase(
+    : _pinned_mem_details::PinnedImag3DBase(
           xDim,
           yDim,
           zDim,
           CL_MEM_HOST_READ_ONLY | (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE),
-          createDevBuffer)
+          CL_MAP_READ,
+          createDevBuffer,
+          queue)
 {
-    size_t rowPitch, slicePitch;
-    setHostPtr(queue.enqueueMapImage(pinnedImage(), CL_TRUE, CL_MAP_READ, zeros(), dimensions(),
-                                     &rowPitch, &slicePitch));
-}
-
-PinnedImg3DHostRead::PinnedImg3DHostRead(const PinnedImg3DHostRead& usedPinnedMem,
-                                         const cl::CommandQueue& queue,
-                                         bool deviceOnlyWrites)
-    : AbstractPinnedMemHostRead<float>(queue)
-    , _pinned_mem_details::PinnedImag3DBase(
-          usedPinnedMem,
-          CL_MEM_HOST_READ_ONLY | (deviceOnlyWrites ? CL_MEM_WRITE_ONLY : CL_MEM_READ_WRITE))
-{
-    setHostPtr(usedPinnedMem.hostPtr());
 }
 
 void PinnedImg3DHostRead::transferDevToPinnedMem(bool blocking, cl::Event* event)
@@ -84,8 +58,11 @@ void PinnedImg3DHostRead::readFromPinnedMem(float* dstPtr)
 namespace _pinned_mem_details {
 
 // PinnedMemImag3DBase
-PinnedImag3DBase::PinnedImag3DBase(size_t xDim, size_t yDim, size_t zDim, cl_mem_flags devAccess, bool createDevBuffer)
-    : _nbElements{ xDim, yDim, zDim }
+PinnedImag3DBase::PinnedImag3DBase(size_t xDim, size_t yDim, size_t zDim,
+                                   cl_mem_flags devAccess, cl_map_flags hostAccess,
+                                   bool createDevBuffer, const cl::CommandQueue& queue)
+    : PinnedMem<float>(queue)
+    , _nbElements{ xDim, yDim, zDim }
     , _pinnedImg(OpenCLConfig::instance().context(),
                  CL_MEM_ALLOC_HOST_PTR | devAccess,
                  cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
@@ -101,18 +78,16 @@ PinnedImag3DBase::PinnedImag3DBase(size_t xDim, size_t yDim, size_t zDim, cl_mem
                                _nbElements[2])
                  : cl::Image3D())
 {
+    size_t rowPitch, slicePitch;
+    this->setHostPtr(reinterpret_cast<float*>(
+                     queue.enqueueMapImage(_pinnedImg, CL_TRUE, hostAccess, zeros(), dimensions(),
+                                           &rowPitch, &slicePitch)));
 }
 
-PinnedImag3DBase::PinnedImag3DBase(const PinnedImag3DBase& usedPinnedMem, cl_mem_flags devAccess)
-    : _nbElements{ usedPinnedMem.nbElements() }
- // , _pinnedImg -> remains a null object
-    , _deviceImg(OpenCLConfig::instance().context(),
-                 devAccess,
-                 cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
-                 _nbElements[0],
-                 _nbElements[1],
-                 _nbElements[2])
+PinnedImag3DBase::~PinnedImag3DBase()
 {
+    if(this->hostPtr())
+        this->queue().enqueueUnmapMemObject(_pinnedImg, this->hostPtr());
 }
 
 const std::array<size_t, 3>& PinnedImag3DBase::nbElements() const { return _nbElements; }
