@@ -246,5 +246,7 @@ int main(int argc, char* argv[])
 
 --------------
 
+![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl)
+
 If you have any problems or questions regarding the CTL, please contact us:  
 <sw4g.production@gmail.com>.
