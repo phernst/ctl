@@ -21,6 +21,12 @@ class PinnedMem
 public:
     PinnedMem(const cl::CommandQueue& queue);
 
+    PinnedMem(PinnedMem&& other);
+    PinnedMem& operator=(PinnedMem&& other);
+    // non-copyable
+    PinnedMem(const PinnedMem& other) = delete;
+    PinnedMem& operator=(const PinnedMem& other) = delete;
+
     T* hostPtr() const;
     const cl::CommandQueue& queue() const;
 
@@ -102,9 +108,6 @@ public:
     AbstractPinnedMemHostWrite(AbstractPinnedMemHostWrite&&) = default;
     AbstractPinnedMemHostWrite& operator=(AbstractPinnedMemHostWrite&&) = default;
     virtual ~AbstractPinnedMemHostWrite() = default;
-    // non-copyable
-    AbstractPinnedMemHostWrite& operator=(const AbstractPinnedMemHostWrite&) = delete;
-    AbstractPinnedMemHostWrite(const AbstractPinnedMemHostWrite&) = delete;
 
     // first copy from srcPtr to pinned memory and then to device (all elements)
     void writeToDev(const T* srcPtr, bool blocking = true, cl::Event* event = nullptr);
@@ -124,9 +127,6 @@ public:
     AbstractPinnedMemHostRead(AbstractPinnedMemHostRead&&) = default;
     AbstractPinnedMemHostRead& operator=(AbstractPinnedMemHostRead&&) = default;
     virtual ~AbstractPinnedMemHostRead() = default;
-    // non-copyable
-    AbstractPinnedMemHostRead& operator=(const AbstractPinnedMemHostRead&) = delete;
-    AbstractPinnedMemHostRead(const AbstractPinnedMemHostRead&) = delete;
 
     // first copy from srcPtr to pinned memory and then to device (all elements)
     void readFromDev(T* dstPtr);
@@ -287,13 +287,17 @@ void AbstractPinnedMemHostRead<T>::readFromDev(T* dstPtr)
 template <typename T>
 std::future<T*> AbstractPinnedMemHostRead<T>::readFromDevAsync(T* dstPtr)
 {
-    cl::Event e;
-    transferDevToPinnedMem(false, &e);
-    return std::async([this, e, dstPtr]() {
-        e.wait();
-        readFromPinnedMem(dstPtr);
-        return dstPtr;
-    });
+    auto transferFinishedEvent = std::unique_ptr<cl::Event>(new cl::Event);
+
+    transferDevToPinnedMem(false, transferFinishedEvent.get());
+
+    return std::async([this, dstPtr](std::unique_ptr<cl::Event> event)
+                      {
+                          event->wait();
+                          readFromPinnedMem(dstPtr);
+                          return dstPtr;
+                      },
+                      std::move(transferFinishedEvent));
 }
 
 namespace _pinned_mem_details {
@@ -307,23 +311,30 @@ PinnedMem<T>::PinnedMem(const cl::CommandQueue& queue)
 {
 }
 
+template<typename T>
+PinnedMem<T>::PinnedMem(PinnedMem&& other)
+    : _hostPtr(other._hostPtr)
+    , _q(std::move(other._q))
+{
+    other._hostPtr = nullptr;
+}
+
+template<typename T>
+PinnedMem<T>& PinnedMem<T>::operator=(PinnedMem&& other)
+{
+    _hostPtr = other._hostPtr;
+    _q = std::move(other._q);
+    other._hostPtr = nullptr;
+}
+
 template <typename T>
-T* PinnedMem<T>::hostPtr() const
-{
-    return _hostPtr;
-}
+T* PinnedMem<T>::hostPtr() const { return _hostPtr; }
 
 template<typename T>
-const cl::CommandQueue &PinnedMem<T>::queue() const
-{
-    return _q;
-}
+const cl::CommandQueue &PinnedMem<T>::queue() const { return _q; }
 
 template<typename T>
-void PinnedMem<T>::setHostPtr(T* hostPtr)
-{
-    _hostPtr = hostPtr;
-}
+void PinnedMem<T>::setHostPtr(T* hostPtr) { _hostPtr = hostPtr; }
 
 // PinnedMemBufBase
 template <typename T>
@@ -347,26 +358,21 @@ template<typename T>
 PinnedBufBase<T>::~PinnedBufBase()
 {
     if(this->hostPtr())
-        this->queue().enqueueUnmapMemObject(_pinnedBuf, this->hostPtr());
+    {
+        cl::Event e;
+        this->queue().enqueueUnmapMemObject(_pinnedBuf, this->hostPtr(), nullptr, &e);
+        e.wait();
+    }
 }
 
 template <typename T>
-const size_t& PinnedBufBase<T>::nbElements() const
-{
-    return _nbElements;
-}
+const size_t& PinnedBufBase<T>::nbElements() const { return _nbElements; }
 
 template <typename T>
-cl::Buffer& PinnedBufBase<T>::devBuffer()
-{
-    return _deviceBuf;
-}
+cl::Buffer& PinnedBufBase<T>::devBuffer() { return _deviceBuf; }
 
 template <typename T>
-cl::Buffer& PinnedBufBase<T>::pinnedBuffer()
-{
-    return _pinnedBuf;
-}
+cl::Buffer& PinnedBufBase<T>::pinnedBuffer() { return _pinnedBuf; }
 
 } // namespace _pinned_mem_details
 

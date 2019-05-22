@@ -87,7 +87,11 @@ PinnedImag3DBase::PinnedImag3DBase(size_t xDim, size_t yDim, size_t zDim,
 PinnedImag3DBase::~PinnedImag3DBase()
 {
     if(this->hostPtr())
-        this->queue().enqueueUnmapMemObject(_pinnedImg, this->hostPtr());
+    {
+        cl::Event e;
+        this->queue().enqueueUnmapMemObject(_pinnedImg, this->hostPtr(), nullptr, &e);
+        e.wait();
+    }
 }
 
 const std::array<size_t, 3>& PinnedImag3DBase::nbElements() const { return _nbElements; }
