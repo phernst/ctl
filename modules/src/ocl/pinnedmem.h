@@ -215,7 +215,7 @@ PinnedBufHostWrite<T>::PinnedBufHostWrite(size_t nbElements,
                                             sizeof(T) * nbElements));
 }
 
-template<typename T>
+template <typename T>
 PinnedBufHostWrite<T>::PinnedBufHostWrite(const PinnedBufHostWrite& usedPinnedMem,
                                           const cl::CommandQueue& queue,
                                           bool deviceOnlyReads)
@@ -257,7 +257,7 @@ PinnedBufHostRead<T>::PinnedBufHostRead(size_t nbElements,
                                             sizeof(T) * nbElements));
 }
 
-template<typename T>
+template <typename T>
 PinnedBufHostRead<T>::PinnedBufHostRead(const PinnedBufHostRead& usedPinnedMem,
                                         const cl::CommandQueue& queue,
                                         bool deviceOnlyWrites)
@@ -319,6 +319,7 @@ std::future<T*> AbstractPinnedMemHostRead<T>::readFromDevAsync(T* dstPtr)
     return std::async([this, e, dstPtr]() {
         e.wait();
         readFromPinnedMem(dstPtr);
+        return dstPtr;
     });
 }
 
@@ -362,7 +363,7 @@ PinnedBufBase<T>::PinnedBufBase(size_t nbElements, cl_mem_flags devAccess, bool 
 {
 }
 
-template<typename T>
+template <typename T>
 PinnedBufBase<T>::PinnedBufBase(const PinnedBufBase& usedPinnedMem, cl_mem_flags devAccess)
     : _nbElements(usedPinnedMem.nbElements())
  // , _pinnedBuf -> remains a null object
