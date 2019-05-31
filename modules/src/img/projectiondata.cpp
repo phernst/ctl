@@ -1,6 +1,8 @@
 #include "projectiondata.h"
 #include <future>
 
+static const uint OPTIMAL_NB_THREADS = std::max(1u, std::thread::hardware_concurrency());
+
 namespace CTL
 {
 /*!
@@ -230,13 +232,25 @@ std::vector<float> ProjectionData::toVector() const
  */
 void ProjectionData::transformToExtinction(double i0)
 {
-    std::vector<std::future<void>> futures;
-    futures.reserve(nbViews());
+    const uint totalViews = nbViews();
+    if(totalViews == 0u)
+        return;
 
-    for(auto& singleView : _data)
-        futures.push_back(std::async(&SingleViewData::transformToExtinction,
-                                     &singleView,
-                                     i0));
+    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    const uint viewsPerThread = totalViews / nbThreads;
+    std::vector<std::future<void>> futures(nbThreads);
+
+    auto threadTask = [this, i0] (uint begin, uint end)
+    {
+        for(uint view = begin; view < end; ++view)
+            _data[view].transformToExtinction(i0);
+    };
+
+    uint t = 0;
+    for(; t < nbThreads-1; ++t)
+        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+    // last thread does the rest (viewsPerThread + x, x < nbThreads)
+    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
 }
 
 /*!
@@ -249,14 +263,25 @@ void ProjectionData::transformToExtinction(double i0)
  */
 void ProjectionData::transformToExtinction(const std::vector<double>& viewDependentI0)
 {
-    std::vector<std::future<void>> futures;
-    futures.reserve(nbViews());
+    const uint totalViews = nbViews();
+    if(totalViews == 0u)
+        return;
 
-    auto i0Iterator = viewDependentI0.begin();
-    for(auto& singleView : _data)
-        futures.push_back(std::async(&SingleViewData::transformToExtinction,
-                                     &singleView,
-                                     *i0Iterator++));
+    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    const uint viewsPerThread = totalViews / nbThreads;
+    std::vector<std::future<void>> futures(nbThreads);
+
+    auto threadTask = [this, &viewDependentI0] (uint begin, uint end)
+    {
+        for(uint view = begin; view < end; ++view)
+            _data[view].transformToExtinction(viewDependentI0[view]);
+    };
+
+    uint t = 0;
+    for(; t < nbThreads-1; ++t)
+        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+    // last thread does the rest (viewsPerThread + x, x < nbThreads)
+    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
 }
 
 /*!
@@ -269,13 +294,7 @@ void ProjectionData::transformToExtinction(const std::vector<double>& viewDepend
  */
 void ProjectionData::transformToIntensity(double i0)
 {
-    std::vector<std::future<void>> futures;
-    futures.reserve(nbViews());
-
-    for(auto& singleView : _data)
-        futures.push_back(std::async(&SingleViewData::transformToCounts,
-                                     &singleView,
-                                     i0));
+    this->transformToCounts(i0);
 }
 
 /*!
@@ -287,14 +306,26 @@ void ProjectionData::transformToIntensity(double i0)
  * \f$
  */
 void ProjectionData::transformToCounts(double n0)
-{
-    std::vector<std::future<void>> futures;
-    futures.reserve(nbViews());
+{   
+    const uint totalViews = nbViews();
+    if(totalViews == 0u)
+        return;
 
-    for(auto& singleView : _data)
-        futures.push_back(std::async(&SingleViewData::transformToCounts,
-                                     &singleView,
-                                     n0));
+    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    const uint viewsPerThread = totalViews / nbThreads;
+    std::vector<std::future<void>> futures(nbThreads);
+
+    auto threadTask = [this, n0] (uint begin, uint end)
+    {
+        for(uint view = begin; view < end; ++view)
+            _data[view].transformToCounts(n0);
+    };
+
+    uint t = 0;
+    for(; t < nbThreads-1; ++t)
+        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+    // last thread does the rest (viewsPerThread + x, x < nbThreads)
+    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
 }
 
 /*!
@@ -307,14 +338,7 @@ void ProjectionData::transformToCounts(double n0)
  */
 void ProjectionData::transformToIntensity(const std::vector<double>& viewDependentI0)
 {
-    std::vector<std::future<void>> futures;
-    futures.reserve(nbViews());
-
-    auto i0Iterator = viewDependentI0.begin();
-    for(auto& singleView : _data)
-        futures.push_back(std::async(&SingleViewData::transformToCounts,
-                                     &singleView,
-                                     *i0Iterator++));
+    this->transformToCounts(viewDependentI0);
 }
 
 /*!
@@ -327,14 +351,25 @@ void ProjectionData::transformToIntensity(const std::vector<double>& viewDepende
  */
 void ProjectionData::transformToCounts(const std::vector<double>& viewDependentN0)
 {
-    std::vector<std::future<void>> futures;
-    futures.reserve(nbViews());
+    const uint totalViews = nbViews();
+    if(totalViews == 0u)
+        return;
 
-    auto n0Iterator = viewDependentN0.begin();
-    for(auto& singleView : _data)
-        futures.push_back(std::async(&SingleViewData::transformToCounts,
-                                     &singleView,
-                                     *n0Iterator++));
+    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    const uint viewsPerThread = totalViews / nbThreads;
+    std::vector<std::future<void>> futures(nbThreads);
+
+    auto threadTask = [this, &viewDependentN0] (uint begin, uint end)
+    {
+        for(uint view = begin; view < end; ++view)
+            _data[view].transformToCounts(viewDependentN0[view]);
+    };
+
+    uint t = 0;
+    for(; t < nbThreads-1; ++t)
+        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+    // last thread does the rest (viewsPerThread + x, x < nbThreads)
+    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
 }
 
 bool ProjectionData::operator==(const ProjectionData &other) const
@@ -405,15 +440,26 @@ ProjectionData& ProjectionData::operator += (const ProjectionData& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("ProjectionData requires same dimensions for '+' operation:\n" +
                                 dimensions().info() + " += " + other.dimensions().info());
+    const uint totalViews = nbViews();
+    if(totalViews == 0u)
+        return *this;
 
-    auto totalViews = nbViews();
-    std::vector<std::future<SingleViewData&>> futures;
-    futures.reserve(totalViews);
+    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    const uint viewsPerThread = totalViews / nbThreads;
+    std::vector<std::future<void>> futures(nbThreads);
 
-    for(uint view = 0; view < totalViews; ++view)
-        futures.push_back(std::async(&SingleViewData::operator+=,
-                                     &_data[view],
-                                     std::ref(other._data[view])));
+    auto threadTask = [this, &other] (uint begin, uint end)
+    {
+        for(uint view = begin; view < end; ++view)
+            _data[view] += other._data[view];
+    };
+
+    uint t = 0;
+    for(; t < nbThreads-1; ++t)
+        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+    // last thread does the rest (viewsPerThread + x, x < nbThreads)
+    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
+
     return *this;
 }
 
@@ -427,15 +473,26 @@ ProjectionData& ProjectionData::operator -= (const ProjectionData& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("ProjectionData requires same dimensions for '-' operation:\n" +
                                 dimensions().info() + " -= " + other.dimensions().info());
+    const uint totalViews = nbViews();
+    if(totalViews == 0u)
+        return *this;
 
-    auto totalViews = nbViews();
-    std::vector<std::future<SingleViewData&>> futures;
-    futures.reserve(totalViews);
+    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    const uint viewsPerThread = totalViews / nbThreads;
+    std::vector<std::future<void>> futures(nbThreads);
 
-    for(uint view = 0; view < totalViews; ++view)
-        futures.push_back(std::async(&SingleViewData::operator-=,
-                                     &_data[view],
-                                     std::ref(other._data[view])));
+    auto threadTask = [this, &other] (uint begin, uint end)
+    {
+        for(uint view = begin; view < end; ++view)
+            _data[view] -= other._data[view];
+    };
+
+    uint t = 0;
+    for(; t < nbThreads-1; ++t)
+        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+    // last thread does the rest (viewsPerThread + x, x < nbThreads)
+    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
+
     return *this;
 }
 
