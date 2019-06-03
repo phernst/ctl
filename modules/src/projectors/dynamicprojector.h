@@ -17,7 +17,7 @@ public:
     ProjectionData project(const VolumeData& volume) override;
 
     // using _projector view by view (reconfigure _projector for each view)
-    ProjectionData project(AbstractDynamicVoxelVolume* volume);
+    ProjectionData project(AbstractDynamicVoxelVolume& volume);
 
 private:
     std::unique_ptr<AbstractProjector> _projector; //!< used static projector

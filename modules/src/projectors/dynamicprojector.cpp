@@ -17,18 +17,18 @@ DynamicProjector::DynamicProjector(std::unique_ptr<AbstractProjector> projector)
 {
 }
 
-void DynamicProjector::configure(const AcquisitionSetup &setup,
+void DynamicProjector::configure(const AcquisitionSetup& setup,
                                  const AbstractProjectorConfig& config)
 {
     _setup = setup;
     _projectorConfig.reset(config.clone());
 }
 
-ProjectionData DynamicProjector::project(const VolumeData &volume)
+ProjectionData DynamicProjector::project(const VolumeData& volume)
 {
-    auto notfierConnection =
-            QObject::connect(_projector->notifier(), &ProjectorNotifier::projectionFinished,
-                             this->notifier(), &ProjectorNotifier::projectionFinished);
+    auto notfierConnection
+        = QObject::connect(_projector->notifier(), &ProjectorNotifier::projectionFinished,
+                           this->notifier(), &ProjectorNotifier::projectionFinished);
 
     _projector->configure(_setup, *_projectorConfig);
     auto ret = _projector->project(volume);
@@ -37,17 +37,17 @@ ProjectionData DynamicProjector::project(const VolumeData &volume)
     return ret;
 }
 
-ProjectionData DynamicProjector::project(AbstractDynamicVoxelVolume* volume)
+ProjectionData DynamicProjector::project(AbstractDynamicVoxelVolume& volume)
 {
     ProjectionData ret(extractViewDimensions(*_setup.system()->detector()));
 
     for(uint view = 0, nbViews = _setup.nbViews(); view < nbViews; ++view)
     {
-        volume->setTime(_setup.view(view).timeStamp());
+        volume.setTime(_setup.view(view).timeStamp());
         _setup.prepareView(view);
 
         _projector->configure({ *_setup.system(), 1 }, *_projectorConfig);
-        ret.append(_projector->project(*volume).view(0));
+        ret.append(_projector->project(volume).view(0));
 
         emit notifier()->projectionFinished(view);
     }
