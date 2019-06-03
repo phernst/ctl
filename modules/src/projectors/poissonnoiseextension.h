@@ -33,7 +33,7 @@ private:
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
     std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
 
-    static void processViewCompact(SingleViewData* view, std::vector<float> i_0, uint seed);
+    static void processViewCompact(SingleViewData& view, const std::vector<float>& i_0, uint seed);
 };
 
 } // namespace CTL

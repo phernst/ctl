@@ -39,7 +39,7 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
     {
         _setup.prepareView(view);
 
-        futures[view] = std::async(launchMode, processViewCompact, &ret.view(view),
+        futures[view] = std::async(launchMode, processViewCompact, std::ref(ret.view(view)),
                                    _setup.system()->photonsPerPixel(), seed + view);
     }
 
@@ -64,9 +64,10 @@ void PoissonNoiseExtension::setParallelizationEnabled(bool enabled)
     _useParallelization = enabled;
 }
 
-void PoissonNoiseExtension::processViewCompact(SingleViewData* view, std::vector<float> i_0, uint seed)
+void PoissonNoiseExtension::processViewCompact(SingleViewData& view, const std::vector<float>& i_0,
+                                               uint seed)
 {
-    if(qFuzzyIsNull(std::accumulate(i_0.begin(), i_0.end(), 0.0)))
+    if(qFuzzyIsNull(std::accumulate(i_0.cbegin(), i_0.cend(), 0.0f)))
     {
         qDebug() << "PoissonNoiseExtension::processViewCompact(): Skipped view with i_0 = 0.";
         return;
@@ -74,15 +75,16 @@ void PoissonNoiseExtension::processViewCompact(SingleViewData* view, std::vector
 
     std::mt19937_64 gen(seed);
 
-    uint mod = 0;
-    for(auto& module : view->data())
+    float origCount, noisyCount;
+    uint mod = 0u;
+    for(auto& module : view.data())
     {
         for(auto& pix : module.data())
         {
-            auto origCount = i_0[mod] * expf(-pix); // mean
+            origCount = i_0[mod] * expf(-pix); // mean
             std::poisson_distribution<ulong> d(origCount);
-            auto noisyCount = d(gen); // Poisson distributed random number
-            pix = logf(float(i_0[mod]) / float(noisyCount));
+            noisyCount = d(gen); // Poisson distributed random number
+            pix = logf(i_0[mod] / noisyCount);
         }
         ++mod;
     }
