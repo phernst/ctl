@@ -1,14 +1,14 @@
 #include "poissonnoiseextension.h"
-#include "components/genericsource.h"
 #include "acquisition/geometryencoder.h"
+#include "components/genericsource.h"
 #include "img/chunk2d.h"
 
 #include <future>
 
 namespace CTL {
 
-void PoissonNoiseExtension::configure(const AcquisitionSetup &setup,
-                                      const AbstractProjectorConfig &config)
+void PoissonNoiseExtension::configure(const AcquisitionSetup& setup,
+                                      const AbstractProjectorConfig& config)
 {
     _setup = setup;
     _config.reset(config.clone());
@@ -64,7 +64,8 @@ void PoissonNoiseExtension::setParallelizationEnabled(bool enabled)
     _useParallelization = enabled;
 }
 
-void PoissonNoiseExtension::processViewCompact(SingleViewData& view, const std::vector<float>& i_0,
+void PoissonNoiseExtension::processViewCompact(SingleViewData& view,
+                                               const std::vector<float>& i_0,
                                                uint seed)
 {
     if(qFuzzyIsNull(std::accumulate(i_0.cbegin(), i_0.cend(), 0.0f)))
@@ -90,4 +91,4 @@ void PoissonNoiseExtension::processViewCompact(SingleViewData& view, const std::
     }
 }
 
-}
+} // namespace CTL
