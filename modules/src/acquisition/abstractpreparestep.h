@@ -48,7 +48,7 @@ class AbstractPrepareStep : public SerializationInterface
     CTL_TYPE_ID(0)
 
     // abstract interface
-    public:virtual void prepare(SimpleCTsystem* system) const = 0;
+    public:virtual void prepare(SimpleCTsystem& system) const = 0;
     public:virtual bool isApplicableTo(const CTsystem& system) const = 0;
 
 public:

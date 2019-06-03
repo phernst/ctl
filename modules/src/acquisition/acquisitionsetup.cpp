@@ -357,7 +357,7 @@ void AcquisitionSetup::prepareView(uint viewNb)
         return;
 
     for(const auto& step : _views[viewNb].prepareSteps())
-        step->prepare(_system.get());
+        step->prepare(*_system.get());
 }
 
 /*!

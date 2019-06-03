@@ -19,9 +19,9 @@ DECLARE_SERIALIZABLE_TYPE(XrayTubeParam)
 // ### GANTRIES ###
 // ### ###  ### ###
 
-void TubularGantryParam::prepare(SimpleCTsystem* system) const
+void TubularGantryParam::prepare(SimpleCTsystem& system) const
 {
-    auto gantryPtr = static_cast<TubularGantry*>(system->gantry());
+    auto gantryPtr = static_cast<TubularGantry*>(system.gantry());
 
     qDebug() << "PrepareTubularGantry --- preparing gantry\n"
              << "- rotation\t" << _newRotationAngle << "\n"
@@ -68,9 +68,9 @@ QVariant TubularGantryParam::toVariant() const
     return ret;
 }
 
-void CarmGantryParam::prepare(SimpleCTsystem* system) const
+void CarmGantryParam::prepare(SimpleCTsystem& system) const
 {
-    auto gantryPtr = static_cast<CarmGantry*>(system->gantry());
+    auto gantryPtr = static_cast<CarmGantry*>(system.gantry());
 
     qDebug() << "PrepareCarmGantry --- preparing gantry\n"
              << "- location\t" << _newLocation.first;
@@ -115,9 +115,9 @@ QVariant CarmGantryParam::toVariant() const
     return ret;
 }
 
-void GenericGantryParam::prepare(SimpleCTsystem* system) const
+void GenericGantryParam::prepare(SimpleCTsystem& system) const
 {
-    auto gantryPtr = static_cast<GenericGantry*>(system->gantry());
+    auto gantryPtr = static_cast<GenericGantry*>(system.gantry());
 
     qDebug() << "PrepareGenericGantry --- preparing gantry\n"
              << "- detector location\t" << _newDetectorLocation.first;
@@ -169,9 +169,9 @@ QVariant GenericGantryParam::toVariant() const
     return ret;
 }
 
-void GantryDisplacementParam::prepare(SimpleCTsystem* system) const
+void GantryDisplacementParam::prepare(SimpleCTsystem& system) const
 {
-    auto gantryPtr = system->gantry();
+    auto gantryPtr = system.gantry();
 
     qDebug() << "PrepareGantryDisplacements --- preparing gantry\n"
              << "- detector displacement\t" << _newDetectorDisplacement.first;
@@ -275,9 +275,9 @@ QVariant GantryDisplacementParam::toVariant() const
 // ### SOURCES ###
 // ### ### ### ###
 
-void SourceParam::prepare(SimpleCTsystem* system) const
+void SourceParam::prepare(SimpleCTsystem& system) const
 {
-    auto sourcePtr = system->source();
+    auto sourcePtr = system.source();
 
     qDebug() << "PrepareAbstractSource --- preparing source\n"
              << "- flux mod\t" << _newFluxModifier << "\n"
@@ -349,11 +349,11 @@ QVariant SourceParam::toVariant() const
     return ret;
 }
 
-void XrayLaserParam::prepare(SimpleCTsystem* system) const
+void XrayLaserParam::prepare(SimpleCTsystem& system) const
 {
     SourceParam::prepare(system);
 
-    auto sourcePtr = static_cast<XrayLaser*>(system->source());
+    auto sourcePtr = static_cast<XrayLaser*>(system.source());
 
     qDebug() << "PrepareXrayLaser --- preparing source\n"
              << "- energy\t" << _newPhotonEnergy << "\n"
@@ -395,11 +395,11 @@ QVariant XrayLaserParam::toVariant() const
     return ret;
 }
 
-void XrayTubeParam::prepare(SimpleCTsystem* system) const
+void XrayTubeParam::prepare(SimpleCTsystem& system) const
 {
     SourceParam::prepare(system);
 
-    auto sourcePtr = static_cast<XrayTube*>(system->source());
+    auto sourcePtr = static_cast<XrayTube*>(system.source());
 
     qDebug() << "PrepareXrayTube --- preparing source\n"
              << "- voltage\t" << _newTubeVoltage << "\n"
@@ -441,9 +441,9 @@ QVariant XrayTubeParam::toVariant() const
     return ret;
 }
 
-void GenericDetectorParam::prepare(SimpleCTsystem* system) const
+void GenericDetectorParam::prepare(SimpleCTsystem& system) const
 {
-    auto detectorPtr = static_cast<GenericDetector*>(system->detector());
+    auto detectorPtr = static_cast<GenericDetector*>(system.detector());
 
     qDebug() << "PrepareGenericDetector --- preparing detector\n"
              << "- module locations\t" << _newModuleLocations.first << "\n"
