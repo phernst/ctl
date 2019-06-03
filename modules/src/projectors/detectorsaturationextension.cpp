@@ -17,15 +17,9 @@ void DetectorSaturationExtension::configure(const AcquisitionSetup& setup,
     ProjectorExtension::configure(setup, config);
 }
 
-bool DetectorSaturationExtension::isLinear() const
-{
-    return false;
-}
+bool DetectorSaturationExtension::isLinear() const { return false; }
 
-void DetectorSaturationExtension::setIntensitySampling(uint nbSamples)
-{
-    _nbSamples = nbSamples;
-}
+void DetectorSaturationExtension::setIntensitySampling(uint nbSamples) { _nbSamples = nbSamples; }
 
 ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector& nestedProjector)
 {
@@ -36,13 +30,13 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
     switch(saturationModelType)
     {
     case AbstractDetector::Extinction:
-        processExtinctions(&ret);
+        processExtinctions(ret);
         break;
     case AbstractDetector::PhotonCount:
-        processCounts(&ret);
+        processCounts(ret);
         break;
     case AbstractDetector::Intensity:
-        processIntensities(&ret);
+        processIntensities(ret);
         break;
     case AbstractDetector::Undefined:
         qWarning() << "DetectorSaturationExtension::project(): Undefined saturation model!";
@@ -52,12 +46,11 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
     return ret;
 }
 
-void DetectorSaturationExtension::processCounts(ProjectionData *projections)
+void DetectorSaturationExtension::processCounts(ProjectionData& projections)
 {
     auto saturationModel = _setup.system()->detector()->saturationModel();
 
-    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& n0)
-    {
+    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& n0) {
         float count;
         uint mod = 0;
         for(auto& module : view->data())
@@ -78,19 +71,18 @@ void DetectorSaturationExtension::processCounts(ProjectionData *projections)
     futures.reserve(_setup.nbViews());
     int v = 0;
 
-    for(auto& view : projections->data())
+    for(auto& view : projections.data())
     {
         _setup.prepareView(v++);
         futures.push_back(std::async(processView, &view, _setup.system()->photonsPerPixel()));
     }
 }
 
-void DetectorSaturationExtension::processExtinctions(ProjectionData* projections)
+void DetectorSaturationExtension::processExtinctions(ProjectionData& projections)
 {
     auto saturationModel = _setup.system()->detector()->saturationModel();
 
-    auto processView = [saturationModel](SingleViewData* view)
-    {
+    auto processView = [saturationModel](SingleViewData* view) {
         for(auto& module : view->data())
             for(auto& pix : module.data())
                 pix = saturationModel->valueAt(pix);
@@ -98,17 +90,16 @@ void DetectorSaturationExtension::processExtinctions(ProjectionData* projections
 
     std::vector<std::future<void>> futures;
     futures.reserve(_setup.nbViews());
-    for(auto& view : projections->data())
+    for(auto& view : projections.data())
         futures.push_back(std::async(processView, &view));
 }
 
-void DetectorSaturationExtension::processIntensities(ProjectionData* projections)
+void DetectorSaturationExtension::processIntensities(ProjectionData& projections)
 {
     auto saturationModel = _setup.system()->detector()->saturationModel();
     auto sourcePtr = _setup.system()->source();
 
-    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& i0)
-    {
+    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& i0) {
         float intensity;
         uint mod = 0;
         for(auto& module : view->data())
@@ -130,13 +121,13 @@ void DetectorSaturationExtension::processIntensities(ProjectionData* projections
     int v = 0;
     std::vector<float> i0(_setup.system()->detector()->nbDetectorModules());
 
-    for(auto& view : projections->data())
+    for(auto& view : projections.data())
     {
         _setup.prepareView(v++);
         auto n0 = _setup.system()->photonsPerPixel();
         auto meanEnergy = sourcePtr->spectrum(_nbSamples).centroid();
         std::transform(n0.begin(), n0.end(), i0.begin(),
-                       [meanEnergy] (float count) { return count * meanEnergy; });
+                       [meanEnergy](float count) { return count * meanEnergy; });
 
         futures.push_back(std::async(processView, &view, i0));
     }
