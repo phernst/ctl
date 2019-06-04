@@ -197,35 +197,43 @@ int main(int argc, char* argv[])
 {
     QCoreApplication a(argc, argv);
 
-    // IO object (reads/writes basic types) with a certain IO type
-    // as a template argument - here for DEN files
-    CTL::io::BaseTypeIO<CTL::io::NrrdFileIO> io;
+    try
+    {
+        // IO object (reads/writes basic types) with a certain IO type
+        // as a template argument - here for NRRD files
+        CTL::io::BaseTypeIO<CTL::io::NrrdFileIO> io;
 
-    // load volume
-    auto volume = io.readVolume<float>("path/to/volume.nrrd");
+        // load volume
+        auto volume = io.readVolume<float>("path/to/volume.nrrd");
 
-    // use of a predefined system from "acquisition/systemblueprints.h"
-    auto system = CTL::CTsystemBuilder::createFromBlueprint(CTL::blueprints::GenericCarmCT());
+        // use of a predefined system from "acquisition/systemblueprints.h"
+        auto system = CTL::CTsystemBuilder::createFromBlueprint(CTL::blueprints::GenericCarmCT());
 
-    // create an acquisition setup
-    uint nbViews = 100;
-    CTL::AcquisitionSetup myCarmSetup(system, nbViews);
-    // add a predefined trajectory to the setup from "acquisition/trajectories.h"
-    double angleSpan = 200.0_deg; // floating-point literal _deg from "mat/mat.h" to convert to rad
-    double sourceToIsocenter = 750.0; // mm is the standard unit for length dimensions
-    myCarmSetup.applyPreparationProtocol(CTL::protocols::WobbleTrajectory(angleSpan,
-                                                                          sourceToIsocenter));
-    if(!myCarmSetup.isValid())
+        // create an acquisition setup
+        uint nbViews = 100;
+        CTL::AcquisitionSetup myCarmSetup(system, nbViews);
+        // add a predefined trajectory to the setup from "acquisition/trajectories.h"
+        double angleSpan = 200.0_deg; // floating-point literal _deg in "mat/mat.h" converts to rad
+        double sourceToIsocenter = 750.0; // mm is the standard unit for length dimensions
+        myCarmSetup.applyPreparationProtocol(CTL::protocols::WobbleTrajectory(angleSpan,
+                                                                              sourceToIsocenter));
+        if(!myCarmSetup.isValid())
+            return -1;
+
+        // configure a projector and project volume
+        CTL::OCL::RayCasterProjector::Config rcConfig;  // config with standard settings
+        CTL::OCL::RayCasterProjector myProjector;       // the projector
+        myProjector.configure(myCarmSetup, rcConfig);   // configure projector
+        auto projections = myProjector.project(volume); // project
+
+        // save projections
+        io.write(projections, "path/to/projections.nrrd");
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << "exception caught:\n" << e.what() << std::endl;
         return -1;
-
-    // configure a projector and project volume
-    CTL::OCL::RayCasterProjector::Config rcConfig;  // config with standard settings
-    CTL::OCL::RayCasterProjector myProjector;       // the projector
-    myProjector.configure(myCarmSetup, rcConfig);   // configure projector
-    auto projections = myProjector.project(volume); // project
-
-    // save projections
-    io.write(projections, "path/to/projections.nrrd");
+    }
 
     std::cout << "end of program" << std::endl;
     return 0;
