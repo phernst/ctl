@@ -30,6 +30,13 @@ build-readmeTeaser:
     - qmake
     - make
 
+build-projectionMatrices:
+  stage: build
+  script:
+    - cd examples/using-projection-matrices
+    - qmake
+    - make
+
 
 # unit testing
 
