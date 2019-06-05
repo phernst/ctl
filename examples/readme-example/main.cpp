@@ -1,8 +1,6 @@
-#include "acquisition/acquisitionsetup.h"
 #include "acquisition/systemblueprints.h"
 #include "acquisition/trajectories.h"
 #include "io/nrrd/nrrdfileio.h"
-#include "mat/mat.h"
 #include "projectors/raycasterprojector.h"
 #include <QCoreApplication>
 

@@ -3,7 +3,6 @@
  * Volume and projection matrices are loaded from DEN files.
  */
 
-#include "acquisition/acquisitionsetup.h"
 #include "acquisition/geometrydecoder.h"
 #include "io/den/denfileio.h"
 #include "projectors/raycasterprojector.h"
