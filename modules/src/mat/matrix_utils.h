@@ -17,6 +17,10 @@ QVector<double> toQVector(const Matrix<Rows, Cols>& matrix);
 // rotation matrix
 Matrix3x3 rotationMatrix(double angle, Qt::Axis axis);
 
+// diagonal squared matrix
+template <uint N>
+Matrix<N, N> diag(const Matrix<N, 1>& diagElements);
+
 // NxN identity matrix
 template <uint N>
 Matrix<N, N> eye();

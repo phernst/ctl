@@ -33,6 +33,16 @@ inline Matrix3x3 rotationMatrix(double angle, Qt::Axis axis)
     return mat::eye<3>();
 }
 
+// diagonal squared matrix
+template <uint N>
+Matrix<N, N> diag(const Matrix<N, 1>& diagElements)
+{
+    Matrix<N, N> ret(0.0);
+    for(uint d = 0; d < N; ++d)
+        ret(d, d) = diagElements(d);
+    return ret;
+}
+
 // identity matrix
 template <uint N>
 Matrix<N, N> eye()
