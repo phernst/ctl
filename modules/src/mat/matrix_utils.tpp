@@ -45,6 +45,13 @@ Matrix<N,N> eye() {
     return ret;
 }
 
+inline Vector3x1 cross(const Vector3x1 & l, const Vector3x1 & r)
+{
+    return { l.get<1>() * r.get<2>() - l.get<2>() * r.get<1>(),
+             l.get<2>() * r.get<0>() - l.get<0>() * r.get<2>(),
+             l.get<0>() * r.get<1>() - l.get<1>() * r.get<0>() };
+}
+
 // concatenation
 template<uint Rows, uint Cols1, uint Cols2>
 Matrix<Rows,Cols1+Cols2>

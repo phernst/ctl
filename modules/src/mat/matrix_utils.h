@@ -21,6 +21,9 @@ Matrix3x3 rotationMatrix(double angle, Qt::Axis axis);
 template<uint N>
 Matrix<N,N> eye();
 
+// cross product
+Vector3x1 cross(const Vector3x1 & l, const Vector3x1 & r);
+
 // concatenation
 template<uint Rows, uint Cols1, uint Cols2>
 Matrix<Rows,Cols1+Cols2>
@@ -29,7 +32,6 @@ horzcat(const Matrix<Rows,Cols1> & m1, const Matrix<Rows,Cols2> & m2);
 template<uint Rows1, uint Rows2, uint Cols>
 Matrix<Rows1+Rows2,Cols>
 vertcat(const Matrix<Rows1,Cols> & m1, const Matrix<Rows2,Cols> & m2);
-
 
 // # structs
 
