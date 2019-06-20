@@ -88,6 +88,7 @@ public:
     void setVolumeOffset(float xOffset, float yOffset, float zOffset);
     void setVoxelSize(const VoxelSize& size);
     void setVoxelSize(float xSize, float ySize, float zSize);
+    void setVoxelSize(float isotropicSize);
 
     // other methods
     void allocateMemory();

@@ -167,6 +167,12 @@ VoxelVolume<T> VoxelVolume<T>::fromChunk2DStack(const std::vector<Chunk2D<T>>& s
     return ret;
 }
 
+template<typename T>
+void VoxelVolume<T>::setVoxelSize(float isotropicSize)
+{
+    _size = { isotropicSize, isotropicSize, isotropicSize };
+}
+
 /*!
  * Returns a reference to the data at voxel \f$[x,y,z\f$. Does not perform boundary checks.
  */
