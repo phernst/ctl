@@ -325,6 +325,8 @@ PinnedMem<T>& PinnedMem<T>::operator=(PinnedMem&& other)
     _hostPtr = other._hostPtr;
     _q = std::move(other._q);
     other._hostPtr = nullptr;
+
+    return *this;
 }
 
 template <typename T>
