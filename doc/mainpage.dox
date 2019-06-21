@@ -33,7 +33,7 @@
 
  \subsection step5 Step 5: use only modules that you need
 
- The FACT Simulator provides several modules. According to your needs, you can select only a subset of modules.
+ The CTL provides several modules. According to your needs, you can select only a subset of modules.
  Each module has a corresponding .pri file that you can include into your qmake project (.pro file) using the syntax
 
      include(example_module.pri)
