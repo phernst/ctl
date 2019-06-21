@@ -47,8 +47,7 @@ typedef Vector3x1 Vector3x1CTS; //!< Alias name for 3D (column) vectors in CT co
  * interpreted such that integral coordinates denote the pixel center. The following figure depicts
  * the grid alignment, which is a general convention in the CTL.
  *
- * ![Grid alignment of a projection image (module) coordinate frame. Integer pixel coordinates
- * denote the center of a pixel.](grid_alignment.png)
+ * ![Grid alignment of a projection image (module) coordinate frame. Integer pixel coordinates denote the center of a pixel.](grid_alignment.png)
  */
 class GeometryEncoder
 {
