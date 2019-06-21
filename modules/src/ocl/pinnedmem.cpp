@@ -18,13 +18,13 @@ PinnedImg3DHostWrite::PinnedImg3DHostWrite(size_t xDim, size_t yDim, size_t zDim
 {
 }
 
-void PinnedImg3DHostWrite::transferPinnedMemToDev(bool blocking, cl::Event* event)
+void PinnedImg3DHostWrite::transferPinnedMemToDev(bool blocking, cl::Event* event) const
 {
     queue().enqueueWriteImage(devImage(), blocking ? CL_TRUE : CL_FALSE, zeros(), dimensions(), 0,
                               0, hostPtr(), nullptr, event);
 }
 
-void PinnedImg3DHostWrite::writeToPinnedMem(const float* srcPtr)
+void PinnedImg3DHostWrite::writeToPinnedMem(const float* srcPtr) const
 {
     std::copy_n(srcPtr, nbElements()[0] * nbElements()[1] * nbElements()[2], hostPtr());
 }
@@ -44,13 +44,13 @@ PinnedImg3DHostRead::PinnedImg3DHostRead(size_t xDim, size_t yDim, size_t zDim,
 {
 }
 
-void PinnedImg3DHostRead::transferDevToPinnedMem(bool blocking, cl::Event* event)
+void PinnedImg3DHostRead::transferDevToPinnedMem(bool blocking, cl::Event* event) const
 {
     queue().enqueueReadImage(devImage(), blocking ? CL_TRUE : CL_FALSE, zeros(), dimensions(), 0, 0,
                              hostPtr(), nullptr, event);
 }
 
-void PinnedImg3DHostRead::readFromPinnedMem(float* dstPtr)
+void PinnedImg3DHostRead::readFromPinnedMem(float* dstPtr) const
 {
     std::copy_n(hostPtr(), nbElements()[0] * nbElements()[1] * nbElements()[2], dstPtr);
 }
@@ -96,7 +96,7 @@ PinnedImag3DBase::~PinnedImag3DBase()
 
 const std::array<size_t, 3>& PinnedImag3DBase::nbElements() const { return _nbElements; }
 
-cl::Image3D& PinnedImag3DBase::devImage() { return _deviceImg; }
+const cl::Image3D& PinnedImag3DBase::devImage() const { return _deviceImg; }
 
 cl::Image3D& PinnedImag3DBase::pinnedImage() { return _pinnedImg; }
 
