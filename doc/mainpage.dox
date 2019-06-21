@@ -41,6 +41,7 @@
  So far, the following modules are available:
  \li ctl.pri: the core library
  \li den_file_io.pri: .den file handling
+ \li nrrd_file_io.pri: .nrrd file handling
  \li ocl_config.pri: uniform OpenCL environment/configuration
  \li ocl_projectors.pri: OpenCL based projectors
  \li gui-widgets.pri: widgets for visualization purposes

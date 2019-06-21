@@ -42,6 +42,13 @@ typedef Vector3x1 Vector3x1CTS; //!< Alias name for 3D (column) vectors in CT co
  * called. It computes and returns the full set of projection matrices for all views (and all
  * modules). If only a single system configuration shall be encoded, the method
  * encodeSingleViewGeometry() can be used instead.
+ *
+ * Note that the encoded projection matrices are mapping to pixel coordinates, which are to be
+ * interpreted such that integral coordinates denote the pixel center. The following figure depicts
+ * the grid alignment, which is a general convention in the CTL.
+ *
+ * ![Grid alignment of a projection image (module) coordinate frame. Integer pixel coordinates
+ * denote the center of a pixel.](grid_alignment.png)
  */
 class GeometryEncoder
 {
