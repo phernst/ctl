@@ -96,8 +96,8 @@ void ProjectorTest::testSpectralExtension()
     io::BaseTypeIO<io::DenFileIO> io;
     // Non-linear composite
     auto proj = spectralExt->projectComposite(compVol);
+    io.write(proj, "testData/spectralExt_nonlin_projectComposite.den");
     auto groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_composite.den");
-    io.write(proj, "sdfsdf.den");
     auto diff = proj-groundTruth;
     auto mean = projectionMean(diff);
     auto var  = projectionVariance(diff);
