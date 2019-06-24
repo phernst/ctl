@@ -81,7 +81,8 @@ HEADERS += \
     $$PWD/src/acquisition/viewgeometry.h \
     $$PWD/src/img/compositevolume.h \
     $$PWD/src/projectors/spectralprojectorextension.h \
-    $$PWD/src/io/ctldatabase.h
+    $$PWD/src/io/ctldatabase.h \
+    $$PWD/src/processing/imageprocessing.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -129,7 +130,8 @@ SOURCES += \
     $$PWD/src/acquisition/viewgeometry.cpp \
     $$PWD/src/img/compositevolume.cpp \
     $$PWD/src/projectors/spectralprojectorextension.cpp \
-    $$PWD/src/io/ctldatabase.cpp
+    $$PWD/src/io/ctldatabase.cpp \
+    $$PWD/src/processing/imageprocessing.cpp
 
 # create a file that contains the absolute path to database
 DATABASE_ROOT = $$PWD/../database
