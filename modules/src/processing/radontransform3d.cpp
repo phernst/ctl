@@ -11,6 +11,10 @@ const std::string CL_PROGRAM_NAME = "planeIntegral"; //!< OCL program name
 namespace CTL {
 namespace OCL {
 
+/*!
+ * Creates a RadonTransform3D instance. The data in \a volume will be transfered to all available
+ * OpenCL devices (for multi-GPU use) immediately (stored internally as cl::Image3D).
+ */
 RadonTransform3D::RadonTransform3D(const VoxelVolume<float> &volume)
     : _p{ sliceDim(volume.dimensions()),
           volume.smallestVoxelSize(),
@@ -36,6 +40,10 @@ RadonTransform3D::RadonTransform3D(const VoxelVolume<float> &volume)
         _tasks.emplace_back(volume, _p, devNb);
 }
 
+/*!
+ * Sets the resolution (i.e. pixels size) for slices used to compute the plane integrals to
+ * \a pixelResolution. Resolution is specified in millimeters.
+ */
 void RadonTransform3D::setSliceResolution(float pixelResolution)
 {
     Q_ASSERT(pixelResolution > 0.0f);
@@ -50,10 +58,26 @@ void RadonTransform3D::setSliceResolution(float pixelResolution)
         task.sliceDimensionsChanged();
 }
 
+/*!
+ * Returns the dimensions (i.e. number of pixels) of slices used to compute the plane integrals.
+ */
 Chunk2D<float>::Dimensions RadonTransform3D::sliceDimensions() const { return _p.dim; }
 
+/*!
+ * Returns the resolution (i.e. pixels size) of slices used to compute the plane integrals.
+ */
 float RadonTransform3D::sliceResolution() const { return _p.reso; }
 
+/*!
+ * Returns the 3D Radon transform of volume data for the set of sampling points given by
+ * \a azimuthAngleSampling, \a polarAngleSampling, and \a distanceSampling.
+ *
+ * This will return the plane integral for all combinations of angles and distances passed.
+ *
+ * This method supports multi-GPU and will automatically split the task (w.r.t. to the distance
+ * samples) across all available devices (as returned by OpenCLConfig::instance().devices() when
+ * this instance of RadonTransform3D had been created).
+ */
 VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<double>& azimuthAngleSampling,
                                                      const std::vector<double>& polarAngleSampling,
                                                      const std::vector<double>& distanceSampling) const
@@ -128,6 +152,10 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<double>& 
     return ret * std::pow(_p.reso, 2.0f);
 }
 
+/*!
+ * Returns the plane integral of the volume data along the plane specified by its normal vector
+ * \a planeUnitNormal and its distance from the origin \a planeDistanceFromOrigin.
+ */
 float RadonTransform3D::planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
                                       double planeDistanceFromOrigin) const
 {
@@ -147,6 +175,11 @@ float RadonTransform3D::planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
     return sum * std::pow(_p.reso, 2.0f);
 }
 
+/*!
+ * Returns the plane integral of the volume data along the plane specified by its angles w.r.t. the
+ * world coordinate system \a planeNormalAzimutAngle and \a planeNormalPolarAngle (polar
+ * coordinates) as well as its distance from the origin \a planeDistanceFromOrigin.
+ */
 float RadonTransform3D::planeIntegral(double planeNormalAzimutAngle, double planeNormalPolarAngle,
                                       double planeDistanceFromOrigin) const
 {
@@ -167,10 +200,19 @@ float RadonTransform3D::planeIntegral(double planeNormalAzimutAngle, double plan
     return sum * std::pow(_p.reso, 2.0f);
 }
 
+/*!
+ * Returns the dimensions (i.e. number of voxels) of the volume managed by this instance.
+ */
 const VoxelVolume<float>::Dimensions& RadonTransform3D::volDim() const { return _p.volDim; }
 
+/*!
+ * Returns the offset (in mm) of the volume managed by this instance.
+ */
 const VoxelVolume<float>::Offset& RadonTransform3D::volOffset() const { return _p.volOffset; }
 
+/*!
+ * Returns the size of the voxels in the volume managed by this instance.
+ */
 const VoxelVolume<float>::VoxelSize& RadonTransform3D::volVoxSize() const { return _p.volVoxSize; }
 
 Chunk2D<float>::Dimensions

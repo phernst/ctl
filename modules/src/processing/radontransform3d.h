@@ -9,6 +9,48 @@
 namespace CTL {
 namespace OCL {
 
+/*!
+ * \class RadonTransform3D
+ * \brief Allows to compute the 3D Radon transform of VoxelVolume<float> data.
+ *
+ * This class allows to compute the 3D Radon transform of VoxelVolume<float> data. The 3D Radon
+ * transform describes a volume by all its plane integrals.
+ * Computation is carried out on an OpenCL device, making use of fast hardware interpolation on
+ * texture memory.
+ *
+ * To compute the 3D Radon transform of volume data, create a RadonTransform3D instance by passing
+ * to its constructor a (constant) reference to the volume that you want to compute the transform
+ * of. The volume data will be transfered to the OpenCL device immediately (stored internally as
+ * cl::Image3D).
+ *
+ * The Radon transform of the volume can be computed for a given set of sampling points using
+ * sampleTransform(). This will return the plane integral for all combinations of angles and
+ * distances passed to sampleTransform(). This method supports multi-GPU and will automatically
+ * split the task (w.r.t. to the distance samples) across all available devices (as returned by
+ * OpenCLConfig::instance().devices()).
+ *
+ * Individual plane integrals (i.e. individual samples in the 3D Radon space) can be computed using
+ * planeIntegral(). For convenience, the integration plane can be defined in two different ways:
+ * 1) by the plane's normal vector and distance to the origin, or
+ * 2) by specifying the plane's angles w.r.t. the world coordinate system (in polar coordinates) and
+ * its distance to the origin.
+ *
+ * By default, the dimensions (ie. number of pixels) and resolution (ie. pixel size) within the
+ * integration plane are determined automatically - w.r.t. the volume's specs - using the following
+ * rules:
+ *
+ * Dimension (isotropic): nextMultipleOf16(ceil(sqrt(2) * max(nbVoxel.x, nbVoxel.y, nbVoxel.z))
+ * Resolution (isotropic): min(voxelSize.x, voxelSize.y, voxelSize.z)
+ *
+ * The nextMultipleOf16 operation is required for computation reasons, where the plane integral is
+ * carried out internally by computing sums of 16x16 pixel patches (due to limitations on local
+ * memory).
+ *
+ * If necessary, the computation resolution can be changed using setSliceResolution(). Note that
+ * this only changes the resolution with which plane integrals are computed. Reducing resolution
+ * can speed up computation, for it results in less pixels required to sample the plane. However,
+ * this can lead to loss in accuracy.
+ */
 class RadonTransform3D
 {
 public:
