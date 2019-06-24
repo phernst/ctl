@@ -10,14 +10,16 @@ HEADERS += \
     $$PWD/src/projectors/raycasteradapter.h \
     $$PWD/src/projectors/raycasterprojector.h \
     $$PWD/src/processing/volumeslicer.h \
-    $$PWD/src/processing/radontransform3d.h
+    $$PWD/src/processing/radontransform3d.h \
+    $$PWD/src/processing/radontransform2d.h
 
 SOURCES += \
     $$PWD/src/projectors/raycaster.cpp \
     $$PWD/src/projectors/raycasteradapter.cpp \
     $$PWD/src/projectors/raycasterprojector.cpp \
     $$PWD/src/processing/volumeslicer.cpp \
-    $$PWD/src/processing/radontransform3d.cpp
+    $$PWD/src/processing/radontransform3d.cpp \
+    $$PWD/src/processing/radontransform2d.cpp
 
 # OpenCL source files
 DISTFILES += \
@@ -25,4 +27,5 @@ DISTFILES += \
     $$PWD/src/ocl/cl_src/projectors/raycasterprojector_interp.cl \
     $$PWD/src/ocl/cl_src/projectors/raycasterprojector_no_interp.cl \
     $$PWD/src/ocl/cl_src/processing/volumeSlicer.cl \
-    $$PWD/src/ocl/cl_src/processing/planeIntegral.cl
+    $$PWD/src/ocl/cl_src/processing/planeIntegral.cl \
+    $$PWD/src/ocl/cl_src/processing/radon2d.cl
