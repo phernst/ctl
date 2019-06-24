@@ -3,6 +3,7 @@
 
 # declare module
 CONFIG += OCL_CONFIG_MODULE
+DEFINES += OCL_CONFIG_MODULE_AVAILABLE
 
 HEADERS += \
     $$PWD/src/ocl/clfileloader.h \
