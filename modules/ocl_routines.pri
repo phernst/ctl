@@ -8,15 +8,18 @@ CONFIG += OCL_ROUTINES_MODULE
 HEADERS += \
     $$PWD/src/projectors/raycaster.h \
     $$PWD/src/projectors/raycasteradapter.h \
-    $$PWD/src/projectors/raycasterprojector.h
+    $$PWD/src/projectors/raycasterprojector.h \
+    $$PWD/src/processing/volumeslicer.h
 
 SOURCES += \
     $$PWD/src/projectors/raycaster.cpp \
     $$PWD/src/projectors/raycasteradapter.cpp \
-    $$PWD/src/projectors/raycasterprojector.cpp
+    $$PWD/src/projectors/raycasterprojector.cpp \
+    $$PWD/src/processing/volumeslicer.cpp
 
 # OpenCL source files
 DISTFILES += \
     $$PWD/src/ocl/cl_src/projectors/external_raycaster.cl \
     $$PWD/src/ocl/cl_src/projectors/raycasterprojector_interp.cl \
-    $$PWD/src/ocl/cl_src/projectors/raycasterprojector_no_interp.cl
+    $$PWD/src/ocl/cl_src/projectors/raycasterprojector_no_interp.cl \
+    $$PWD/src/ocl/cl_src/processing/volumeSlicer.cl
