@@ -41,7 +41,7 @@ include(../../modules/den_file_io.pri)
 
 include(../../modules/ocl_config.pri)
 
-include(../../modules/ocl_projectors.pri)
+include(../../modules/ocl_routines.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

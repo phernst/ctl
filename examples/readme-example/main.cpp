@@ -57,5 +57,5 @@ int main(int argc, char* argv[])
  *  include(path/to/ctl.pri)
  *  include(path/to/nrrd_file_io.pri)
  *  include(path/to/ocl_config.pri)
- *  include(path/to/ocl_projectors.pri)
+ *  include(path/to/ocl_routines.pri)
  */

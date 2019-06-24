@@ -6,26 +6,28 @@ DEFINES += QT_DEPRECATED_WARNINGS \
 
 # MODULES
 # =======
+CTL_MODULE_DIR = ../../modules
+
 # CTL_CORE_MODULE: core library
 # -> dependencies: no
-include(../../modules/ctl.pri)
+include($${CTL_MODULE_DIR}/ctl.pri)
 
 # DEN_FILE_IO_MODULE: den file handling
 # -> dependencies: no
-include(../../modules/den_file_io.pri)
+include($${CTL_MODULE_DIR}/den_file_io.pri)
 
 # NRRD_FILE_IO_MODULE: nrrd file handling
 # -> dependencies: CTL_CORE_MODULE (ctl.pri)
-include(../../modules/nrrd_file_io.pri)
+include($${CTL_MODULE_DIR}/nrrd_file_io.pri)
 
 # OCL_CONFIG_MODULE: OpenCLConfig
 # -> dependencies: no
-include(../../modules/ocl_config.pri)
+include($${CTL_MODULE_DIR}/ocl_config.pri)
 
-# OCL_PROJECTORS_MODULE: OpenCL based projectors
+# OCL_ROUTINES_MODULE: OpenCL based routines
 # -> dependencies: CTL_CORE_MODULE (ctl.pri)
 #                  OCL_CONFIG_MODULE (ocl_config.pri)
-include(../../modules/ocl_projectors.pri)
+include($${CTL_MODULE_DIR}/ocl_routines.pri)
 
 SOURCES += \
     main.cpp \
