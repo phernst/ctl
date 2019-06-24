@@ -56,7 +56,7 @@ float RadonTransform3D::sliceResolution() const { return _p.reso; }
 
 VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<double>& azimuthAngleSampling,
                                                      const std::vector<double>& polarAngleSampling,
-                                                     const std::vector<double>& distanceSampling)
+                                                     const std::vector<double>& distanceSampling) const
 {
     if(azimuthAngleSampling.size() > UINT_MAX &&
        polarAngleSampling.size() > UINT_MAX &&
