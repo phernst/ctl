@@ -11,6 +11,12 @@ const std::string CL_FILE_NAME = "processing/volumeSlicer.cl"; //!< path to .cl 
 const std::string CL_KERNEL_NAME = "slicer"; //!< name of the OpenCL kernel function
 const std::string CL_PROGRAM_NAME = "volumeSlicer"; //!< OCL program name
 
+/*!
+ * Creates a VolumeSlicer instance. The data in \a volume will be transfered to the OpenCL
+ * device immediately (stored internally as cl::Image3D). Use \a oclDeviceNb to specify
+ * the id of the OpenCL device (within the device list in OpenCLConfig::instance().devices()) if
+ * required. If unspecified, it defaults to 0 (i.e. using first device in list).
+ */
 VolumeSlicer::VolumeSlicer(const VoxelVolume<float>& volume, uint oclDeviceNb)
     : _dim(sliceDim(volume.dimensions()))
     , _reso(volume.smallestVoxelSize())
@@ -69,14 +75,35 @@ VolumeSlicer::VolumeSlicer(const VoxelVolume<float>& volume, uint oclDeviceNb)
         throw std::runtime_error("kernel pointer not valid");
 }
 
+/*!
+ * Sets the dimensions (i.e. number of pixels) for slices computed by this instance to
+ * \a dimensions.
+ *
+ * Example:
+ * \codeline slicer.setSliceDimensions( { 100, 200 } ) // creates slices with 100 x 200 pixels
+ */
 void VolumeSlicer::setSliceDimensions(Chunk2D<float>::Dimensions dimensions) { _dim = dimensions; }
 
+/*!
+ * Sets the resolution (i.e. pixels size) for slices computed by this instance to
+ * \a pixelResolution. Resolution is specified in millimeters.
+ */
 void VolumeSlicer::setSliceResolution(float pixelResolution) { _reso = pixelResolution; }
 
+/*!
+ * Returns the dimensions (i.e. number of pixels) of slices computed by this instance.
+ */
 Chunk2D<float>::Dimensions VolumeSlicer::sliceDimensions() const { return _dim; }
 
+/*!
+ * Returns the resolution (i.e. pixels size) of slices computed by this instance.
+ */
 float VolumeSlicer::sliceResolution() const { return _reso; }
 
+/*!
+ * Returns a slice through the volume in the plane specified by \a planeUnitNormal and
+ * \a planeDistanceFromOrigin.
+ */
 Chunk2D<float> VolumeSlicer::slice(const mat::Matrix<3, 1>& planeUnitNormal,
                                    double planeDistanceFromOrigin) const
 {
@@ -133,6 +160,11 @@ Chunk2D<float> VolumeSlicer::slice(const mat::Matrix<3, 1>& planeUnitNormal,
     return ret;
 }
 
+/*!
+ * Returns a slice through the volume in the plane specified by the angles \a planeNormalAzimutAngle
+ * and \a planeNormalPolarAngle as well as the plane's distance from origin
+ * \a planeDistanceFromOrigin.
+ */
 Chunk2D<float> VolumeSlicer::slice(double planeNormalAzimutAngle,
                                    double planeNormalPolarAngle,
                                    double planeDistanceFromOrigin) const
@@ -145,16 +177,25 @@ Chunk2D<float> VolumeSlicer::slice(double planeNormalAzimutAngle,
     return slice(planeNormal, planeDistanceFromOrigin);
 }
 
+/*!
+ * Returns the dimensions (i.e. number of voxels) of the volume managed by this instance.
+ */
 const VoxelVolume<float>::Dimensions& VolumeSlicer::volDim() const
 {
     return _volDim;
 }
 
+/*!
+ * Returns the offset (in mm) of the volume managed by this instance.
+ */
 const VoxelVolume<float>::Offset& VolumeSlicer::volOffset() const
 {
     return _volOffset;
 }
 
+/*!
+ * Returns the size of the voxels in the volume managed by this instance.
+ */
 const VoxelVolume<float>::VoxelSize& VolumeSlicer::volVoxSize() const
 {
     return _volVoxSize;
