@@ -1,7 +1,7 @@
 #ifndef IMAGEPROCESSING_H
 #define IMAGEPROCESSING_H
 
-typedef unsigned int uint;
+typedef unsigned int uint; //!< Alias for unsigned int
 
 namespace CTL {
 
@@ -27,5 +27,10 @@ void diff(VoxelVolume<double>& volume, Method m = CentralDifference);
 
 } // namespace imgproc
 } // namespace CTL
+
+/*! \file */
+///@{
+
+///@}
 
 #endif // IMAGEPROCESSING_H

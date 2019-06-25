@@ -34,6 +34,12 @@ private:
 };
 
 // ## Derivative methods ##
+
+// Derivative methods need to have the following signature:
+// template <typename T> static void NAME (const std::vector<T*>&)
+// The input argument is a vector providing pointers to all elements along the dimension of
+// differentiation. Compute the derivative values and overwrite them using the provided pointers.
+
 template <typename T>
 static void diffBuffer_null(const std::vector<T*>&)
 {
@@ -218,13 +224,16 @@ void diff_impl(VoxelVolume<T>& volume, Method m)
 
 // Interface function definitions
 // ------------------------------
-
 template <uint dim>
 void diff(Chunk2D<float>& image, Method m)
 {
     diff_impl<float, dim>(image, m);
 }
 
+/*!
+ * Differentiates the data in \a image along the dimension \a dim using the differentiation method
+ * \a m.
+ */
 template <uint dim>
 void diff(Chunk2D<double>& image, Method m)
 {
@@ -236,12 +245,20 @@ template void diff<1u>(Chunk2D<float>& image, Method m);
 template void diff<0u>(Chunk2D<double>& image, Method m);
 template void diff<1u>(Chunk2D<double>& image, Method m);
 
+/*!
+ * Differentiates the data in \a volume along the dimension \a dim using the differentiation method
+ * \a m.
+ */
 template <uint dim>
 void diff(VoxelVolume<float>& volume, Method m)
 {
     diff_impl<float, dim>(volume, m);
 }
 
+/*!
+ * Differentiates the data in \a volume along the dimension \a dim using the differentiation method
+ * \a m.
+ */
 template <uint dim>
 void diff(VoxelVolume<double>& volume, Method m)
 {
@@ -254,6 +271,31 @@ template void diff<2u>(VoxelVolume<float>& volume, Method m);
 template void diff<0u>(VoxelVolume<double>& volume, Method m);
 template void diff<1u>(VoxelVolume<double>& volume, Method m);
 template void diff<2u>(VoxelVolume<double>& volume, Method m);
+
+/*!
+ * \enum Method
+ * Enumeration for differentiation methods that can be used.
+ *
+ * To incorporate a new differentiation method, add a value to this enumeration and provide the
+ * corresponding implementation of the method (see .cpp file for more information).
+ */
+
+/*! \var Method::CentralDifference
+ * This computes the central difference. Values on the borders will be set to zero.
+ *
+ * Assuming the dimension along which the difference is computed has (valid) indices
+ * \f$ n=0,...,N-1 \f$.
+ *
+ * The following formula applies:
+ *
+ *\f$
+ * f(n)=\begin{cases}
+ * 0 & n=0\\
+ * 0.5\cdot\left(f(n+1)-f(n-1)\right) & n=1,...,N-2\\
+ * 0 & n=N-1
+ * \end{cases}
+ * \f$
+ */
 
 } // namespace imgproc
 } // namespace CTL
