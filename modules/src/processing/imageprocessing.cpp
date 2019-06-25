@@ -65,6 +65,72 @@ static void diffBuffer_CentralDifference(const std::vector<T*>& buffer)
     *buffer[lastBufEl] = T(0);
 }
 
+template <typename T>
+static void diffBuffer_DifferenceToNext(const std::vector<T*>& buffer)
+{
+    Q_ASSERT(buffer.size() >= 2);
+
+    PipeBuffer<T, 2> pipe({ T(0), *buffer[0] });
+
+    const auto lastBufEl = uint(buffer.size() - 1);
+
+    for(uint el = 0; el < lastBufEl; ++el)
+    {
+        pipe.addValue(*buffer[el + 1]);
+        *buffer[el] = pipe(1) - pipe(0);
+    }
+
+    // set boundaries to zero
+    *buffer[lastBufEl] = T(0);
+}
+
+template <typename T>
+static void diffBuffer_SavitzkyGolay5(const std::vector<T*>& buffer)
+{
+    Q_ASSERT(buffer.size() >= 5);
+
+    PipeBuffer<T, 5> pipe({ T(0), T(0), *buffer[0], *buffer[1], *buffer[2] });
+
+    const auto lastBufEl = uint(buffer.size() - 2);
+
+    for(uint el = 2; el < lastBufEl; ++el)
+    {
+        pipe.addValue(*buffer[el + 1]);
+        *buffer[el] = T(0.1) * (T(2) * pipe(4) + pipe(3) - pipe(1) - T(2) * pipe(0));
+    }
+
+    // set boundaries to zero
+    *buffer[0] = T(0);
+    *buffer[1] = T(0);
+    *buffer[lastBufEl] = T(0);
+    *buffer[lastBufEl+1] = T(0);
+}
+
+template <typename T>
+static void diffBuffer_SavitzkyGolay7(const std::vector<T*>& buffer)
+{
+    Q_ASSERT(buffer.size() >= 7);
+
+    PipeBuffer<T, 7> pipe({ T(0), T(0), T(0), *buffer[0], *buffer[1], *buffer[2], *buffer[3] });
+
+    const auto lastBufEl = uint(buffer.size() - 3);
+
+    for(uint el = 3; el < lastBufEl; ++el)
+    {
+        pipe.addValue(*buffer[el + 1]);
+        *buffer[el] = T(1)/T(28) * (T(3) * pipe(6) + T(2) * pipe(5) + pipe(4)
+                                    - pipe(2) - T(2) * pipe(1) - T(3) * pipe(0));
+    }
+
+    // set boundaries to zero
+    *buffer[0] = T(0);
+    *buffer[1] = T(0);
+    *buffer[2] = T(0);
+    *buffer[lastBufEl] = T(0);
+    *buffer[lastBufEl+1] = T(0);
+    *buffer[lastBufEl+2] = T(0);
+}
+
 // ...
 // Add more methods here and
 // add it to enum `Method` and following function `selectDiffFct`.
@@ -81,6 +147,15 @@ static PtrToDiffFct<T> selectDiffFct(Method m)
     {
     case CentralDifference:
         ret = &diffBuffer_CentralDifference;
+        break;
+    case DifferenceToNext:
+        ret = &diffBuffer_DifferenceToNext;
+        break;
+    case SavitzkyGolay5:
+        ret = &diffBuffer_SavitzkyGolay5;
+        break;
+    case SavitzkyGolay7:
+        ret = &diffBuffer_SavitzkyGolay7;
         break;
     default:
         ret = &diffBuffer_null;
@@ -293,6 +368,59 @@ template void diff<2u>(VoxelVolume<double>& volume, Method m);
  * 0 & n=0\\
  * 0.5\cdot\left(f(n+1)-f(n-1)\right) & n=1,...,N-2\\
  * 0 & n=N-1
+ * \end{cases}
+ * \f$
+ */
+
+/*! \var Method::DifferenceToNext
+ * This computes the difference to the next value. The border value (last index) will be set to
+ * zero to preserve input dimension.
+ *
+ * Assuming the dimension along which the difference is computed has (valid) indices
+ * \f$ n=0,...,N-1 \f$.
+ *
+ * The following formula applies:
+ *
+ *\f$
+ * f(n)=\begin{cases}
+ * f(n+1)-f(n) & n=0,...,N-2\\
+ * 0 & n=N-1
+ * \end{cases}
+ * \f$
+ */
+
+/*! \var Method::SavitzkyGolay5
+ * This computes the derivative using a Savitzky-Golay-Filter of lenght 5. Values on the borders
+ * will be set to zero.
+ *
+ * Assuming the dimension along which the difference is computed has (valid) indices
+ * \f$ n=0,...,N-1 \f$.
+ *
+ * The following formula applies:
+ *
+ *\f$
+ * f(n)=\begin{cases}
+ * 0 & n=0,1\\
+ * 0.1\cdot\left(2f(n+2)+f(n+1)-f(n-1)-2f(n-2)\right) & n=2,...,N-3\\
+ * 0 & n=N-2,N-1
+ * \end{cases}
+ * \f$
+ */
+
+/*! \var Method::SavitzkyGolay7
+ * This computes the derivative using a Savitzky-Golay-Filter of lenght 7. Values on the borders
+ * will be set to zero.
+ *
+ * Assuming the dimension along which the difference is computed has (valid) indices
+ * \f$ n=0,...,N-1 \f$.
+ *
+ * The following formula applies:
+ *
+ *\f$
+ * f(n)=\begin{cases}
+ * 0 & n=0,1,2\\
+ * 1/28\cdot\left(3f(n+3)+2f(n+2)+f(n+1)-f(n-1)-2f(n-2)-3f(n-3)\right) & n=3,...,N-4\\
+ * 0 & n=N-3,N-2,N-1
  * \end{cases}
  * \f$
  */

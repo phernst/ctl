@@ -12,7 +12,10 @@ class VoxelVolume;
 
 namespace imgproc {
 
-enum Method { CentralDifference };
+enum Method { CentralDifference,
+              DifferenceToNext,
+              SavitzkyGolay5,
+              SavitzkyGolay7 };
 
 // partial derivatives
 template <uint dim>
