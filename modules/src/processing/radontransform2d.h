@@ -51,7 +51,7 @@ public:
     Chunk2D<float> sampleTransform(const std::vector<float>& theta,
                                    const std::vector<float>& s) const;
 
-    mat::Matrix<2, 3> xAxisToLineMapping(const mat::Matrix<3, 1>& plane) const;
+    mat::Matrix<2, 3> xAxisToLineMapping(const mat::Matrix<3, 1>& line) const;
 
 private:
     Chunk2D<float>::Dimensions _imageDim; //!< image dimensions

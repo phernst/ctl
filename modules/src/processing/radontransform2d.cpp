@@ -96,6 +96,16 @@ float RadonTransform2D::lineResolution() const { return _lineReso; }
  */
 mat::Matrix<2, 1> RadonTransform2D::origin() const { return { double(_origin.x), double(_origin.y) }; }
 
+/*!
+ * Returns the 2D Radon transform of volume data for the set of sampling points given by \a theta
+ * and \a s.
+ *
+ * This will return the line integral for all combinations of angles \a theta and distances \a s
+ * passed.
+ *
+ * The transform will be computed with respect to the image center, as long as not specified
+ * otherwise by calling setOrigin(). The used origin can be checked with origin().
+ */
 Chunk2D<float> RadonTransform2D::sampleTransform(const std::vector<float>& theta, const std::vector<float>& s) const
 {
 /*
@@ -136,12 +146,17 @@ Chunk2D<float> RadonTransform2D::sampleTransform(const std::vector<float>& theta
     return ret;
 }
 
-mat::Matrix<2, 3> RadonTransform2D::xAxisToLineMapping(const mat::Matrix<3, 1>& plane) const
+/*!
+ * Returns the transformation matrix that maps a value on the x-axis to the line specified by
+ * \a line (containing the unit normal vector of the line in its first two components and the line's
+ * distance from the origin as the third component).
+ */
+mat::Matrix<2, 3> RadonTransform2D::xAxisToLineMapping(const mat::Matrix<3, 1>& line) const
 {
-    mat::Matrix<2, 2> Rt{ plane.get<1>(),  plane.get<0>(),
-                          -plane.get<0>(), plane.get<1>() };
+    mat::Matrix<2, 2> Rt{  line.get<1>(), line.get<0>(),
+                          -line.get<0>(), line.get<1>() };
 
-    auto t = Rt * mat::Matrix<2, 1>{ 0, -plane.get<2>() };
+    auto t = Rt * mat::Matrix<2, 1>{ 0, -line.get<2>() };
 
     return mat::horzcat(Rt, t);
 }
