@@ -91,10 +91,10 @@ private:
         uint nbPatches() const;
     };
 
-    class SingleGPU
+    class SingleDevice
     {
     public:
-        SingleGPU(const VoxelVolume<float>& volume, const Parameters& params, uint oclDeviceNb);
+        SingleDevice(const VoxelVolume<float>& volume, const Parameters& params, uint oclDeviceNb);
 
         void sliceDimensionsChanged();
 
@@ -120,7 +120,7 @@ private:
 
     // member variables
     Parameters _p;
-    std::vector<SingleGPU> _tasks;
+    std::vector<SingleDevice> _tasks;
 
     // static functions
     static uint nextMultipleOfN(uint value, uint N);

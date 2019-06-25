@@ -240,8 +240,8 @@ uint RadonTransform3D::nextMultipleOfN(uint value, uint N)
     return ret;
 }
 
-RadonTransform3D::SingleGPU::SingleGPU(const VoxelVolume<float>& volume, const Parameters& params,
-                                       uint oclDeviceNb)
+RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
+                                             const Parameters& params, uint oclDeviceNb)
     : _p(params)
     , _q(OpenCLConfig::instance().context(), OpenCLConfig::instance().devices()[oclDeviceNb])
     , _volImage3D(OpenCLConfig::instance().context(),
@@ -261,10 +261,27 @@ RadonTransform3D::SingleGPU::SingleGPU(const VoxelVolume<float>& volume, const P
                     3 * sizeof(float))
     , _resultBuf((_p.dim.width/PATCH_SIZE) * (_p.dim.height/PATCH_SIZE), _q)
 {
-    // Create kernel
     try
     {
+        // Create kernel
         _kernel = OpenCLConfig::instance().kernel(CL_KERNEL_NAME, CL_PROGRAM_NAME);
+
+        // write buffers
+        cl::size_t<3> volDim;
+        volDim[0] = volume.dimensions().x;
+        volDim[1] = volume.dimensions().y;
+        volDim[2] = volume.dimensions().z;
+
+        const cl_uint2 sliceDim{ _p.dim.width, _p.dim.height };
+
+        const cl_float3 voxCorner{ -0.5f * (_p.volDim.x - 1) + _p.volOffset.x / _p.volVoxSize.x,
+                                   -0.5f * (_p.volDim.y - 1) + _p.volOffset.y / _p.volVoxSize.y,
+                                   -0.5f * (_p.volDim.z - 1) + _p.volOffset.z / _p.volVoxSize.z };
+
+        _q.enqueueWriteImage(_volImage3D, CL_FALSE, cl::size_t<3>(), volDim, 0, 0,
+                             const_cast<float*>(volume.rawData()));
+        _q.enqueueWriteBuffer(_sliceDimBuf, CL_FALSE, 0, 2 * sizeof(uint), &sliceDim);
+        _q.enqueueWriteBuffer(_voxCornerBuf, CL_FALSE, 0, 3 * sizeof(float), &voxCorner);
 
     } catch(const cl::Error& err)
     {
@@ -274,28 +291,11 @@ RadonTransform3D::SingleGPU::SingleGPU(const VoxelVolume<float>& volume, const P
 
     if(_kernel == nullptr)
         throw std::runtime_error("kernel pointer not valid");
-
-
-    // write buffers
-    cl::size_t<3> volDim;
-    volDim[0] = volume.dimensions().x;
-    volDim[1] = volume.dimensions().y;
-    volDim[2] = volume.dimensions().z;
-
-    const cl_uint2 sliceDim{ _p.dim.width, _p.dim.height };
-
-    const cl_float3 voxCorner{ -0.5f * (_p.volDim.x - 1) + _p.volOffset.x / _p.volVoxSize.x,
-                               -0.5f * (_p.volDim.y - 1) + _p.volOffset.y / _p.volVoxSize.y,
-                               -0.5f * (_p.volDim.z - 1) + _p.volOffset.z / _p.volVoxSize.z };
-
-    _q.enqueueWriteImage(_volImage3D, CL_FALSE, cl::size_t<3>(), volDim, 0, 0,
-                         const_cast<float*>(volume.rawData()));
-    _q.enqueueWriteBuffer(_sliceDimBuf, CL_FALSE, 0, 2 * sizeof(uint), &sliceDim);
-    _q.enqueueWriteBuffer(_voxCornerBuf, CL_FALSE, 0, 3 * sizeof(float), &voxCorner);
 }
 
-RadonTransform3D::DeviceResult RadonTransform3D::SingleGPU::planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
-                                                        double planeDistanceFromOrigin) const
+RadonTransform3D::DeviceResult
+RadonTransform3D::SingleDevice::planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
+                                              double planeDistanceFromOrigin) const
 {
     Q_ASSERT(qFuzzyCompare(planeUnitNormal.norm(), 1.0));
 
@@ -329,8 +329,6 @@ RadonTransform3D::DeviceResult RadonTransform3D::SingleGPU::planeIntegral(const 
 
         // read result
         _resultBuf.transferDevToPinnedMem(false, readEvent.get());
-//        _q.enqueueReadBuffer(_resultBuf.devBuffer(), CL_FALSE, 0, nbPatches * sizeof(float), patchRes.data(),
-//                             nullptr, readEvent.get());
 
     } catch(const cl::Error& e)
     {
@@ -346,9 +344,10 @@ RadonTransform3D::DeviceResult RadonTransform3D::SingleGPU::planeIntegral(const 
     return { _resultBuf.hostPtr(), std::move(readEvent) };
 }
 
-RadonTransform3D::DeviceResult RadonTransform3D::SingleGPU::planeIntegral(double planeNormalAzimutAngle,
-                                                        double planeNormalPolarAngle,
-                                                        double planeDistanceFromOrigin) const
+RadonTransform3D::DeviceResult
+RadonTransform3D::SingleDevice::planeIntegral(double planeNormalAzimutAngle,
+                                              double planeNormalPolarAngle,
+                                              double planeDistanceFromOrigin) const
 {
     Vector3x1 planeNormal{
         std::sin(planeNormalPolarAngle) * std::cos(planeNormalAzimutAngle),
@@ -358,12 +357,12 @@ RadonTransform3D::DeviceResult RadonTransform3D::SingleGPU::planeIntegral(double
     return planeIntegral(planeNormal, planeDistanceFromOrigin);
 }
 
-const float *RadonTransform3D::SingleGPU::resultArray() const
+const float *RadonTransform3D::SingleDevice::resultArray() const
 {
     return _resultBuf.hostPtr();
 }
 
-void RadonTransform3D::SingleGPU::sliceDimensionsChanged()
+void RadonTransform3D::SingleDevice::sliceDimensionsChanged()
 {
     _resultBuf = PinnedBufHostRead<float>(_p.nbPatches(), _q);
 
@@ -372,7 +371,7 @@ void RadonTransform3D::SingleGPU::sliceDimensionsChanged()
 }
 
 mat::Matrix<3, 4>
-RadonTransform3D::SingleGPU::transformXYPlaneToPlane(const mat::Matrix<4, 1>& plane) const
+RadonTransform3D::SingleDevice::transformXYPlaneToPlane(const mat::Matrix<4, 1>& plane) const
 {
     Vector3x1 r1, r2(0.0), r3{ plane.get<0>(), plane.get<1>(), plane.get<2>() };
 
