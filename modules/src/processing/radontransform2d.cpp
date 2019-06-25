@@ -10,15 +10,24 @@ const std::string CL_PROGRAM_NAME = "radonTransform2D"; //!< OCL program name
 namespace CTL {
 namespace OCL {
 
+/*!
+ * Creates a RadonTransform2D instance that allows to compute the 2D Radon transform of \a image.
+ * The size of pixels in \a image must be specified by \a pixelSize [in mm]. Data from \a image
+ * will be transfered to the OpenCL device \a oclDeviceNb in the device list (as returned by
+ * OpenCLConfig::instance().devices()).
+ */
 RadonTransform2D::RadonTransform2D(const Chunk2D<float> &image, const mat::Matrix<2, 1>& pixelSize, uint oclDeviceNb)
     : _imageDim(image.dimensions())
     , _pixelSize({ float(pixelSize.get<0>()), float(pixelSize.get<1>()) })
-    , _origin((image.width() - 1) * 0.5, (image.height() - 1) * 0.5)
+    , _origin({ float((image.width() - 1) * 0.5), float((image.height() - 1) * 0.5) })
     , _lineReso(std::min(pixelSize.get<0>(), pixelSize.get<1>()))
     , _q(OpenCLConfig::instance().context(), OpenCLConfig::instance().devices()[oclDeviceNb])
     , _imgResoBuf(OpenCLConfig::instance().context(),
                   CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                   2 * sizeof(float))
+    , _imgOriginBuf(OpenCLConfig::instance().context(),
+                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                    2 * sizeof(float))
     , _image(OpenCLConfig::instance().context(),
              CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
              cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
@@ -53,22 +62,39 @@ RadonTransform2D::RadonTransform2D(const Chunk2D<float> &image, const mat::Matri
     imgDim[2] = 1;
 
     _q.enqueueWriteBuffer(_imgResoBuf, CL_FALSE, 0, 2 * sizeof(float), &_pixelSize);
+    _q.enqueueWriteBuffer(_imgOriginBuf, CL_FALSE, 0, 2 * sizeof(float), &_origin);
     _q.enqueueWriteImage(_image, CL_FALSE, cl::size_t<3>(), imgDim, 0, 0,
                          const_cast<float*>(image.rawData()));
 
 }
 
+/*!
+ * Sets the resolution for line integration to \a stepLength. This defines the step length (in mm)
+ * for sampling along the integration lines.
+ */
 void RadonTransform2D::setLineResolution(float stepLength) { _lineReso = stepLength; }
 
-void RadonTransform2D::setOrigin(double x, double y)
+/*!
+ * Sets the origin for the transform to [\a x, \a y] (in pixels).
+ */
+void RadonTransform2D::setOrigin(float x, float y)
 {
-    _origin.get<0>() = x;
-    _origin.get<1>() = y;
+    _origin.x = x;
+    _origin.y = y;
+
+    _q.enqueueWriteBuffer(_imgOriginBuf, CL_FALSE, 0, 2 * sizeof(float), &_origin);
 }
 
+/*!
+ * Returns the resolution for line integration. This refers to the step length (in mm) used for
+ * sampling along the integration lines.
+ */
 float RadonTransform2D::lineResolution() const { return _lineReso; }
 
-const mat::Matrix<2, 1>& RadonTransform2D::origin() const { return _origin; }
+/*!
+ * Returns the origin of the transform (in pixels).
+ */
+mat::Matrix<2, 1> RadonTransform2D::origin() const { return { double(_origin.x), double(_origin.y) }; }
 
 Chunk2D<float> RadonTransform2D::sampleTransform(const std::vector<float>& theta, const std::vector<float>& s) const
 {
@@ -95,8 +121,9 @@ Chunk2D<float> RadonTransform2D::sampleTransform(const std::vector<float>& theta
     _kernel->setArg(1, sVecBuf);
     _kernel->setArg(2, thetaVecBuf);
     _kernel->setArg(3, _imgResoBuf);
-    _kernel->setArg(4, resultBuf);
-    _kernel->setArg(5, _image);
+    _kernel->setArg(4, _imgOriginBuf);
+    _kernel->setArg(5, resultBuf);
+    _kernel->setArg(6, _image);
 
     // start kernel
     _q.enqueueNDRangeKernel(*_kernel, cl::NullRange, cl::NDRange(s.size(), theta.size()));
