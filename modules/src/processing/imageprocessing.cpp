@@ -1,7 +1,7 @@
 #include "imageprocessing.h"
 #include "img/chunk2d.h"
 #include "img/voxelvolume.h"
-#include "array"
+#include <array>
 
 namespace CTL {
 namespace imgproc {
@@ -17,7 +17,13 @@ template <typename T, uint N>
 class PipeBuffer
 {
 public:
-    PipeBuffer(const std::array<T, N>& init) : _startPos(0), _buf(init) {}
+    explicit PipeBuffer(const std::vector<T*>& init)
+    {
+        // initialize N-1 elements with init by using an offset of 1 in the array, i.e.
+        // array = { 0, *init[0], *init[1], *init[2], ... }
+        for(uint n = 0; n < N - 1; ++n)
+            _buf[n + 1] = *init[n];
+    }
 
     void addValue(const T& val)
     {
@@ -26,109 +32,104 @@ public:
         _startPos %= N;
     }
 
-    T& operator() (uint i) { return _buf[(_startPos + i) % N]; }
+    const T& operator() (uint i) const { return _buf[(_startPos + i) % N]; }
 
 private:
-    uint _startPos;
+    uint _startPos = 0;
     std::array<T, N> _buf;
 };
 
-// ## Derivative methods ##
+// ## Generic function for numerical derivate using a certain function f on a PipeBuffer ###
+template <typename T, uint filterSize>
+using DiffValFromPipeBuf = T (*)(const PipeBuffer<T, filterSize>&);
 
+template <typename T, uint filterSize>
+void meta_diff(const std::vector<T*>& buffer, DiffValFromPipeBuf<T, filterSize> f)
+{
+    Q_ASSERT(buffer.size() >= filterSize - 1);
+
+    PipeBuffer<T, filterSize> pipe(buffer);
+
+    const auto halfFiltSize = (filterSize - 1) / 2;
+    const auto firstUndefEl = uint(buffer.size() - halfFiltSize);
+
+    for(uint el = halfFiltSize; el < firstUndefEl; ++el)
+    {
+        pipe.addValue(*buffer[el + halfFiltSize]);
+        *buffer[el] = f(pipe);
+    }
+
+    // set boundaries to zero
+    for(uint b = 0; b < halfFiltSize; ++b)
+    {
+        *buffer[b] = T(0);
+        *buffer[firstUndefEl + b] = T(0);
+    }
+}
+
+// ## Derivative methods ##
 // Derivative methods need to have the following signature:
-// template <typename T> static void NAME (const std::vector<T*>&)
+// template <typename T> void NAME (const std::vector<T*>&)
 // The input argument is a vector providing pointers to all elements along the dimension of
 // differentiation. Compute the derivative values and overwrite them using the provided pointers.
+// This can be easily done by calling `meta_diff` and passing the buffer as well as a pointer to
+// a function that performs a derivative based on the values provided by a PipeBuffer<T,filterSize>.
+// This means, ony the formula for a single value of the derivative based on the adjacent elements
+// (the number of neighbors is given by the `filterSize` template argument) needs to be provided.
 
 template <typename T>
-static void diffBuffer_null(const std::vector<T*>&)
+void diffBuffer_null(const std::vector<T*>&)
 {
 }
 
 template <typename T>
-static void diffBuffer_CentralDifference(const std::vector<T*>& buffer)
+void diffBuffer_CentralDifference(const std::vector<T*>& buffer)
 {
-    Q_ASSERT(buffer.size() >= 2);
-
-    PipeBuffer<T, 3> pipe({ T(0), *buffer[0], *buffer[1] });
-
-    const auto lastBufEl = uint(buffer.size() - 1);
-
-    for(uint el = 1; el < lastBufEl; ++el)
+    constexpr uint filterSize = 3;
+    meta_diff(buffer, +[](const PipeBuffer<T, filterSize>& pipe)
     {
-        pipe.addValue(*buffer[el + 1]);
-        *buffer[el] = T(0.5) * (pipe(2) - pipe(0));
-    }
-
-    // set boundaries to zero
-    *buffer[0] = T(0);
-    *buffer[lastBufEl] = T(0);
+        return T(0.5) * (pipe(2) - pipe(0));
+    });
 }
 
 template <typename T>
-static void diffBuffer_DifferenceToNext(const std::vector<T*>& buffer)
+void diffBuffer_DifferenceToNext(const std::vector<T*>& buffer)
 {
-    Q_ASSERT(buffer.size() >= 2);
-
-    PipeBuffer<T, 2> pipe({ T(0), *buffer[0] });
-
-    const auto lastBufEl = uint(buffer.size() - 1);
-
-    for(uint el = 0; el < lastBufEl; ++el)
+    constexpr uint filterSize = 2;
+    meta_diff(buffer, +[](const PipeBuffer<T, filterSize>& pipe)
     {
-        pipe.addValue(*buffer[el + 1]);
-        *buffer[el] = pipe(1) - pipe(0);
-    }
-
-    // set boundaries to zero
-    *buffer[lastBufEl] = T(0);
+        return pipe(1) - pipe(0);
+    });
 }
 
 template <typename T>
-static void diffBuffer_SavitzkyGolay5(const std::vector<T*>& buffer)
+void diffBuffer_SavitzkyGolay5(const std::vector<T*>& buffer)
 {
-    Q_ASSERT(buffer.size() >= 5);
-
-    PipeBuffer<T, 5> pipe({ T(0), T(0), *buffer[0], *buffer[1], *buffer[2] });
-
-    const auto lastBufEl = uint(buffer.size() - 2);
-
-    for(uint el = 2; el < lastBufEl; ++el)
+    constexpr uint filterSize = 5;
+    meta_diff(buffer, +[](const PipeBuffer<T, filterSize>& pipe)
     {
-        pipe.addValue(*buffer[el + 1]);
-        *buffer[el] = T(0.1) * (T(2) * pipe(4) + pipe(3) - pipe(1) - T(2) * pipe(0));
-    }
+        return T(0.1) * (- T(2) * pipe(0)
+                         -        pipe(1)
 
-    // set boundaries to zero
-    *buffer[0] = T(0);
-    *buffer[1] = T(0);
-    *buffer[lastBufEl] = T(0);
-    *buffer[lastBufEl+1] = T(0);
+                         +        pipe(3)
+                         + T(2) * pipe(4));
+    });
 }
 
 template <typename T>
-static void diffBuffer_SavitzkyGolay7(const std::vector<T*>& buffer)
+void diffBuffer_SavitzkyGolay7(const std::vector<T*>& buffer)
 {
-    Q_ASSERT(buffer.size() >= 7);
-
-    PipeBuffer<T, 7> pipe({ T(0), T(0), T(0), *buffer[0], *buffer[1], *buffer[2], *buffer[3] });
-
-    const auto lastBufEl = uint(buffer.size() - 3);
-
-    for(uint el = 3; el < lastBufEl; ++el)
+    constexpr uint filterSize = 7;
+    meta_diff(buffer, +[](const PipeBuffer<T, filterSize>& pipe)
     {
-        pipe.addValue(*buffer[el + 1]);
-        *buffer[el] = T(1)/T(28) * (T(3) * pipe(6) + T(2) * pipe(5) + pipe(4)
-                                    - pipe(2) - T(2) * pipe(1) - T(3) * pipe(0));
-    }
+        return T(1)/T(28) * (- T(3) * pipe(0)
+                             - T(2) * pipe(1)
+                             -        pipe(2)
 
-    // set boundaries to zero
-    *buffer[0] = T(0);
-    *buffer[1] = T(0);
-    *buffer[2] = T(0);
-    *buffer[lastBufEl] = T(0);
-    *buffer[lastBufEl+1] = T(0);
-    *buffer[lastBufEl+2] = T(0);
+                             +        pipe(4)
+                             + T(2) * pipe(5)
+                             + T(3) * pipe(6));
+    });
 }
 
 // ...
@@ -140,28 +141,21 @@ template <typename T>
 using PtrToDiffFct = void (*)(const std::vector<T*>&);
 
 template <typename T>
-static PtrToDiffFct<T> selectDiffFct(Method m)
+PtrToDiffFct<T> selectDiffFct(Method m)
 {
-    PtrToDiffFct<T> ret;
     switch(m)
     {
     case CentralDifference:
-        ret = &diffBuffer_CentralDifference;
-        break;
+        return &diffBuffer_CentralDifference;
     case DifferenceToNext:
-        ret = &diffBuffer_DifferenceToNext;
-        break;
+        return &diffBuffer_DifferenceToNext;
     case SavitzkyGolay5:
-        ret = &diffBuffer_SavitzkyGolay5;
-        break;
+        return &diffBuffer_SavitzkyGolay5;
     case SavitzkyGolay7:
-        ret = &diffBuffer_SavitzkyGolay7;
-        break;
+        return &diffBuffer_SavitzkyGolay7;
     default:
-        ret = &diffBuffer_null;
+        return &diffBuffer_null;
     }
-
-    return ret;
 }
 
 // ## Buffer helper class that stores pointer for 1D look-ups ##
