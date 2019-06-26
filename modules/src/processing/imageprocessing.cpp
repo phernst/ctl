@@ -50,21 +50,22 @@ void meta_diff(const std::vector<T*>& buffer, DiffValFromPipeBuf<T, filterSize> 
 
     PipeBuffer<T, filterSize> pipe(buffer);
 
-    const auto halfFiltSize = (filterSize - 1) / 2;
-    const auto firstUndefEl = uint(buffer.size() - halfFiltSize);
+    // number of filter elements on the left and right hand side (equal for odd filter size)
+    const auto nbRightFilterEl = filterSize / 2;
+    const auto nbLeftFilterEl = (filterSize - 1) / 2;
+    const auto firstUndefEl = uint(buffer.size() - nbRightFilterEl);
 
-    for(uint el = halfFiltSize; el < firstUndefEl; ++el)
+    for(uint el = nbLeftFilterEl; el < firstUndefEl; ++el)
     {
-        pipe.addValue(*buffer[el + halfFiltSize]);
+        pipe.addValue(*buffer[el + nbRightFilterEl]);
         *buffer[el] = f(pipe);
     }
 
     // set boundaries to zero
-    for(uint b = 0; b < halfFiltSize; ++b)
-    {
+    for(uint b = 0; b < nbLeftFilterEl; ++b)
         *buffer[b] = T(0);
+    for(uint b = 0; b < nbRightFilterEl; ++b)
         *buffer[firstUndefEl + b] = T(0);
-    }
 }
 
 // ## Derivative methods ##
