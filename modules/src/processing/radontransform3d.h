@@ -32,8 +32,8 @@ namespace OCL {
  * Individual plane integrals (i.e. individual samples in the 3D Radon space) can be computed using
  * planeIntegral(). For convenience, the integration plane can be defined in two different ways:
  * 1) by the plane's normal vector and distance to the origin, or
- * 2) by specifying the plane's angles w.r.t. the world coordinate system (in polar coordinates) and
- * its distance to the origin.
+ * 2) by specifying the plane's angles w.r.t. the world coordinate system (in spherical coordinates)
+ * and its distance to the origin.
  *
  * By default, the dimensions (ie. number of pixels) and resolution (ie. pixel size) within the
  * integration plane are determined automatically - w.r.t. the volume's specs - using the following
