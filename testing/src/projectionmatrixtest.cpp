@@ -170,3 +170,14 @@ void ProjectionMatrixTest::comparatorTest()
     QCOMPARE(compare.volumeOffset().get<2>(), -20.0);
     QCOMPARE(compare(P3, P4).meanError, 42.0);
 }
+
+void ProjectionMatrixTest::unaryMinus()
+{
+    Matrix<2, 1> v2{ 1, 2 };
+    Matrix<1, 1> s{ 3 };
+    auto v3 = vertcat(-v2, -s);
+
+    QCOMPARE(v3.get<0>(), -1.);
+    QCOMPARE(v3.get<1>(), -2.);
+    QCOMPARE(v3.get<2>(), -3.);
+}

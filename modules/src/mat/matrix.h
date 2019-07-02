@@ -147,6 +147,7 @@ public:
 
     // operations
     Matrix<1, 1> transposed() const { return *this; }
+    Matrix<1, 1> operator-() const { return { -ref() }; }
     Matrix<1, 1>& operator*=(double scalar)
     {
         ref() *= scalar;

@@ -22,6 +22,7 @@ private Q_SLOTS:
     void projectionOntoDetector();
     void equalityTest();
     void comparatorTest();
+    void unaryMinus();
 
 private:
     CTL::mat::ProjectionMatrix P;
