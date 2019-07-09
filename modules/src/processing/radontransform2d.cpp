@@ -142,7 +142,7 @@ Chunk2D<float> RadonTransform2D::sampleTransform(const std::vector<float>& theta
     _q.enqueueNDRangeKernel(*_kernel, cl::NullRange, cl::NDRange(s.size(), theta.size()));
 
     // read result
-    Chunk2D<float> ret(theta.size(), s.size());
+    Chunk2D<float> ret(uint(theta.size()), uint(s.size()));
     ret.allocateMemory();
     _q.enqueueReadBuffer(resultBuf, CL_TRUE, 0, s.size() * theta.size() * sizeof(float), ret.rawData());
 

@@ -103,7 +103,7 @@ void PlaneVisualizer::initializeView()
     auto lightSource = new Qt3DRender::QPointLight;
     auto lightTransform = new Qt3DCore::QTransform;
     lightSource->setColor("white");
-    lightSource->setIntensity(0.2);
+    lightSource->setIntensity(0.2f);
     lightTransform->setTranslation( { -5000.0, -5000.0, 0.0} );
     lightEntity->setObjectName("permanent");
     lightEntity->addComponent(lightSource);
