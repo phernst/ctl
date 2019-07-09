@@ -5,6 +5,7 @@
 
 const std::string CL_FILE_NAME = "processing/radon2d.cl"; //!< path to .cl file
 const std::string CL_KERNEL_NAME = "radon2d"; //!< name of the OpenCL kernel function
+const std::string CL_KERNEL_NAME_SUBSET = "radon2dsubset"; //!< name of the OpenCL kernel function
 const std::string CL_PROGRAM_NAME = "radonTransform2D"; //!< OCL program name
 
 namespace CTL {
@@ -40,11 +41,13 @@ RadonTransform2D::RadonTransform2D(const Chunk2D<float> &image, const mat::Matri
     const auto clSourceCode = clFile.loadSourceCode();
 
     OpenCLConfig::instance().addKernel(CL_KERNEL_NAME, clSourceCode, CL_PROGRAM_NAME);
+    OpenCLConfig::instance().addKernel(CL_KERNEL_NAME_SUBSET, clSourceCode, CL_PROGRAM_NAME);
 
     // Create kernel
     try
     {
-        _kernel = OpenCLConfig::instance().kernel(CL_KERNEL_NAME, CL_PROGRAM_NAME);
+        _kernel       = OpenCLConfig::instance().kernel(CL_KERNEL_NAME, CL_PROGRAM_NAME);
+        _kernelSubset = OpenCLConfig::instance().kernel(CL_KERNEL_NAME_SUBSET, CL_PROGRAM_NAME);
 
     } catch(const cl::Error& err)
     {
@@ -52,7 +55,7 @@ RadonTransform2D::RadonTransform2D(const Chunk2D<float> &image, const mat::Matri
         throw std::runtime_error("OpenCL error");
     }
 
-    if(_kernel == nullptr)
+    if(_kernel == nullptr || _kernelSubset == nullptr)
         throw std::runtime_error("kernel pointer not valid");
 
     // write buffers
@@ -142,6 +145,36 @@ Chunk2D<float> RadonTransform2D::sampleTransform(const std::vector<float>& theta
     Chunk2D<float> ret(theta.size(), s.size());
     ret.allocateMemory();
     _q.enqueueReadBuffer(resultBuf, CL_TRUE, 0, s.size() * theta.size() * sizeof(float), ret.rawData());
+
+    return ret;
+}
+
+std::vector<float> RadonTransform2D::sampleTransform(const std::vector<Radon2DCoord>& smplPts) const
+{
+    const auto& context = OpenCLConfig::instance().context();
+
+    const auto nbSamples = smplPts.size();
+
+    cl::Buffer smplPtBuf(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY, nbSamples * sizeof(cl_float2));
+    cl::Buffer resultBuf(context, CL_MEM_WRITE_ONLY | CL_MEM_HOST_READ_ONLY, nbSamples * sizeof(float));
+
+    // write buffers
+    _q.enqueueWriteBuffer(smplPtBuf, CL_FALSE, 0, nbSamples * sizeof(cl_float2), smplPts.data());
+
+    // set kernel args
+    _kernelSubset->setArg(0, _lineReso);
+    _kernelSubset->setArg(1, smplPtBuf);
+    _kernelSubset->setArg(2, _imgResoBuf);
+    _kernelSubset->setArg(3, _imgOriginBuf);
+    _kernelSubset->setArg(4, resultBuf);
+    _kernelSubset->setArg(5, _image);
+
+    // start kernel
+    _q.enqueueNDRangeKernel(*_kernelSubset, cl::NullRange, cl::NDRange(nbSamples));
+
+    // read result
+    std::vector<float> ret(nbSamples);
+    _q.enqueueReadBuffer(resultBuf, CL_TRUE, 0, nbSamples * sizeof(float), ret.data());
 
     return ret;
 }

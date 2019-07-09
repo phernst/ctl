@@ -51,6 +51,8 @@ public:
     Chunk2D<float> sampleTransform(const std::vector<float>& theta,
                                    const std::vector<float>& s) const;
 
+    std::vector<float> sampleTransform(const std::vector<Radon2DCoord>& smplPts) const;
+
     mat::Matrix<2, 3> xAxisToLineMapping(const mat::Matrix<3, 1>& line) const;
 
 private:
@@ -62,6 +64,7 @@ private:
     //ocl
     cl::CommandQueue _q; //!< OpenCL command queue
     cl::Kernel* _kernel; //!< Pointer to OpenCL kernel
+    cl::Kernel* _kernelSubset; //!< Pointer to OpenCL kernel (for subset of transform)
     cl::Buffer _imgResoBuf; //!< Buffer for image resolution
     cl::Buffer _imgOriginBuf; //!< Buffer for image origing
     cl::Image2D _image; //!< Image data to be transformed
