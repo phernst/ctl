@@ -4,8 +4,21 @@
 #include <img/chunk2d.h>
 #include <mat/matrix.h>
 #include "ocl/openclconfig.h"
+#include "processing/coordinates.h"
 
 namespace CTL {
+
+struct Radon2DCoord : Generic2DCoord
+{
+    Radon2DCoord() = default;
+    Radon2DCoord(float angle, float distance) : Generic2DCoord (angle, distance) {}
+
+    float& angle() { return data[0]; }
+    float& dist() { return data[1]; }
+    const float& angle() const { return data[0]; }
+    const float& dist() const { return data[1]; }
+};
+
 namespace OCL {
 
 /*!

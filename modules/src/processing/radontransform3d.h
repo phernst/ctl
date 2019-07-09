@@ -5,8 +5,24 @@
 #include "mat/matrix.h"
 #include "ocl/openclconfig.h"
 #include "ocl/pinnedmem.h"
+#include "processing/coordinates.h"
 
 namespace CTL {
+
+struct Radon3DCoord : Generic3DCoord
+{
+    Radon3DCoord() = default;
+    Radon3DCoord(float azimuth, float polar, float distance)
+        : Generic3DCoord (azimuth, polar, distance) {}
+
+    float& azimuth() { return data[0]; }
+    float& polar() { return data[1]; }
+    float& dist() { return data[2]; }
+    const float& azimuth() const { return data[0]; }
+    const float& polar() const { return data[1]; }
+    const float& dist() const { return data[2]; }
+};
+
 namespace OCL {
 
 /*!

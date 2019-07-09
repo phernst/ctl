@@ -82,7 +82,8 @@ HEADERS += \
     $$PWD/src/img/compositevolume.h \
     $$PWD/src/projectors/spectralprojectorextension.h \
     $$PWD/src/io/ctldatabase.h \
-    $$PWD/src/processing/imageprocessing.h
+    $$PWD/src/processing/imageprocessing.h \
+    $$PWD/src/processing/coordinates.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
