@@ -49,6 +49,7 @@ HEADERS += \
     $$PWD/src/mat/projectionmatrix.h \
     $$PWD/src/models/xrayspectrummodels.h \
     $$PWD/src/models/abstractdatamodel.h \
+    $$PWD/src/processing/diff.h \
     $$PWD/src/projectors/abstractprojector.h \
     $$PWD/src/projectors/abstractprojectorconfig.h \
     $$PWD/src/projectors/arealfocalspotextension.h \
