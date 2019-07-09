@@ -78,9 +78,9 @@ float RadonTransform3D::sliceResolution() const { return _p.reso; }
  * samples) across all available devices (as returned by OpenCLConfig::instance().devices() when
  * this instance of RadonTransform3D had been created).
  */
-VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<double>& azimuthAngleSampling,
-                                                     const std::vector<double>& polarAngleSampling,
-                                                     const std::vector<double>& distanceSampling) const
+VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& azimuthAngleSampling,
+                                                     const std::vector<float>& polarAngleSampling,
+                                                     const std::vector<float>& distanceSampling) const
 {
     if(azimuthAngleSampling.size() > UINT_MAX &&
        polarAngleSampling.size() > UINT_MAX &&
@@ -143,6 +143,7 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<double>& 
                 if(dev == nbDevices)
                     dev = 0;
              }
+
     // evaluate remaining running devices
     for(uint dev = 0; dev < nbDevices; ++dev)
         if(devRunning[dev])

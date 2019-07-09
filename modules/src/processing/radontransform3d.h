@@ -54,7 +54,7 @@ namespace OCL {
 class RadonTransform3D
 {
 public:
-    RadonTransform3D(const VoxelVolume<float>& volume);
+    explicit RadonTransform3D(const VoxelVolume<float>& volume);
 
     // setter methods
     void setSliceResolution(float pixelResolution);
@@ -67,9 +67,9 @@ public:
     const VoxelVolume<float>::VoxelSize& volVoxSize() const;
 
     // sampling of several plane integrals
-    VoxelVolume<float> sampleTransform(const std::vector<double>& azimuthAngleSampling,
-                                       const std::vector<double>& polarAngleSampling,
-                                       const std::vector<double>& distanceSampling) const;
+    VoxelVolume<float> sampleTransform(const std::vector<float>& azimuthAngleSampling,
+                                       const std::vector<float>& polarAngleSampling,
+                                       const std::vector<float>& distanceSampling) const;
     // single plane integral
     float planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
                         double planeDistanceFromOrigin) const;
