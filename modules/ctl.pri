@@ -133,7 +133,8 @@ SOURCES += \
     $$PWD/src/img/compositevolume.cpp \
     $$PWD/src/projectors/spectralprojectorextension.cpp \
     $$PWD/src/io/ctldatabase.cpp \
-    $$PWD/src/processing/imageprocessing.cpp
+    $$PWD/src/processing/imageprocessing.cpp \
+    $$PWD/src/processing/diff.cpp
 
 # create a file that contains the absolute path to database
 DATABASE_ROOT = $$PWD/../database
