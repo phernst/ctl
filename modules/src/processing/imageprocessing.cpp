@@ -1,8 +1,6 @@
 #include "imageprocessing.h"
 #include "img/chunk2d.h"
 #include "mat/matrix.h"
-#include "img/voxelvolume.h"
-#include <array>
 
 namespace CTL {
 namespace imgproc {
@@ -12,21 +10,24 @@ namespace imgproc {
 
 void cosWeighting(Chunk2D<float>& proj, const mat::Matrix<3,3>& K)
 {
-    const uint xSize  = proj.width();
-    const uint ySize  = proj.height();
-    const float cx = xSize / 2.0f;
-    const float cy = ySize / 2.0f;
+    auto cosineOfConeAngle = [&K] (double x, double y) {
+        // back substitution to find 'd' in K*d = [x,y,1]^t
+        mat::Matrix<3, 1> direction;
+        direction.get<2>() = 1.0;
+        direction.get<1>() = (y - K.get<1,2>()) / K.get<1,1>();
+        direction.get<0>() = (x - direction.get<1>()*K.get<0,1>() - K.get<0,2>()) / K.get<0,0>();
 
-    //COS-WEIGHTING
-    const float D   = 0.5f * (K(0,0) + K(1,1));
-    const float Dsq = std::pow(D, 2.0);
+        // cosine to z-axis = <unitDirection, [0 0 1]^t>
+        return direction.get<2>() / direction.norm();
+    };
 
+    const uint xSize = proj.width();
+    const uint ySize = proj.height();
     uint x, y;
     for(x = 0; x < xSize; ++x)
-        for(uint y = 0; y < ySize; ++y)
-            proj(x,y) *= D/std::sqrt(std::pow(x-K(0,2), 2.0) + std::pow(y-K(1,2), 2.0) + Dsq);
+        for(y = 0; y < ySize; ++y)
+            proj(x,y) *= cosineOfConeAngle(x, y);
 }
-
 
 } // namespace imgproc
 } // namespace CTL
