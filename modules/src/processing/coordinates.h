@@ -46,7 +46,7 @@ struct Range
     const T& start() const { return data[0]; }
     const T& end() const { return data[1]; }
 
-    std::vector<T> linspace(uint nbSamples) const { return linspace(data[1], data[0], nbSamples); }
+    std::vector<T> linspace(uint nbSamples) const { return linspace(data[0], data[1], nbSamples); }
     static std::vector<T> linspace(T from, T to, uint nbSamples)
     {
         std::vector<T> ret(nbSamples);
