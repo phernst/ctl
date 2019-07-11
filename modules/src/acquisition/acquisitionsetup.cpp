@@ -469,12 +469,22 @@ void AcquisitionSetup::setNbViews(uint nbViews)
 /*!
  * Returns a pointer to the system in this setup.
  */
-SimpleCTsystem* AcquisitionSetup::system() { return _system.get(); }
+SimpleCTsystem* AcquisitionSetup::system()
+{
+    if(_system == nullptr)
+        qWarning("No CT system has been set for the AcquisitionSetup.");
+    return _system.get();
+}
 
 /*!
  * Returns a pointer to the (constant) system in this setup.
  */
-const SimpleCTsystem* AcquisitionSetup::system() const { return _system.get(); }
+const SimpleCTsystem* AcquisitionSetup::system() const
+{
+    if(_system == nullptr)
+        qWarning("No CT system has been set for the AcquisitionSetup.");
+    return _system.get();
+}
 
 /*!
  * Returns a reference to the View \a viewNb of this setup.
