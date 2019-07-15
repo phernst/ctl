@@ -60,9 +60,8 @@ RadonTransform2D::RadonTransform2D(const Chunk2D<float> &image, uint oclDeviceNb
     imgDim[2] = 1;
 
     _q.enqueueWriteBuffer(_imgOriginBuf, CL_FALSE, 0, 2 * sizeof(float), &_origin);
-    _q.enqueueWriteImage(_image, CL_FALSE, cl::size_t<3>(), imgDim, 0, 0,
+    _q.enqueueWriteImage(_image, CL_TRUE, cl::size_t<3>(), imgDim, 0, 0,
                          const_cast<float*>(image.rawData()));
-
 }
 
 /*!

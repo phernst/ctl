@@ -273,16 +273,16 @@ RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
         volDim[1] = volume.dimensions().y;
         volDim[2] = volume.dimensions().z;
 
-        const cl_uint2 sliceDim{ _p.dim.width, _p.dim.height };
+        const cl_uint2 sliceDim{ { _p.dim.width, _p.dim.height } };
 
-        const cl_float3 voxCorner{ -0.5f * (_p.volDim.x - 1) + _p.volOffset.x / _p.volVoxSize.x,
-                                   -0.5f * (_p.volDim.y - 1) + _p.volOffset.y / _p.volVoxSize.y,
-                                   -0.5f * (_p.volDim.z - 1) + _p.volOffset.z / _p.volVoxSize.z };
+        const cl_float3 voxCorner{ { -0.5f * (_p.volDim.x - 1) + _p.volOffset.x / _p.volVoxSize.x,
+                                     -0.5f * (_p.volDim.y - 1) + _p.volOffset.y / _p.volVoxSize.y,
+                                     -0.5f * (_p.volDim.z - 1) + _p.volOffset.z / _p.volVoxSize.z } };
 
-        _q.enqueueWriteImage(_volImage3D, CL_FALSE, cl::size_t<3>(), volDim, 0, 0,
+        _q.enqueueWriteImage(_volImage3D, CL_TRUE, cl::size_t<3>(), volDim, 0, 0,
                              const_cast<float*>(volume.rawData()));
-        _q.enqueueWriteBuffer(_sliceDimBuf, CL_FALSE, 0, 2 * sizeof(uint), &sliceDim);
-        _q.enqueueWriteBuffer(_voxCornerBuf, CL_FALSE, 0, 3 * sizeof(float), &voxCorner);
+        _q.enqueueWriteBuffer(_sliceDimBuf, CL_TRUE, 0, 2 * sizeof(uint), &sliceDim);
+        _q.enqueueWriteBuffer(_voxCornerBuf, CL_TRUE, 0, 3 * sizeof(float), &voxCorner);
 
     } catch(const cl::Error& err)
     {
@@ -311,9 +311,9 @@ RadonTransform3D::SingleDevice::planeIntegral(const mat::Matrix<3, 1>& planeUnit
             mat::vertcat(planeUnitNormal, mat::Matrix<1, 1>(-planeDistanceFromOrigin)));
 
         // store in OpenCL specifiv vector format
-        const cl_float16 h_cl{ float(h(0, 0)), float(h(0, 1)), float(h(0, 2)), float(h(0, 3)),
-                               float(h(1, 0)), float(h(1, 1)), float(h(1, 2)), float(h(1, 3)),
-                               float(h(2, 0)), float(h(2, 1)), float(h(2, 2)), float(h(2, 3)) };
+        const cl_float16 h_cl{ { float(h(0, 0)), float(h(0, 1)), float(h(0, 2)), float(h(0, 3)),
+                                 float(h(1, 0)), float(h(1, 1)), float(h(1, 2)), float(h(1, 3)),
+                                 float(h(2, 0)), float(h(2, 1)), float(h(2, 2)), float(h(2, 3)) } };
 
         // write buffers
         _q.enqueueWriteBuffer(_homoBuf, CL_FALSE, 0, 12 * sizeof(float), &h_cl);
@@ -367,7 +367,7 @@ void RadonTransform3D::SingleDevice::sliceDimensionsChanged()
 {
     _resultBuf = PinnedBufHostRead<float>(_p.nbPatches(), _q);
 
-    const cl_uint2 sliceDim{ _p.dim.width, _p.dim.height };
+    const cl_uint2 sliceDim{  { _p.dim.width, _p.dim.height } };
     _q.enqueueWriteBuffer(_sliceDimBuf, CL_FALSE, 0, 2 * sizeof(uint), &sliceDim);
 }
 
