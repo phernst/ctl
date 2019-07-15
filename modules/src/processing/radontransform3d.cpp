@@ -394,4 +394,35 @@ RadonTransform3D::SingleDevice::transformXYPlaneToPlane(const mat::Matrix<4, 1>&
 }
 
 } // namespace OCL
+
+std::vector<Generic3DCoord> toGeneric3DCoord(const std::vector<Radon3DCoord>& radonCoord)
+{
+    std::vector<Generic3DCoord> ret(radonCoord.size());
+    std::copy(radonCoord.cbegin(), radonCoord.cend(), ret.begin());
+    return ret;
+}
+
+std::vector<HomCoordPlaneNormalized> toHomCoordPlane(const std::vector<Radon3DCoord>& radonCoord)
+{
+    auto ret = std::vector<HomCoordPlaneNormalized>(radonCoord.size());
+    auto planePtr = ret.data();
+    float sinPol, cosPol, sinAzi, cosAzi;
+
+    for(const auto& coord : radonCoord)
+    {
+        sinPol = std::sin(coord.polar());
+        cosPol = std::cos(coord.polar());
+        sinAzi = std::sin(coord.azimuth());
+        cosAzi = std::cos(coord.azimuth());
+        planePtr->data[0] = sinPol * cosAzi;
+        planePtr->data[1] = sinPol * sinAzi;
+        planePtr->data[2] = cosPol;
+        planePtr->data[3] = -coord.dist();
+
+        ++planePtr;
+    }
+
+    return ret;
+}
+
 } // namespace CTL

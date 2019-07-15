@@ -9,6 +9,7 @@
 
 namespace CTL {
 
+
 struct Radon3DCoord : Generic3DCoord
 {
     Radon3DCoord() = default;
@@ -22,6 +23,27 @@ struct Radon3DCoord : Generic3DCoord
     const float& polar() const { return data[1]; }
     const float& dist() const { return data[2]; }
 };
+
+struct HomCoordPlaneNormalized
+{
+    mat::Matrix<4, 1> homoVec() const { return { data[0], data[1], data[2], data[3] }; }
+    mat::Matrix<3, 1> normalVector() const { return { data[0], data[1], data[2] }; }
+    mat::Matrix<1, 1> distance() const { return { - data[3] }; }
+
+    void setNormalVec(const mat::Matrix<3, 1>& normal)
+    {
+        std::transform(normal.begin(), normal.end(), data, [] (double el) { return float(el); } );
+    }
+    void setDistance(const mat::Matrix<1, 1>& distance)
+    {
+        data[3] = - distance;
+    }
+
+    float data[4];
+};
+
+std::vector<Generic3DCoord> toGeneric3DCoord(const std::vector<Radon3DCoord>& radonCoord);
+std::vector<HomCoordPlaneNormalized> toHomCoordPlane(const std::vector<Radon3DCoord>& radonCoord);
 
 namespace OCL {
 
