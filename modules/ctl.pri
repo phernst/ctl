@@ -10,6 +10,7 @@ CONFIG += CTL_CORE_MODULE
 
 # definition for mathematical constants
 DEFINES += _USE_MATH_DEFINES
+DEFINES += QT_MESSAGELOGCONTEXT
 
 INCLUDEPATH += $$PWD/src
 
@@ -84,7 +85,8 @@ HEADERS += \
     $$PWD/src/projectors/spectralprojectorextension.h \
     $$PWD/src/io/ctldatabase.h \
     $$PWD/src/processing/imageprocessing.h \
-    $$PWD/src/processing/coordinates.h
+    $$PWD/src/processing/coordinates.h \
+    $$PWD/src/io/messagehandler.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -134,7 +136,8 @@ SOURCES += \
     $$PWD/src/projectors/spectralprojectorextension.cpp \
     $$PWD/src/io/ctldatabase.cpp \
     $$PWD/src/processing/imageprocessing.cpp \
-    $$PWD/src/processing/diff.cpp
+    $$PWD/src/processing/diff.cpp \
+    $$PWD/src/io/messagehandler.cpp
 
 # create a file that contains the absolute path to database
 DATABASE_ROOT = $$PWD/../database
