@@ -40,6 +40,12 @@ void SpectrumTest::initTestCase()
     qInfo() << _tube->spectrum(100).normalizedByIntegral().samplingPoints();
 }
 
+void SpectrumTest::cleanupTestCase()
+{
+    delete _tube;
+    delete _model;
+}
+
 void SpectrumTest::testXrayLaserSpectrum()
 {
     CTL::XrayLaser laser;
@@ -62,11 +68,6 @@ void SpectrumTest::testSpectrumSampling()
     QVERIFY2(verifySampledSpectrum(CTL::IntervalDataSeries::sampledFromModel(*_model, 0.0f, 100.0f, 10)), "spectrum 1 failed");
     QVERIFY2(verifySampledSpectrum(CTL::IntervalDataSeries::sampledFromModel(*_model, 10.0f, 15.0f, 30)), "spectrum 2 failed");
     QVERIFY2(verifySampledSpectrum(CTL::IntervalDataSeries::sampledFromModel(*_model, 50.0f, 90.0f, 50)), "spectrum 3 failed");
-}
-
-void SpectrumTest::cleanupTestCase()
-{
-    delete _tube;
 }
 
 float SpectrumTest::calcIntensity(float energy) const

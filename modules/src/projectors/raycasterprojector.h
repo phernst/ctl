@@ -44,6 +44,7 @@ private: // members
     SingleViewData::Dimensions _viewDim; //!< dimensions of a single view
     Config _config; //!< configuration of the projector
     std::string _oclProgramName; //!< OCL program name (depends on if interpolation is enabled)
+    uint _volDim[3]; //!< cache for volume dimensions
 
 private: // methods
     void initOpenCL();

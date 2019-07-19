@@ -27,6 +27,11 @@ void GeometryTest::initTestCase()
     *_cArmTestSystem << cArmGantry << detector << source;
 }
 
+void GeometryTest::cleanupTestCase()
+{
+    delete _cArmTestSystem;
+    delete _tubeTestSystem;
+}
 void GeometryTest::testGeometryEncoder()
 {
     io::BaseTypeIO<io::DenFileIO> fileIO;

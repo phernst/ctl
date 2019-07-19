@@ -20,6 +20,7 @@ private Q_SLOTS:
     void testGeometryDecoder();
     void testGeometryEncoder();
     void testDecoderEncoderConsistency();
+    void cleanupTestCase();
 
 private:
     CTL::CTsystem* _cArmTestSystem;
