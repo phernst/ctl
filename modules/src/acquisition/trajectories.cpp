@@ -40,7 +40,7 @@ HelicalTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup&) const
     gantryPrep->setPitchPosition(viewNb * _pitchIncrement + _startPitch);
     gantryPrep->setRotationAngle(viewNb * _angleIncrement + _startAngle);
 
-    ret.push_back(gantryPrep);
+    ret.push_back(std::move(gantryPrep));
 
     qDebug() << "HelicalTrajectory --- add prepare steps for view: " << viewNb
              << "\n-rotation: " << viewNb * _angleIncrement + _startAngle
@@ -90,7 +90,7 @@ WobbleTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setup) const
 
     gantryPrep->setLocation(mat::Location(viewPosition, viewRotation));
 
-    ret.push_back(gantryPrep);
+    ret.push_back(std::move(gantryPrep));
 
     return ret;
 }
@@ -156,7 +156,7 @@ CirclePlusLineTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setu
 
     gantryPrep->setLocation(mat::Location(viewPosition, viewRotation));
 
-    ret.push_back(gantryPrep);
+    ret.push_back(std::move(gantryPrep));
 
     return ret;
 }
@@ -199,7 +199,7 @@ std::vector<std::shared_ptr<AbstractPrepareStep> > ShortScanTrajectory::prepareS
 
     gantryPrep->setLocation(mat::Location(viewPosition, viewRotation));
 
-    ret.push_back(gantryPrep);
+    ret.push_back(std::move(gantryPrep));
 
     return ret;
 }
@@ -210,7 +210,7 @@ bool ShortScanTrajectory::isApplicableTo(const AcquisitionSetup &setup) const
     return tmp.isApplicableTo(*setup.system());
 }
 
-double ShortScanTrajectory::fanAngle(const AcquisitionSetup &setup) const
+double ShortScanTrajectory::fanAngle(const AcquisitionSetup& setup) const
 {
     auto detector = setup.system()->detector();
     auto gantry   = static_cast<CarmGantry*>(setup.system()->gantry());
@@ -219,9 +219,9 @@ double ShortScanTrajectory::fanAngle(const AcquisitionSetup &setup) const
     switch (detector->type()) {
     case CylindricalDetector::Type:
     {
-        auto cylDetPtr = static_cast<CylindricalDetector*>(detector);
-        double cylFan =cylDetPtr->fanAngle();
-        relevantWidth = 2.0 * cylDetPtr->curvatureRadius() * sin(cylFan / 2.0);
+        const auto cylDetPtr = static_cast<CylindricalDetector*>(detector);
+        const auto cylFan = cylDetPtr->fanAngle();
+        relevantWidth = 2.0 * cylDetPtr->curvatureRadius() * std::sin(cylFan / 2.0);
         break;
     }
     case FlatPanelDetector::Type:
@@ -253,7 +253,7 @@ AxialScanTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setup) co
 
     gantryPrep->setRotationAngle(viewNb * angleIncrement + _startAngle);
 
-    ret.push_back(gantryPrep);
+    ret.push_back(std::move(gantryPrep));
 
     qDebug() << "AxialScanTrajectory --- add prepare steps for view: " << viewNb
              << "\n-rotation: " << viewNb * angleIncrement + _startAngle;

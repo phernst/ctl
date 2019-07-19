@@ -22,7 +22,7 @@ namespace {
 // helper functions
 cl_double16 decomposeM(const Matrix3x3& M);
 cl_float3 determineSource(const ProjectionMatrix& P);
-cl_float3 volumeCorner(cl::size_t<3> volDim, cl_float3 voxelSize, cl_float3 volOffset);
+cl_float3 volumeCorner(const cl::size_t<3>& volDim, const cl_float3& voxelSize, const cl_float3& volOffset);
 std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, size_t memSize, const void* hostPtr,
                                               const std::vector<cl::CommandQueue>& queues);
 
@@ -31,19 +31,19 @@ struct VolumeSpecs
 {
     static VolumeSpecs upSampleVolume(const VolumeData& volume, uint upSamplingFactor);
 
-    cl::size_t<3> volDim;
     cl_float3 volOffset;
     cl_float3 voxelSize;
+    cl::size_t<3> volDim;
+    std::vector<float> upSampledVolume;
     float* volumeDataPtr;
     float mean;
-    std::vector<float> upSampledVolume;
 };
 
 struct PtrWrapper
 {
     template<class T>
     PtrWrapper(T* ptr) : ptr(ptr), size(sizeof(T)) { }
-    void* ptr;
+    const void* ptr;
     size_t size;
 };
 } // unnamed namespace
@@ -60,8 +60,8 @@ void RayCasterProjector::configure(const AcquisitionSetup &setup,
 
     // extract required system geometry
     auto detectorPixels = setup.system()->detector()->nbPixelPerModule();
-    _viewDim.nbRows = detectorPixels.height();
-    _viewDim.nbChannels = detectorPixels.width();
+    _viewDim.nbRows = uint(detectorPixels.height());
+    _viewDim.nbChannels = uint(detectorPixels.width());
     _viewDim.nbModules = setup.system()->detector()->nbDetectorModules();
 
     // prepare RayCaster
@@ -106,12 +106,12 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
     const size_t pixelPerView = size_t(_viewDim.nbModules) * pixelPerModule;
 
     // upsample volume (if volumeUpSampling > 1)
-    auto volumeSpecs = VolumeSpecs::upSampleVolume(volume, _config.volumeUpSampling);
+    const auto volumeSpecs = VolumeSpecs::upSampleVolume(volume, _config.volumeUpSampling);
 
     // volume specs
-    auto& volDim = volumeSpecs.volDim;
-    auto& volOffset = volumeSpecs.volOffset;
-    auto& voxelSize = volumeSpecs.voxelSize;
+    const auto& volDim = volumeSpecs.volDim;
+    const auto& volOffset = volumeSpecs.volOffset;
+    const auto& voxelSize = volumeSpecs.voxelSize;
     auto* volumeDataPtr = volumeSpecs.volumeDataPtr;
 
     // determine ray step length in mm
@@ -202,9 +202,11 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
                 queues[dev].enqueueWriteBuffer(volumeBufs[dev], CL_FALSE, 0,
                                                memSize, volumeDataPtr, nullptr, &writeVolFinished[dev]);
             }
-            // additional buffer with volume dimensions
-            uint volumeDim[3] = { uint(volDim[0]), uint(volDim[1]), uint(volDim[2]) };
-            volumeDimensionsBufs = mkInitBufs(&volumeDim);
+            // buffer with volume dimensions
+            _volDim[0] = uint(volDim[0]);
+            _volDim[1] = uint(volDim[1]);
+            _volDim[2] = uint(volDim[2]);
+            volumeDimensionsBufs = mkInitBufs(&_volDim);
 
             // there seems to be a bug on Windows, therefore this waiting is required
             for(auto& e : writeVolFinished)
@@ -291,7 +293,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
             ++device;
             device = device % nbUsedDevs;
 
-            emit notifier()->projectionFinished(view);
+            emit notifier()->projectionFinished(int(view));
         }
         // wait for remaining devices
         for(uint remainingDev = 0; remainingDev < nbUsedDevs; ++remainingDev)
@@ -413,16 +415,16 @@ RayCasterProjector::Config RayCasterProjector::Config::optimizedFor(const Volume
     uint ratios[5][2] = { {1,2}, {1,3}, {1,4}, {2,3}, {3,4} };
     double deviation = fabs(pixelRatio - 1.0);
     for(const auto& r : ratios)
-        if(fabs(pixelRatio - (double)r[0]/r[1]) < deviation)
+        if(fabs(pixelRatio - double(r[0])/double(r[1])) < deviation)
         {
-            deviation = fabs(pixelRatio - (double)r[0]/r[1]);
+            deviation = fabs(pixelRatio - double(r[0])/double(r[1]));
             ret.raysPerPixel[0] = r[broadPixel];
             ret.raysPerPixel[1] = r[!broadPixel];
         }
 
     // up-sampling factor for volume (if voxel large)
-    double smallestVoxelSize = volume.smallestVoxelSize();
-    double smallestPixelSize = qMin(Xmm/ret.raysPerPixel[0], Ymm/ret.raysPerPixel[1]);
+    const auto smallestVoxelSize = double(volume.smallestVoxelSize());
+    const auto smallestPixelSize = qMin(Xmm/ret.raysPerPixel[0], Ymm/ret.raysPerPixel[1]);
     ret.volumeUpSampling = qMax(uint(smallestVoxelSize / smallestPixelSize), 1u);
 
     // increase number of rays (if voxels are small)
@@ -465,7 +467,7 @@ cl_float3 determineSource(const ProjectionMatrix& P)
 }
 
 // documentation in "\file section" at end of this file
-cl_float3 volumeCorner(cl::size_t<3> volDim, cl_float3 voxelSize, cl_float3 volOffset)
+cl_float3 volumeCorner(const cl::size_t<3> &volDim, const cl_float3 &voxelSize, const cl_float3 &volOffset)
 {
     return { { volOffset.s[0] - 0.5f * volDim[0] * voxelSize.s[0],
                volOffset.s[1] - 0.5f * volDim[1] * voxelSize.s[1],
@@ -497,9 +499,10 @@ VolumeSpecs VolumeSpecs::upSampleVolume(const VolumeData& volume, uint upSamplin
     volSpecs.volOffset.s[1] = volume.offset().y;
     volSpecs.volOffset.s[2] = volume.offset().z;
 
-    size_t X = volume.nbVoxels().x,
-           Y = volume.nbVoxels().y,
-           Z = volume.nbVoxels().z;
+    const auto& nbVoxels = volume.nbVoxels();
+    size_t X = nbVoxels.x;
+    size_t Y = nbVoxels.y;
+    size_t Z = nbVoxels.z;
 
     switch (upSamplingFactor) {
 
@@ -517,7 +520,7 @@ VolumeSpecs VolumeSpecs::upSampleVolume(const VolumeData& volume, uint upSamplin
         volSpecs.mean = 0.0f;
         for(auto val : volume.constData())
             volSpecs.mean += val;
-        volSpecs.mean /= (float)volume.totalVoxelCount();
+        volSpecs.mean /= float(volume.totalVoxelCount());
 
         volSpecs.volumeDataPtr = &volSpecs.mean;
 
