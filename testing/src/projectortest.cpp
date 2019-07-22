@@ -140,6 +140,8 @@ void ProjectorTest::testSpectralExtension()
     qInfo() << mean << var;
     QVERIFY2(std::abs(mean) < 0.01, "Linear simple failed");
     QVERIFY2(var < 0.01, "Linear simple failed");
+
+    delete spectralExt;
 }
 
 void ProjectorTest::poissonSimulation(double meanPhotons,
