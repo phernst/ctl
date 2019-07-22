@@ -19,13 +19,6 @@ namespace CTL {
 namespace OCL {
 
 namespace {
-// helper functions
-cl_double16 decomposeM(const Matrix3x3& M);
-cl_float3 determineSource(const ProjectionMatrix& P);
-cl_float3 volumeCorner(const cl::size_t<3>& volDim, const cl_float3& voxelSize, const cl_float3& volOffset);
-std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, size_t memSize, const void* hostPtr,
-                                              const std::vector<cl::CommandQueue>& queues);
-
 // helper classes
 struct VolumeSpecs
 {
@@ -46,6 +39,14 @@ struct PtrWrapper
     const void* ptr;
     size_t size;
 };
+
+// helper functions
+cl_double16 decomposeM(const Matrix3x3& M);
+cl_float3 determineSource(const ProjectionMatrix& P);
+cl_float3 volumeCorner(const cl::size_t<3>& volDim, const cl_float3& voxelSize,
+                       const cl_float3& volOffset);
+std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, const PtrWrapper& hostPtr,
+                                              const std::vector<cl::CommandQueue>& queues);
 } // unnamed namespace
 
 /*!
@@ -165,7 +166,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
 
         // Other input (read only) buffers for each device
         auto mkInitBufs = [nbUsedDevs, &queues](PtrWrapper ptrWrapper) {
-            return createReadOnlyBuffers(nbUsedDevs, ptrWrapper.size, ptrWrapper.ptr, queues);
+            return createReadOnlyBuffers(nbUsedDevs, ptrWrapper, queues);
         };
         // constant (view/device-independent) buffers
         std::vector<cl::Buffer> raysPerPixelBufs = mkInitBufs(&raysPerPixel);
@@ -199,8 +200,8 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
             {
                 volumeBufs.emplace_back(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                                         memSize);
-                queues[dev].enqueueWriteBuffer(volumeBufs[dev], CL_FALSE, 0,
-                                               memSize, volumeDataPtr, nullptr, &writeVolFinished[dev]);
+                queues[dev].enqueueWriteBuffer(volumeBufs[dev], CL_FALSE, 0, memSize,
+                                               volumeDataPtr, nullptr, &writeVolFinished[dev]);
             }
             // buffer with volume dimensions
             _volDim[0] = uint(volDim[0]);
@@ -432,8 +433,8 @@ RayCasterProjector::Config RayCasterProjector::Config::optimizedFor(const Volume
     ret.raysPerPixel[0] *= rayIncreaseFactor;
     ret.raysPerPixel[1] *= rayIncreaseFactor;
 
-    //qDebug() << "raysPerPixel:" << ret.raysPerPixel[0] << "," << ret.raysPerPixel[1];
-    //qDebug() << "upsampling factor:" << ret.volumeUpSampling;
+    qDebug() << "raysPerPixel:" << ret.raysPerPixel[0] << "," << ret.raysPerPixel[1];
+    qDebug() << "upsampling factor:" << ret.volumeUpSampling;
 
     return ret;
 }
@@ -449,12 +450,12 @@ cl_double16 decomposeM(const Matrix3x3& M)
     auto& R = QR.R;
     if(std::signbit(R(0, 0) * R(1, 1) * R(2, 2)))
         R = -R;
-    cl_double16 ret = { {Q(0,0),Q(0,1),Q(0,2),
-                         Q(1,0),Q(1,1),Q(1,2),
-                         Q(2,0),Q(2,1),Q(2,2),
-                         R(0,0),R(0,1),R(0,2),
-                                R(1,1),R(1,2),
-                                       R(2,2)} };
+    cl_double16 ret = { { Q(0,0), Q(0,1), Q(0,2),
+                          Q(1,0), Q(1,1), Q(1,2),
+                          Q(2,0), Q(2,1), Q(2,2),
+                          R(0,0), R(0,1), R(0,2),
+                                  R(1,1), R(1,2),
+                                          R(2,2) } };
     return ret;
 }
 
@@ -467,24 +468,25 @@ cl_float3 determineSource(const ProjectionMatrix& P)
 }
 
 // documentation in "\file section" at end of this file
-cl_float3 volumeCorner(const cl::size_t<3> &volDim, const cl_float3 &voxelSize, const cl_float3 &volOffset)
+cl_float3 volumeCorner(const cl::size_t<3>& volDim, const cl_float3& voxelSize,
+                       const cl_float3& volOffset)
 {
     return { { volOffset.s[0] - 0.5f * volDim[0] * voxelSize.s[0],
                volOffset.s[1] - 0.5f * volDim[1] * voxelSize.s[1],
                volOffset.s[2] - 0.5f * volDim[2] * voxelSize.s[2] } };
 }
 
-std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, size_t memSize, const void* hostPtr,
+std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, const PtrWrapper& hostPtr,
                                               const std::vector<cl::CommandQueue>& queues)
 {
     std::vector<cl::Buffer> ret;
     ret.reserve(nbBuffers);
     for(uint buf = 0; buf < nbBuffers; ++buf)
         ret.emplace_back(OpenCLConfig::instance().context(),
-                         CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY, memSize);
+                         CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY, hostPtr.size);
 
     for(uint buf = 0; buf < nbBuffers; ++buf)
-        queues[buf].enqueueWriteBuffer(ret[buf], CL_FALSE, 0, memSize, hostPtr);
+        queues[buf].enqueueWriteBuffer(ret[buf], CL_FALSE, 0, hostPtr.size, hostPtr.ptr);
 
     return ret;
 }
@@ -620,14 +622,14 @@ VolumeSpecs VolumeSpecs::upSampleVolume(const VolumeData& volume, uint upSamplin
  */
 
 /*!
- * \fn cl_float3 CTL::OCL::determineSource(const ProjectionMatrix& P);
+ * \fn cl_float3 CTL::OCL::determineSource(const ProjectionMatrix& P)
  * \relates CTL::OCL::RayCasterProjector
  *
  * Returns the source position encoded in \a P as a `cl_float3`.
  */
 
 /*!
- * \fn cl_float3 CTL::OCL::volumeCorner(cl::size_t<3> volDim, cl_float3 voxelSize, cl_float3 volOffset);
+ * \fn cl_float3 CTL::OCL::volumeCorner(const cl::size_t<3>& volDim, const cl_float3& voxelSize, const cl_float3& volOffset)
  * \relates CTL::OCL::RayCasterProjector
  *
  * Computes and returns the coordinates of the volume corner (with the lowest coordinates) with
