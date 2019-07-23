@@ -136,6 +136,7 @@ public:
                                         NormalizationMode normalizationMode = NoNormalization) const;
     Matrix<3, 1> principalRayDirection() const;
     // extrinsic parameters
+    Matrix<3, 1> translationCTS() const;
     Matrix<3, 1> sourcePosition() const;
     Matrix<3, 3> rotationMatR() const;
     // intrinsic parameters
@@ -144,6 +145,10 @@ public:
     Matrix<2, 1> principalPoint() const;
     Matrix<2, 1> focalLength() const;
     double skewCoefficient() const;
+    double magnificationX(double X, double Y, double Z) const;
+    double magnificationX(const Matrix<3, 1>& worldCoordinate = { 0.0, 0.0, 0.0 }) const;
+    double magnificationY(double X, double Y, double Z) const;
+    double magnificationY(const Matrix<3, 1>& worldCoordinate = { 0.0, 0.0, 0.0 }) const;
 
     // # other/convenience
     Matrix<2, 1> projectOntoDetector(double X, double Y, double Z) const;

@@ -322,8 +322,8 @@ void AcquisitionSetup::applyPreparationProtocol(const AbstractPreparationProtoco
             _views[view].addPrepareStep(std::move(step));
     }
 
-    qDebug() << "AcquisitionSetup --- addPreparationProtocol";
-    qDebug() << "-nbViews: " << _views.size();
+    qDebug() << "AcquisitionSetup --- addPreparationProtocol\n"
+             << "- nbViews: " << _views.size();
 }
 
 /*!

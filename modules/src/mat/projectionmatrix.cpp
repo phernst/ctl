@@ -30,7 +30,7 @@ namespace mat {
  */
 ProjectionMatrix ProjectionMatrix::compose(const Matrix<3, 3>& M, const Matrix<3, 1>& p4)
 {
-    return mat::horzcat(M, p4);
+    return horzcat(M, p4);
 }
 
 /*!
@@ -121,7 +121,7 @@ void ProjectionMatrix::changeDetectorResolution(double resamplingFactorX, double
 void ProjectionMatrix::normalize()
 {
     double denom = Matrix<3, 1>({ get<2, 0>(), get<2, 1>(), get<2, 2>() }).norm();
-    denom = std::copysign(denom, mat::det(M()));
+    denom = std::copysign(denom, det(M()));
     Q_ASSERT(!qFuzzyIsNull(denom));
     *this /= denom;
 }
@@ -136,7 +136,7 @@ void ProjectionMatrix::normalize()
 ProjectionMatrix ProjectionMatrix::normalized() const
 {
     double denom = Matrix<3, 1>({ get<2, 0>(), get<2, 1>(), get<2, 2>() }).norm();
-    denom = std::copysign(denom, mat::det(M()));
+    denom = std::copysign(denom, det(M()));
     Q_ASSERT(!qFuzzyIsNull(denom));
     return *this / denom;
 }
@@ -147,7 +147,7 @@ ProjectionMatrix ProjectionMatrix::normalized() const
  */
 Matrix<3, 3> ProjectionMatrix::M() const
 {
-    return mat::horzcat(mat::horzcat(column<0>(), column<1>()), column<2>());
+    return horzcat(horzcat(column<0>(), column<1>()), column<2>());
 }
 
 /*!
@@ -188,7 +188,7 @@ Matrix<3, 1> ProjectionMatrix::directionSourceToPixel(const Matrix<2, 1>& pixelC
 Matrix<3, 1> ProjectionMatrix::directionSourceToPixel(double x, double y,
                                                       NormalizationMode normalizationMode) const
 {
-    auto RQ = mat::RQdecomposition(M(),false,false);
+    auto RQ = RQdecomposition(M(),false,false);
     auto& R = RQ.R;
     auto& Q = RQ.Q;
 
@@ -231,9 +231,20 @@ Matrix<3, 1> ProjectionMatrix::principalRayDirection() const
     Matrix<3, 1> ret({ get<2, 0>(), get<2, 1>(), get<2, 2>() });
     const auto vecNorm = ret.norm();
     Q_ASSERT(!qFuzzyIsNull(vecNorm));
-    const double scale = std::copysign(1.0 / vecNorm, mat::det(M()));
+    const double scale = std::copysign(1.0 / vecNorm, det(M()));
     ret *= scale;
     return ret;
+}
+
+/*!
+ * Returns the translation of the CT system (after rotation) \f$\mathbf{t}=-R\mathbf{c}\f$
+ * (with source position \f$\mathbf{c}\f$). It is the vector \f$\mathbf{t}\f$ in the decomposition
+ * \f$P=K\,\left[\begin{array}{cc} R & \mathbf{t}\end{array}\right]=KR\,\left[\begin{array}{cc}
+ * I & -\mathbf{c}\end{array}\right]\f$.
+ */
+Matrix<3, 1> ProjectionMatrix::translationCTS() const
+{
+    return -(rotationMatR() * sourcePosition());
 }
 
 // extrinsic parameters
@@ -245,8 +256,6 @@ Matrix<3, 1> ProjectionMatrix::principalRayDirection() const
  */
 Matrix<3, 1> ProjectionMatrix::sourcePosition() const
 {
-    using mat::det;
-    using mat::horzcat;
     // normalization to convert homogeneous to cartesian coordinates
     double hom2cart = -det(horzcat(horzcat(column<0>(), column<1>()), column<2>()));
     Q_ASSERT(!qFuzzyIsNull(hom2cart));
@@ -264,19 +273,19 @@ Matrix<3, 1> ProjectionMatrix::sourcePosition() const
  */
 Matrix<3, 3> ProjectionMatrix::rotationMatR() const
 {
-    return mat::RQdecomposition(M(), true, false).Q;
+    return RQdecomposition(M(), true, false).Q;
 }
 
 // intrinsic parameters
 
 /*!
- * Returns the calibration matrix (intrinsic parameters).
+ * Returns the normalized calibration matrix (intrinsic parameters).
  *
  * \sa compose(const Matrix<3, 3>& K, const Matrix<3, 3>& R, const Matrix<3, 1>& source)
  */
 Matrix<3, 3> ProjectionMatrix::intrinsicMatK() const
 {
-    return mat::RQdecomposition(M(), true, true).R;
+    return RQdecomposition(M(), true, true).R;
 }
 
 // intrinsic convenience functions
@@ -309,6 +318,59 @@ Matrix<2, 1> ProjectionMatrix::focalLength() const
  * Returns the skew coefficient, which is zero if the detector coordinate system is orthogonal.
  */
 double ProjectionMatrix::skewCoefficient() const { return intrinsicMatK().get<0, 1>(); }
+
+/*!
+ * Same as magnificationX(const Matrix<3, 1>& worldCoordinate).
+ */
+double ProjectionMatrix::magnificationX(double X, double Y, double Z) const
+{
+    return magnificationX({ X, Y, Z });
+}
+
+/*!
+ * Return the magnification factor w.r.t. to the x dimension of the detector (channel direction).
+ * This factor `M` describes how strong a point in world coordinates \a worldCoordinate is magnified
+ * when it is projected onto the detector.
+ * Precisely, this means that an extent `epsilon` mm that is parallel to the detector's x-axis is
+ * enlarged to `M*epsilon` pixels.
+ *
+ * \sa magnificationX(double X, double Y, double Z)
+ */
+double ProjectionMatrix::magnificationX(const Matrix<3, 1>& worldCoordinate) const
+{
+    const auto RQ = RQdecomposition(M());
+    const auto& K = RQ.R;
+    const auto& R = RQ.Q;
+    return K.get<0, 0>() / (R.row<2>() * worldCoordinate + translationCTS().get<2>());
+}
+
+/*!
+ * Same as magnificationY(const Matrix<3, 1>& worldCoordinate).
+ */
+double ProjectionMatrix::magnificationY(double X, double Y, double Z) const
+{
+    return magnificationY({ X, Y, Z });
+}
+
+/*!
+ * Return the magnification factor w.r.t. to the y dimension of the detector (row direction).
+ * This factor `M` describes how strong a point in world coordinates \a worldCoordinate is magnified
+ * when it is projected onto the detector.
+ * Precisely, this means that an extent `epsilon` mm that is parallel to the detector's y-axis is
+ * enlarged to `M*epsilon` pixels.
+ * Note that if there are square pixels and no skew factor, this magnification is identical to the
+ * magnification in the x dimension of the detector, s.a. magnificationX().
+ *
+ * \sa magnificationY(double X, double Y, double Z)
+ */
+double ProjectionMatrix::magnificationY(const Matrix<3, 1>& worldCoordinate) const
+{
+    const auto RQ = RQdecomposition(M());
+    const auto& K = RQ.R;
+    const auto& R = RQ.Q;
+    return Matrix<2, 1>{ K.get<0, 1>(), K.get<1, 1>() }.norm() /
+           (R.row<2>() * worldCoordinate + translationCTS().get<2>());
+}
 
 /*!
  * Maps a point in (cartesian) world coordinates onto the detector/image plane. This 2-dimensional
