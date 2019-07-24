@@ -18,10 +18,10 @@ class Homography2D : public Matrix<3, 3>
 
     // specialized ctors
     // translation
-    Homography2D(const Matrix<2, 1>& translation);
+    explicit Homography2D(const Matrix<2, 1>& translation);
     // rotation
-    Homography2D(const Matrix<2, 2>& rotation);
-    Homography2D(double angle);
+    explicit Homography2D(const Matrix<2, 2>& rotation);
+    explicit Homography2D(double angle);
     // Euclidian transform
     Homography2D(const Matrix<2, 1>& translation, const Matrix<2, 2>& rotation);
     Homography2D(const Matrix<2, 1>& translation, double angle);
@@ -39,9 +39,9 @@ public:
 
     // specialized ctors
     // translation
-    Homography3D(const Matrix<3, 1>& translation);
+    explicit Homography3D(const Matrix<3, 1>& translation);
     // rotation
-    Homography3D(const Matrix<3, 3>& rotation);
+    explicit Homography3D(const Matrix<3, 3>& rotation);
     Homography3D(double angle, Qt::Axis axis);
     // Euclidian transform
     Homography3D(const Matrix<3, 1>& translation, const Matrix<3, 3>& rotation);
