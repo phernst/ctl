@@ -86,7 +86,8 @@ HEADERS += \
     $$PWD/src/io/ctldatabase.h \
     $$PWD/src/processing/imageprocessing.h \
     $$PWD/src/processing/coordinates.h \
-    $$PWD/src/io/messagehandler.h
+    $$PWD/src/io/messagehandler.h \
+    $$PWD/src/mat/homography.h
 
 SOURCES += \
     $$PWD/src/components/carmgantry.cpp \
@@ -137,7 +138,8 @@ SOURCES += \
     $$PWD/src/io/ctldatabase.cpp \
     $$PWD/src/processing/imageprocessing.cpp \
     $$PWD/src/processing/diff.cpp \
-    $$PWD/src/io/messagehandler.cpp
+    $$PWD/src/io/messagehandler.cpp \
+    $$PWD/src/mat/homography.cpp
 
 # create a file that contains the absolute path to database
 DATABASE_ROOT = $$PWD/../database
