@@ -17,14 +17,21 @@ class Homography2D : public Matrix<3, 3>
     using Matrix<3, 3>::operator=;
 
     // specialized ctors
-    // translation
-    explicit Homography2D(const Matrix<2, 1>& translation);
     // rotation
     explicit Homography2D(const Matrix<2, 2>& rotation);
     explicit Homography2D(double angle);
+    // translation
+    explicit Homography2D(const Matrix<2, 1>& translation);
     // Euclidian transform
-    Homography2D(const Matrix<2, 1>& translation, const Matrix<2, 2>& rotation);
-    Homography2D(const Matrix<2, 1>& translation, double angle);
+    Homography2D(const Matrix<2, 2>& rotation, const Matrix<2, 1>& translation);
+    Homography2D(double angle, const Matrix<2, 1>& translation);
+
+    // factories
+    static Homography2D passive(const Matrix<2, 2>& rotation);
+    static Homography2D passive(double angle);
+    static Homography2D passive(const Matrix<2, 1>& translation);
+    static Homography2D passive(const Matrix<2, 2>& rotation, const Matrix<2, 1>& translation);
+    static Homography2D passive(double angle, const Matrix<2, 1>& translation);
 };
 
 class Homography3D : public Matrix<4, 4>
@@ -38,14 +45,21 @@ public:
     using Matrix<4, 4>::operator=;
 
     // specialized ctors
-    // translation
-    explicit Homography3D(const Matrix<3, 1>& translation);
     // rotation
     explicit Homography3D(const Matrix<3, 3>& rotation);
     Homography3D(double angle, Qt::Axis axis);
+    // translation
+    explicit Homography3D(const Matrix<3, 1>& translation);
     // Euclidian transform
-    Homography3D(const Matrix<3, 1>& translation, const Matrix<3, 3>& rotation);
-    Homography3D(const Matrix<3, 1>& translation, double angle, Qt::Axis axis);
+    Homography3D(const Matrix<3, 3>& rotation, const Matrix<3, 1>& translation);
+    Homography3D(double angle, Qt::Axis axis, const Matrix<3, 1>& translation);
+
+    // factories
+    static Homography3D passive(const Matrix<3, 3>& rotation);
+    static Homography3D passive(double angle);
+    static Homography3D passive(const Matrix<3, 1>& translation);
+    static Homography3D passive(const Matrix<3, 3>& rotation, const Matrix<3, 1>& translation);
+    static Homography3D passive(double angle, Qt::Axis axis, const Matrix<3, 1>& translation);
 };
 
 } // namespace mat
