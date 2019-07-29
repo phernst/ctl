@@ -103,6 +103,11 @@ public:
     static Matrix<Rows, Cols>
     fromContainer(const Container& vector, size_t NthMat, bool* ok = nullptr);
 
+    // sub-matrix extraction
+    template <uint fromRow, uint toRow, uint fromCol, uint toCol>
+    auto subMat() const -> Matrix<toRow >= fromRow ? toRow - fromRow + 1 : fromRow - toRow + 1,
+                                  toCol >= fromCol ? toCol - fromCol + 1 : fromCol - toCol + 1>;
+
     // single vector extraction
     template <uint i>
     Matrix<1, Cols> row() const;

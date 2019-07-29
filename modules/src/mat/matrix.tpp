@@ -227,6 +227,33 @@ Matrix<Rows, Cols>::fromContainer(const Container& vector, size_t NthMat, bool* 
     return ret;
 }
 
+// sub-matrix extraction
+template <uint Rows, uint Cols>
+template <uint fromRow, uint toRow, uint fromCol, uint toCol>
+auto Matrix<Rows, Cols>::subMat() const
+-> Matrix<toRow >= fromRow ? toRow - fromRow + 1 : fromRow - toRow + 1,
+          toCol >= fromCol ? toCol - fromCol + 1 : fromCol - toCol + 1>
+{
+    static_assert(fromRow < Rows, "fromRow exceeds matrix dimension");
+    static_assert(toRow < Rows, "toRow exceeds matrix dimension");
+    static_assert(fromCol < Cols, "fromCol exceeds matrix dimension");
+    static_assert(toCol < Cols, "toCol exceeds matrix dimension");
+    constexpr auto nbRowsSub = toRow >= fromRow ? toRow - fromRow + 1 : fromRow - toRow + 1;
+    constexpr auto nbColsSub = toCol >= fromCol ? toCol - fromCol + 1 : fromCol - toCol + 1;
+
+    Matrix<nbRowsSub, nbColsSub> ret;
+    constexpr int rowInc = toRow >= fromRow ? 1 : -1;
+    constexpr int colInc = toCol >= fromCol ? 1 : -1;
+    uint row = fromRow, subRow = 0;
+    uint col = fromCol, subCol = 0;
+
+    for(row = fromRow, subRow = 0; row != (toRow + rowInc); row += rowInc, ++subRow)
+        for(col = fromCol, subCol = 0; col != (toCol + colInc); col += colInc, ++subCol)
+            ret(subRow, subCol) = (*this)(row, col);
+
+    return ret;
+}
+
 // single vector extraction
 template <uint Rows, uint Cols>
 template <uint i>
