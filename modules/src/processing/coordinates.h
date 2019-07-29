@@ -55,7 +55,7 @@ struct Range
         T val = from-increment;
         std::generate(ret.begin(), ret.end(), [&val, increment]{ return val+=increment; });
         return ret;
-    };
+    }
 
     T data[2];
 };
