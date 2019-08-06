@@ -5,9 +5,7 @@
 __constant sampler_t samp = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_LINEAR;
 
 // the kernel
-__kernel void planeInt( __constant float3* volCorner_vox,
-                        __constant uint2* sliceDim,
-                        __constant float16* homography,
+__kernel void planeInt( __constant float16* homography,
                         __global float* patchResults,
                         __read_only image3d_t volume )
 {
@@ -24,18 +22,14 @@ __kernel void planeInt( __constant float3* volCorner_vox,
     const uint groupIDY = get_group_id(1);
     const uint numGroupsX = get_num_groups(0);
 
-    const float2 sliceCorner_pix = 0.5f * convert_float2(*sliceDim - (uint2)1u);
+    // ny': sample of "template hyperplane"
+    const float4 sliceCoord = (float4)((float)x, (float)y, 0.0f, 1.0f);
 
-    const float4 sliceCoord = (float4)((float)x - sliceCorner_pix.x,
-                                       (float)y - sliceCorner_pix.y,
-                                       0.0f,
-                                       1.0f);
-
+    // H^-1 * ny'
     const float4 voxToRead = (float4)(dot((*homography).s0123, sliceCoord),
                                       dot((*homography).s4567, sliceCoord),
                                       dot((*homography).s89ab, sliceCoord),
-                                      0.0f)
-                             - (float4)(*volCorner_vox, 0.0f) + (float4)0.5f;
+                                      0.0f);
 
     patch[yPatch][xPatch] = read_imagef(volume, samp, voxToRead).x;
     

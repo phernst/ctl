@@ -228,7 +228,7 @@ RadonTransform3D::sliceDim(const VoxelVolume<float>::Dimensions& volDim)
 
 uint RadonTransform3D::Parameters::nbPatches() const
 {
-    return (dim.width/PATCH_SIZE)*(dim.height/PATCH_SIZE);
+    return (dim.width / PATCH_SIZE) * (dim.height / PATCH_SIZE);
 }
 
 uint RadonTransform3D::nextMultipleOfN(uint value, uint N)
@@ -244,7 +244,13 @@ uint RadonTransform3D::nextMultipleOfN(uint value, uint N)
 RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
                                              const Parameters& params, uint oclDeviceNb)
     : _p(params)
+    , _volumeCorner{ volume.offset().x - 0.5 * volume.dimensions().x * volume.voxelSize().x,
+                     volume.offset().y - 0.5 * volume.dimensions().y * volume.voxelSize().y,
+                     volume.offset().z - 0.5 * volume.dimensions().z * volume.voxelSize().z }
+    , _sliceFirstPixelPos{ _p.reso * 0.5 * (_p.dim.width - 1),
+                           _p.reso * 0.5 * (_p.dim.height - 1) }
     , _q(OpenCLConfig::instance().context(), OpenCLConfig::instance().devices()[oclDeviceNb])
+    , _resultBuf(_p.nbPatches(), _q)
     , _volImage3D(OpenCLConfig::instance().context(),
                   CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                   cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
@@ -254,35 +260,20 @@ RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
     , _homoBuf(OpenCLConfig::instance().context(),
                CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                16 * sizeof(float))
-    , _sliceDimBuf(OpenCLConfig::instance().context(),
-                   CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
-                   2 * sizeof(uint))
-    , _voxCornerBuf(OpenCLConfig::instance().context(),
-                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
-                    3 * sizeof(float))
-    , _resultBuf((_p.dim.width/PATCH_SIZE) * (_p.dim.height/PATCH_SIZE), _q)
+    , _kernel(nullptr)
 {
     try
     {
         // Create kernel
         _kernel = OpenCLConfig::instance().kernel(CL_KERNEL_NAME, CL_PROGRAM_NAME);
 
-        // write buffers
+        // write 3d image
         cl::size_t<3> volDim;
         volDim[0] = volume.dimensions().x;
         volDim[1] = volume.dimensions().y;
         volDim[2] = volume.dimensions().z;
-
-        const cl_uint2 sliceDim{ { _p.dim.width, _p.dim.height } };
-
-        const cl_float3 voxCorner{ { -0.5f * (_p.volDim.x - 1) + _p.volOffset.x / _p.volVoxSize.x,
-                                     -0.5f * (_p.volDim.y - 1) + _p.volOffset.y / _p.volVoxSize.y,
-                                     -0.5f * (_p.volDim.z - 1) + _p.volOffset.z / _p.volVoxSize.z } };
-
         _q.enqueueWriteImage(_volImage3D, CL_TRUE, cl::size_t<3>(), volDim, 0, 0,
                              const_cast<float*>(volume.rawData()));
-        _q.enqueueWriteBuffer(_sliceDimBuf, CL_TRUE, 0, 2 * sizeof(uint), &sliceDim);
-        _q.enqueueWriteBuffer(_voxCornerBuf, CL_TRUE, 0, 3 * sizeof(float), &voxCorner);
 
     } catch(const cl::Error& err)
     {
@@ -307,23 +298,21 @@ RadonTransform3D::SingleDevice::planeIntegral(const mat::Matrix<3, 1>& planeUnit
             throw std::runtime_error("voxel size is zero or negative");
 
         // calculate homography that maps a XY-plane to the requested plane
-        const auto h = transformXYPlaneToPlane(
+        const auto H = transformXYPlaneToPlane(
             mat::vertcat(planeUnitNormal, mat::Matrix<1, 1>(-planeDistanceFromOrigin)));
 
         // store in OpenCL specifiv vector format
-        const cl_float16 h_cl{ { float(h(0, 0)), float(h(0, 1)), float(h(0, 2)), float(h(0, 3)),
-                                 float(h(1, 0)), float(h(1, 1)), float(h(1, 2)), float(h(1, 3)),
-                                 float(h(2, 0)), float(h(2, 1)), float(h(2, 2)), float(h(2, 3)) } };
+        const cl_float16 h_cl{ { float(H(0, 0)), float(H(0, 1)), float(H(0, 2)), float(H(0, 3)),
+                                 float(H(1, 0)), float(H(1, 1)), float(H(1, 2)), float(H(1, 3)),
+                                 float(H(2, 0)), float(H(2, 1)), float(H(2, 2)), float(H(2, 3)) } };
 
         // write buffers
         _q.enqueueWriteBuffer(_homoBuf, CL_FALSE, 0, 12 * sizeof(float), &h_cl);
 
         // set kernel arguments and run
-        _kernel->setArg(0, _voxCornerBuf);
-        _kernel->setArg(1, _sliceDimBuf);
-        _kernel->setArg(2, _homoBuf);
-        _kernel->setArg(3, _resultBuf.devBuffer());
-        _kernel->setArg(4, _volImage3D);
+        _kernel->setArg(0, _homoBuf);
+        _kernel->setArg(1, _resultBuf.devBuffer());
+        _kernel->setArg(2, _volImage3D);
 
         _q.enqueueNDRangeKernel(*_kernel, cl::NullRange, cl::NDRange(_p.dim.width, _p.dim.height),
                                                          cl::NDRange(PATCH_SIZE ,PATCH_SIZE));
@@ -367,8 +356,8 @@ void RadonTransform3D::SingleDevice::sliceDimensionsChanged()
 {
     _resultBuf = PinnedBufHostRead<float>(_p.nbPatches(), _q);
 
-    const cl_uint2 sliceDim{  { _p.dim.width, _p.dim.height } };
-    _q.enqueueWriteBuffer(_sliceDimBuf, CL_FALSE, 0, 2 * sizeof(uint), &sliceDim);
+    _sliceFirstPixelPos = { _p.reso * 0.5 * (_p.dim.width - 1),
+                            _p.reso * 0.5 * (_p.dim.height - 1) };
 }
 
 mat::Matrix<3, 4>
@@ -384,13 +373,16 @@ RadonTransform3D::SingleDevice::transformXYPlaneToPlane(const mat::Matrix<4, 1>&
     r2 /= r2.norm();
     r1 = mat::cross(r2, r3);
 
-    const auto rotationMatrix = mat::horzcat(mat::horzcat(r1, r2), r3);
-    const auto translationVec = rotationMatrix * Vector3x1{ 0.0, 0.0, -plane.get<3>() };
+    const auto rotMatTransp = mat::horzcat(mat::horzcat(r1, r2), r3);
+    const auto translationVec = rotMatTransp * Vector3x1{ _sliceFirstPixelPos.get<0>(),
+                                                          _sliceFirstPixelPos.get<1>(),
+                                                          plane.get<3>() }
+                                + _volumeCorner;
 
     Matrix3x3 voxelSizeNormalization = mat::diag(
         Vector3x1{ 1.0 / _p.volVoxSize.x, 1.0 / _p.volVoxSize.y, 1.0 / _p.volVoxSize.z });
 
-    return voxelSizeNormalization * mat::horzcat(_p.reso * rotationMatrix, translationVec);
+    return voxelSizeNormalization * mat::horzcat(_p.reso * rotMatTransp, -translationVec);
 }
 
 } // namespace OCL

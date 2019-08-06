@@ -145,13 +145,13 @@ private:
 
     private:
         const Parameters& _p;
+        mat::Matrix<3, 1> _volumeCorner;
+        mat::Matrix<2, 1> _sliceFirstPixelPos;
         cl::CommandQueue _q;
-        cl::Kernel* _kernel;
+        PinnedBufHostRead<float> _resultBuf;
         cl::Image3D _volImage3D;
         cl::Buffer _homoBuf;
-        cl::Buffer _sliceDimBuf;
-        cl::Buffer _voxCornerBuf;
-        PinnedBufHostRead<float> _resultBuf;
+        cl::Kernel* _kernel;
 
         mat::Matrix<3, 4> transformXYPlaneToPlane(const mat::Matrix<4, 1>& plane) const;
     };
