@@ -33,6 +33,29 @@ inline Matrix3x3 rotationMatrix(double angle, Qt::Axis axis)
     return mat::eye<3>();
 }
 
+inline Vector3x1 rotationAxis(const Matrix3x3& rotMat, bool lengthEqualsAngle)
+{
+    Vector3x1 ret{ rotMat(2,1) - rotMat(1,2),
+                   rotMat(0,2) - rotMat(2,0),
+                   rotMat(1,0) - rotMat(0,1) };
+
+    if(lengthEqualsAngle)
+    {
+        const auto norm = ret.norm();
+        const auto angle = std::asin(0.5 * norm);
+        ret *= angle / norm;
+    }
+
+    return ret;
+}
+
+inline double rotationAngle(const Matrix3x3& rotMat)
+{
+    const auto trace = rotMat.get<0, 0>() + rotMat.get<1, 1>() + rotMat.get<2, 2>();
+    const auto arg = 0.5 * (trace - 1);
+    return std::acos(std::min(arg, 1.0)); // limit by 1 for numerical safety
+}
+
 // diagonal squared matrix
 template <uint N>
 Matrix<N, N> diag(const Matrix<N, 1>& diagElements)
