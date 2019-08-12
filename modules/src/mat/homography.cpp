@@ -127,9 +127,9 @@ Homography3D Homography3D::passive(const Matrix<3, 3>& rotation)
     return Homography3D(rotation.transposed());
 }
 
-Homography3D Homography3D::passive(double angle)
+Homography3D Homography3D::passive(double angle, Qt::Axis axis)
 {
-    return Homography3D(-angle);
+    return Homography3D(-angle, axis);
 }
 
 Homography3D Homography3D::passive(const Matrix<3, 1>& translation)

@@ -56,7 +56,7 @@ public:
 
     // factories
     static Homography3D passive(const Matrix<3, 3>& rotation);
-    static Homography3D passive(double angle);
+    static Homography3D passive(double angle, Qt::Axis axis);
     static Homography3D passive(const Matrix<3, 1>& translation);
     static Homography3D passive(const Matrix<3, 3>& rotation, const Matrix<3, 1>& translation);
     static Homography3D passive(double angle, Qt::Axis axis, const Matrix<3, 1>& translation);
