@@ -52,8 +52,8 @@ struct Range
         std::vector<T> ret(nbSamples);
         const T increment = (nbSamples > 1) ? (to - from) / T(nbSamples - 1)
                                             : T(0);
-        T val = from-increment;
-        std::generate(ret.begin(), ret.end(), [&val, increment]{ return val+=increment; });
+        uint idx = 0;
+        std::generate(ret.begin(), ret.end(), [&idx, from, increment]{ return from + T(idx++) * increment; });
         return ret;
     }
 
