@@ -94,20 +94,27 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
     const auto nbPolSmpl = uint(polarAngleSampling.size());
     const auto nbDistSmpl = uint(distanceSampling.size());
 
+    for(auto& task : _tasks)
+        task.makeBufs(distanceSampling);
+
     VoxelVolume<float> ret(nbAziSmpl, nbPolSmpl, nbDistSmpl);
     ret.allocateMemory();
 
     const uint nbPatches = _p.nbPatches();
 
-    auto writeToRet = [&ret, nbPatches] (const DeviceResult& devRes, uint azi, uint pol, uint dist)
+    auto writeToRet = [&ret, nbPatches, nbDistSmpl] (const DeviceResult& devRes, uint azi, uint pol)
     {
         devRes.second->wait();
-        float sum = 0.0f;
-        const auto ptr = devRes.first;
-        for(uint val = 0; val < nbPatches; ++val)
-            sum += ptr[val];
+        for(uint dist = 0; dist < nbDistSmpl; ++dist)
+        {
+            float sum = 0.0f;
 
-        ret(azi, pol, dist) = sum;
+            const auto ptr = devRes.first + nbPatches*dist;
+            for(uint val = 0; val < nbPatches; ++val)
+                sum += ptr[val];
+
+            ret(azi, pol, dist) = sum;
+        }
     };
 
     auto nbDevices = _tasks.size();
@@ -115,39 +122,36 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
     std::vector<bool> devRunning(nbDevices, false);
     std::vector<uint> aziAngle(nbDevices);
     std::vector<uint> polAngle(nbDevices);
-    std::vector<uint> distance(nbDevices);
-    uint azi, pol, dist, dev = 0;
+    //std::vector<uint> distance(nbDevices);
+    uint azi, pol, dev = 0;
 
-    for(dist = 0; dist < nbDistSmpl; ++dist)
-        for(pol = 0; pol < nbPolSmpl; ++pol)
-            for(azi = 0; azi < nbAziSmpl; ++azi)
+    for(pol = 0; pol < nbPolSmpl; ++pol)
+        for(azi = 0; azi < nbAziSmpl; ++azi)
+        {
+            if(devRunning[dev])
             {
-                if(devRunning[dev])
-                {
-                    // wait for result and store in "ret"
-                    writeToRet(devResults[dev], aziAngle[dev], polAngle[dev], distance[dev]);
-                    devRunning[dev] = false;
-                }
+                // wait for result and store in "ret"
+                writeToRet(devResults[dev], aziAngle[dev], polAngle[dev]);
+                devRunning[dev] = false;
+            }
 
-                // start async calculation on device
-                devResults[dev] = _tasks[dev].planeIntegral(azimuthAngleSampling[azi],
-                                                            polarAngleSampling[pol],
-                                                            distanceSampling[dist]);
-                // memory for device state
-                aziAngle[dev] = azi;
-                polAngle[dev] = pol;
-                distance[dev] = dist;
-                devRunning[dev] = true;
+            // start async calculation on device
+            devResults[dev] = _tasks[dev].planeIntegrals(azimuthAngleSampling[azi],
+                                                         polarAngleSampling[pol]);
+            // memory for device state
+            aziAngle[dev] = azi;
+            polAngle[dev] = pol;
+            devRunning[dev] = true;
 
-                ++dev;
-                if(dev == nbDevices)
-                    dev = 0;
-             }
+            ++dev;
+            if(dev == nbDevices)
+                dev = 0;
+         }
 
     // evaluate remaining running devices
     for(uint dev = 0; dev < nbDevices; ++dev)
         if(devRunning[dev])
-            writeToRet(devResults[dev], aziAngle[dev], polAngle[dev], distance[dev]);
+            writeToRet(devResults[dev], aziAngle[dev], polAngle[dev]);
 
     // multiply result with area of a pixel
     return ret * std::pow(_p.reso, 2.0f);
@@ -165,8 +169,10 @@ float RadonTransform3D::planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
         qCritical() << "no OpenCL device initialized";
         return 0.0f;
     }
+
     // use first device for computation
-    const auto& res = _tasks[0].planeIntegral(planeUnitNormal, planeDistanceFromOrigin);
+    _tasks[0].makeBufs(std::vector<float>{ float(planeDistanceFromOrigin) });
+    const auto& res = _tasks[0].planeIntegrals(planeUnitNormal);
     res.second->wait();
     float sum = 0.0f;
     const auto ptr = res.first;
@@ -184,21 +190,13 @@ float RadonTransform3D::planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
 float RadonTransform3D::planeIntegral(double planeNormalAzimutAngle, double planeNormalPolarAngle,
                                       double planeDistanceFromOrigin) const
 {
-    if(_tasks.empty())
-    {
-        qCritical() << "no OpenCL device initialized";
-        return 0.0f;
-    }
-    // use first device for computation
-    const auto& res = _tasks[0].planeIntegral(planeNormalAzimutAngle, planeNormalPolarAngle,
-                                              planeDistanceFromOrigin);
-    res.second->wait();
-    float sum = 0.0f;
-    const auto ptr = res.first;
-    for(uint val = 0; val < _p.nbPatches(); ++val)
-        sum += ptr[val];
+    Vector3x1 planeNormal{
+        std::sin(planeNormalPolarAngle) * std::cos(planeNormalAzimutAngle),
+        std::sin(planeNormalPolarAngle) * std::sin(planeNormalAzimutAngle),
+        std::cos(planeNormalPolarAngle)
+    };
 
-    return sum * std::pow(_p.reso, 2.0f);
+    return planeIntegral(planeNormal, planeDistanceFromOrigin);
 }
 
 /*!
@@ -250,7 +248,6 @@ RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
     , _sliceFirstPixelPos{ _p.reso * 0.5 * (_p.dim.width - 1),
                            _p.reso * 0.5 * (_p.dim.height - 1) }
     , _q(OpenCLConfig::instance().context(), OpenCLConfig::instance().devices()[oclDeviceNb])
-    , _resultBuf(_p.nbPatches(), _q)
     , _volImage3D(OpenCLConfig::instance().context(),
                   CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                   cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
@@ -260,7 +257,11 @@ RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
     , _homoBuf(OpenCLConfig::instance().context(),
                CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                16 * sizeof(float))
+    , _distShiftBuf(OpenCLConfig::instance().context(),
+                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                    3 * sizeof(float))
     , _kernel(nullptr)
+    , _nbDist(0u)
 {
     try
     {
@@ -286,8 +287,7 @@ RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
 }
 
 RadonTransform3D::DeviceResult
-RadonTransform3D::SingleDevice::planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
-                                              double planeDistanceFromOrigin) const
+RadonTransform3D::SingleDevice::planeIntegrals(const mat::Matrix<3, 1>& planeUnitNormal) const
 {
     Q_ASSERT(qFuzzyCompare(planeUnitNormal.norm(), 1.0));
 
@@ -298,27 +298,38 @@ RadonTransform3D::SingleDevice::planeIntegral(const mat::Matrix<3, 1>& planeUnit
             throw std::runtime_error("voxel size is zero or negative");
 
         // calculate homography that maps a XY-plane to the requested plane
-        const auto H = transformXYPlaneToPlane(
-            mat::vertcat(planeUnitNormal, mat::Matrix<1, 1>(-planeDistanceFromOrigin)));
+        const auto R = rotationXYPlaneToPlane(planeUnitNormal);
+        const auto H = transformXYPlaneToCentralPlane(R);
 
-        // store in OpenCL specifiv vector format
+        const auto distShift = cl_float3 { { float(R.get<0,2>()) / _p.volVoxSize.x,
+                                             float(R.get<1,2>()) / _p.volVoxSize.y,
+                                             float(R.get<2,2>()) / _p.volVoxSize.z }};
+
+
+
+        // store in OpenCL specific vector format
         const cl_float16 h_cl{ { float(H(0, 0)), float(H(0, 1)), float(H(0, 2)), float(H(0, 3)),
                                  float(H(1, 0)), float(H(1, 1)), float(H(1, 2)), float(H(1, 3)),
                                  float(H(2, 0)), float(H(2, 1)), float(H(2, 2)), float(H(2, 3)) } };
 
         // write buffers
         _q.enqueueWriteBuffer(_homoBuf, CL_FALSE, 0, 12 * sizeof(float), &h_cl);
+        _q.enqueueWriteBuffer(_distShiftBuf, CL_FALSE, 0, 3 * sizeof(float), &distShift);
 
         // set kernel arguments and run
         _kernel->setArg(0, _homoBuf);
-        _kernel->setArg(1, _resultBuf.devBuffer());
-        _kernel->setArg(2, _volImage3D);
+        _kernel->setArg(1, _distShiftBuf);
+        _kernel->setArg(2, _distanceBuf);
+        _kernel->setArg(3, _nbDist);
+        _kernel->setArg(4, _resultBufAllDist->devBuffer());
+        _kernel->setArg(5, _volImage3D);
 
         _q.enqueueNDRangeKernel(*_kernel, cl::NullRange, cl::NDRange(_p.dim.width, _p.dim.height),
                                                          cl::NDRange(PATCH_SIZE ,PATCH_SIZE));
 
         // read result
-        _resultBuf.transferDevToPinnedMem(false, readEvent.get());
+
+        _resultBufAllDist->transferDevToPinnedMem(false, readEvent.get());
 
     } catch(const cl::Error& e)
     {
@@ -331,39 +342,50 @@ RadonTransform3D::SingleDevice::planeIntegral(const mat::Matrix<3, 1>& planeUnit
         qCritical() << "std exception:" << e.what();
     }
 
-    return { _resultBuf.hostPtr(), std::move(readEvent) };
+    return { _resultBufAllDist->hostPtr(), std::move(readEvent) };
 }
 
-RadonTransform3D::DeviceResult
-RadonTransform3D::SingleDevice::planeIntegral(double planeNormalAzimutAngle,
-                                              double planeNormalPolarAngle,
-                                              double planeDistanceFromOrigin) const
+RadonTransform3D::DeviceResult RadonTransform3D::SingleDevice::planeIntegrals(double planeNormalAzimutAngle,
+                                                                              double planeNormalPolarAngle) const
 {
     Vector3x1 planeNormal{
         std::sin(planeNormalPolarAngle) * std::cos(planeNormalAzimutAngle),
         std::sin(planeNormalPolarAngle) * std::sin(planeNormalAzimutAngle),
         std::cos(planeNormalPolarAngle)
     };
-    return planeIntegral(planeNormal, planeDistanceFromOrigin);
+    return planeIntegrals(planeNormal);
 }
 
 const float *RadonTransform3D::SingleDevice::resultArray() const
 {
-    return _resultBuf.hostPtr();
+    return _resultBufAllDist->hostPtr();
+}
+
+void RadonTransform3D::SingleDevice::makeBufs(const std::vector<float>& distanceSampling)
+{
+    if(distanceSampling.size() != _nbDist) // buffer size changes
+    {
+        _nbDist = distanceSampling.size();
+        _distanceBuf = cl::Buffer(OpenCLConfig::instance().context(), CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                                  _nbDist * sizeof(float));
+        _resultBufAllDist.reset(new PinnedBufHostRead<float>(_nbDist * _p.nbPatches(), _q));
+    }
+
+    _q.enqueueWriteBuffer(_distanceBuf, CL_TRUE, 0, _nbDist * sizeof(float), distanceSampling.data());
 }
 
 void RadonTransform3D::SingleDevice::sliceDimensionsChanged()
 {
-    _resultBuf = PinnedBufHostRead<float>(_p.nbPatches(), _q);
+    _resultBufAllDist.reset(new PinnedBufHostRead<float>(_nbDist * _p.nbPatches(), _q));
 
     _sliceFirstPixelPos = { _p.reso * 0.5 * (_p.dim.width - 1),
                             _p.reso * 0.5 * (_p.dim.height - 1) };
 }
 
-mat::Matrix<3, 4>
-RadonTransform3D::SingleDevice::transformXYPlaneToPlane(const mat::Matrix<4, 1>& plane) const
+mat::Matrix<3, 3>
+RadonTransform3D::SingleDevice::rotationXYPlaneToPlane(const mat::Matrix<3, 1>& n) const
 {
-    Vector3x1 r1, r2(0.0), r3{ plane.get<0>(), plane.get<1>(), plane.get<2>() };
+    Vector3x1 r1, r2(0.0), r3{ n.get<0>(), n.get<1>(), n.get<2>() };
 
     // find axis that is as most as perpendicular to r3
     uint axis = std::abs(r3.get<0>()) < std::abs(r3.get<1>()) ? 0 : 1;
@@ -373,10 +395,15 @@ RadonTransform3D::SingleDevice::transformXYPlaneToPlane(const mat::Matrix<4, 1>&
     r2 /= r2.norm();
     r1 = mat::cross(r2, r3);
 
-    const auto rotMatTransp = mat::horzcat(mat::horzcat(r1, r2), r3);
+    return mat::horzcat(mat::horzcat(r1, r2), r3);
+}
+
+mat::Matrix<3, 4>
+RadonTransform3D::SingleDevice::transformXYPlaneToCentralPlane(const mat::Matrix<3, 3>& rotMatTransp) const
+{
     const auto translationVec = rotMatTransp * Vector3x1{ _sliceFirstPixelPos.get<0>(),
                                                           _sliceFirstPixelPos.get<1>(),
-                                                          plane.get<3>() }
+                                                          0.0 }
                                 + _volumeCorner;
 
     Matrix3x3 voxelSizeNormalization = mat::diag(

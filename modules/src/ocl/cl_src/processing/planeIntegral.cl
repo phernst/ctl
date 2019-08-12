@@ -6,6 +6,9 @@ __constant sampler_t samp = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CL
 
 // the kernel
 __kernel void planeInt( __constant float16* homography,
+                        __constant float3* distanceShift,
+                        __constant float* distances,
+                        uint nbDist,
                         __global float* patchResults,
                         __read_only image3d_t volume )
 {
@@ -21,39 +24,46 @@ __kernel void planeInt( __constant float16* homography,
     const uint groupIDX = get_group_id(0);
     const uint groupIDY = get_group_id(1);
     const uint numGroupsX = get_num_groups(0);
+    const uint numGroupsY = get_num_groups(1);
 
     // ny': sample of "template hyperplane"
+    const float16 centerHomo = *homography;
     const float4 sliceCoord = (float4)((float)x, (float)y, 0.0f, 1.0f);
 
-    // H^-1 * ny'
-    const float4 voxToRead = (float4)(dot((*homography).s0123, sliceCoord),
-                                      dot((*homography).s4567, sliceCoord),
-                                      dot((*homography).s89ab, sliceCoord),
-                                      0.0f);
-
-    patch[yPatch][xPatch] = read_imagef(volume, samp, voxToRead).x;
-    
-    barrier(CLK_LOCAL_MEM_FENCE);
-
-    if(xPatch == 0)
+    for(uint d = 0; d < nbDist; ++d)
     {
-        float16 sum = vload16(0, patch[yPatch]);
+        float16 finalHomo = centerHomo;
+        finalHomo.s37b -= distances[d] * (*distanceShift);
+        // H^-1 * ny'
+        const float4 voxToRead = (float4)(dot(finalHomo.s0123, sliceCoord),
+                                          dot(finalHomo.s4567, sliceCoord),
+                                          dot(finalHomo.s89ab, sliceCoord),
+                                          0.0f);
 
-        rowSums[yPatch] = dot(sum.s0123, (float4)1.0f) +
-                          dot(sum.s4567, (float4)1.0f) +
-                          dot(sum.s89ab, (float4)1.0f) +
-                          dot(sum.scdef, (float4)1.0f);
-    }
+        patch[yPatch][xPatch] = read_imagef(volume, samp, voxToRead).x;
 
-    barrier(CLK_LOCAL_MEM_FENCE);
+        barrier(CLK_LOCAL_MEM_FENCE);
 
-    if(xPatch == 0 && yPatch == 0)
-    {
-        float16 tmp = vload16(0, rowSums);
-        float totalSum =  dot(tmp.s0123, (float4)1.0f) +
-                          dot(tmp.s4567, (float4)1.0f) +
-                          dot(tmp.s89ab, (float4)1.0f) +
-                          dot(tmp.scdef, (float4)1.0f);
-        patchResults[groupIDY * numGroupsX + groupIDX] = totalSum;
+        if(xPatch == 0)
+        {
+            float16 sum = vload16(0, patch[yPatch]);
+
+            rowSums[yPatch] = dot(sum.s0123, (float4)1.0f) +
+                              dot(sum.s4567, (float4)1.0f) +
+                              dot(sum.s89ab, (float4)1.0f) +
+                              dot(sum.scdef, (float4)1.0f);
+        }
+
+        barrier(CLK_LOCAL_MEM_FENCE);
+
+        if(xPatch == 0 && yPatch == 0)
+        {
+            float16 tmp = vload16(0, rowSums);
+            float totalSum =  dot(tmp.s0123, (float4)1.0f) +
+                              dot(tmp.s4567, (float4)1.0f) +
+                              dot(tmp.s89ab, (float4)1.0f) +
+                              dot(tmp.scdef, (float4)1.0f);
+            patchResults[d * numGroupsX * numGroupsY + groupIDY * numGroupsX + groupIDX] = totalSum;
+        }
     }
 }

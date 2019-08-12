@@ -136,29 +136,34 @@ private:
 
         void sliceDimensionsChanged();
 
-        DeviceResult planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
-                                   double planeDistanceFromOrigin) const;
-        DeviceResult planeIntegral(double planeNormalAzimutAngle, double planeNormalPolarAngle,
-                                   double planeDistanceFromOrigin) const;
+        DeviceResult planeIntegrals(const mat::Matrix<3, 1>& planeUnitNormal) const;
+        DeviceResult planeIntegrals(double planeNormalAzimutAngle, double planeNormalPolarAngle) const;
 
         const float* resultArray() const;
+
+        void makeBufs(const std::vector<float>& distanceSampling);
 
     private:
         const Parameters& _p;
         mat::Matrix<3, 1> _volumeCorner;
         mat::Matrix<2, 1> _sliceFirstPixelPos;
         cl::CommandQueue _q;
-        PinnedBufHostRead<float> _resultBuf;
+        std::unique_ptr<PinnedBufHostRead<float>> _resultBufAllDist;
         cl::Image3D _volImage3D;
         cl::Buffer _homoBuf;
+        cl::Buffer _distanceBuf;
+        cl::Buffer _distShiftBuf;
         cl::Kernel* _kernel;
+        uint _nbDist;
 
-        mat::Matrix<3, 4> transformXYPlaneToPlane(const mat::Matrix<4, 1>& plane) const;
+        mat::Matrix<3, 3> rotationXYPlaneToPlane(const mat::Matrix<3, 1>& n) const;
+        mat::Matrix<3, 4> transformXYPlaneToCentralPlane(const mat::Matrix<3, 3>& rotMatTransp) const;
+
     };
 
     // member variables
     Parameters _p;
-    std::vector<SingleDevice> _tasks;
+    mutable std::vector<SingleDevice> _tasks;
 
     // static functions
     static uint nextMultipleOfN(uint value, uint N);
