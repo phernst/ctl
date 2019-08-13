@@ -87,19 +87,9 @@ template <typename T>
 void diffBuffer_CentralDifference(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 3;
-    meta_diff(buffer, +[](const PipeBuffer<T, filterSize>& pipe)
+    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return T(0.5) * (pipe(2) - pipe(0));
-    });
-}
-
-template <typename T>
-void diffBuffer_CentralDifferenceLOO(const std::vector<T*>& buffer)
-{
-    constexpr uint filterSize = 5;
-    meta_diff(buffer, +[](const PipeBuffer<T, filterSize>& pipe)
-    {
-        return T(0.5) * (pipe(4) - pipe(0));
     });
 }
 
@@ -107,7 +97,7 @@ template <typename T>
 void diffBuffer_DifferenceToNext(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 2;
-    meta_diff(buffer, +[](const PipeBuffer<T, filterSize>& pipe)
+    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return pipe(1) - pipe(0);
     });
@@ -117,7 +107,7 @@ template <typename T>
 void diffBuffer_SavitzkyGolay5(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 5;
-    meta_diff(buffer, +[](const PipeBuffer<T, filterSize>& pipe)
+    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return T(0.1) * (- T(2) * pipe(0)
                          -        pipe(1)
@@ -131,7 +121,7 @@ template <typename T>
 void diffBuffer_SavitzkyGolay7(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 7;
-    meta_diff(buffer, +[](const PipeBuffer<T, filterSize>& pipe)
+    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return T(1)/T(28) * (- T(3) * pipe(0)
                              - T(2) * pipe(1)
@@ -164,9 +154,8 @@ PtrToDiffFct<T> selectDiffFct(Method m)
         return &diffBuffer_SavitzkyGolay5;
     case SavitzkyGolay7:
         return &diffBuffer_SavitzkyGolay7;
-    default:
-        return &diffBuffer_null;
     }
+    return &diffBuffer_null;
 }
 
 // ## Buffer helper class that stores pointer for 1D look-ups ##

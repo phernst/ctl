@@ -257,10 +257,10 @@ RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
                   volume.dimensions().z)
     , _homoBuf(OpenCLConfig::instance().context(),
                CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
-               16 * sizeof(float))
+               sizeof(cl_float16))
     , _distShiftBuf(OpenCLConfig::instance().context(),
                     CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
-                    3 * sizeof(float))
+                    sizeof(cl_float3))
     , _kernel(nullptr)
     , _nbDist(0u)
 {
@@ -301,15 +301,15 @@ RadonTransform3D::SingleDevice::planeIntegrals(const mat::Matrix<3, 1>& planeUni
         // calculate homography that maps a XY-plane to the requested plane
         const auto H = transformXYPlaneToCentralPlane(planeUnitNormal);
 
-        const auto distShift = cl_float3 { { float(planeUnitNormal.get<0>()) / _p.volVoxSize.x,
-                                             float(planeUnitNormal.get<1>()) / _p.volVoxSize.y,
-                                             float(planeUnitNormal.get<2>()) / _p.volVoxSize.z }};
-
         // store in OpenCL specific vector format
-        const auto h_cl = cl_float16{ { float(H(0, 0)), float(H(0, 1)), float(H(0, 2)), float(H(0, 3)),
-                                        float(H(1, 0)), float(H(1, 1)), float(H(1, 2)), float(H(1, 3)),
-                                        float(H(2, 0)), float(H(2, 1)), float(H(2, 2)), float(H(2, 3)) } };
-
+        const auto distShift = cl_float3{ { float(planeUnitNormal.get<0>()) / _p.volVoxSize.x,
+                                            float(planeUnitNormal.get<1>()) / _p.volVoxSize.y,
+                                            float(planeUnitNormal.get<2>()) / _p.volVoxSize.z }
+                                        };
+        const auto h_cl = cl_float16{ { float(H(0,0)), float(H(0,1)), float(H(0,2)), float(H(0,3)),
+                                        float(H(1,0)), float(H(1,1)), float(H(1,2)), float(H(1,3)),
+                                        float(H(2,0)), float(H(2,1)), float(H(2,2)), float(H(2,3)) }
+                                    };
         // write buffers
         _q.enqueueWriteBuffer(_homoBuf, CL_FALSE, 0, 12 * sizeof(float), &h_cl);
         _q.enqueueWriteBuffer(_distShiftBuf, CL_FALSE, 0, sizeof(cl_float3), &distShift);
@@ -362,7 +362,7 @@ void RadonTransform3D::SingleDevice::makeBufs(const std::vector<float>& distance
 {
     if(distanceSampling.size() != _nbDist) // buffer size changes
     {
-        _nbDist = distanceSampling.size();
+        _nbDist = uint(distanceSampling.size());
         _distanceBuf = cl::Buffer(OpenCLConfig::instance().context(), CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                                   _nbDist * sizeof(float));
         _resultBufAllDist.reset(new PinnedBufHostRead<float>(_nbDist * _p.nbPatches(), _q));

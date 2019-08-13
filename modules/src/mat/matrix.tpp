@@ -1,6 +1,6 @@
 /******************************************************************************
 ** Template implementation for "matrix.h"
-** by Robert Frysch | Feb 05, 2018
+** by Robert Frysch | Aug 13, 2019
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -231,8 +231,7 @@ Matrix<Rows, Cols>::fromContainer(const Container& vector, size_t NthMat, bool* 
 template <uint Rows, uint Cols>
 template <uint fromRow, uint toRow, uint fromCol, uint toCol>
 auto Matrix<Rows, Cols>::subMat() const
--> Matrix<toRow >= fromRow ? toRow - fromRow + 1 : fromRow - toRow + 1,
-          toCol >= fromCol ? toCol - fromCol + 1 : fromCol - toCol + 1>
+-> Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>
 {
     static_assert(fromRow < Rows, "fromRow exceeds matrix dimension");
     static_assert(toRow < Rows, "toRow exceeds matrix dimension");
@@ -438,6 +437,11 @@ operator*(const Matrix<Cols1_Rows2, Cols2>& rhs) const
             ++retPtr;
         }
     return ret;
+}
+
+constexpr uint rangeDim(uint from, uint to)
+{
+    return to >= from ? to - from + 1u : from - to + 1u;
 }
 
 } // namespace mat
