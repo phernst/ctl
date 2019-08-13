@@ -245,8 +245,9 @@ RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
     , _volumeCorner{ volume.offset().x - 0.5 * volume.dimensions().x * volume.voxelSize().x,
                      volume.offset().y - 0.5 * volume.dimensions().y * volume.voxelSize().y,
                      volume.offset().z - 0.5 * volume.dimensions().z * volume.voxelSize().z }
-    , _sliceFirstPixelPos{ _p.reso * 0.5 * (_p.dim.width - 1),
-                           _p.reso * 0.5 * (_p.dim.height - 1) }
+    , _templatePlaneStart{ - _p.reso * 0.5 * (_p.dim.width - 1),
+                           - _p.reso * 0.5 * (_p.dim.height - 1),
+                           0.0 }
     , _q(OpenCLConfig::instance().context(), OpenCLConfig::instance().devices()[oclDeviceNb])
     , _volImage3D(OpenCLConfig::instance().context(),
                   CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
@@ -298,23 +299,20 @@ RadonTransform3D::SingleDevice::planeIntegrals(const mat::Matrix<3, 1>& planeUni
             throw std::runtime_error("voxel size is zero or negative");
 
         // calculate homography that maps a XY-plane to the requested plane
-        const auto R = rotationXYPlaneToPlane(planeUnitNormal);
-        const auto H = transformXYPlaneToCentralPlane(R);
+        const auto H = transformXYPlaneToCentralPlane(planeUnitNormal);
 
-        const auto distShift = cl_float3 { { float(R.get<0,2>()) / _p.volVoxSize.x,
-                                             float(R.get<1,2>()) / _p.volVoxSize.y,
-                                             float(R.get<2,2>()) / _p.volVoxSize.z }};
-
-
+        const auto distShift = cl_float3 { { float(planeUnitNormal.get<0>()) / _p.volVoxSize.x,
+                                             float(planeUnitNormal.get<1>()) / _p.volVoxSize.y,
+                                             float(planeUnitNormal.get<2>()) / _p.volVoxSize.z }};
 
         // store in OpenCL specific vector format
-        const cl_float16 h_cl{ { float(H(0, 0)), float(H(0, 1)), float(H(0, 2)), float(H(0, 3)),
-                                 float(H(1, 0)), float(H(1, 1)), float(H(1, 2)), float(H(1, 3)),
-                                 float(H(2, 0)), float(H(2, 1)), float(H(2, 2)), float(H(2, 3)) } };
+        const auto h_cl = cl_float16{ { float(H(0, 0)), float(H(0, 1)), float(H(0, 2)), float(H(0, 3)),
+                                        float(H(1, 0)), float(H(1, 1)), float(H(1, 2)), float(H(1, 3)),
+                                        float(H(2, 0)), float(H(2, 1)), float(H(2, 2)), float(H(2, 3)) } };
 
         // write buffers
         _q.enqueueWriteBuffer(_homoBuf, CL_FALSE, 0, 12 * sizeof(float), &h_cl);
-        _q.enqueueWriteBuffer(_distShiftBuf, CL_FALSE, 0, 3 * sizeof(float), &distShift);
+        _q.enqueueWriteBuffer(_distShiftBuf, CL_FALSE, 0, sizeof(cl_float3), &distShift);
 
         // set kernel arguments and run
         _kernel->setArg(0, _homoBuf);
@@ -328,7 +326,6 @@ RadonTransform3D::SingleDevice::planeIntegrals(const mat::Matrix<3, 1>& planeUni
                                                          cl::NDRange(PATCH_SIZE ,PATCH_SIZE));
 
         // read result
-
         _resultBufAllDist->transferDevToPinnedMem(false, readEvent.get());
 
     } catch(const cl::Error& e)
@@ -378,8 +375,9 @@ void RadonTransform3D::SingleDevice::sliceDimensionsChanged()
 {
     _resultBufAllDist.reset(new PinnedBufHostRead<float>(_nbDist * _p.nbPatches(), _q));
 
-    _sliceFirstPixelPos = { _p.reso * 0.5 * (_p.dim.width - 1),
-                            _p.reso * 0.5 * (_p.dim.height - 1) };
+    _templatePlaneStart = { - _p.reso * 0.5 * (_p.dim.width - 1),
+                            - _p.reso * 0.5 * (_p.dim.height - 1),
+                            0.0 };
 }
 
 mat::Matrix<3, 3>
@@ -399,17 +397,15 @@ RadonTransform3D::SingleDevice::rotationXYPlaneToPlane(const mat::Matrix<3, 1>& 
 }
 
 mat::Matrix<3, 4>
-RadonTransform3D::SingleDevice::transformXYPlaneToCentralPlane(const mat::Matrix<3, 3>& rotMatTransp) const
+RadonTransform3D::SingleDevice::transformXYPlaneToCentralPlane(const mat::Matrix<3, 1>& n) const
 {
-    const auto translationVec = rotMatTransp * Vector3x1{ _sliceFirstPixelPos.get<0>(),
-                                                          _sliceFirstPixelPos.get<1>(),
-                                                          0.0 }
-                                + _volumeCorner;
+    const auto rotMatTransp = rotationXYPlaneToPlane(n);
+    const auto translationVec = rotMatTransp * _templatePlaneStart - _volumeCorner;
 
     Matrix3x3 voxelSizeNormalization = mat::diag(
         Vector3x1{ 1.0 / _p.volVoxSize.x, 1.0 / _p.volVoxSize.y, 1.0 / _p.volVoxSize.z });
 
-    return voxelSizeNormalization * mat::horzcat(_p.reso * rotMatTransp, -translationVec);
+    return voxelSizeNormalization * mat::horzcat(_p.reso * rotMatTransp, translationVec);
 }
 
 } // namespace OCL

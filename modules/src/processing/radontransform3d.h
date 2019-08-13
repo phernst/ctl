@@ -146,7 +146,7 @@ private:
     private:
         const Parameters& _p;
         mat::Matrix<3, 1> _volumeCorner;
-        mat::Matrix<2, 1> _sliceFirstPixelPos;
+        mat::Matrix<3, 1> _templatePlaneStart;
         cl::CommandQueue _q;
         std::unique_ptr<PinnedBufHostRead<float>> _resultBufAllDist;
         cl::Image3D _volImage3D;
@@ -157,7 +157,7 @@ private:
         uint _nbDist;
 
         mat::Matrix<3, 3> rotationXYPlaneToPlane(const mat::Matrix<3, 1>& n) const;
-        mat::Matrix<3, 4> transformXYPlaneToCentralPlane(const mat::Matrix<3, 3>& rotMatTransp) const;
+        mat::Matrix<3, 4> transformXYPlaneToCentralPlane(const mat::Matrix<3, 1>& n) const;
 
     };
 
