@@ -33,7 +33,7 @@ __kernel void planeInt( __constant float16* homography,
     for(uint d = 0; d < nbDist; ++d)
     {
         float16 finalHomo = centerHomo;
-        finalHomo.s37b -= distances[d] * (*distanceShift);
+        finalHomo.s37b += distances[d] * (*distanceShift);
         // H^-1 * ny'
         const float4 voxToRead = (float4)(dot(finalHomo.s0123, sliceCoord),
                                           dot(finalHomo.s4567, sliceCoord),
