@@ -302,26 +302,26 @@ RadonTransform3D::SingleDevice::planeIntegrals(const mat::Matrix<3, 1>& planeUni
 {
     Q_ASSERT(qFuzzyCompare(planeUnitNormal.norm(), 1.0));
 
-    std::unique_ptr<cl::Event> readEvent(new cl::Event);
-
     if(_p.volVoxSize.x <= 0.0f || _p.volVoxSize.y <= 0.0f || _p.volVoxSize.z <= 0.0f)
         throw std::runtime_error("voxel size is zero or negative");
 
     // calculate homography that maps a XY-plane to the requested plane
     const auto H = transformXYPlaneToCentralPlane(planeUnitNormal);
 
-    // store in OpenCL specific vector format
-    const auto distShift = cl_float3{ { float(planeUnitNormal.get<0>()) / _p.volVoxSize.x,
-                                        float(planeUnitNormal.get<1>()) / _p.volVoxSize.y,
-                                        float(planeUnitNormal.get<2>()) / _p.volVoxSize.z }
+    // write data to pinned memory (host side)
+    *_distShiftBuf.hostPtr() = cl_float3{ { float(planeUnitNormal.get<0>()) / _p.volVoxSize.x,
+                                            float(planeUnitNormal.get<1>()) / _p.volVoxSize.y,
+                                            float(planeUnitNormal.get<2>()) / _p.volVoxSize.z }
+                                        };
+
+    *_homoBuf.hostPtr() = cl_float16{ { float(H(0,0)), float(H(0,1)), float(H(0,2)), float(H(0,3)),
+                                        float(H(1,0)), float(H(1,1)), float(H(1,2)), float(H(1,3)),
+                                        float(H(2,0)), float(H(2,1)), float(H(2,2)), float(H(2,3)) }
                                     };
-    const auto h_cl = cl_float16{ { float(H(0,0)), float(H(0,1)), float(H(0,2)), float(H(0,3)),
-                                    float(H(1,0)), float(H(1,1)), float(H(1,2)), float(H(1,3)),
-                                    float(H(2,0)), float(H(2,1)), float(H(2,2)), float(H(2,3)) }
-                                };
-    // write buffers
-    _homoBuf.writeToDev(&h_cl, false);
-    _distShiftBuf.writeToDev(&distShift, false);
+
+    // transfer pinned memory contents to device
+    _distShiftBuf.transferPinnedMemToDev(false);
+    _homoBuf.transferPinnedMemToDev(false);
 
     // set kernel arguments and run
     _kernel->setArg(0, _homoBuf.devBuffer());
@@ -335,6 +335,7 @@ RadonTransform3D::SingleDevice::planeIntegrals(const mat::Matrix<3, 1>& planeUni
                                                      cl::NDRange(PATCH_SIZE ,PATCH_SIZE));
 
     // read result
+    std::unique_ptr<cl::Event> readEvent(new cl::Event);
     _resultBufAllDist->transferDevToPinnedMem(false, readEvent.get());
 
     return { _resultBufAllDist->hostPtr(), std::move(readEvent) };
