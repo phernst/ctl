@@ -439,7 +439,8 @@ operator*(const Matrix<Cols1_Rows2, Cols2>& rhs) const
     return ret;
 }
 
-constexpr uint rangeDim(uint from, uint to)
+template <uint Rows, uint Cols>
+constexpr uint Matrix<Rows, Cols>::rangeDim(uint from, uint to)
 {
     return to >= from ? to - from + 1u : from - to + 1u;
 }
