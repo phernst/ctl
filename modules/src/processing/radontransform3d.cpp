@@ -42,9 +42,11 @@ RadonTransform3D::RadonTransform3D(const VoxelVolume<float> &volume)
 
 /*!
  * Returns the 3D Radon transform of volume data for the set of sampling points given by
- * \a azimuthAngleSampling, \a polarAngleSampling, and \a distanceSampling.
+ * \a azimuthAngleSampling, \a polarAngleSampling and \a distanceSampling.
  *
- * This will return the plane integral for all combinations of angles and distances passed.
+ * This will return the plane integral for all combinations of angles and distances passed,
+ * i.e. \a azimuthAngleSampling, \a polarAngleSampling and \a distanceSampling define the grid
+ * of the returned Radon transform.
  *
  * This method supports multi-GPU and will automatically split the task (w.r.t. to the distance
  * samples) across all available devices (as returned by OpenCLConfig::instance().devices() when
@@ -73,15 +75,22 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
 
     auto writeToRet = [&ret, nbPatches, nbDistSmpl] (const DeviceResult& devRes, uint azi, uint pol)
     {
+        auto devPtr = devRes.first;
+        float sum;
+        uint patchIdx;
+
+        // wait for device
         devRes.second->wait();
+
+        // add up all partial sums (patches) for each distance
         for(uint dist = 0; dist < nbDistSmpl; ++dist)
         {
-            float sum = 0.0f;
-
-            const auto ptr = devRes.first + nbPatches*dist;
-            for(uint val = 0; val < nbPatches; ++val)
-                sum += ptr[val];
-
+            sum = 0.0f;
+            for(patchIdx = 0; patchIdx < nbPatches; ++patchIdx)
+            {
+                sum += *devPtr;
+                ++devPtr;
+            }
             ret(azi, pol, dist) = sum;
         }
     };
