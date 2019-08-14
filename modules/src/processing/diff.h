@@ -12,21 +12,21 @@ class VoxelVolume;
 
 namespace imgproc {
 
-enum Method { CentralDifference,
-              DifferenceToNext,
-              SavitzkyGolay5,
-              SavitzkyGolay7 };
+enum DiffMethod { CentralDifference,
+                  DifferenceToNext,
+                  SavitzkyGolay5,
+                  SavitzkyGolay7 };
 
 // partial derivatives
 template <uint dim>
-void diff(Chunk2D<float>& image, Method m = CentralDifference);
+void diff(Chunk2D<float>& image, DiffMethod m = CentralDifference);
 template <uint dim>
-void diff(Chunk2D<double>& image, Method m = CentralDifference);
+void diff(Chunk2D<double>& image, DiffMethod m = CentralDifference);
 
 template <uint dim>
-void diff(VoxelVolume<float>& volume, Method m = CentralDifference);
+void diff(VoxelVolume<float>& volume, DiffMethod m = CentralDifference);
 template <uint dim>
-void diff(VoxelVolume<double>& volume, Method m = CentralDifference);
+void diff(VoxelVolume<double>& volume, DiffMethod m = CentralDifference);
 
 } // namespace imgproc
 } // namespace CTL

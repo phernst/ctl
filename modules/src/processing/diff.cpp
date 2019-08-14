@@ -142,7 +142,7 @@ template <typename T>
 using PtrToDiffFct = void (*)(const std::vector<T*>&);
 
 template <typename T>
-PtrToDiffFct<T> selectDiffFct(Method m)
+PtrToDiffFct<T> selectDiffFct(DiffMethod m)
 {
     switch(m)
     {
@@ -236,7 +236,7 @@ public:
 // ## Template implementation of diff functions ##
 // # Chunk2D diff function #
 template <typename T, uint dim>
-void diff_impl(Chunk2D<T>& image, Method m)
+void diff_impl(Chunk2D<T>& image, DiffMethod m)
 {
     auto buffDiffFct = selectDiffFct<T>(m);
 
@@ -255,7 +255,7 @@ void diff_impl(Chunk2D<T>& image, Method m)
 
 // # VoxelVolume diff function #
 template <typename T, uint dim>
-void diff_impl(VoxelVolume<T>& volume, Method m)
+void diff_impl(VoxelVolume<T>& volume, DiffMethod m)
 {
     auto buffDiffFct = selectDiffFct<T>(m);
 
@@ -294,7 +294,7 @@ void diff_impl(VoxelVolume<T>& volume, Method m)
 // Interface function definitions
 // ------------------------------
 template <uint dim>
-void diff(Chunk2D<float>& image, Method m)
+void diff(Chunk2D<float>& image, DiffMethod m)
 {
     diff_impl<float, dim>(image, m);
 }
@@ -304,22 +304,22 @@ void diff(Chunk2D<float>& image, Method m)
  * \a m.
  */
 template <uint dim>
-void diff(Chunk2D<double>& image, Method m)
+void diff(Chunk2D<double>& image, DiffMethod m)
 {
     diff_impl<double, dim>(image, m);
 }
 
-template void diff<0u>(Chunk2D<float>& image, Method m);
-template void diff<1u>(Chunk2D<float>& image, Method m);
-template void diff<0u>(Chunk2D<double>& image, Method m);
-template void diff<1u>(Chunk2D<double>& image, Method m);
+template void diff<0u>(Chunk2D<float>& image, DiffMethod m);
+template void diff<1u>(Chunk2D<float>& image, DiffMethod m);
+template void diff<0u>(Chunk2D<double>& image, DiffMethod m);
+template void diff<1u>(Chunk2D<double>& image, DiffMethod m);
 
 /*!
  * Differentiates the data in \a volume along the dimension \a dim using the differentiation method
  * \a m.
  */
 template <uint dim>
-void diff(VoxelVolume<float>& volume, Method m)
+void diff(VoxelVolume<float>& volume, DiffMethod m)
 {
     diff_impl<float, dim>(volume, m);
 }
@@ -329,17 +329,17 @@ void diff(VoxelVolume<float>& volume, Method m)
  * \a m.
  */
 template <uint dim>
-void diff(VoxelVolume<double>& volume, Method m)
+void diff(VoxelVolume<double>& volume, DiffMethod m)
 {
     diff_impl<double, dim>(volume, m);
 }
 
-template void diff<0u>(VoxelVolume<float>& volume, Method m);
-template void diff<1u>(VoxelVolume<float>& volume, Method m);
-template void diff<2u>(VoxelVolume<float>& volume, Method m);
-template void diff<0u>(VoxelVolume<double>& volume, Method m);
-template void diff<1u>(VoxelVolume<double>& volume, Method m);
-template void diff<2u>(VoxelVolume<double>& volume, Method m);
+template void diff<0u>(VoxelVolume<float>& volume, DiffMethod m);
+template void diff<1u>(VoxelVolume<float>& volume, DiffMethod m);
+template void diff<2u>(VoxelVolume<float>& volume, DiffMethod m);
+template void diff<0u>(VoxelVolume<double>& volume, DiffMethod m);
+template void diff<1u>(VoxelVolume<double>& volume, DiffMethod m);
+template void diff<2u>(VoxelVolume<double>& volume, DiffMethod m);
 
 /*!
  * \enum Method
