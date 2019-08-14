@@ -139,8 +139,6 @@ private:
         DeviceResult planeIntegrals(const mat::Matrix<3, 1>& planeUnitNormal) const;
         DeviceResult planeIntegrals(double planeNormalAzimutAngle, double planeNormalPolarAngle) const;
 
-        const float* resultArray() const;
-
         void makeBufs(const std::vector<float>& distanceSampling);
 
     private:
@@ -149,10 +147,10 @@ private:
         mat::Matrix<3, 1> _templatePlaneStart;
         cl::CommandQueue _q;
         std::unique_ptr<PinnedBufHostRead<float>> _resultBufAllDist;
+        PinnedBufHostWrite<cl_float16> _homoBuf;
+        PinnedBufHostWrite<cl_float3> _distShiftBuf;
         cl::Image3D _volImage3D;
-        cl::Buffer _homoBuf;
         cl::Buffer _distanceBuf;
-        cl::Buffer _distShiftBuf;
         cl::Kernel* _kernel;
         uint _nbDist;
 

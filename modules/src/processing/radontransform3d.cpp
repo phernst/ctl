@@ -41,34 +41,6 @@ RadonTransform3D::RadonTransform3D(const VoxelVolume<float> &volume)
 }
 
 /*!
- * Sets the resolution (i.e. pixels size) for slices used to compute the plane integrals to
- * \a pixelResolution. Resolution is specified in millimeters.
- */
-void RadonTransform3D::setSliceResolution(float pixelResolution)
-{
-    Q_ASSERT(pixelResolution > 0.0f);
-    const float factor = _p.reso / pixelResolution;
-    _p.reso = pixelResolution;
-
-    // change number of pixels in slice
-    const uint newNbPixel = nextMultipleOfN(_p.dim.width * factor, PATCH_SIZE);
-    _p.dim = { newNbPixel, newNbPixel };
-
-    for(auto& task : _tasks)
-        task.sliceDimensionsChanged();
-}
-
-/*!
- * Returns the dimensions (i.e. number of pixels) of slices used to compute the plane integrals.
- */
-Chunk2D<float>::Dimensions RadonTransform3D::sliceDimensions() const { return _p.dim; }
-
-/*!
- * Returns the resolution (i.e. pixels size) of slices used to compute the plane integrals.
- */
-float RadonTransform3D::sliceResolution() const { return _p.reso; }
-
-/*!
  * Returns the 3D Radon transform of volume data for the set of sampling points given by
  * \a azimuthAngleSampling, \a polarAngleSampling, and \a distanceSampling.
  *
@@ -93,9 +65,6 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
     const auto nbAziSmpl = uint(azimuthAngleSampling.size());
     const auto nbPolSmpl = uint(polarAngleSampling.size());
     const auto nbDistSmpl = uint(distanceSampling.size());
-
-    for(auto& task : _tasks)
-        task.makeBufs(distanceSampling);
 
     VoxelVolume<float> ret(nbAziSmpl, nbPolSmpl, nbDistSmpl);
     ret.allocateMemory();
@@ -122,36 +91,44 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
     std::vector<bool> devRunning(nbDevices, false);
     std::vector<uint> aziAngle(nbDevices);
     std::vector<uint> polAngle(nbDevices);
-    //std::vector<uint> distance(nbDevices);
     uint azi, pol, dev = 0;
 
-    for(pol = 0; pol < nbPolSmpl; ++pol)
-        for(azi = 0; azi < nbAziSmpl; ++azi)
-        {
-            if(devRunning[dev])
+    try{
+        for(auto& task : _tasks)
+            task.makeBufs(distanceSampling);
+
+        for(pol = 0; pol < nbPolSmpl; ++pol)
+            for(azi = 0; azi < nbAziSmpl; ++azi)
             {
-                // wait for result and store in "ret"
+                if(devRunning[dev])
+                {
+                    // wait for result and store in "ret"
+                    writeToRet(devResults[dev], aziAngle[dev], polAngle[dev]);
+                    devRunning[dev] = false;
+                }
+
+                // start async calculation on device
+                devResults[dev] = _tasks[dev].planeIntegrals(azimuthAngleSampling[azi],
+                                                             polarAngleSampling[pol]);
+                // memory for device state
+                aziAngle[dev] = azi;
+                polAngle[dev] = pol;
+                devRunning[dev] = true;
+
+                ++dev;
+                if(dev == nbDevices)
+                    dev = 0;
+             }
+
+        // evaluate remaining running devices
+        for(uint dev = 0; dev < nbDevices; ++dev)
+            if(devRunning[dev])
                 writeToRet(devResults[dev], aziAngle[dev], polAngle[dev]);
-                devRunning[dev] = false;
-            }
 
-            // start async calculation on device
-            devResults[dev] = _tasks[dev].planeIntegrals(azimuthAngleSampling[azi],
-                                                         polarAngleSampling[pol]);
-            // memory for device state
-            aziAngle[dev] = azi;
-            polAngle[dev] = pol;
-            devRunning[dev] = true;
-
-            ++dev;
-            if(dev == nbDevices)
-                dev = 0;
-         }
-
-    // evaluate remaining running devices
-    for(uint dev = 0; dev < nbDevices; ++dev)
-        if(devRunning[dev])
-            writeToRet(devResults[dev], aziAngle[dev], polAngle[dev]);
+    } catch(const cl::Error& e)
+    {
+        qCritical() << "OpenCL error:" << e.what() << "(" << e.err() << ")";
+    }
 
     // multiply result with area of a pixel
     return ret * std::pow(_p.reso, 2.0f);
@@ -170,12 +147,21 @@ float RadonTransform3D::planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
         return 0.0f;
     }
 
-    // use first device for computation
-    _tasks[0].makeBufs(std::vector<float>{ float(planeDistanceFromOrigin) });
-    const auto& res = _tasks[0].planeIntegrals(planeUnitNormal);
-    res.second->wait();
+    const float* ptr;
+    try{
+        // use first device for computation
+        _tasks[0].makeBufs(std::vector<float>{ float(planeDistanceFromOrigin) });
+        const auto& res = _tasks[0].planeIntegrals(planeUnitNormal);
+        res.second->wait();
+        ptr = res.first;
+    } catch(const cl::Error& e)
+    {
+        qCritical() << "OpenCL error:" << e.what() << "(" << e.err() << ")";
+        return 0.0f;
+    }
+
+    // sum-up patch results
     float sum = 0.0f;
-    const auto ptr = res.first;
     for(uint val = 0; val < _p.nbPatches(); ++val)
         sum += ptr[val];
 
@@ -198,6 +184,34 @@ float RadonTransform3D::planeIntegral(double planeNormalAzimutAngle, double plan
 
     return planeIntegral(planeNormal, planeDistanceFromOrigin);
 }
+
+/*!
+ * Sets the resolution (i.e. pixels size) for slices used to compute the plane integrals to
+ * \a pixelResolution. Resolution is specified in millimeters.
+ */
+void RadonTransform3D::setSliceResolution(float pixelResolution)
+{
+    Q_ASSERT(pixelResolution > 0.0f);
+    const float factor = _p.reso / pixelResolution;
+    _p.reso = pixelResolution;
+
+    // change number of pixels in slice
+    const uint newNbPixel = nextMultipleOfN(_p.dim.width * factor, PATCH_SIZE);
+    _p.dim = { newNbPixel, newNbPixel };
+
+    for(auto& task : _tasks)
+        task.sliceDimensionsChanged();
+}
+
+/*!
+ * Returns the dimensions (i.e. number of pixels) of slices used to compute the plane integrals.
+ */
+Chunk2D<float>::Dimensions RadonTransform3D::sliceDimensions() const { return _p.dim; }
+
+/*!
+ * Returns the resolution (i.e. pixels size) of slices used to compute the plane integrals.
+ */
+float RadonTransform3D::sliceResolution() const { return _p.reso; }
 
 /*!
  * Returns the dimensions (i.e. number of voxels) of the volume managed by this instance.
@@ -249,18 +263,14 @@ RadonTransform3D::SingleDevice::SingleDevice(const VoxelVolume<float>& volume,
                            - _p.reso * 0.5 * (_p.dim.height - 1),
                            0.0 }
     , _q(OpenCLConfig::instance().context(), OpenCLConfig::instance().devices()[oclDeviceNb])
+    , _homoBuf(1, _q)
+    , _distShiftBuf(1, _q)
     , _volImage3D(OpenCLConfig::instance().context(),
                   CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                   cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
                   volume.dimensions().x,
                   volume.dimensions().y,
                   volume.dimensions().z)
-    , _homoBuf(OpenCLConfig::instance().context(),
-               CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
-               sizeof(cl_float16))
-    , _distShiftBuf(OpenCLConfig::instance().context(),
-                    CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
-                    sizeof(cl_float3))
     , _kernel(nullptr)
     , _nbDist(0u)
 {
@@ -294,50 +304,38 @@ RadonTransform3D::SingleDevice::planeIntegrals(const mat::Matrix<3, 1>& planeUni
 
     std::unique_ptr<cl::Event> readEvent(new cl::Event);
 
-    try {
-        if(_p.volVoxSize.x <= 0.0f || _p.volVoxSize.y <= 0.0f || _p.volVoxSize.z <= 0.0f)
-            throw std::runtime_error("voxel size is zero or negative");
+    if(_p.volVoxSize.x <= 0.0f || _p.volVoxSize.y <= 0.0f || _p.volVoxSize.z <= 0.0f)
+        throw std::runtime_error("voxel size is zero or negative");
 
-        // calculate homography that maps a XY-plane to the requested plane
-        const auto H = transformXYPlaneToCentralPlane(planeUnitNormal);
+    // calculate homography that maps a XY-plane to the requested plane
+    const auto H = transformXYPlaneToCentralPlane(planeUnitNormal);
 
-        // store in OpenCL specific vector format
-        const auto distShift = cl_float3{ { float(planeUnitNormal.get<0>()) / _p.volVoxSize.x,
-                                            float(planeUnitNormal.get<1>()) / _p.volVoxSize.y,
-                                            float(planeUnitNormal.get<2>()) / _p.volVoxSize.z }
-                                        };
-        const auto h_cl = cl_float16{ { float(H(0,0)), float(H(0,1)), float(H(0,2)), float(H(0,3)),
-                                        float(H(1,0)), float(H(1,1)), float(H(1,2)), float(H(1,3)),
-                                        float(H(2,0)), float(H(2,1)), float(H(2,2)), float(H(2,3)) }
+    // store in OpenCL specific vector format
+    const auto distShift = cl_float3{ { float(planeUnitNormal.get<0>()) / _p.volVoxSize.x,
+                                        float(planeUnitNormal.get<1>()) / _p.volVoxSize.y,
+                                        float(planeUnitNormal.get<2>()) / _p.volVoxSize.z }
                                     };
-        // write buffers
-        _q.enqueueWriteBuffer(_homoBuf, CL_FALSE, 0, 12 * sizeof(float), &h_cl);
-        _q.enqueueWriteBuffer(_distShiftBuf, CL_FALSE, 0, sizeof(cl_float3), &distShift);
+    const auto h_cl = cl_float16{ { float(H(0,0)), float(H(0,1)), float(H(0,2)), float(H(0,3)),
+                                    float(H(1,0)), float(H(1,1)), float(H(1,2)), float(H(1,3)),
+                                    float(H(2,0)), float(H(2,1)), float(H(2,2)), float(H(2,3)) }
+                                };
+    // write buffers
+    _homoBuf.writeToDev(&h_cl, false);
+    _distShiftBuf.writeToDev(&distShift, false);
 
-        // set kernel arguments and run
-        _kernel->setArg(0, _homoBuf);
-        _kernel->setArg(1, _distShiftBuf);
-        _kernel->setArg(2, _distanceBuf);
-        _kernel->setArg(3, _nbDist);
-        _kernel->setArg(4, _resultBufAllDist->devBuffer());
-        _kernel->setArg(5, _volImage3D);
+    // set kernel arguments and run
+    _kernel->setArg(0, _homoBuf.devBuffer());
+    _kernel->setArg(1, _distShiftBuf.devBuffer());
+    _kernel->setArg(2, _distanceBuf);
+    _kernel->setArg(3, _nbDist);
+    _kernel->setArg(4, _resultBufAllDist->devBuffer());
+    _kernel->setArg(5, _volImage3D);
 
-        _q.enqueueNDRangeKernel(*_kernel, cl::NullRange, cl::NDRange(_p.dim.width, _p.dim.height),
-                                                         cl::NDRange(PATCH_SIZE ,PATCH_SIZE));
+    _q.enqueueNDRangeKernel(*_kernel, cl::NullRange, cl::NDRange(_p.dim.width, _p.dim.height),
+                                                     cl::NDRange(PATCH_SIZE ,PATCH_SIZE));
 
-        // read result
-        _resultBufAllDist->transferDevToPinnedMem(false, readEvent.get());
-
-    } catch(const cl::Error& e)
-    {
-        qCritical() << "OpenCL error:" << e.what() << "(" << e.err() << ")";
-    } catch(const std::bad_alloc& e)
-    {
-        qCritical() << "allocation error:" << e.what();
-    } catch(const std::exception& e)
-    {
-        qCritical() << "std exception:" << e.what();
-    }
+    // read result
+    _resultBufAllDist->transferDevToPinnedMem(false, readEvent.get());
 
     return { _resultBufAllDist->hostPtr(), std::move(readEvent) };
 }
@@ -351,11 +349,6 @@ RadonTransform3D::DeviceResult RadonTransform3D::SingleDevice::planeIntegrals(do
         std::cos(planeNormalPolarAngle)
     };
     return planeIntegrals(planeNormal);
-}
-
-const float *RadonTransform3D::SingleDevice::resultArray() const
-{
-    return _resultBufAllDist->hostPtr();
 }
 
 void RadonTransform3D::SingleDevice::makeBufs(const std::vector<float>& distanceSampling)
