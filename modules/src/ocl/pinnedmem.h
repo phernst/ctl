@@ -167,7 +167,7 @@ public:
     // copy from device to pinned memory (all elements)
     void transferDevToPinnedMem(bool blocking = true, cl::Event* event = nullptr) const override;
     // copy from pinned memory to dstPtr (all elements)
-    void readFromPinnedMem(float* dstPtr) const override;
+    void readFromPinnedMem(T* dstPtr) const override;
 };
 
 // Image3D with host write access and device read access
@@ -262,7 +262,7 @@ void PinnedBufHostRead<T>::transferDevToPinnedMem(bool blocking, cl::Event* even
 }
 
 template <typename T>
-void PinnedBufHostRead<T>::readFromPinnedMem(float* dstPtr) const
+void PinnedBufHostRead<T>::readFromPinnedMem(T* dstPtr) const
 {
     std::copy_n(this->hostPtr(), this->nbElements(), dstPtr);
 }
