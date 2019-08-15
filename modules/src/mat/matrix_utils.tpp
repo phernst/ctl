@@ -33,6 +33,57 @@ inline Matrix3x3 rotationMatrix(double angle, Qt::Axis axis)
     return mat::eye<3>();
 }
 
+inline Matrix3x3 rotationMatrix(double angle, const Vector3x1& axis)
+{
+    constexpr auto tol = 1.0e-7;
+
+    const auto axisLength = axis.norm();
+
+    if(std::abs(angle) < tol || axisLength < tol)
+        return mat::eye<3>();
+
+    // convert axis to unit vector
+    const double x = axis.get<0>() / axisLength;
+    const double y = axis.get<1>() / axisLength;
+    const double z = axis.get<2>() / axisLength;
+
+    const double si = std::sin(angle);
+    const double co = std::cos(angle);
+    const double c_ = 1.0 - co;
+    const double tmp[] = { x * y * c_, z * si, x * z * c_, y * z * c_, y * si, x * si };
+
+    return { x * x * c_ + co, tmp[0] + tmp[1], tmp[2] - tmp[4],
+             tmp[0] - tmp[1], y * y * c_ + co, tmp[3] + tmp[5],
+             tmp[2] + tmp[4], tmp[3] - tmp[5], z * z * c_ + co };
+}
+
+/*
+ * Same as return `rotationMatrix(axis.norm(), axis)`.
+ */
+inline Matrix3x3 rotationMatrix(const Vector3x1& axis)
+{
+    constexpr auto tol = 1.0e-7;
+
+    const auto angle = axis.norm();
+
+    if(angle < tol)
+        return mat::eye<3>();
+
+    // convert axis to unit vector
+    const double x = axis.get<0>() / angle;
+    const double y = axis.get<1>() / angle;
+    const double z = axis.get<2>() / angle;
+
+    const double si = std::sin(angle);
+    const double co = std::cos(angle);
+    const double c_ = 1.0 - co;
+    const double tmp[] = { x * y * c_, z * si, x * z * c_, y * z * c_, y * si, x * si };
+
+    return { x * x * c_ + co, tmp[0] + tmp[1], tmp[2] - tmp[4],
+             tmp[0] - tmp[1], y * y * c_ + co, tmp[3] + tmp[5],
+             tmp[2] + tmp[4], tmp[3] - tmp[5], z * z * c_ + co };
+}
+
 inline Vector3x1 rotationAxis(const Matrix3x3& rotMat, bool lengthEqualsAngle)
 {
     Vector3x1 ret{ rotMat(2,1) - rotMat(1,2),

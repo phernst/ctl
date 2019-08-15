@@ -16,6 +16,8 @@ QVector<double> toQVector(const Matrix<Rows, Cols>& matrix);
 
 // rotation matrix and related
 Matrix3x3 rotationMatrix(double angle, Qt::Axis axis);
+Matrix3x3 rotationMatrix(double angle, const Vector3x1& axis);
+Matrix3x3 rotationMatrix(const Vector3x1& axis);
 Vector3x1 rotationAxis(const Matrix3x3& rotMat, bool lengthEqualsAngle = true);
 double rotationAngle(const Matrix3x3& rotMat);
 
