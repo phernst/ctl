@@ -2,6 +2,7 @@
 #include "img/chunk2d.h"
 #include "img/voxelvolume.h"
 #include <array>
+#include <cmath>
 
 namespace CTL {
 namespace imgproc {
@@ -133,6 +134,93 @@ void diffBuffer_SavitzkyGolay7(const std::vector<T*>& buffer)
     });
 }
 
+template <typename T>
+void diffBuffer_Gauss3(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 3;
+    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return T(0.25) * pipe(0) + T(0.5) * pipe(1) + T(0.25) * pipe(2);
+    });
+}
+
+template <typename T>
+void diffBuffer_Average3(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 3;
+    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return T(1.0/3.0) * pipe(0) + T(1.0/3.0) * pipe(1) + T(1.0/3.0) * pipe(2);
+    });
+}
+
+template <typename T>
+void diffBuffer_Median3(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 3;
+    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        if(pipe(0) > pipe(1))
+        {
+            if(pipe(0) < pipe(2))
+                return pipe(0);
+            else
+                return pipe(1) < pipe(2) ? pipe(2) : pipe(1);
+        }
+        else
+        {
+            if(pipe(1) < pipe(2))
+                return pipe(1);
+            else
+                return pipe(0) < pipe(2) ? pipe(2) : pipe(0);
+        }
+    });
+}
+
+template <typename T>
+void diffBuffer_MedianAbs3(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 3;
+    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        if(std::fabs(pipe(0)) > std::fabs(pipe(1)))
+        {
+            if(std::fabs(pipe(0)) < std::fabs(pipe(2)))
+                return pipe(0);
+            else
+                return std::fabs(pipe(1)) < std::fabs(pipe(2)) ? pipe(2) : pipe(1);
+        }
+        else
+        {
+            if(std::fabs(pipe(1)) < std::fabs(pipe(2)))
+                return pipe(1);
+            else
+                return std::fabs(pipe(0)) < std::fabs(pipe(2)) ? pipe(2) : pipe(0);
+        }
+    });
+}
+
+template <typename T>
+void diffBuffer_MaxAbs3(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 3;
+    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        if(std::fabs(pipe(0)) > std::fabs(pipe(1)))
+        {
+            if(std::fabs(pipe(0)) > std::fabs(pipe(2)))
+                return pipe(0);
+        }
+        else
+        {
+            if(std::fabs(pipe(1)) > std::fabs(pipe(2)))
+                return pipe(1);
+        }
+
+        return pipe(2);
+    });
+}
+
 // ...
 // Add more methods here and
 // add it to enum `Method` and following function `selectDiffFct`.
@@ -154,6 +242,16 @@ PtrToDiffFct<T> selectDiffFct(DiffMethod m)
         return &diffBuffer_SavitzkyGolay5;
     case SavitzkyGolay7:
         return &diffBuffer_SavitzkyGolay7;
+    case Gauss3:
+        return &diffBuffer_Gauss3;
+    case Average3:
+        return &diffBuffer_Average3;
+    case Median3:
+        return &diffBuffer_Median3;
+    case MedianAbs3:
+        return &diffBuffer_MedianAbs3;
+    case MaxAbs3:
+        return &diffBuffer_MaxAbs3;
     }
     return &diffBuffer_null;
 }

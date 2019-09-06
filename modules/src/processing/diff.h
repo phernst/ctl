@@ -15,7 +15,12 @@ namespace imgproc {
 enum DiffMethod { CentralDifference,
                   DifferenceToNext,
                   SavitzkyGolay5,
-                  SavitzkyGolay7 };
+                  SavitzkyGolay7,
+                  Gauss3,
+                  Average3,
+                  Median3,
+                  MedianAbs3,
+                  MaxAbs3 };
 
 // partial derivatives
 template <uint dim>
