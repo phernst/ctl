@@ -94,6 +94,7 @@ public:
     void allocateMemory();
     void allocateMemory(const T& initValue);
     void fill(const T& fillValue);
+    void freeMemory();
     T max() const;
     T min() const;
     VoxelVolume<T> reslicedByX(bool reverse = false) const;
@@ -104,8 +105,8 @@ public:
     Chunk2D<T> sliceZ(uint slice) const;
     float smallestVoxelSize() const;
 
-    T& operator()(uint x, uint y, uint z);
-    const T& operator()(uint x, uint y, uint z) const;
+    typename std::vector<T>::reference operator()(uint x, uint y, uint z);
+    typename std::vector<T>::const_reference operator()(uint x, uint y, uint z) const;
 
     VoxelVolume<T>& operator+=(const VoxelVolume<T>& other);
     VoxelVolume<T>& operator-=(const VoxelVolume<T>& other);

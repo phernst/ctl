@@ -173,11 +173,18 @@ void VoxelVolume<T>::setVoxelSize(float isotropicSize)
     _size = { isotropicSize, isotropicSize, isotropicSize };
 }
 
+template<typename T>
+void VoxelVolume<T>::freeMemory()
+{
+    _data.clear();
+    _data.shrink_to_fit();
+}
+
 /*!
  * Returns a reference to the data at voxel \f$[x,y,z\f$. Does not perform boundary checks.
  */
 template <typename T>
-T& VoxelVolume<T>::operator()(uint x, uint y, uint z)
+typename std::vector<T>::reference VoxelVolume<T>::operator()(uint x, uint y, uint z)
 {
     const size_t voxPerSlice = size_t(_dim.x) * _dim.y;
     const size_t voxPerLine = size_t(_dim.x);
@@ -191,7 +198,7 @@ T& VoxelVolume<T>::operator()(uint x, uint y, uint z)
  * Returns a constant reference to the data at voxel \f$[x,y,z\f$. Does not perform boundary checks.
  */
 template <typename T>
-const T& VoxelVolume<T>::operator()(uint x, uint y, uint z) const
+typename std::vector<T>::const_reference VoxelVolume<T>::operator()(uint x, uint y, uint z) const
 {
     const size_t voxPerSlice = size_t(_dim.x) * _dim.y;
     const size_t voxPerLine = size_t(_dim.x);
