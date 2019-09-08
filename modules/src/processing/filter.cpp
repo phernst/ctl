@@ -1,8 +1,14 @@
-#include "imageprocessing.h"
+#include "diff.h"
+#include "filter.h"
 #include "img/chunk2d.h"
 #include "img/voxelvolume.h"
 #include <array>
 #include <cmath>
+
+/*!
+ * This cpp implements the partial `diff` and one-dimensional `filter` functions declared in
+ * "diff.h" and "filter.h".
+ */
 
 namespace CTL {
 namespace imgproc {
@@ -42,10 +48,10 @@ private:
 
 // ## Generic function for numerical derivate using a certain function f on a PipeBuffer ###
 template <typename T, uint filterSize>
-using DiffValFromPipeBuf = T (*)(const PipeBuffer<T, filterSize>&);
+using ResValFromPipeBuf = T (*)(const PipeBuffer<T, filterSize>&);
 
 template <typename T, uint filterSize>
-void meta_diff(const std::vector<T*>& buffer, DiffValFromPipeBuf<T, filterSize> f)
+void meta_filt(const std::vector<T*>& buffer, ResValFromPipeBuf<T, filterSize> f)
 {
     Q_ASSERT(buffer.size() >= filterSize - 1);
 
@@ -69,18 +75,20 @@ void meta_diff(const std::vector<T*>& buffer, DiffValFromPipeBuf<T, filterSize> 
         *buffer[firstUndefEl + b] = T(0);
 }
 
-// ## Derivative methods ##
-// Derivative methods need to have the following signature:
+// ## Derivative/Filter methods ##
+// Derivative/Filter methods need to have the following signature:
 // template <typename T> void NAME (const std::vector<T*>&)
 // The input argument is a vector providing pointers to all elements along the dimension of
-// differentiation. Compute the derivative values and overwrite them using the provided pointers.
-// This can be easily done by calling `meta_diff` and passing the buffer as well as a pointer to
-// a function that performs a derivative based on the values provided by a PipeBuffer<T,filterSize>.
-// This means, ony the formula for a single value of the derivative based on the adjacent elements
+// differentiation/filtering. Compute the derivative/filtered values and overwrite them using the
+// provided pointers. This can be easily done by calling `meta_filt` and passing the buffer as well
+// as a pointer to a function that performs a derivative/filter based on the values provided by a
+// PipeBuffer<T,filterSize>.
+// This means, ony the formula for a single value of the derivative/filter based on the adjacent elements
 // (the number of neighbors is given by the `filterSize` template argument) needs to be provided.
 
+// Derivatives
 template <typename T>
-void diffBuffer_null(const std::vector<T*>&)
+void filterBuffer_null(const std::vector<T*>&)
 {
 }
 
@@ -88,7 +96,7 @@ template <typename T>
 void diffBuffer_CentralDifference(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 3;
-    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return T(0.5) * (pipe(2) - pipe(0));
     });
@@ -98,7 +106,7 @@ template <typename T>
 void diffBuffer_DifferenceToNext(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 2;
-    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return pipe(1) - pipe(0);
     });
@@ -108,7 +116,7 @@ template <typename T>
 void diffBuffer_SavitzkyGolay5(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 5;
-    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return T(0.1) * (- T(2) * pipe(0)
                          -        pipe(1)
@@ -122,7 +130,7 @@ template <typename T>
 void diffBuffer_SavitzkyGolay7(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 7;
-    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return T(1)/T(28) * (- T(3) * pipe(0)
                              - T(2) * pipe(1)
@@ -134,31 +142,32 @@ void diffBuffer_SavitzkyGolay7(const std::vector<T*>& buffer)
     });
 }
 
+// Generic Filters
 template <typename T>
-void diffBuffer_Gauss3(const std::vector<T*>& buffer)
+void filterBuffer_Gauss3(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 3;
-    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return T(0.25) * pipe(0) + T(0.5) * pipe(1) + T(0.25) * pipe(2);
     });
 }
 
 template <typename T>
-void diffBuffer_Average3(const std::vector<T*>& buffer)
+void filterBuffer_Average3(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 3;
-    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         return T(1.0/3.0) * pipe(0) + T(1.0/3.0) * pipe(1) + T(1.0/3.0) * pipe(2);
     });
 }
 
 template <typename T>
-void diffBuffer_Median3(const std::vector<T*>& buffer)
+void filterBuffer_Median3(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 3;
-    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         if(pipe(0) > pipe(1))
         {
@@ -178,10 +187,10 @@ void diffBuffer_Median3(const std::vector<T*>& buffer)
 }
 
 template <typename T>
-void diffBuffer_MedianAbs3(const std::vector<T*>& buffer)
+void filterBuffer_MedianAbs3(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 3;
-    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         if(std::fabs(pipe(0)) > std::fabs(pipe(1)))
         {
@@ -201,10 +210,10 @@ void diffBuffer_MedianAbs3(const std::vector<T*>& buffer)
 }
 
 template <typename T>
-void diffBuffer_MaxAbs3(const std::vector<T*>& buffer)
+void filterBuffer_MaxAbs3(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 3;
-    meta_diff<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
         if(std::fabs(pipe(0)) > std::fabs(pipe(1)))
         {
@@ -223,37 +232,39 @@ void diffBuffer_MaxAbs3(const std::vector<T*>& buffer)
 
 // ...
 // Add more methods here and
-// add it to enum `Method` and following function `selectDiffFct`.
+// add it to enum `[Diff]/[Filt]Method` and following function `selectFilterFct`.
 
 // # Method selection #
 template <typename T>
 using PtrToDiffFct = void (*)(const std::vector<T*>&);
 
 template <typename T>
-PtrToDiffFct<T> selectDiffFct(DiffMethod m)
+PtrToDiffFct<T> selectFilterFct(int m)
 {
     switch(m)
     {
-    case CentralDifference:
+    // Derivatives
+    case DiffMethod::CentralDifference:
         return &diffBuffer_CentralDifference;
-    case DifferenceToNext:
+    case DiffMethod::DifferenceToNext:
         return &diffBuffer_DifferenceToNext;
-    case SavitzkyGolay5:
+    case DiffMethod::SavitzkyGolay5:
         return &diffBuffer_SavitzkyGolay5;
-    case SavitzkyGolay7:
+    case DiffMethod::SavitzkyGolay7:
         return &diffBuffer_SavitzkyGolay7;
-    case Gauss3:
-        return &diffBuffer_Gauss3;
-    case Average3:
-        return &diffBuffer_Average3;
-    case Median3:
-        return &diffBuffer_Median3;
-    case MedianAbs3:
-        return &diffBuffer_MedianAbs3;
-    case MaxAbs3:
-        return &diffBuffer_MaxAbs3;
+    // Generic Filters
+    case FiltMethod::Gauss3:
+        return &filterBuffer_Gauss3;
+    case FiltMethod::Average3:
+        return &filterBuffer_Average3;
+    case FiltMethod::Median3:
+        return &filterBuffer_Median3;
+    case FiltMethod::MedianAbs3:
+        return &filterBuffer_MedianAbs3;
+    case FiltMethod::MaxAbs3:
+        return &filterBuffer_MaxAbs3;
     }
-    return &diffBuffer_null;
+    return &filterBuffer_null;
 }
 
 // ## Buffer helper class that stores pointer for 1D look-ups ##
@@ -331,59 +342,59 @@ public:
     }
 };
 
-// ## Template implementation of diff functions ##
-// # Chunk2D diff function #
+// ## Template implementation of diff/filter functions ##
+// # Chunk2D diff/filter function #
 template <typename T, uint dim>
-void diff_impl(Chunk2D<T>& image, DiffMethod m)
+void filter_impl(Chunk2D<T>& image, int m)
 {
-    auto buffDiffFct = selectDiffFct<T>(m);
+    auto buffFilterFct = selectFilterFct<T>(m);
 
-    uint diffDim = image.width();
+    uint filterDim = image.width();
     uint otherDim = image.height();
     if(dim == 1)
-        std::swap(diffDim, otherDim);
+        std::swap(filterDim, otherDim);
 
-    LineBuffer<T, dim> lineBuff(diffDim);
+    LineBuffer<T, dim> lineBuff(filterDim);
     for(uint el = 0; el < otherDim; ++el)
     {
         lineBuff.fillLineBuffer(image, el);
-        buffDiffFct(lineBuff.get());
+        buffFilterFct(lineBuff.get());
     }
 }
 
-// # VoxelVolume diff function #
+// # VoxelVolume diff/filter function #
 template <typename T, uint dim>
-void diff_impl(VoxelVolume<T>& volume, DiffMethod m)
+void filter_impl(VoxelVolume<T>& volume, int m)
 {
-    auto buffDiffFct = selectDiffFct<T>(m);
+    auto buffFilterFct = selectFilterFct<T>(m);
 
     auto volDim = volume.dimensions();
-    uint diffDim, otherDim1, otherDim2;
+    uint filterDim, otherDim1, otherDim2;
     switch(dim)
     {
     case 0:
-        diffDim = volDim.x;
+        filterDim = volDim.x;
         otherDim1 = volDim.y;
         otherDim2 = volDim.z;
         break;
     case 1:
-        diffDim = volDim.y;
+        filterDim = volDim.y;
         otherDim1 = volDim.x;
         otherDim2 = volDim.z;
         break;
     case 2:
-        diffDim = volDim.z;
+        filterDim = volDim.z;
         otherDim1 = volDim.x;
         otherDim2 = volDim.y;
         break;
     }
 
-    LineBuffer<T, dim> lineBuff(diffDim);
+    LineBuffer<T, dim> lineBuff(filterDim);
     for(uint elDim1 = 0; elDim1 < otherDim1; ++elDim1)
         for(uint elDim2 = 0; elDim2 < otherDim2; ++elDim2)
         {
             lineBuff.fillLineBuffer(volume, elDim1, elDim2);
-            buffDiffFct(lineBuff.get());
+            buffFilterFct(lineBuff.get());
         }
 }
 
@@ -391,10 +402,23 @@ void diff_impl(VoxelVolume<T>& volume, DiffMethod m)
 
 // Interface function definitions
 // ------------------------------
+/*!
+ * Differentiates the data in \a image along the dimension \a dim using the differentiation method
+ * \a m.
+ */
 template <uint dim>
 void diff(Chunk2D<float>& image, DiffMethod m)
 {
-    diff_impl<float, dim>(image, m);
+    filter_impl<float, dim>(image, m);
+}
+
+/*!
+ * Filters the data in \a image along the dimension \a dim using the filter method \a m.
+ */
+template <uint dim>
+void filter(Chunk2D<float>& image, FiltMethod m)
+{
+    filter_impl<float, dim>(image, m);
 }
 
 /*!
@@ -404,13 +428,27 @@ void diff(Chunk2D<float>& image, DiffMethod m)
 template <uint dim>
 void diff(Chunk2D<double>& image, DiffMethod m)
 {
-    diff_impl<double, dim>(image, m);
+    filter_impl<double, dim>(image, m);
+}
+
+/*!
+ * Filters the data in \a image along the dimension \a dim using the filter method \a m.
+ */
+template <uint dim>
+void filter(Chunk2D<double>& image, FiltMethod m)
+{
+    filter_impl<double, dim>(image, m);
 }
 
 template void diff<0u>(Chunk2D<float>& image, DiffMethod m);
 template void diff<1u>(Chunk2D<float>& image, DiffMethod m);
 template void diff<0u>(Chunk2D<double>& image, DiffMethod m);
 template void diff<1u>(Chunk2D<double>& image, DiffMethod m);
+
+template void filter<0u>(Chunk2D<float>& image, FiltMethod m);
+template void filter<1u>(Chunk2D<float>& image, FiltMethod m);
+template void filter<0u>(Chunk2D<double>& image, FiltMethod m);
+template void filter<1u>(Chunk2D<double>& image, FiltMethod m);
 
 /*!
  * Differentiates the data in \a volume along the dimension \a dim using the differentiation method
@@ -419,7 +457,16 @@ template void diff<1u>(Chunk2D<double>& image, DiffMethod m);
 template <uint dim>
 void diff(VoxelVolume<float>& volume, DiffMethod m)
 {
-    diff_impl<float, dim>(volume, m);
+    filter_impl<float, dim>(volume, m);
+}
+
+/*!
+ * Filters the data in \a volume along the dimension \a dim using the filter method \a m.
+ */
+template <uint dim>
+void filter(VoxelVolume<float>& volume, FiltMethod m)
+{
+    filter_impl<float, dim>(volume, m);
 }
 
 /*!
@@ -429,7 +476,16 @@ void diff(VoxelVolume<float>& volume, DiffMethod m)
 template <uint dim>
 void diff(VoxelVolume<double>& volume, DiffMethod m)
 {
-    diff_impl<double, dim>(volume, m);
+    filter_impl<double, dim>(volume, m);
+}
+
+/*!
+ * Filters the data in \a volume along the dimension \a dim using the filter method \a m.
+ */
+template <uint dim>
+void filter(VoxelVolume<double>& volume, FiltMethod m)
+{
+    filter_impl<double, dim>(volume, m);
 }
 
 template void diff<0u>(VoxelVolume<float>& volume, DiffMethod m);
@@ -439,15 +495,22 @@ template void diff<0u>(VoxelVolume<double>& volume, DiffMethod m);
 template void diff<1u>(VoxelVolume<double>& volume, DiffMethod m);
 template void diff<2u>(VoxelVolume<double>& volume, DiffMethod m);
 
+template void filter<0u>(VoxelVolume<float>& volume, FiltMethod m);
+template void filter<1u>(VoxelVolume<float>& volume, FiltMethod m);
+template void filter<2u>(VoxelVolume<float>& volume, FiltMethod m);
+template void filter<0u>(VoxelVolume<double>& volume, FiltMethod m);
+template void filter<1u>(VoxelVolume<double>& volume, FiltMethod m);
+template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
+
 /*!
- * \enum Method
+ * \enum FiltMethod
  * Enumeration for differentiation methods that can be used.
  *
  * To incorporate a new differentiation method, add a value to this enumeration and provide the
  * corresponding implementation of the method (see .cpp file for more information).
  */
 
-/*! \var Method::CentralDifference
+/*! \var FiltMethod::CentralDifference
  * This computes the central difference. Values on the borders will be set to zero.
  *
  * Assuming the dimension along which the difference is computed has (valid) indices
@@ -464,7 +527,7 @@ template void diff<2u>(VoxelVolume<double>& volume, DiffMethod m);
  * \f$
  */
 
-/*! \var Method::DifferenceToNext
+/*! \var FiltMethod::DifferenceToNext
  * This computes the difference to the next value. The border value (last index) will be set to
  * zero to preserve input dimension.
  *
@@ -481,7 +544,7 @@ template void diff<2u>(VoxelVolume<double>& volume, DiffMethod m);
  * \f$
  */
 
-/*! \var Method::SavitzkyGolay5
+/*! \var FiltMethod::SavitzkyGolay5
  * This computes the derivative using a Savitzky-Golay-Filter of lenght 5. Values on the borders
  * will be set to zero.
  *
@@ -499,7 +562,7 @@ template void diff<2u>(VoxelVolume<double>& volume, DiffMethod m);
  * \f$
  */
 
-/*! \var Method::SavitzkyGolay7
+/*! \var FiltMethod::SavitzkyGolay7
  * This computes the derivative using a Savitzky-Golay-Filter of lenght 7. Values on the borders
  * will be set to zero.
  *

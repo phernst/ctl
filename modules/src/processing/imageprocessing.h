@@ -6,6 +6,7 @@
  */
 
 #include "diff.h"
+#include "filter.h"
 
 namespace CTL {
 
