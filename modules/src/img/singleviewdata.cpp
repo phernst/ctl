@@ -22,7 +22,7 @@ SingleViewData::SingleViewData(const ModuleData::Dimensions &moduleDimensions)
  * do so, use allocateMemory().
  */
 SingleViewData::SingleViewData(uint channelsPerModule, uint rowsPerModule)
-    : _moduleDim({channelsPerModule, rowsPerModule})
+    : _moduleDim({ channelsPerModule, rowsPerModule })
 {
 
 }
@@ -298,6 +298,15 @@ void SingleViewData::fill(float fillValue)
 }
 
 /*!
+ * Removes all modules from the view and deletes the image data.
+ */
+void SingleViewData::freeMemory()
+{
+    _data.clear();
+    _data.shrink_to_fit();
+}
+
+/*!
  * Returns the maximum value in this instance.
  *
  * Returns zero if this data is empty.
@@ -366,6 +375,11 @@ bool SingleViewData::hasEqualSizeAs(const std::vector<float> &other) const
  * Enforces memory allocation. This resizes the internal std::vector to the required number of
  * modules and requests memory allocation for each of the modules.
  * As a result, the number of modules is equal to \a nbModules.
+ *
+ * Note that if the current number of modules is less than \a nbModules the additionally allocated
+ * modules remain uninitialized, i.e. they contain undefined values.
+ *
+ * \sa allocateMemory(uint nbModules, float initValue)
  */
 void SingleViewData::allocateMemory(uint nbModules)
 {
@@ -376,14 +390,14 @@ void SingleViewData::allocateMemory(uint nbModules)
 }
 
 /*!
- * Enforces memory allocation and initializes all values with \a initValue.
+ * Enforces memory allocation and if the current number of modules is less than \a nbModules,
+ * the additionally appended modules are initialized with \a initValue.
  *
- * \sa allocateMemory(uint), fill().
+ * \sa allocateMemory(uint nbModules), fill().
  */
 void SingleViewData::allocateMemory(uint nbModules, float initValue)
 {
-    allocateMemory(nbModules);
-    fill(initValue);
+    _data.resize(nbModules, ModuleData(_moduleDim, initValue));
 }
 
 /*!

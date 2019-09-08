@@ -196,15 +196,15 @@ void VoxelVolume<T>::allocateMemory()
 }
 
 /*!
- * Enforces memory allocation and initilizes all elements with \a initValue.
+ * Enforces memory allocation and if the current number of allocated elements is less than the
+ * number of elements in the chunk, additional copies of \a initValue are appended.
  *
- * \sa allocateMemory(), fill().
+ * \sa allocatedElements(), allocateMemory(), fill().
  */
 template<typename T>
 void VoxelVolume<T>::allocateMemory(const T& initValue)
 {
-    allocateMemory();
-    fill(initValue);
+    _data.resize(totalVoxelCount(), initValue);
 }
 
 /*!

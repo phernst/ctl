@@ -57,6 +57,7 @@ public:
     void append(const std::vector<float>& dataVector);
     Chunk2D<float> combined(const ModuleLayout& layout = ModuleLayout(), bool* ok = nullptr) const;
     void fill(float fillValue);
+    void freeMemory();
     float max() const;
     float min() const;
     void setDataFromVector(const std::vector<float>& dataVector);

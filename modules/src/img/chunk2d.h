@@ -39,12 +39,12 @@ public:
     };
 
     explicit Chunk2D(const Dimensions& dimensions);
-    Chunk2D(const Dimensions& dimensions, const T& fillValue);
+    Chunk2D(const Dimensions& dimensions, const T& initValue);
     Chunk2D(const Dimensions& dimensions, std::vector<T>&& data);
     Chunk2D(const Dimensions& dimensions, const std::vector<T>& data);
 
     Chunk2D(uint width, uint height);
-    Chunk2D(uint width, uint height, const T& fillValue);
+    Chunk2D(uint width, uint height, const T& initValue);
     Chunk2D(uint width, uint height, std::vector<T>&& data);
     Chunk2D(uint width, uint height, const std::vector<T>& data);
 
@@ -63,8 +63,8 @@ public:
     const T* rawData() const;
     uint width() const;
 
-    T& operator()(uint x, uint y);
-    const T& operator()(uint x, uint y) const;
+    typename std::vector<T>::reference operator()(uint x, uint y);
+    typename std::vector<T>::const_reference operator()(uint x, uint y) const;
 
     bool operator==(const Chunk2D<T>& other) const;
     bool operator!=(const Chunk2D<T>& other) const;
@@ -85,7 +85,9 @@ public:
 
     // other methods
     void allocateMemory();
+    void allocateMemory(const T& initValue);
     void fill(const T& fillValue);
+    void freeMemory();
 
 protected:
     Dimensions _dim; //!< The dimensions (width x height) of the chunk.

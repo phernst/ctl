@@ -56,6 +56,7 @@ public:
     void append(const SingleViewData& singleView);
     ProjectionData combined(const ModuleLayout& layout = ModuleLayout()) const;
     void fill(float fillValue);
+    void freeMemory();
     float max() const;
     float min() const;
     void setDataFromVector(const std::vector<float>& dataVector);

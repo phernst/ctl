@@ -173,6 +173,11 @@ void VoxelVolume<T>::setVoxelSize(float isotropicSize)
     _size = { isotropicSize, isotropicSize, isotropicSize };
 }
 
+/*
+ * Deletes the data of the voxel volume.
+ *
+ * \sa allocateMemory()
+ */
 template<typename T>
 void VoxelVolume<T>::freeMemory()
 {

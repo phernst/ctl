@@ -199,6 +199,15 @@ void ProjectionData::fill(float fillValue)
 }
 
 /*!
+ * Removes all views from the projection data and deletes the image data.
+ */
+void ProjectionData::freeMemory()
+{
+    _data.clear();
+    _data.shrink_to_fit();
+}
+
+/*!
  * Concatenates the projection data from all views and returns it as a one-dimensional vector.
  */
 std::vector<float> ProjectionData::toVector() const
@@ -211,7 +220,7 @@ std::vector<float> ProjectionData::toVector() const
 
     auto destIt = ret.begin();
 
-    for(size_t view=0; view<dim.nbViews; ++view)
+    for(size_t view = 0; view < dim.nbViews; ++view)
     {
         auto viewVectorized = _data[view].toVector();
         auto srcIt = viewVectorized.cbegin();
@@ -409,25 +418,31 @@ bool ProjectionData::hasEqualSizeAs(const SingleViewData &other) const
  * Enforces memory allocation and allocates memory for \a nbViews views.
  * As a result, the number of views is equal to \a nbViews.
  *
- * \sa SingleViewData::allocateMemory().
+ * Note that if the current number of views is less than \a nbViews the additionally allocated
+ * views remain uninitialized, i.e. they contain undefined values.
+ *
+ * \sa allocateMemory(uint nbViews, float initValue), SingleViewData::allocateMemory().
  */
 void ProjectionData::allocateMemory(uint nbViews)
 {
-    _data.resize(nbViews, SingleViewData(_viewDim.nbChannels,_viewDim.nbRows));
+    _data.resize(nbViews, SingleViewData(_viewDim.nbChannels, _viewDim.nbRows));
 
     for(auto& view : _data)
         view.allocateMemory(_viewDim.nbModules);
 }
 
 /*!
- * Enforces memory allocation and initializes all values with \a initValue.
+ * Enforces memory allocation and if the current number of views is less than \a nbViews,
+ * the additionally appended views are initialized with \a initValue.
  *
- * \sa allocateMemory(uint), fill().
+ * \sa allocateMemory(uint nbViews), fill().
  */
 void ProjectionData::allocateMemory(uint nbViews, float initValue)
 {
-    allocateMemory(nbViews);
-    fill(initValue);
+    auto oldNbViews = this->nbViews();
+    _data.resize(nbViews, SingleViewData(_viewDim.nbChannels, _viewDim.nbRows));
+    for(auto view = oldNbViews; view < nbViews; ++view)
+        _data[view].allocateMemory(_viewDim.nbModules, initValue);
 }
 
 /*!
