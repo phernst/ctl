@@ -20,14 +20,14 @@ enum FiltMethod { Gauss3,
 
 // one-dimensional filter
 template <uint dim>
-void filter(Chunk2D<float>& image, FiltMethod m = Gauss3);
+void filter(Chunk2D<float>& image, FiltMethod m);
 template <uint dim>
-void filter(Chunk2D<double>& image, FiltMethod m = Gauss3);
+void filter(Chunk2D<double>& image, FiltMethod m);
 
 template <uint dim>
-void filter(VoxelVolume<float>& volume, FiltMethod m = Gauss3);
+void filter(VoxelVolume<float>& volume, FiltMethod m);
 template <uint dim>
-void filter(VoxelVolume<double>& volume, FiltMethod m = Gauss3);
+void filter(VoxelVolume<double>& volume, FiltMethod m);
 
 } // namespace imgproc
 } // namespace CTL
