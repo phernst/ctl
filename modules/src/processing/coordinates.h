@@ -41,12 +41,24 @@ struct Generic3DCoord
 template<typename T>
 struct Range
 {
+    // start and end of the range
     T& start() { return data[0]; }
     T& end() { return data[1]; }
     const T& start() const { return data[0]; }
     const T& end() const { return data[1]; }
 
+    // spacing of the resulting linspace vector for given number of samples
+    T spacing(uint nbSamples) const
+    {
+        return (nbSamples > 1) ? (data[1] - data[0]) / T(nbSamples - 1)
+                               : T(0);
+    }
+    // center
+    T center() const { return (data[0] + data[1]) / T(2); }
+
+    // linspace
     std::vector<T> linspace(uint nbSamples) const { return linspace(data[0], data[1], nbSamples); }
+    // static linspace
     static std::vector<T> linspace(T from, T to, uint nbSamples)
     {
         std::vector<T> ret(nbSamples);
@@ -57,6 +69,7 @@ struct Range
         return ret;
     }
 
+    // data member (start and end)
     T data[2];
 };
 
