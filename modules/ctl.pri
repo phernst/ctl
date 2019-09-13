@@ -10,6 +10,9 @@ CONFIG += CTL_CORE_MODULE
 
 # definition for mathematical constants
 DEFINES += _USE_MATH_DEFINES
+# disable min/max macros in Windows headers
+DEFINES += NOMINMAX
+# enable logging function names and line numbers even for release builds
 DEFINES += QT_MESSAGELOGCONTEXT
 
 INCLUDEPATH += $$PWD/src
