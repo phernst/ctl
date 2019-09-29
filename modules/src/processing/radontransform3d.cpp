@@ -144,6 +144,32 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
 }
 
 /*!
+ * Same as
+ * sampleTransform(const std::vector<float>&, const std::vector<float>&, const std::vector<float>&),
+ * but computes the 3D Radon transform on a equidistantly spaced grid, which is defined by sampling
+ * ranges and number of samples in each direction.
+ * Note that the returned VoxelVolume that contains the 3D Radon transform includes the voxel size
+ * and volume offset according to the specified ranges and number of samples (i.e. spacing on the
+ * grid and center of the ranges).
+ */
+VoxelVolume<float>
+RadonTransform3D::sampleTransform(SamplingRange azimuthRange, uint nbAzimuthSamples,
+                                  SamplingRange polarRange, uint nbPolarSamples,
+                                  SamplingRange distanceRange, uint nbDistanceSamples) const
+{
+    auto ret = sampleTransform(azimuthRange.linspace(nbAzimuthSamples),
+                               polarRange.linspace(nbPolarSamples),
+                               distanceRange.linspace(nbDistanceSamples));
+
+    ret.setVoxelSize(azimuthRange.spacing(nbAzimuthSamples),
+                     polarRange.spacing(nbPolarSamples),
+                     distanceRange.spacing(nbDistanceSamples));
+    ret.setVolumeOffset(azimuthRange.center(), polarRange.center(), distanceRange.center());
+
+    return ret;
+}
+
+/*!
  * Returns the plane integral of the volume data along the plane specified by its normal vector
  * \a planeUnitNormal and its distance from the origin \a planeDistanceFromOrigin.
  */

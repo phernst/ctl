@@ -104,10 +104,14 @@ public:
     const VoxelVolume<float>::Offset& volOffset() const;
     const VoxelVolume<float>::VoxelSize& volVoxSize() const;
 
-    // sampling of several plane integrals
+    // sampling of several plane integrals (non-equidistant grid)
     VoxelVolume<float> sampleTransform(const std::vector<float>& azimuthAngleSampling,
                                        const std::vector<float>& polarAngleSampling,
                                        const std::vector<float>& distanceSampling) const;
+    // sampling of several equally distributed plane integrals (equidistant grid)
+    VoxelVolume<float> sampleTransform(SamplingRange azimuthRange, uint nbAzimuthSamples,
+                                       SamplingRange polarRange, uint nbPolarSamples,
+                                       SamplingRange distanceRange, uint nbDistanceSamples) const;
     // single plane integral
     float planeIntegral(const mat::Matrix<3, 1>& planeUnitNormal,
                         double planeDistanceFromOrigin) const;
