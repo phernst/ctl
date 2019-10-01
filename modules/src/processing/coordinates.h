@@ -39,8 +39,13 @@ struct Generic3DCoord
 
 // Range
 template<typename T>
-struct Range
+class Range
 {
+public:
+    // ctor
+    Range(T start, T end) : data{ start, end }
+    { }
+
     // start and end of the range
     T& start() { return data[0]; }
     T& end() { return data[1]; }
@@ -69,6 +74,7 @@ struct Range
         return ret;
     }
 
+private:
     // data member (start and end)
     T data[2];
 };
