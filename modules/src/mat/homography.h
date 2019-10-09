@@ -26,7 +26,7 @@ class Homography2D : public Matrix<3, 3>
     Homography2D(const Matrix<2, 2>& rotation, const Matrix<2, 1>& translation);
     Homography2D(double angle, const Matrix<2, 1>& translation);
 
-    // factories
+    // "passive" factories for describing the transformation of the coordinate system
     static Homography2D passive(const Matrix<2, 2>& rotation);
     static Homography2D passive(double angle);
     static Homography2D passive(const Matrix<2, 1>& translation);
@@ -54,7 +54,7 @@ public:
     Homography3D(const Matrix<3, 3>& rotation, const Matrix<3, 1>& translation);
     Homography3D(double angle, Qt::Axis axis, const Matrix<3, 1>& translation);
 
-    // factories
+    // "passive" factories for describing the transformation of the coordinate system
     static Homography3D passive(const Matrix<3, 3>& rotation);
     static Homography3D passive(double angle, Qt::Axis axis);
     static Homography3D passive(const Matrix<3, 1>& translation);
