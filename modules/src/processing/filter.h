@@ -29,6 +29,19 @@ void filter(VoxelVolume<float>& volume, FiltMethod m);
 template <uint dim>
 void filter(VoxelVolume<double>& volume, FiltMethod m);
 
+// available specializations (explicit instantiation declaration)
+extern template void filter<0u>(VoxelVolume<float>& volume, FiltMethod m);
+extern template void filter<1u>(VoxelVolume<float>& volume, FiltMethod m);
+extern template void filter<2u>(VoxelVolume<float>& volume, FiltMethod m);
+extern template void filter<0u>(VoxelVolume<double>& volume, FiltMethod m);
+extern template void filter<1u>(VoxelVolume<double>& volume, FiltMethod m);
+extern template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
+
+extern template void filter<0u>(Chunk2D<float>& image, FiltMethod m);
+extern template void filter<1u>(Chunk2D<float>& image, FiltMethod m);
+extern template void filter<0u>(Chunk2D<double>& image, FiltMethod m);
+extern template void filter<1u>(Chunk2D<double>& image, FiltMethod m);
+
 } // namespace imgproc
 } // namespace CTL
 

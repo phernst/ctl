@@ -29,6 +29,19 @@ void diff(VoxelVolume<float>& volume, DiffMethod m = CentralDifference);
 template <uint dim>
 void diff(VoxelVolume<double>& volume, DiffMethod m = CentralDifference);
 
+// available specializations (explicit instantiation declaration)
+extern template void diff<0u>(Chunk2D<float>& image, DiffMethod m);
+extern template void diff<1u>(Chunk2D<float>& image, DiffMethod m);
+extern template void diff<0u>(Chunk2D<double>& image, DiffMethod m);
+extern template void diff<1u>(Chunk2D<double>& image, DiffMethod m);
+
+extern template void diff<0u>(VoxelVolume<float>& volume, DiffMethod m);
+extern template void diff<1u>(VoxelVolume<float>& volume, DiffMethod m);
+extern template void diff<2u>(VoxelVolume<float>& volume, DiffMethod m);
+extern template void diff<0u>(VoxelVolume<double>& volume, DiffMethod m);
+extern template void diff<1u>(VoxelVolume<double>& volume, DiffMethod m);
+extern template void diff<2u>(VoxelVolume<double>& volume, DiffMethod m);
+
 } // namespace imgproc
 } // namespace CTL
 
