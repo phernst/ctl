@@ -107,6 +107,8 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
             task.makeBufs(distanceSampling);
 
         for(pol = 0; pol < nbPolSmpl; ++pol)
+        {
+            qDebug() << (pol + 1) / float(nbPolSmpl) << "%";
             for(azi = 0; azi < nbAziSmpl; ++azi)
             {
                 if(devRunning[dev])
@@ -128,6 +130,7 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
                 if(dev == nbDevices)
                     dev = 0;
              }
+        }
 
         // evaluate remaining running devices
         for(uint dev = 0; dev < nbDevices; ++dev)
