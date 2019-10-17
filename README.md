@@ -10,8 +10,16 @@ detector are included as well. Conversion of the geometric information to/from
 projection matrices allowes to easily collaborate with other tools supporting 
 them.
 
-**For more details:**
-[**check out the documentation!**](https://www.forschungscampus-stimulate.de/ctl/)
+Reference publication:  
+Tim Pfeiffer, Robert Frysch, Richard N. K. Bismark, and Georg Rose
+"CTL: modular open-source C++-library for CT-simulations",
+Proc. SPIE 11072,
+15th International Meeting on Fully Three-Dimensional Image Reconstruction in Radiology and Nuclear Medicine,
+110721L (28 May 2019);
+[doi:10.1117/12.2534517](https://doi.org/10.1117/12.2534517)
+
+For further details, check
+[the documentation of the code.](https://www.forschungscampus-stimulate.de/ctl/)
 
 Moreover, you may find useful information in the
 [Wiki](https://gitlab.com/tpfeiffe/ctl/wikis/home),
