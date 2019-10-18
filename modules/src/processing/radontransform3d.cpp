@@ -101,6 +101,14 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
     std::vector<uint> aziAngle(nbDevices);
     std::vector<uint> polAngle(nbDevices);
     uint azi, pol, dev = 0;
+    int curProgress, oldProgress = -1;
+    auto printProgress = [&curProgress, &oldProgress, nbPolSmpl](uint pol)
+    {
+        curProgress = int((pol + 1) / float(nbPolSmpl) * 100.0f);
+        if(curProgress != oldProgress)
+            qDebug() << curProgress << "%";
+        oldProgress = curProgress;
+    };
 
     try{
         for(auto& task : _tasks)
@@ -108,7 +116,8 @@ VoxelVolume<float> RadonTransform3D::sampleTransform(const std::vector<float>& a
 
         for(pol = 0; pol < nbPolSmpl; ++pol)
         {
-            qDebug() << (pol + 1) / float(nbPolSmpl) << "%";
+            printProgress(pol);
+
             for(azi = 0; azi < nbAziSmpl; ++azi)
             {
                 if(devRunning[dev])
