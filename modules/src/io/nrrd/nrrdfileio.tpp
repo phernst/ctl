@@ -428,9 +428,10 @@ inline bool NrrdFileIO::parseField(const QString &field, const QString &desc,
             return false;
         if(!desc.startsWith('(') || !desc.endsWith(')'))
             return false;
+        // extract part between '(' and ')'
         auto offSet = desc.mid(1);
         offSet.chop(1);
-        auto vector = desc.split(',');
+        auto vector = offSet.split(',');
         metaInfo->insert(meta_info::volOffX, vector.value(0).toFloat());
         metaInfo->insert(meta_info::volOffY, vector.value(1).toFloat());
         metaInfo->insert(meta_info::volOffZ, vector.value(2).toFloat());
