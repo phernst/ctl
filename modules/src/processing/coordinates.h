@@ -43,7 +43,10 @@ class Range
 {
 public:
     // ctor
-    Range(T start, T end) : data{ start, end }
+    template<typename T1, typename T2,
+             typename = typename std::enable_if<std::is_convertible<T1, T>::value &&
+                                                std::is_convertible<T2, T>::value>::type>
+    Range(T1 start, T2 end) : data{ static_cast<T>(start), static_cast<T>(end) }
     { }
 
     // start and end of the range
