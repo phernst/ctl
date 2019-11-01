@@ -128,7 +128,7 @@ void SystemVisualizerWidget::addBoxObject(const QVector3D& dimensions,
 void SystemVisualizerWidget::addDetectorComponent(CTL::AbstractGantry* gantry,
                                                   CTL::AbstractDetector* detector)
 {
-    static const float MOD_THICKNESS = 0.1f;
+    static constexpr float MOD_THICKNESS = 0.1f;
 
     const auto detPos = gantry->detectorPosition();
     const auto detRot = gantry->detectorRotation();
@@ -156,7 +156,7 @@ void SystemVisualizerWidget::addDetectorComponent(CTL::AbstractGantry* gantry,
 void SystemVisualizerWidget::addSourceComponent(CTL::AbstractGantry* gantry,
                                                 CTL::AbstractSource* )
 {
-    static const float SRC_LENGTH = 1.0f;
+    static constexpr float SRC_LENGTH = 1.0f;
 
     const QVector3D srcBoxSize(0.25f * VIS_SCALE, 0.25f * VIS_SCALE, SRC_LENGTH * VIS_SCALE);
 

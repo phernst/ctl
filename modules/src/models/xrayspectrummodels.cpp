@@ -251,7 +251,7 @@ float KramersLawSpectrumModel::valueAt(float position) const
 
 float KramersLawSpectrumModel::binIntegral(float position, float binWidth) const
 {
-    static const float LOW_END = 0.1f;
+    static constexpr float LOW_END = 0.1f;
 
     float bot = position - 0.5f*binWidth;
     float top = position + 0.5f*binWidth;
