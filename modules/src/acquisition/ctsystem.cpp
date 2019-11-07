@@ -21,8 +21,8 @@ namespace CTL {
 /*!
  * Constructs a CTsystem object named \a name.
  */
-CTsystem::CTsystem(const QString& name)
-    : _name(name)
+CTsystem::CTsystem(QString name)
+    : _name(std::move(name))
 {
 }
 

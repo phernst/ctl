@@ -13,7 +13,7 @@
 #define PMATCOMPARATOR_H
 
 #include "matrix_types.h"
-#include <float.h>
+#include <cfloat>
 #include <QSize>
 
 typedef unsigned int uint;

@@ -35,11 +35,11 @@ public:
 protected:
     QList<QPointF> _data;
 
-    inline QList<QPointF>& rdata();
+    QList<QPointF>& rdata();
 
     PointSeriesBase() = default;
-    inline PointSeriesBase(const QList<QPointF>& pointSeries);
-    inline PointSeriesBase(QList<QPointF>&& pointSeries);
+    PointSeriesBase(const QList<QPointF>& pointSeries);
+    PointSeriesBase(QList<QPointF>&& pointSeries);
 };
 
 inline PointSeriesBase::PointSeriesBase(const QList<QPointF>& pointSeries)
@@ -73,7 +73,7 @@ inline double PointSeriesBase::min() const
     return minEl->y();
 }
 
-inline QList<QPointF> &PointSeriesBase::rdata()
+inline QList<QPointF>& PointSeriesBase::rdata()
 {
     return _data;
 }

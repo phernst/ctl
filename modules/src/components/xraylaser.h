@@ -15,8 +15,8 @@ class XrayLaser : public AbstractSource
     CTL_TYPE_ID(310)
 
     // implementation of abstract interface
-    public:virtual EnergyRange energyRange() const override;
-    protected:virtual double nominalPhotonFlux() const override;
+    public: EnergyRange energyRange() const override;
+    protected: double nominalPhotonFlux() const override;
 
 public:
     XrayLaser(const QString& name);

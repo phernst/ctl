@@ -43,8 +43,8 @@ float XraySpectrumTabulatedModel::valueAt(float position) const
     auto parPosition = _lookupTables.upperBound(_energy);
     // --> always gives next tabulated data, since no exact lookup available
 
-    auto tableLower = (parPosition - 1).value(); // tabulated data with voltage < _parameter
-    auto tableUpper = (parPosition).value(); // tabulated data with voltage > _parameter
+    const auto& tableLower = (parPosition - 1).value(); // tabulated data with voltage < _parameter
+    const auto& tableUpper = (parPosition).value(); // tabulated data with voltage > _parameter
 
     auto lowerValue = tableLower.valueAt(position);
     auto upperValue = tableUpper.valueAt(position);

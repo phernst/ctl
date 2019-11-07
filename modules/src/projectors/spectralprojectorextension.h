@@ -29,8 +29,8 @@ private:
         std::vector<std::vector<double>> adjustedFluxMods;
         std::vector<double> totalIntensities;
         std::vector<float> energyBins;
-        float binWidth;
-        uint nbSamples = 0;
+        float binWidth{};
+        uint nbSamples{};
     };
 
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.

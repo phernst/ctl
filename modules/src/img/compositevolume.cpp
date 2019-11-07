@@ -4,19 +4,19 @@
 namespace CTL {
 
 SpectralVolumeData::SpectralVolumeData(const VoxelVolume<float>& materialDensity,
-                                         std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
-                                         const QString& materialName)
+                                       std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
+                                       const QString& materialName)
     : VoxelVolume<float> (materialDensity)
-    , _absorptionModel(absorptionModel)
+    , _absorptionModel(std::move(absorptionModel))
     , _materialName(materialName)
 {
 }
 
 SpectralVolumeData::SpectralVolumeData(VoxelVolume<float>&& materialDensity,
-                                         std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
-                                         const QString& materialName)
+                                       std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
+                                       const QString& materialName)
     : VoxelVolume<float> (std::move(materialDensity))
-    , _absorptionModel(absorptionModel)
+    , _absorptionModel(std::move(absorptionModel))
     , _materialName(materialName)
 {
 }
@@ -61,7 +61,8 @@ const QString& SpectralVolumeData::materialName() const
 
 VoxelVolume<float> SpectralVolumeData::muVolume(float centerEnergy, float binWidth) const
 {
-    return (*this) * (averageMassAttenuationFactor(centerEnergy, binWidth) * 0.1f);
+    constexpr auto cm2mm = 0.1f; // 1/cm -> 1/mm
+    return (*this) * (averageMassAttenuationFactor(centerEnergy, binWidth) * cm2mm);
 }
 
 SpectralVolumeData SpectralVolumeData::createBall(float radius, float voxelSize, float density,

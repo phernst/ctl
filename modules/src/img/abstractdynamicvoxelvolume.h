@@ -24,6 +24,13 @@ public:
 
 private:
     float _time = 0.0f; //!< current time in seconds
+
+protected:
+    AbstractDynamicVoxelVolume() = default;
+    AbstractDynamicVoxelVolume(const AbstractDynamicVoxelVolume&) = default;
+    AbstractDynamicVoxelVolume(AbstractDynamicVoxelVolume&&) = default;
+    AbstractDynamicVoxelVolume& operator= (const AbstractDynamicVoxelVolume&) = default;
+    AbstractDynamicVoxelVolume& operator= (AbstractDynamicVoxelVolume&&) = default;
 };
 
 /*!

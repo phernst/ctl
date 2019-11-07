@@ -15,6 +15,13 @@ class AbstractMetaInfoReader
 
 public:
     virtual ~AbstractMetaInfoReader() = default;
+
+protected:
+    AbstractMetaInfoReader() = default;
+    AbstractMetaInfoReader(const AbstractMetaInfoReader&) = default;
+    AbstractMetaInfoReader(AbstractMetaInfoReader&&) = default;
+    AbstractMetaInfoReader& operator= (const AbstractMetaInfoReader&) = default;
+    AbstractMetaInfoReader& operator= (AbstractMetaInfoReader&&) = default;
 };
 
 template<typename T>

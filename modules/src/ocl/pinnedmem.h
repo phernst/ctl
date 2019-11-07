@@ -19,13 +19,15 @@ template <typename T>
 class PinnedMem
 {
 public:
-    PinnedMem(const cl::CommandQueue& queue);
+    PinnedMem(cl::CommandQueue queue);
 
-    PinnedMem(PinnedMem&& other);
+    PinnedMem(PinnedMem&& other) noexcept;
     PinnedMem& operator=(PinnedMem&& other);
     // non-copyable
     PinnedMem(const PinnedMem& other) = delete;
     PinnedMem& operator=(const PinnedMem& other) = delete;
+
+    ~PinnedMem() = default;
 
     T* hostPtr() const;
     const cl::CommandQueue& queue() const;
@@ -305,14 +307,14 @@ namespace _pinned_mem_details {
 // Generic pinned memory class
 
 template <typename T>
-PinnedMem<T>::PinnedMem(const cl::CommandQueue& queue)
+PinnedMem<T>::PinnedMem(cl::CommandQueue queue)
     : _hostPtr(nullptr)
-    , _q(queue)
+    , _q(std::move(queue))
 {
 }
 
 template<typename T>
-PinnedMem<T>::PinnedMem(PinnedMem&& other)
+PinnedMem<T>::PinnedMem(PinnedMem&& other) noexcept
     : _hostPtr(other._hostPtr)
     , _q(std::move(other._q))
 {

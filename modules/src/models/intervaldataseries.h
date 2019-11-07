@@ -9,10 +9,11 @@ namespace CTL {
 class IntervalDataSeries : public PointSeriesBase
 {
 public:
-    IntervalDataSeries();
+    IntervalDataSeries() = default;
 
     // factory methods
-    static IntervalDataSeries sampledFromModel(const AbstractIntegrableDataModel& dataModel, float from, float to, uint nbSamples);
+    static IntervalDataSeries sampledFromModel(const AbstractIntegrableDataModel& dataModel,
+                                               float from, float to, uint nbSamples);
 
     // other methods
     float integral() const;
@@ -23,7 +24,7 @@ public:
     float centroid() const;
 
 private:
-    float _binWidth;
+    float _binWidth{};
 };
 
 }

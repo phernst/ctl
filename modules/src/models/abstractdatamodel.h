@@ -72,8 +72,6 @@ class AbstractDataModel : public SerializationInterface
     public:virtual AbstractDataModel* clone() const = 0;
 
 public:
-    virtual ~AbstractDataModel() = default;
-
     virtual bool isIntegrable() const final;
     virtual QVariant parameter() const;
     virtual void setParameter(const QVariant& parameter);
@@ -101,6 +99,7 @@ struct DataModelPtr
     DataModelPtr(DataModelPtr&& other) = default;
     DataModelPtr& operator=(const DataModelPtr& other);
     DataModelPtr& operator=(DataModelPtr&& other) = default;
+    ~DataModelPtr() = default;
 
     AbstractDataModel* operator->() const;
     AbstractDataModel& operator*() const;

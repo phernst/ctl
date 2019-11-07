@@ -2,21 +2,17 @@
 
 namespace CTL {
 
-IntervalDataSeries::IntervalDataSeries()
-{
-
-}
-
-IntervalDataSeries IntervalDataSeries::sampledFromModel(const AbstractIntegrableDataModel &dataModel, float from, float to, uint nbSamples)
+IntervalDataSeries IntervalDataSeries::sampledFromModel(const AbstractIntegrableDataModel& dataModel,
+                                                        float from, float to, uint nbSamples)
 {
     Q_ASSERT(from <= to);
     Q_ASSERT(nbSamples > 0);
 
     IntervalDataSeries ret;
-    ret._binWidth = ((to - from) / float(nbSamples));
+    ret._binWidth = (to - from) / float(nbSamples);
 
     float smpPt = from + 0.5f * ret._binWidth;
-    for(uint s = 0; s<nbSamples; ++s)
+    for(uint s = 0; s < nbSamples; ++s)
     {
         ret._data.append(QPointF(smpPt, dataModel.binIntegral(smpPt, ret._binWidth)));
         smpPt += ret._binWidth;
@@ -71,6 +67,4 @@ float IntervalDataSeries::centroid() const
     return sum / integral();
 }
 
-
-
-}
+} // namespace CTL

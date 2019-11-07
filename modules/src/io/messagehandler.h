@@ -11,6 +11,13 @@ class MessageHandler : public QObject
 {
     Q_OBJECT
 public:
+    // non-copyable
+    MessageHandler(const MessageHandler&) = delete;
+    MessageHandler(MessageHandler&&) = delete;
+    MessageHandler& operator=(const MessageHandler&) = delete;
+    MessageHandler& operator=(MessageHandler&&) = delete;
+    ~MessageHandler() = default;
+
     // get the instance of the message handler
     static MessageHandler& instance();
     // installer method to be used to set in qInstallMessageHandler()
@@ -60,12 +67,11 @@ signals:
 
 private:
     MessageHandler();
-    MessageHandler(const MessageHandler&) = delete;
 
     QStringList _theLog;
     QString _logfileName = QStringLiteral("ctllog.txt");
 
-    bool _blacklistMsgType[5];
+    bool _blacklistMsgType[5] = {};
     bool _logBlacklistedMsg = false;
     bool _showDateTag = false;
     bool _showMsgOrig = false;

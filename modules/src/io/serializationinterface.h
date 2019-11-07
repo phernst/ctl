@@ -186,7 +186,7 @@ inline QVariant SerializationInterface::toVariant() const
  */
 #define CTL_TYPE_ID(newIndex)                                                                      \
 public:                                                                                            \
-    enum { Type = newIndex };                                                                      \
+    enum { Type = (newIndex) };                                                                    \
     int type() const override { return Type; }                                                     \
                                                                                                    \
 private:                                                                                           \
