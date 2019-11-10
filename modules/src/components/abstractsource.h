@@ -81,16 +81,6 @@ public:
     protected:virtual double nominalPhotonFlux() const = 0;
 
 public:
-    AbstractSource(const QString& name);
-    AbstractSource(const QSizeF& focalSpotSize, const QString& name);
-    AbstractSource(const QSizeF& focalSpotSize,
-                   const Vector3x1& focalSpotPosition,
-                   const QString& name);
-    AbstractSource(const QSizeF& focalSpotSize,
-                   const Vector3x1& focalSpotPosition,
-                   AbstractXraySpectrumModel* spectumModel,
-                   const QString& name);
-
     // virtual methods  
     virtual IntervalDataSeries spectrum(uint nbSamples) const;
     virtual uint spectrumDiscretizationHint() const;
@@ -118,7 +108,24 @@ public:
     bool hasSpectrumModel() const;
     void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
 
+    ~AbstractSource() override = default;
+
 protected:
+    AbstractSource() = default;
+    AbstractSource(const QString& name);
+    AbstractSource(const QSizeF& focalSpotSize, const QString& name);
+    AbstractSource(const QSizeF& focalSpotSize,
+                   const Vector3x1& focalSpotPosition,
+                   const QString& name);
+    AbstractSource(const QSizeF& focalSpotSize,
+                   const Vector3x1& focalSpotPosition,
+                   AbstractXraySpectrumModel* spectumModel,
+                   const QString& name);
+
+    AbstractSource(const AbstractSource&) = default;
+    AbstractSource(AbstractSource&&) = default;
+    AbstractSource& operator=(const AbstractSource&) = default;
+    AbstractSource& operator=(AbstractSource&&) = default;
 
     QSizeF _focalSpotSize = QSizeF(0.0, 0.0); //!< Size of the focal spot (in mm).
     Vector3x1 _focalSpotPosition = Vector3x1(0.0); //!< Position of the focal spot (relative to source center).

@@ -88,8 +88,8 @@ protected:
     AbstractProjector() = default;
     AbstractProjector(const AbstractProjector&) = default;
     AbstractProjector(AbstractProjector&&) = default;
-    AbstractProjector& operator= (const AbstractProjector&) = default;
-    AbstractProjector& operator= (AbstractProjector&&) = default;
+    AbstractProjector& operator=(const AbstractProjector&) = default;
+    AbstractProjector& operator=(AbstractProjector&&) = default;
 };
 
 inline bool AbstractProjector::isLinear() const { return true; }

@@ -82,14 +82,33 @@ public:
     void setName(const QString& name);
     const QString& name() const;
 
+    ~AbstractDataModel() override = default;
+
 private:
     QString _name;
+
+protected:
+    AbstractDataModel() = default;
+    AbstractDataModel(const AbstractDataModel&) = default;
+    AbstractDataModel(AbstractDataModel&&) = default;
+    AbstractDataModel& operator=(const AbstractDataModel&) = default;
+    AbstractDataModel& operator=(AbstractDataModel&&) = default;
 };
 
 class AbstractIntegrableDataModel : public AbstractDataModel
 {
     // abstract interface
     public:virtual float binIntegral(float position, float binWidth) const = 0;
+
+public:
+    ~AbstractIntegrableDataModel() override = default;
+
+protected:
+    AbstractIntegrableDataModel() = default;
+    AbstractIntegrableDataModel(const AbstractIntegrableDataModel&) = default;
+    AbstractIntegrableDataModel(AbstractIntegrableDataModel&&) = default;
+    AbstractIntegrableDataModel& operator=(const AbstractIntegrableDataModel&) = default;
+    AbstractIntegrableDataModel& operator=(AbstractIntegrableDataModel&&) = default;
 };
 
 struct DataModelPtr

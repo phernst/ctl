@@ -87,9 +87,16 @@ public:
     QSizeF moduleDimensions() const;
     SingleViewData::Dimensions viewDimensions() const;
 
+    ~AbstractDetector() override = default;
+
 protected:
     AbstractDetector() = default;
     AbstractDetector(const QString& name);
+
+    AbstractDetector(const AbstractDetector&) = default;
+    AbstractDetector(AbstractDetector&&) = default;
+    AbstractDetector& operator=(const AbstractDetector&) = default;
+    AbstractDetector& operator=(AbstractDetector&&) = default;
 
     QSize _nbPixelPerModule; //!< Number of pixels in each detector module.
     QSizeF _pixelDimensions; //!< Size of individual pixels (in mm).

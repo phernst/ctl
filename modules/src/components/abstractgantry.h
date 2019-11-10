@@ -70,8 +70,6 @@ class AbstractGantry : public SystemComponent
     protected:virtual mat::Location nominalSourceLocation() const = 0;
 
 public:
-    AbstractGantry(const QString& name);
-
     // virtual methods
     QString info() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
@@ -104,8 +102,16 @@ public:
     void setSourceDisplacementPosition(const Vector3x1& position);
     void setSourceDisplacementPosition(double x, double y, double z);
 
+    ~AbstractGantry() override = default;
+
 protected:
     AbstractGantry() = default;
+    AbstractGantry(const QString& name);
+
+    AbstractGantry(const AbstractGantry&) = default;
+    AbstractGantry(AbstractGantry&&) = default;
+    AbstractGantry& operator=(const AbstractGantry&) = default;
+    AbstractGantry& operator=(AbstractGantry&&) = default;
 
 private:
     mat::Location _globalGantryDisplacement; //!< Displacement of the whole gantry.

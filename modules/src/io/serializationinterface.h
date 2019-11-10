@@ -28,8 +28,8 @@ protected:
     SerializationInterface() = default;
     SerializationInterface(const SerializationInterface&) = default;
     SerializationInterface(SerializationInterface&&) = default;
-    SerializationInterface& operator= (const SerializationInterface&) = default;
-    SerializationInterface& operator= (SerializationInterface&&) = default;
+    SerializationInterface& operator=(const SerializationInterface&) = default;
+    SerializationInterface& operator=(SerializationInterface&&) = default;
 };
 
 /*!

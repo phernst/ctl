@@ -57,8 +57,8 @@ protected:
     AbstractSerializer() = default;
     AbstractSerializer(const AbstractSerializer&) = default;
     AbstractSerializer(AbstractSerializer&&) = default;
-    AbstractSerializer& operator= (const AbstractSerializer&) = default;
-    AbstractSerializer& operator= (AbstractSerializer&&) = default;
+    AbstractSerializer& operator=(const AbstractSerializer&) = default;
+    AbstractSerializer& operator=(AbstractSerializer&&) = default;
 };
 
 inline void AbstractSerializer::serialize(const AbstractDataModel& model, const QString& fileName) const

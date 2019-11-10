@@ -46,13 +46,22 @@ class AbstractBeamModifier : public SystemComponent
                                             double phi = 0.0) = 0;
 
 public:
-    AbstractBeamModifier(const QString& name = defaultName());
-
     // virtual methods
     QString info() const override;
 
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
+
+    ~AbstractBeamModifier() override = default;
+
+protected:
+    AbstractBeamModifier() = default;
+    AbstractBeamModifier(const QString& name);
+
+    AbstractBeamModifier(const AbstractBeamModifier&) = default;
+    AbstractBeamModifier(AbstractBeamModifier&&) = default;
+    AbstractBeamModifier& operator=(const AbstractBeamModifier&) = default;
+    AbstractBeamModifier& operator=(AbstractBeamModifier&&) = default;
 };
 
 /*!
