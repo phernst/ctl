@@ -52,9 +52,9 @@ inline Matrix3x3 rotationMatrix(double angle, const Vector3x1& axis)
     const double c_ = 1.0 - co;
     const double tmp[] = { x * y * c_, z * si, x * z * c_, y * z * c_, y * si, x * si };
 
-    return { x * x * c_ + co, tmp[0] + tmp[1], tmp[2] - tmp[4],
-             tmp[0] - tmp[1], y * y * c_ + co, tmp[3] + tmp[5],
-             tmp[2] + tmp[4], tmp[3] - tmp[5], z * z * c_ + co };
+    return { x * x * c_ + co, tmp[0] - tmp[1], tmp[2] + tmp[4],
+             tmp[0] + tmp[1], y * y * c_ + co, tmp[3] - tmp[5],
+             tmp[2] - tmp[4], tmp[3] + tmp[5], z * z * c_ + co };
 }
 
 /*
@@ -79,9 +79,9 @@ inline Matrix3x3 rotationMatrix(const Vector3x1& axis)
     const double c_ = 1.0 - co;
     const double tmp[] = { x * y * c_, z * si, x * z * c_, y * z * c_, y * si, x * si };
 
-    return { x * x * c_ + co, tmp[0] + tmp[1], tmp[2] - tmp[4],
-             tmp[0] - tmp[1], y * y * c_ + co, tmp[3] + tmp[5],
-             tmp[2] + tmp[4], tmp[3] - tmp[5], z * z * c_ + co };
+    return { x * x * c_ + co, tmp[0] - tmp[1], tmp[2] + tmp[4],
+             tmp[0] + tmp[1], y * y * c_ + co, tmp[3] - tmp[5],
+             tmp[2] - tmp[4], tmp[3] + tmp[5], z * z * c_ + co };
 }
 
 inline Vector3x1 rotationAxis(const Matrix3x3& rotMat, bool lengthEqualsAngle)
