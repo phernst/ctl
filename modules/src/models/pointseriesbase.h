@@ -33,13 +33,12 @@ public:
     std::vector<float> values() const;
 
 protected:
-    QList<QPointF> _data;
-
-    QList<QPointF>& rdata();
-
+    // ctors
     PointSeriesBase() = default;
-    PointSeriesBase(const QList<QPointF>& pointSeries);
-    PointSeriesBase(QList<QPointF>&& pointSeries);
+    explicit PointSeriesBase(const QList<QPointF>& pointSeries);
+    explicit PointSeriesBase(QList<QPointF>&& pointSeries);
+
+    QList<QPointF> _data;
 };
 
 inline PointSeriesBase::PointSeriesBase(const QList<QPointF>& pointSeries)
@@ -71,11 +70,6 @@ inline double PointSeriesBase::min() const
                                   [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); });
 
     return minEl->y();
-}
-
-inline QList<QPointF>& PointSeriesBase::rdata()
-{
-    return _data;
 }
 
 inline uint PointSeriesBase::nbSamples() const
@@ -121,10 +115,9 @@ inline float PointSeriesBase::samplingPoint(uint sampleNb) const
 
 inline std::vector<float> PointSeriesBase::samplingPoints() const
 {
-    std::vector<float> ret;
-    ret.reserve(nbSamples());
-    for(const auto& pt : _data)
-        ret.push_back(pt.x());
+    std::vector<float> ret(nbSamples());
+    std::transform(_data.begin(), _data.end(), ret.begin(),
+                   [](const QPointF& pt) -> float { return pt.x(); });
     return ret;
 }
 
@@ -135,10 +128,9 @@ inline float PointSeriesBase::value(uint sampleNb) const
 
 inline std::vector<float> PointSeriesBase::values() const
 {
-    std::vector<float> ret;
-    ret.reserve(nbSamples());
-    for(const auto& pt : _data)
-        ret.push_back(pt.y());
+    std::vector<float> ret(nbSamples());
+    std::transform(_data.begin(), _data.end(), ret.begin(),
+                   [](const QPointF& pt) -> float { return pt.y(); });
     return ret;
 }
 
