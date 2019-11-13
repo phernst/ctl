@@ -12,6 +12,12 @@ QVector<double> toQVector(const Matrix<Rows, Cols>& matrix)
     return ret;
 }
 
+/*!
+ * Return a 3D rotation matrix that is constructed from a rotation \a axis and an \a angle in rad.
+ * The rotation \a axis can be one of the three coordiante axis `Qt::XAxis`, `Qt::YAxis` or
+ * `Qt::ZAxis`.
+ * Throws if the specified \a axis is invalid, i.e. it is not part of the `Qt::Axis` enumeration.
+ */
 inline Matrix3x3 rotationMatrix(double angle, Qt::Axis axis)
 {
     const auto sinVal = std::sin(angle);
@@ -30,17 +36,26 @@ inline Matrix3x3 rotationMatrix(double angle, Qt::Axis axis)
                              sinVal,  cosVal,     0.0,
                                 0.0,     0.0,     1.0 };
     }
-    return mat::eye<3>();
+    throw std::runtime_error("rotationMatrix(double angle, Qt::Axis axis): "
+                             "No valid axis specified.");
 }
 
+/*!
+ * Return a 3D rotation matrix that is constructed from a rotation \a axis and an \a angle in rad.
+ * Throws if the norm of the axis is close to zero.
+ */
 inline Matrix3x3 rotationMatrix(double angle, const Vector3x1& axis)
 {
-    constexpr auto tol = 1.0e-7;
+    constexpr auto tol1 = 1.0e-7;
+    constexpr auto tol2 = 1.0e-12;
 
     const auto axisLength = axis.norm();
 
-    if(std::abs(angle) < tol || axisLength < tol)
+    if(std::abs(angle) < tol1)
         return mat::eye<3>();
+    if(axisLength < tol2)
+        throw std::runtime_error("rotationMatrix(double angle, const Vector3x1& axis): "
+                                 "Rotation axis is singular.");
 
     // convert axis to unit vector
     const double x = axis.get<0>() / axisLength;
@@ -57,10 +72,10 @@ inline Matrix3x3 rotationMatrix(double angle, const Vector3x1& axis)
              tmp[2] - tmp[4], tmp[3] + tmp[5], z * z * c_ + co };
 }
 
-/*
- * Same as return `rotationMatrix(axis.norm(), axis)`.
+/*!
+ * Same as return `rotationMatrix(axis.norm(), axis)`, but does not throw.
  */
-inline Matrix3x3 rotationMatrix(const Vector3x1& axis)
+inline Matrix3x3 rotationMatrix(const Vector3x1& axis) noexcept
 {
     constexpr auto tol = 1.0e-7;
 
@@ -124,9 +139,11 @@ Matrix<N, N> eye()
     static Matrix<N, N> ret(0.0);
     static bool toBeInit = true;
     if(toBeInit)
+    {
         for(uint i = 0; i < N; ++i)
             ret(i, i) = 1.0;
-    toBeInit = false;
+        toBeInit = false;
+    }
     return ret;
 }
 
