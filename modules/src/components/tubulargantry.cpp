@@ -1,5 +1,6 @@
 #include "tubulargantry.h"
 
+#include "mat/mat.h"
 #include <cmath>
 
 namespace CTL {
@@ -147,8 +148,8 @@ Vector3x1 TubularGantry::sourcePositionTG() const
  */
 Matrix3x3 TubularGantry::sourceRotationTG() const
 {
-    return totalGantryRotation() * mat::rotationMatrix(M_PI_2, Qt::ZAxis)
-        * mat::rotationMatrix(-M_PI_2, Qt::XAxis);
+    return totalGantryRotation() * mat::rotationMatrix(PI_2, Qt::ZAxis)
+        * mat::rotationMatrix(-PI_2, Qt::XAxis);
 }
 
 /*!
@@ -183,8 +184,8 @@ Vector3x1 TubularGantry::detectorPositionTG() const
  */
 Matrix3x3 TubularGantry::detectorRotationTG() const
 {
-    Matrix3x3 rotMat = totalGantryRotation() * mat::rotationMatrix(M_PI_2, Qt::ZAxis)
-        * mat::rotationMatrix(-M_PI_2, Qt::XAxis); // active form
+    Matrix3x3 rotMat = totalGantryRotation() * mat::rotationMatrix(PI_2, Qt::ZAxis)
+        * mat::rotationMatrix(-PI_2, Qt::XAxis); // active form
 
     return rotMat.transposed(); // passive form
 }
@@ -224,9 +225,9 @@ QString TubularGantry::info() const
         typeInfoString(typeid(this)) +
         "\tSource-to-detector distance: " + QString::number(_sourceToDetectorDistance) + " mm\n" +
         "\tSource-to-iso-center distance: " + QString::number(_sourceToIsoCenterDistance) + " mm\n" +
-        "\tRotation angle: " + QString::number(_rotationAngle * 180.0 / M_PI) + " deg\n" +
+        "\tRotation angle: " + QString::number(_rotationAngle * 180.0 / PI) + " deg\n" +
         "\tTable pitch position: " + QString::number(_pitchPosition) + " mm\n" +
-        "\tTilt angle: " + QString::number(_tiltAngle * 180.0 / M_PI) + " deg\n";
+        "\tTilt angle: " + QString::number(_tiltAngle * 180.0 / PI) + " deg\n";
 
     ret += (this->type() == TubularGantry::Type) ? "}\n" : "";
 

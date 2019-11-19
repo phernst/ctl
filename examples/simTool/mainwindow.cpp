@@ -143,7 +143,7 @@ void MainWindow::setDimensionLabelText(uint x, uint y, uint z)
 
 AcquisitionSetup MainWindow::currentSetup() const
 {
-    constexpr double DEG_TO_RAD = M_PI / 180.0;
+    constexpr double DEG_TO_RAD = PI / 180.0;
 
     // gather acquisition parameter from GUI
     auto nbViews = ui->_SB_nbViews->value();

@@ -77,11 +77,11 @@ WobbleTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setup) const
 
     const uint nbViews = setup.nbViews();
     const Vector3x1 initialSrcPos(0.0, 0.0, -_sourceToIsocenter);
-    const Matrix3x3 fixedRotMat = mat::rotationMatrix(M_PI_2 + _startAngle, Qt::ZAxis)
-        * mat::rotationMatrix(-M_PI_2, Qt::XAxis);
+    const Matrix3x3 fixedRotMat = mat::rotationMatrix(PI_2 + _startAngle, Qt::ZAxis)
+        * mat::rotationMatrix(-PI_2, Qt::XAxis);
     const double angleIncrement = (nbViews > 1) ? _angleSpan / double(nbViews - 1) : 0.0;
 
-    const auto wobblePhase = sin(double(viewNb) / double(nbViews) * 2.0 * M_PI * _wobbleFreq);
+    const auto wobblePhase = sin(double(viewNb) / double(nbViews) * 2.0 * PI * _wobbleFreq);
     const auto wobbleRotMat = mat::rotationMatrix(wobblePhase * _wobbleAngle, Qt::XAxis);
 
     const auto viewRotation
@@ -131,8 +131,8 @@ CirclePlusLineTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setu
     const uint nbViewsLine   = static_cast<uint>(std::floor(nbViews * _fractionOfViewsForLine));
     const uint nbViewsCircle = nbViews - nbViewsLine;
     const Vector3x1 initialSrcPos(0.0, 0.0, -_sourceToIsocenter);
-    const Matrix3x3 fixedRotMat = mat::rotationMatrix(M_PI_2 + _startAngle, Qt::ZAxis)
-        * mat::rotationMatrix(-M_PI_2, Qt::XAxis);
+    const Matrix3x3 fixedRotMat = mat::rotationMatrix(PI_2 + _startAngle, Qt::ZAxis)
+        * mat::rotationMatrix(-PI_2, Qt::XAxis);
 
     Vector3x1 viewPosition;
     Matrix3x3 viewRotation;
@@ -190,8 +190,8 @@ std::vector<std::shared_ptr<AbstractPrepareStep> > ShortScanTrajectory::prepareS
 
     const uint nbViews = setup.nbViews();
     const Vector3x1 initialSrcPos(0.0, 0.0, -_sourceToIsocenter);
-    const Matrix3x3 fixedRotMat = mat::rotationMatrix(M_PI_2 + _startAngle, Qt::ZAxis)
-        * mat::rotationMatrix(-M_PI_2, Qt::XAxis);
+    const Matrix3x3 fixedRotMat = mat::rotationMatrix(PI_2 + _startAngle, Qt::ZAxis)
+        * mat::rotationMatrix(-PI_2, Qt::XAxis);
     const double angleIncrement = (nbViews > 1) ? angleSpan / double(nbViews - 1) : 0.0;
 
     const auto viewRotation = mat::rotationMatrix(viewNb * angleIncrement, Qt::ZAxis) * fixedRotMat;

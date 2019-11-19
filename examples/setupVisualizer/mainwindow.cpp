@@ -126,7 +126,7 @@ void MainWindow::on__PB_wobbleTraj_clicked()
     auto srcToIso = ui->_SL_srcToIsoDist->value();
     auto nbProj = ui->_SB_nbProj->value();
     auto nbWobbles = double(ui->_SB_nbWobbles->value());
-    auto wobbleAmpl = ui->_SB_wobbleAmpl->value() * M_PI / 180.0;
+    auto wobbleAmpl = ui->_SB_wobbleAmpl->value() * PI / 180.0;
 
     // set-up system
     CTL::CTsystem mySystem;
