@@ -570,7 +570,7 @@ template<typename T>
 VoxelVolume<T> BaseTypeIO<FileIOImplementer>::VolumeIO<T>::readVolume(const QString &fileName) const
 {
     BaseTypeIO<FileIOImplementer> io;
-    return io.readVolume<T>(fileName);
+    return io.template readVolume<T>(fileName);
 }
 
 template<typename FileIOImplementer>
@@ -579,7 +579,7 @@ Chunk2D<T> BaseTypeIO<FileIOImplementer>::VolumeIO<T>::readSlice(const QString &
                                                                  uint sliceNb) const
 {
     BaseTypeIO<FileIOImplementer> io;
-    return io.readSlice<T>(fileName, sliceNb);
+    return io.template readSlice<T>(fileName, sliceNb);
 }
 
 template<typename FileIOImplementer>
