@@ -63,12 +63,14 @@ HEADERS += \
     $$PWD/src/io/metainfokeys.h \
     $$PWD/src/io/serializationhelper.h \
     $$PWD/src/io/serializationinterface.h \
+    $$PWD/src/mat/deg.h \
     $$PWD/src/mat/homography.h \
     $$PWD/src/mat/mat.h \
     $$PWD/src/mat/matrix.h \
     $$PWD/src/mat/matrix_algorithm.h \
     $$PWD/src/mat/matrix_types.h \
     $$PWD/src/mat/matrix_utils.h \
+    $$PWD/src/mat/pi.h \
     $$PWD/src/mat/pmatcomparator.h \
     $$PWD/src/mat/projectionmatrix.h \
     $$PWD/src/models/abstractdatamodel.h \
