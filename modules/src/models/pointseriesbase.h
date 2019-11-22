@@ -2,6 +2,7 @@
 #define POINTSERIESBASE_H
 
 #include <QList>
+#include <QPair>
 #include <QPointF>
 #include <vector>
 

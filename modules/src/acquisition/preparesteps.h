@@ -30,9 +30,9 @@ public:
     QVariant toVariant() const override; // serialization
 
 private:
-    std::pair<bool,double> _newRotationAngle = {false, 0.0};
-    std::pair<bool,double> _newPitchPosition = {false, 0.0};
-    std::pair<bool,double> _newTiltAngle     = {false, 0.0};
+    QPair<bool,double> _newRotationAngle = {false, 0.0};
+    QPair<bool,double> _newPitchPosition = {false, 0.0};
+    QPair<bool,double> _newTiltAngle     = {false, 0.0};
 };
 
 class CarmGantryParam : public AbstractPrepareStep
@@ -50,8 +50,8 @@ public:
     QVariant toVariant() const override; // serialization
 
 private:
-    std::pair<bool,mat::Location> _newLocation = {false, mat::Location()};
-    std::pair<bool,double> _newCarmSpan        = {false, 0.0};
+    QPair<bool,mat::Location> _newLocation = {false, mat::Location()};
+    QPair<bool,double> _newCarmSpan        = {false, 0.0};
 };
 
 class GenericGantryParam : public AbstractPrepareStep
@@ -69,8 +69,8 @@ public:
     QVariant toVariant() const override; // serialization
 
 private:
-    std::pair<bool,mat::Location> _newDetectorLocation = {false, mat::Location()};
-    std::pair<bool,mat::Location> _newSourceLocation   = {false, mat::Location()};
+    QPair<bool,mat::Location> _newDetectorLocation = {false, mat::Location()};
+    QPair<bool,mat::Location> _newSourceLocation   = {false, mat::Location()};
 };
 
 class GantryDisplacementParam : public AbstractPrepareStep
@@ -92,11 +92,11 @@ public:
     QVariant toVariant() const override; // serialization
 
 private:
-    std::pair<bool,mat::Location> _newDetectorDisplacement = {false, mat::Location()};
-    std::pair<bool,mat::Location> _newGantryDisplacement   = {false, mat::Location()};
-    std::pair<bool,mat::Location> _newSourceDisplacement   = {false, mat::Location()};
-    std::pair<bool,mat::Location> _detectorDisplacementIncrement = {false, mat::Location()};
-    std::pair<bool,mat::Location> _sourceDisplacementIncrement   = {false, mat::Location()};
+    QPair<bool,mat::Location> _newDetectorDisplacement = {false, mat::Location()};
+    QPair<bool,mat::Location> _newGantryDisplacement   = {false, mat::Location()};
+    QPair<bool,mat::Location> _newSourceDisplacement   = {false, mat::Location()};
+    QPair<bool,mat::Location> _detectorDisplacementIncrement = {false, mat::Location()};
+    QPair<bool,mat::Location> _sourceDisplacementIncrement   = {false, mat::Location()};
 };
 
 // ### ### ### ###
@@ -119,9 +119,9 @@ public:
     QVariant toVariant() const override; // serialization
 
 protected:
-    std::pair<bool,double> _newFluxModifier    = {false, 0.0};
-    std::pair<bool,QSizeF> _newFocalSpotSize   = {false, QSizeF(0.0, 0.0)};
-    std::pair<bool,Vector3x1> _newSpotPosition = {false, Vector3x1(0.0)};
+    QPair<bool,double> _newFluxModifier    = {false, 0.0};
+    QPair<bool,QSizeF> _newFocalSpotSize   = {false, QSizeF(0.0, 0.0)};
+    QPair<bool,Vector3x1> _newSpotPosition = {false, Vector3x1(0.0)};
 };
 
 class XrayLaserParam : public SourceParam
@@ -139,8 +139,8 @@ public:
     QVariant toVariant() const override; // serialization
 
 private:
-    std::pair<bool,double> _newPhotonEnergy = {false, 0.0};
-    std::pair<bool,double> _newPower        = {false, 0.0};
+    QPair<bool,double> _newPhotonEnergy = {false, 0.0};
+    QPair<bool,double> _newPower        = {false, 0.0};
 };
 
 class XrayTubeParam : public SourceParam
@@ -158,8 +158,8 @@ public:
     QVariant toVariant() const override; // serialization
 
 private:
-    std::pair<bool,double> _newTubeVoltage     = {false, 0.0};
-    std::pair<bool,double> _newEmissionCurrent = {false, 0.0};
+    QPair<bool,double> _newTubeVoltage     = {false, 0.0};
+    QPair<bool,double> _newEmissionCurrent = {false, 0.0};
 };
 
 
@@ -183,9 +183,9 @@ public:
     QVariant toVariant() const override; // serialization
 
 private:
-    std::pair<bool,QVector<mat::Location>> _newModuleLocations = {false, QVector<mat::Location>()};
-    std::pair<bool,QSizeF> _newPixelSize                       = {false, QSizeF()};
-    std::pair<bool,double> _newSkewCoefficient                 = {false, 0.0};
+    QPair<bool,QVector<mat::Location>> _newModuleLocations = {false, QVector<mat::Location>()};
+    QPair<bool,QSizeF> _newPixelSize                       = {false, QSizeF()};
+    QPair<bool,double> _newSkewCoefficient                 = {false, 0.0};
 };
 
 } // namespace prepare

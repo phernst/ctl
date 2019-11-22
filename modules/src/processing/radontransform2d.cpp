@@ -75,8 +75,7 @@ void RadonTransform2D::setAccuracy(float stepLength) { _accuracy = stepLength; }
  */
 void RadonTransform2D::setOrigin(float x, float y)
 {
-    _origin.x = x;
-    _origin.y = y;
+    _origin = { { x, y } };
 
     _q.enqueueWriteBuffer(_imgOriginBuf, CL_FALSE, 0, 2 * sizeof(float), &_origin);
 }
@@ -90,7 +89,7 @@ float RadonTransform2D::accuracy() const { return _accuracy; }
 /*!
  * Returns the origin of the transform (in pixels).
  */
-mat::Matrix<2, 1> RadonTransform2D::origin() const { return { double(_origin.x), double(_origin.y) }; }
+mat::Matrix<2, 1> RadonTransform2D::origin() const { return { double(_origin.s[0]), double(_origin.s[1]) }; }
 
 /*!
  * Returns the 2D Radon transform of volume data for the set of sampling points given by \a theta
