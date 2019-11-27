@@ -10,7 +10,7 @@ build-2D3DRegistration:
     - apt-get install -y cmake
     - git clone https://github.com/stevengj/nlopt.git
     - cd nlopt
-    - cmake && make && make install
+    - cmake . && make && make install
     - cd ../examples/regist2d3d
     - qmake
     - make
