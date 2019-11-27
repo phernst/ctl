@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
     if(parser.isSet("o"))
     {
         outPath = parser.value("o");
-        if(outPath.back() == "/" || outPath.back() == "\\")
+        if(outPath.right(1) == "/" || outPath.right(1) == "\\")
             outPath.chop(1);
     }
 
