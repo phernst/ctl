@@ -1,6 +1,47 @@
 image: frysch/ubuntu:ocl-intel
 
+
 # compile examples
+
+build-2D3DRegistration:
+  stage: build
+  script:
+    - apt-get update
+    - apt-get install -y cmake
+    - git clone https://github.com/stevengj/nlopt.git
+    - cd nlopt
+    - cmake && make && make install
+    - cd ../examples/regist2d3d
+    - qmake
+    - make
+
+build-3DRadonTransform:
+  stage: build
+  script:
+    - cd examples/radon3d
+    - qmake
+    - make
+
+build-meanProjectionDistance:
+  stage: build
+  script:
+    - cd examples/mpd
+    - qmake
+    - make
+
+build-projectionMatrices:
+  stage: build
+  script:
+    - cd examples/using-projection-matrices
+    - qmake
+    - make
+
+build-readmeTeaser:
+  stage: build
+  script:
+    - cd examples/readme-example
+    - qmake
+    - make
 
 build-setupVisualizer:
   stage: build
@@ -21,20 +62,6 @@ build-simTool-Debug:
   script:
     - cd examples/simTool
     - qmake CONFIG+=debug
-    - make
-
-build-readmeTeaser:
-  stage: build
-  script:
-    - cd examples/readme-example
-    - qmake
-    - make
-
-build-projectionMatrices:
-  stage: build
-  script:
-    - cd examples/using-projection-matrices
-    - qmake
     - make
 
 

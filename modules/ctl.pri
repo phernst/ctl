@@ -81,6 +81,7 @@ HEADERS += \
     $$PWD/src/models/xrayspectrummodels.h \
     $$PWD/src/models/xydataseries.h \
     $$PWD/src/processing/coordinates.h \
+    $$PWD/src/processing/errormetrics.h \
     $$PWD/src/processing/diff.h \
     $$PWD/src/processing/filter.h \
     $$PWD/src/processing/imageprocessing.h \
@@ -137,6 +138,7 @@ SOURCES += \
     $$PWD/src/models/tabulateddatamodel.cpp \
     $$PWD/src/models/xrayspectrummodels.cpp \
     $$PWD/src/models/xydataseries.cpp \
+    $$PWD/src/processing/errormetrics.cpp \
     $$PWD/src/processing/filter.cpp \
     $$PWD/src/processing/imageprocessing.cpp \
     $$PWD/src/projectors/arealfocalspotextension.cpp \
@@ -144,6 +146,7 @@ SOURCES += \
     $$PWD/src/projectors/dynamicprojector.cpp \
     $$PWD/src/projectors/poissonnoiseextension.cpp \
     $$PWD/src/projectors/spectralprojectorextension.cpp
+
 
 # create a file that contains the absolute path to database
 DATABASE_ROOT = $$PWD/../database
