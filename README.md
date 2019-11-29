@@ -190,6 +190,7 @@ include further geometric/physical/measuring effects.
 #include "io/nrrd/nrrdfileio.h"
 #include "projectors/raycasterprojector.h"
 #include <QCoreApplication>
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
