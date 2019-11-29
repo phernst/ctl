@@ -1,7 +1,5 @@
 #include "voxelvolume.h"
 
-#include <stdexcept>
-
 namespace CTL {
 
 /*!

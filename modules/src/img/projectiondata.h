@@ -1,8 +1,6 @@
 #ifndef PROJECTIONDATA_H
 #define PROJECTIONDATA_H
 
-#include <iostream>
-
 #include "singleviewdata.h"
 
 namespace CTL {

@@ -1,7 +1,7 @@
 #ifndef VOXELVOLUME_H
 #define VOXELVOLUME_H
 
-#include <img/chunk2d.h>
+#include "chunk2d.h"
 
 namespace CTL {
 /*!
