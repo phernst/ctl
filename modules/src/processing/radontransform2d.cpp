@@ -18,7 +18,7 @@ namespace OCL {
  * OpenCLConfig::instance().devices()).
  */
 RadonTransform2D::RadonTransform2D(const Chunk2D<float> &image, uint oclDeviceNb)
-    : _origin({ (image.width() - 1) * 0.5f, (image.height() - 1) * 0.5f })
+    : _origin{ { (image.width() - 1) * 0.5f, (image.height() - 1) * 0.5f } }
     , _accuracy(1.0f)
     , _q(OpenCLConfig::instance().context(), OpenCLConfig::instance().devices()[oclDeviceNb])
     , _imgOriginBuf(OpenCLConfig::instance().context(),

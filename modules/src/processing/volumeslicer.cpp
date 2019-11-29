@@ -119,15 +119,15 @@ Chunk2D<float> VolumeSlicer::slice(const mat::Matrix<3, 1>& planeUnitNormal,
         const auto h = createInverseTransformationToXYPlane(
             mat::vertcat(planeUnitNormal, mat::Matrix<1, 1>(-planeDistanceFromOrigin)));
         // store in OpenCL specifiv vector format
-        const cl_float16 h_cl{ float(h(0, 0)), float(h(0, 1)), float(h(0, 2)), float(h(0, 3)),
-                               float(h(1, 0)), float(h(1, 1)), float(h(1, 2)), float(h(1, 3)),
-                               float(h(2, 0)), float(h(2, 1)), float(h(2, 2)), float(h(2, 3)) };
+        const cl_float16 h_cl{ { float(h(0, 0)), float(h(0, 1)), float(h(0, 2)), float(h(0, 3)),
+                                 float(h(1, 0)), float(h(1, 1)), float(h(1, 2)), float(h(1, 3)),
+                                 float(h(2, 0)), float(h(2, 1)), float(h(2, 2)), float(h(2, 3)) } };
 
-        const cl_uint2 sliceDim{ _dim.width, _dim.height };
+        const cl_uint2 sliceDim{ { _dim.width, _dim.height } };
 
-        const cl_float3 voxCorner{ -0.5f * (_volDim.x - 1) + _volOffset.x / _volVoxSize.x,
-                                   -0.5f * (_volDim.y - 1) + _volOffset.y / _volVoxSize.y,
-                                   -0.5f * (_volDim.z - 1) + _volOffset.z / _volVoxSize.z };
+        const cl_float3 voxCorner{ { -0.5f * (_volDim.x - 1) + _volOffset.x / _volVoxSize.x,
+                                     -0.5f * (_volDim.y - 1) + _volOffset.y / _volVoxSize.y,
+                                     -0.5f * (_volDim.z - 1) + _volOffset.z / _volVoxSize.z } };
         // write buffers
         _q.enqueueWriteBuffer(_homoBuf, CL_FALSE, 0, 12 * sizeof(float), &h_cl);
         _q.enqueueWriteBuffer(_sliceDimBuf, CL_FALSE, 0, 2 * sizeof(uint), &sliceDim);
