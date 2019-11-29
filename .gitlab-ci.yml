@@ -87,7 +87,5 @@ run-unitTests:
 run-doxygen:
   stage: build
   script:
-    - apt-get update
-    - apt-get install -y lynx
     - wget -q -O start-doxy $INITIATE_DOXY_SCRIPT
     - lynx -cmd_script=start-doxy $DOXY_LOGIN_PAGE > /dev/null
