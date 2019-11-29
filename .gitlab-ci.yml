@@ -112,30 +112,39 @@ build-simTool-Debug-clang:
     - qmake -spec linux-clang CONFIG+=debug
     - make
 
-build-unitTests-clang:
-  stage: build
-  script:
-    - cd testing/src
-    - qmake -spec linux-clang
-    - make
-
 
 # unit testing
 
 build-unitTests:
   stage: build
   script:
-    - cd testing/src
-    - qmake
+    - mkdir testing/src/gcc
+    - cd testing/src/gcc
+    - qmake ..
     - make
   artifacts:
     paths:
-      - testing/src/bin/
+      - testing/src/gcc/bin/
+build-unitTests-clang:
+  stage: build
+  script:
+    - mkdir testing/src/clang
+    - cd testing/src/clang
+    - qmake -spec linux-clang ..
+    - make
+  artifacts:
+    paths:
+      - testing/src/clang/bin/
 
 run-unitTests:
   stage: test
   script:
-    - cd testing/src/bin
+    - cd testing/src/gcc/bin
+    - ./unitTesting
+run-unitTests-clang:
+  stage: test
+  script:
+    - cd testing/src/clang/bin
     - ./unitTesting
 
 
