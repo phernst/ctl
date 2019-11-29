@@ -53,7 +53,7 @@ namespace OCL {
 class RadonTransform2D
 {
 public:
-    RadonTransform2D(const Chunk2D<float>& image, uint oclDeviceNb = 0);
+    explicit RadonTransform2D(const Chunk2D<float>& image, uint oclDeviceNb = 0);
 
     void setAccuracy(float stepLength);
     void setOrigin(float x, float y);
