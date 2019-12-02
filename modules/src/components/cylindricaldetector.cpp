@@ -130,9 +130,9 @@ double CylindricalDetector::curvatureRadius() const
         return std::numeric_limits<double>::max(); // flat detector --> radius becomes infinite
 
     const double modWidth = moduleWidth();
-    double d = _moduleSpacing + modWidth * cos(_angulationPerModule / 2.0);
+    double d = _moduleSpacing + modWidth * std::cos(_angulationPerModule / 2.0);
 
-    return d / sqrt(2.0 * (1.0 - cos(_angulationPerModule)));
+    return d / std::sqrt(2.0 * (1.0 - std::cos(_angulationPerModule)));
 }
 
 /*!
@@ -309,8 +309,8 @@ void CylindricalDetector::setAngulationFromFanAngle(uint nbModules, double fanAn
  */
 void CylindricalDetector::setSpacingFromRadius(double radius)
 {
-    _moduleSpacing = radius * sqrt(2.0 * (1.0 - cos(_angulationPerModule)))
-        - moduleWidth() * cos(0.5 * _angulationPerModule);
+    _moduleSpacing = radius * std::sqrt(2.0 * (1.0 - std::cos(_angulationPerModule)))
+        - moduleWidth() * std::cos(0.5 * _angulationPerModule);
 }
 
 } // namespace CTL

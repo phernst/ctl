@@ -75,9 +75,9 @@ QVector<float> XYDataSeries::expSpace(float from, float to, uint nbSamples)
     if(from <= 0.0f)
         throw std::domain_error("Exponential sampling is not supported for negative sampling points");
 
-    QVector<float> ret = linSpace(log(from), log(to), nbSamples);
+    QVector<float> ret = linSpace(std::log(from), std::log(to), nbSamples);
     for(auto& smp : ret)
-        smp = exp(smp);
+        smp = std::exp(smp);
     return ret;
 }
 

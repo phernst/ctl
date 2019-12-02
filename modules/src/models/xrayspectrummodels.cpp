@@ -264,7 +264,7 @@ float KramersLawSpectrumModel::binIntegral(float position, float binWidth) const
     if(top > _energy)
         top = _energy;
 
-    return _energy * log(top / bot) - (top - bot);
+    return _energy * std::log(top / bot) - (top - bot);
 }
 
 AbstractDataModel *KramersLawSpectrumModel::clone() const

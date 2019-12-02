@@ -155,7 +155,7 @@ double MatrixBase<Rows, Cols>::norm() const
     double ret = 0.0;
     for(auto val : _m)
         ret += val * val;
-    return sqrt(ret);
+    return std::sqrt(ret);
 }
 
 // Test that all elements are equal, it means have the equal representation of all elements

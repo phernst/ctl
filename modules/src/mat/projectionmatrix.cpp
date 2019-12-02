@@ -210,13 +210,13 @@ Matrix<3, 1> ProjectionMatrix::directionSourceToPixel(double x, double y,
         ret /= ret.norm();
         break;
     case NormalizeByX: // same as NormalizeByChannel
-        ret *= fabs(R.get<0,0>());
+        ret *= std::fabs(R.get<0,0>());
         break;
     case NormalizeByY: // same as NormalizeByRow
         double aa = R.get<0,0>() * R.get<0,0>(); // a b c
         double bb = R.get<0,1>() * R.get<0,1>(); // 0 d e
         double dd = R.get<1,1>() * R.get<1,1>(); // 0 0 f
-        double scale = sqrt(aa * dd / (aa + bb));
+        double scale = std::sqrt(aa * dd / (aa + bb));
         ret *= scale;
         break;
     }

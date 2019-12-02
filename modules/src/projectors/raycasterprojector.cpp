@@ -413,11 +413,11 @@ RayCasterProjector::Config RayCasterProjector::Config::optimizedFor(const Volume
         pixelRatio = 1.0 / pixelRatio;
     // test a preset of ratios (max 4 rays per dimension)
     uint ratios[5][2] = { {1,2}, {1,3}, {1,4}, {2,3}, {3,4} };
-    double deviation = fabs(pixelRatio - 1.0);
+    double deviation = std::fabs(pixelRatio - 1.0);
     for(const auto& r : ratios)
-        if(fabs(pixelRatio - double(r[0])/double(r[1])) < deviation)
+        if(std::fabs(pixelRatio - double(r[0])/double(r[1])) < deviation)
         {
-            deviation = fabs(pixelRatio - double(r[0])/double(r[1]));
+            deviation = std::fabs(pixelRatio - double(r[0])/double(r[1]));
             ret.raysPerPixel[0] = r[broadPixel];
             ret.raysPerPixel[1] = r[!broadPixel];
         }

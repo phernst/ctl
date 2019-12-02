@@ -81,7 +81,7 @@ WobbleTrajectory::prepareSteps(uint viewNb, const AcquisitionSetup& setup) const
         * mat::rotationMatrix(-PI_2, Qt::XAxis);
     const double angleIncrement = (nbViews > 1) ? _angleSpan / double(nbViews - 1) : 0.0;
 
-    const auto wobblePhase = sin(double(viewNb) / double(nbViews) * 2.0 * PI * _wobbleFreq);
+    const auto wobblePhase = std::sin(double(viewNb) / double(nbViews) * 2.0 * PI * _wobbleFreq);
     const auto wobbleRotMat = mat::rotationMatrix(wobblePhase * _wobbleAngle, Qt::XAxis);
 
     const auto viewRotation

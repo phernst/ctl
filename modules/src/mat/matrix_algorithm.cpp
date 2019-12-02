@@ -94,12 +94,12 @@ bool qrdcmp(Matrix3x3 & a, double *d)
     double scale, sigma, sum, tau;
     double c[n-1];
     bool sing = false;
-    for(uint k=0; k<n-1; k++)
+    for(uint k = 0; k < n - 1; k++)
     {
         scale = 0.0;
-        for(i=k; i<n; i++)
-            if(scale<fabs(a[i][k]))
-                scale=fabs(a[i][k]);
+        for(i = k; i < n; i++)
+            if(scale < std::fabs(a[i][k]))
+                scale = std::fabs(a[i][k]);
         if(qFuzzyIsNull(scale))
         {
             sing = true;
@@ -108,24 +108,24 @@ bool qrdcmp(Matrix3x3 & a, double *d)
         }
         else
         {
-            for(i=k; i<n; i++)
+            for(i = k; i < n; i++)
                 a[i][k] /= scale;
-            for(sum=0.0, i=k; i<n; i++)
-                sum += a[i][k]*a[i][k];
+            for(sum = 0.0, i = k; i < n; i++)
+                sum += a[i][k] * a[i][k];
 
-            sigma = std::copysign(sqrt(sum), a[k][k]);
+            sigma = std::copysign(std::sqrt(sum), a[k][k]);
             a[k][k] += sigma;
-            c[k] = sigma*a[k][k];
-            d[k] = -scale*sigma;
+            c[k] = sigma * a[k][k];
+            d[k] = -scale * sigma;
 
-            for(j=k+1; j<n; j++)
+            for(j = k+1; j < n; j++)
             {
-                for(sum=0.0, i=k; i<n; i++)
-                    sum += a[i][k]*a[i][j];
+                for(sum = 0.0, i = k; i < n; i++)
+                    sum += a[i][k] * a[i][j];
 
-                tau = sum/c[k];
-                for(i=k; i<n; i++)
-                    a[i][j] -= tau*a[i][k];
+                tau = sum / c[k];
+                for(i = k; i < n; i++)
+                    a[i][j] -= tau * a[i][k];
             }
         }
     }

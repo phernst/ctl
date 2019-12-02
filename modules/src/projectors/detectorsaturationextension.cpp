@@ -58,11 +58,11 @@ void DetectorSaturationExtension::processCounts(ProjectionData& projections)
             for(auto& pix : module.data())
             {
                 // transform extinction to photon count
-                count = n0[mod] * exp(-pix);
+                count = n0[mod] * std::exp(-pix);
                 // pass intensity through saturation model
                 count = saturationModel->valueAt(count);
                 // back-transform to extinction and overwrite projection pixel value
-                pix = log(n0[mod] / count);
+                pix = std::log(n0[mod] / count);
             }
         }
     };
@@ -107,11 +107,11 @@ void DetectorSaturationExtension::processIntensities(ProjectionData& projections
             for(auto& pix : module.data())
             {
                 // transform extinction to intensity
-                intensity = i0[mod] * exp(-pix);
+                intensity = i0[mod] * std::exp(-pix);
                 // pass intensity through saturation model
                 intensity = saturationModel->valueAt(intensity);
                 // back-transform to extinction and overwrite projection pixel value
-                pix = log(i0[mod] / intensity);
+                pix = std::log(i0[mod] / intensity);
             }
         }
     };
