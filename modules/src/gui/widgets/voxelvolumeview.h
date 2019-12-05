@@ -21,6 +21,9 @@ public:
     template<typename T>
     void setVolumeData(const CTL::VoxelVolume<T>& volume);
 
+    void setSliceIdx(uint slice);
+    void setZoomFactor(float zoom);
+
 private slots:
     void on_verticalSlider_valueChanged(int value);
     void updateImage();

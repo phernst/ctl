@@ -19,6 +19,16 @@ VoxelVolumeView::~VoxelVolumeView()
     delete ui;
 }
 
+void VoxelVolumeView::setSliceIdx(uint slice)
+{
+    ui->verticalSlider->setValue(slice);
+}
+
+void VoxelVolumeView::setZoomFactor(float zoom)
+{
+    ui->_SB_zoom->setValue(zoom);
+}
+
 void VoxelVolumeView::on_verticalSlider_valueChanged(int value)
 {
     ui->_L_slice->setText(QString::number(value));
@@ -61,7 +71,7 @@ void VoxelVolumeView::updateImage()
                 image.setPixel(x,y,qMax(qMin(int(grayValue + .5f),255),0));
             }
     }
-    auto pixmap = QPixmap::fromImage(image).scaledToHeight(image.height() * ui->_SB_zoom->value());
+    auto pixmap = QPixmap::fromImage(image).scaledToHeight(qRound(double(image.height()) * ui->_SB_zoom->value()));
     ui->_L_image->setPixmap(pixmap);
 }
 

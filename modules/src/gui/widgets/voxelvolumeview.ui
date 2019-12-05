@@ -14,6 +14,21 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <property name="verticalSpacing">
+    <number>0</number>
+   </property>
    <item row="0" column="2">
     <widget class="QSlider" name="verticalSlider">
      <property name="orientation">
@@ -65,22 +80,6 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="2">
-    <widget class="QSpinBox" name="_SB_zoom">
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::PlusMinus</enum>
-     </property>
-     <property name="suffix">
-      <string> x</string>
-     </property>
-     <property name="minimum">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <number>10</number>
-     </property>
-    </widget>
-   </item>
    <item row="0" column="0" rowspan="2" colspan="2">
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
@@ -94,8 +93,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>323</width>
-        <height>180</height>
+        <width>335</width>
+        <height>204</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
@@ -111,6 +110,25 @@
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QDoubleSpinBox" name="_SB_zoom">
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::PlusMinus</enum>
+     </property>
+     <property name="minimum">
+      <double>0.250000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>10.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.250000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
     </widget>
    </item>
   </layout>
@@ -143,17 +161,17 @@
   </connection>
   <connection>
    <sender>_SB_zoom</sender>
-   <signal>valueChanged(int)</signal>
+   <signal>valueChanged(double)</signal>
    <receiver>VoxelVolumeView</receiver>
    <slot>updateImage()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>414</x>
-     <y>251</y>
+     <x>378</x>
+     <y>241</y>
     </hint>
     <hint type="destinationlabel">
-     <x>334</x>
-     <y>45</y>
+     <x>402</x>
+     <y>171</y>
     </hint>
    </hints>
   </connection>
