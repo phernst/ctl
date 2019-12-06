@@ -47,7 +47,7 @@ public:
     };
 
     // ctors (no data set)
-    VoxelVolume(const Dimensions& nbVoxels);
+    explicit VoxelVolume(const Dimensions& nbVoxels);
     VoxelVolume(const Dimensions& nbVoxels, const VoxelSize& voxelSize);
     VoxelVolume(uint nbVoxelX, uint nbVoxelY, uint nbVoxelZ);
     VoxelVolume(uint nbVoxelX, uint nbVoxelY, uint nbVoxelZ, float xSize, float ySize, float zSize);

@@ -86,10 +86,10 @@ private:
 
 protected:
     AbstractProjector() = default;
-    AbstractProjector(const AbstractProjector&) = default;
-    AbstractProjector(AbstractProjector&&) = default;
-    AbstractProjector& operator=(const AbstractProjector&) = default;
-    AbstractProjector& operator=(AbstractProjector&&) = default;
+    AbstractProjector(const AbstractProjector&) = delete;
+    AbstractProjector(AbstractProjector&&) = delete;
+    AbstractProjector& operator=(const AbstractProjector&) = delete;
+    AbstractProjector& operator=(AbstractProjector&&) = delete;
 };
 
 inline bool AbstractProjector::isLinear() const { return true; }
