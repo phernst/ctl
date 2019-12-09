@@ -10,6 +10,6 @@ HEADERS += $$PWD/src/app/registration/grangeatregistration2d3d.h
 
 SOURCES += $$PWD/src/app/registration/grangeatregistration2d3d.cpp
 
-# NLopt library
+# NLopt library [ https://github.com/stevengj/nlopt/ ]
 unix:LIBS += -L/usr/local/lib
 LIBS += -lnlopt

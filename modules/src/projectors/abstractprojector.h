@@ -48,7 +48,7 @@ typedef SpectralVolumeData VolumeData;
  *
  * Two structurally different ways of how such an implementation can be realized are given by
  * the examples RayCasterInterface and RayCasterProjector, which can be found in the OpenCL module
- * (ocl_projectors.pri).
+ * (ocl_routines.pri).
  */
 
 /*!
