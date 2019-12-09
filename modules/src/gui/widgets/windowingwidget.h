@@ -12,7 +12,7 @@ class WindowingWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit WindowingWidget(QWidget *parent = 0);
+    explicit WindowingWidget(QWidget *parent = nullptr);
     ~WindowingWidget();
 
     QPair<double, double> windowFromTo() const;

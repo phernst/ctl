@@ -8,19 +8,14 @@ DEFINES += QT_DEPRECATED_WARNINGS \
 
 CONFIG += c++11
 
-SOURCES += \
-        main.cpp \
-        mainwindow.cpp
+SOURCES += main.cpp \
+           mainwindow.cpp
 
-HEADERS += \
-        mainwindow.h
+HEADERS += mainwindow.h
 
-FORMS += \
-        mainwindow.ui
+FORMS += mainwindow.ui
 
 # CTL modules
 include(../../modules/ctl.pri)
-include(../../modules/gui-widgets.pri)
-include(../../modules/den_file_io.pri)
-include(../../modules/ocl_config.pri)
-include(../../modules/ocl_routines.pri)
+include(../../modules/ctl_ocl.pri)
+include(../../modules/ctl_qtgui.pri)
