@@ -19,11 +19,14 @@
 
      apt install nvidia-opencl-dev
 
- \subsection step3 Step 3: get OpenCL headers (if not already there)
+ \subsection step3 Step 2b: get OpenCL headers (if not already there)
 
      apt install opencl-headers
  
  \subsection step4 Step 4: compile a project
+ We use the qmake build system. You may check out our examples in the `examples` folder,
+ where you can find a project file (`.pro`) for each example. To build an example you
+ can run the following commands:
 
      cd /path/to/source (where the .pro file lives)
      mkdir build
@@ -43,8 +46,9 @@
  \li den_file_io.pri: .den file handling
  \li nrrd_file_io.pri: .nrrd file handling
  \li ocl_config.pri: uniform OpenCL environment/configuration
- \li ocl_projectors.pri: OpenCL based projectors
+ \li ocl_routines.pri: OpenCL based algorithms (e.g. cone-beam projectors or Radon transform)
  \li gui-widgets.pri: widgets for visualization purposes
+ \li grangeat-2d3d-regist.pri: Grangeat-based 2D/3D registration using NLopt
 
  \subsection step6 Install Qt3D for the GUI
 
@@ -54,8 +58,13 @@
 
      apt install qt3d5-dev
 
+
  As an IDE, Qt Creator is recommended:
 
      apt install qtcreator
 
+
+ <SMALL>
+ We thank our admin Viktor Sayenko for hosting this website on [https://www.forschungscampus-stimulate.de/ctl](https://www.forschungscampus-stimulate.de/ctl/).
+ </SMALL>
  */
