@@ -1,4 +1,5 @@
 #include "spectralvolumedata.h"
+#include "io/ctldatabase.h"
 #include <cmath>
 
 namespace CTL {
@@ -113,5 +114,28 @@ void SpectralVolumeData::setMaterialName(const QString& name)
     _materialName = name;
 }
 
+SpectralVolumeData SpectralVolumeData::fromMuVolume(VoxelVolume<float> muValues,
+                                                    std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
+                                                    float referenceEnergy)
+{
+    // transform to densities (g/cm^3)
+    muValues /= (0.1f * absorptionModel->valueAt(referenceEnergy));
+
+    return SpectralVolumeData(std::move(muValues), absorptionModel, absorptionModel->name());
+}
+
+SpectralVolumeData SpectralVolumeData::fromHUVolume(VoxelVolume<float> HUValues,
+                                                    std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
+                                                    float referenceEnergy)
+{
+    // transform to attenuation values
+    auto muWater = database::attenuationModel(database::composite::Water)->valueAt(referenceEnergy);
+    HUValues = (HUValues*(muWater/1000.0f)) + muWater;
+
+    // transform to densities (g/cm^3)
+    HUValues /= (0.1f * absorptionModel->valueAt(referenceEnergy));
+
+    return SpectralVolumeData(std::move(HUValues), absorptionModel, absorptionModel->name());
+}
 
 } // namespace CTL

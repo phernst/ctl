@@ -36,6 +36,14 @@ public:
 
     using VoxelVolume<float>::operator=;
 
+    // factory methods
+    static SpectralVolumeData fromMuVolume(VoxelVolume<float> muValues,
+                                           std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
+                                           float referenceEnergy = 50.0f);
+    static SpectralVolumeData fromHUVolume(VoxelVolume<float> HUValues,
+                                           std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
+                                           float referenceEnergy = 50.0f);
+
 private:
     std::shared_ptr<AbstractIntegrableDataModel> _absorptionModel;
     QString _materialName;
