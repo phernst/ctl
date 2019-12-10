@@ -80,6 +80,7 @@ HEADERS += \
     $$CTL_SOURCE_DIR/models/detectorsaturationmodels.h \
     $$CTL_SOURCE_DIR/models/intervaldataseries.h \
     $$CTL_SOURCE_DIR/models/pointseriesbase.h \
+    $$CTL_SOURCE_DIR/models/stepfunctionmodels.h \
     $$CTL_SOURCE_DIR/models/tabulateddatamodel.h \
     $$CTL_SOURCE_DIR/models/xrayspectrummodels.h \
     $$CTL_SOURCE_DIR/models/xydataseries.h \
@@ -137,6 +138,7 @@ SOURCES += \
     $$CTL_SOURCE_DIR/mat/projectionmatrix.cpp \
     $$CTL_SOURCE_DIR/models/detectorsaturationmodels.cpp \
     $$CTL_SOURCE_DIR/models/intervaldataseries.cpp \
+    $$CTL_SOURCE_DIR/models/stepfunctionmodels.cpp \
     $$CTL_SOURCE_DIR/models/tabulateddatamodel.cpp \
     $$CTL_SOURCE_DIR/models/xrayspectrummodels.cpp \
     $$CTL_SOURCE_DIR/models/xydataseries.cpp \
