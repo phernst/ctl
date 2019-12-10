@@ -88,6 +88,7 @@ HEADERS += \
     $$CTL_SOURCE_DIR/processing/diff.h \
     $$CTL_SOURCE_DIR/processing/filter.h \
     $$CTL_SOURCE_DIR/processing/imageprocessing.h \
+    $$CTL_SOURCE_DIR/processing/abstractvolumedecomposer.h \
     $$CTL_SOURCE_DIR/projectors/abstractprojector.h \
     $$CTL_SOURCE_DIR/projectors/abstractprojectorconfig.h \
     $$CTL_SOURCE_DIR/projectors/arealfocalspotextension.h \
