@@ -7,12 +7,10 @@ namespace CTL {
 
 class ModelBasedVolumeDecomposer : public AbstractVolumeDecomposer
 {
+    public: CompositeVolume decompose(const VoxelVolume<float>& volume,
+                                      float referenceEnergy = 50.0f) const override;
+
 public:
-    ModelBasedVolumeDecomposer();
-
-    CompositeVolume decompose(const VoxelVolume<float>& volume,
-                              float referenceEnergy = 50.0f) const override;
-
     void addMaterial(std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
                      std::shared_ptr<AbstractDataModel> segmentationModel);
     uint nbMaterials() const;
@@ -25,13 +23,14 @@ protected:
 
 class TwoMaterialThresholdVolumeDecomposer : public AbstractVolumeDecomposer
 {
-public:
-    TwoMaterialThresholdVolumeDecomposer(std::shared_ptr<AbstractIntegrableDataModel> absorptionModelMaterial1,
-                                         std::shared_ptr<AbstractIntegrableDataModel> absorptionModelMaterial2,
-                                         float thresholdDensity1);
+    public: CompositeVolume decompose(const VoxelVolume<float>& volume,
+                                      float referenceEnergy = 50.0f) const override;
 
-    CompositeVolume decompose(const VoxelVolume<float>& volume,
-                              float referenceEnergy = 50.0f) const override;
+public:
+    TwoMaterialThresholdVolumeDecomposer(
+        std::shared_ptr<AbstractIntegrableDataModel> absorptionModelMaterial1,
+        std::shared_ptr<AbstractIntegrableDataModel> absorptionModelMaterial2,
+        float thresholdDensity1);
 
 private:
     std::shared_ptr<AbstractIntegrableDataModel> _absMaterial1;

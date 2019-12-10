@@ -25,4 +25,5 @@ private:
 };
 
 } // namespace CTL
+
 #endif // STEPFUNCTIONMODELS_H

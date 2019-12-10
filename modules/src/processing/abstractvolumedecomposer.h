@@ -7,9 +7,10 @@ namespace CTL {
 
 class AbstractVolumeDecomposer
 {
+    public:virtual CompositeVolume decompose(const VoxelVolume<float>& volume,
+                                             float referenceEnergy = 50.0f) const = 0;
+
 public:
-    virtual CompositeVolume decompose(const VoxelVolume<float>& volume,
-                                      float referenceEnergy = 50.0f) const = 0;
     virtual ~AbstractVolumeDecomposer() = default;
 
 protected:
