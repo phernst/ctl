@@ -88,6 +88,7 @@ HEADERS += \
     $$CTL_SOURCE_DIR/processing/diff.h \
     $$CTL_SOURCE_DIR/processing/filter.h \
     $$CTL_SOURCE_DIR/processing/imageprocessing.h \
+    $$CTL_SOURCE_DIR/processing/modelbasedvolumedecomposer.h \
     $$CTL_SOURCE_DIR/processing/abstractvolumedecomposer.h \
     $$CTL_SOURCE_DIR/projectors/abstractprojector.h \
     $$CTL_SOURCE_DIR/projectors/abstractprojectorconfig.h \
@@ -146,6 +147,7 @@ SOURCES += \
     $$CTL_SOURCE_DIR/processing/errormetrics.cpp \
     $$CTL_SOURCE_DIR/processing/filter.cpp \
     $$CTL_SOURCE_DIR/processing/imageprocessing.cpp \
+    $$CTL_SOURCE_DIR/processing/modelbasedvolumedecomposer.cpp \
     $$CTL_SOURCE_DIR/projectors/arealfocalspotextension.cpp \
     $$CTL_SOURCE_DIR/projectors/detectorsaturationextension.cpp \
     $$CTL_SOURCE_DIR/projectors/dynamicprojector.cpp \
