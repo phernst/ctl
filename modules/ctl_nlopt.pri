@@ -12,6 +12,6 @@
 # Install OpenCL (platform dependent):
 #   sudo apt install nvidia-opencl-dev opencl-headers
 
-include(submodules/ocl_config.pri)
-include(submodules/ocl_routines.pri)
-include(submodules/grangeat_2d3d_regist.pri)
+!OCL_CONFIG_MODULE:include(submodules/ocl_config.pri)
+!OCL_ROUTINES_MODULE:include(submodules/ocl_routines.pri)
+!GRANGEAT_2D3D_REGIST_MODULE:include(submodules/grangeat_2d3d_regist.pri)

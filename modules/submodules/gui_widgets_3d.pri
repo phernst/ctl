@@ -1,5 +1,3 @@
-!GUI_WIDGETS_3D_MODULE {
-
 # define source directory
 CTL_SOURCE_DIR = $$PWD/../src
 
@@ -26,5 +24,3 @@ SOURCES += \
 
 FORMS += \
     $$CTL_SOURCE_DIR/gui/widgets/volumeslicerwidget.ui
-
-} # GUI_WIDGETS_3D_MODULE

@@ -1,5 +1,3 @@
-!OCL_CONFIG_MODULE {
-
 # define source directory
 CTL_SOURCE_DIR = $$PWD/../src
 
@@ -25,5 +23,3 @@ LIBS += -lOpenCL
 # copy OpenCL source files
 win32:QMAKE_POST_LINK += $(COPY_DIR) \"$$shell_path($$CTL_SOURCE_DIR/ocl/cl_src)\" \"$$shell_path($$DESTDIR/cl_src)\" $$escape_expand(\n\t)
 !win32:QMAKE_POST_LINK += $(COPY_DIR) \"$$shell_path($$CTL_SOURCE_DIR/ocl/cl_src)\" \"$$shell_path($$DESTDIR)\" $$escape_expand(\n\t)
-
-} # OCL_CONFIG_MODULE

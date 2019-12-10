@@ -4,5 +4,5 @@
 # Install Qt 3D:
 #   apt install qt3d5-dev
 
-include(submodules/gui_widgets.pri)
-include(submodules/gui_widgets_3d.pri)
+!GUI_WIDGETS_MODULE:include(submodules/gui_widgets.pri)
+!GUI_WIDGETS_3D_MODULE:include(submodules/gui_widgets_3d.pri)

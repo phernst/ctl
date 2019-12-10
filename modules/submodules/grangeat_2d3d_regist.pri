@@ -1,5 +1,3 @@
-!GRANGEAT_2D3D_REGIST_MODULE {
-
 # define source directory
 CTL_SOURCE_DIR = $$PWD/../src
 
@@ -18,5 +16,3 @@ SOURCES += $$CTL_SOURCE_DIR/app/registration/grangeatregistration2d3d.cpp
 # NLopt library [ https://github.com/stevengj/nlopt/ ]
 unix:LIBS += -L/usr/local/lib
 LIBS += -lnlopt
-
-} # GRANGEAT_2D3D_REGIST_MODULE

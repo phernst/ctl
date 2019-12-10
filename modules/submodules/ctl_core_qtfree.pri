@@ -1,5 +1,3 @@
-!CTL_CORE_QTFREE_MODULE {
-
 # define source directory
 CTL_SOURCE_DIR = $$PWD/../src
 
@@ -18,5 +16,3 @@ HEADERS += \
 
 SOURCES += \
     $$CTL_SOURCE_DIR/mat/matrix.tpp
-
-} # CTL_CORE_QTFREE_MODULE

@@ -1,5 +1,3 @@
-!GUI_WIDGETS_MODULE {
-
 # define source directory
 CTL_SOURCE_DIR = $$PWD/../src
 
@@ -26,5 +24,3 @@ FORMS += \
     $$CTL_SOURCE_DIR/gui/widgets/projectionview.ui \
     $$CTL_SOURCE_DIR/gui/widgets/voxelvolumeview.ui \
     $$CTL_SOURCE_DIR/gui/widgets/windowingwidget.ui
-
-} # GUI_WIDGETS_MODULE

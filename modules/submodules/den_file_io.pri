@@ -1,5 +1,3 @@
-!DEN_FILE_IO_MODULE {
-
 # define source directory
 CTL_SOURCE_DIR = $$PWD/../src
 
@@ -26,5 +24,3 @@ SOURCES += \
     $$CTL_SOURCE_DIR/io/den/den_header.tpp \
     $$CTL_SOURCE_DIR/io/den/den_utils.tpp \
     $$CTL_SOURCE_DIR/io/den/dfileformat.tpp
-
-} # DEN_FILE_IO_MODULE

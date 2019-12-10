@@ -1,5 +1,3 @@
-!NRRD_FILE_IO_MODULE {
-
 # define source directory
 CTL_SOURCE_DIR = $$PWD/../src
 
@@ -12,5 +10,3 @@ CONFIG += NRRD_FILE_IO_MODULE
 HEADERS += $$CTL_SOURCE_DIR/io/nrrd/nrrdfileio.h
 
 SOURCES += $$CTL_SOURCE_DIR/io/nrrd/nrrdfileio.tpp
-
-} # NRRD_FILE_IO_MODULE

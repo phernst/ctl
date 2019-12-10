@@ -1,5 +1,3 @@
-!CTL_CORE_MODULE {
-
 # include Qt-free sources
 include(ctl_core_qtfree.pri)
 
@@ -159,5 +157,3 @@ DATABASE_ROOT = $$PWD/../../database
 QMAKE_SUBSTITUTES += indirect
 indirect.input = $$PWD/../.database.path.in
 indirect.output = $$DESTDIR/database.path
-
-} # CTL_CORE_MODULE

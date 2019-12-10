@@ -1,5 +1,3 @@
-!OCL_ROUTINES_MODULE {
-
 # define source directory
 CTL_SOURCE_DIR = $$PWD/../src
 
@@ -43,5 +41,3 @@ DISTFILES += \
     $$CTL_SOURCE_DIR/ocl/cl_src/processing/radon2d.cl \
     $$CTL_SOURCE_DIR/ocl/cl_src/processing/volumeResampler.cl \
     $$CTL_SOURCE_DIR/ocl/cl_src/processing/volumeSlicer.cl
-
-} # OCL_ROUTINES_MODULE
