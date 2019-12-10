@@ -55,6 +55,7 @@ HEADERS += \
     $$CTL_SOURCE_DIR/img/modulelayout.h \
     $$CTL_SOURCE_DIR/img/projectiondata.h \
     $$CTL_SOURCE_DIR/img/singleviewdata.h \
+    $$CTL_SOURCE_DIR/img/spectralvolumedata.h \
     $$CTL_SOURCE_DIR/img/voxelvolume.h \
     $$CTL_SOURCE_DIR/img/trivialdynamicvolume.h \
     $$CTL_SOURCE_DIR/io/abstractbasetypeio.h \
@@ -121,6 +122,7 @@ SOURCES += \
     $$CTL_SOURCE_DIR/img/compositevolume.cpp \
     $$CTL_SOURCE_DIR/img/projectiondata.cpp \
     $$CTL_SOURCE_DIR/img/singleviewdata.cpp \
+    $$CTL_SOURCE_DIR/img/spectralvolumedata.cpp \
     $$CTL_SOURCE_DIR/img/voxelvolume.tpp \
     $$CTL_SOURCE_DIR/io/basetypeio.tpp \
     $$CTL_SOURCE_DIR/io/jsonserializer.cpp \
