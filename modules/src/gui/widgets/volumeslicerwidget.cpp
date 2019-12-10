@@ -23,7 +23,7 @@ VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
 #ifndef OCL_CONFIG_MODULE_AVAILABLE
     qWarning() << "OCL_CONFIG_MODULE is required!"
                   "VolumeSlicerWidget needs OpenCL to compute sliced images."
-                  "No funtionality will be available";
+                  "No functionality will be available";
 #endif
 }
 
