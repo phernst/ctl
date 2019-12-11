@@ -4,19 +4,19 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(StepFunctionModel)
 
-StepFunctionModel::StepFunctionModel(float threshold, float amplitude, bool leftIsZero)
+StepFunctionModel::StepFunctionModel(float threshold, float amplitude, StepDirection stepDirection)
     : _threshold(threshold)
     , _amplitude(amplitude)
-    , _leftIsZero(leftIsZero)
+    , _stepDirection(stepDirection)
 {
 }
 
 float StepFunctionModel::valueAt(float position) const
 {
     if(position > _threshold)
-        return _amplitude * float(_leftIsZero);
+        return _amplitude * float(_stepDirection == LeftIsZero);
     else
-        return _amplitude * float(!_leftIsZero);
+        return _amplitude * float(_stepDirection == RightIsZero);
 }
 
 AbstractDataModel* StepFunctionModel::clone() const
@@ -33,9 +33,9 @@ AbstractDataModel* StepFunctionModel::clone() const
 QVariant StepFunctionModel::parameter() const
 {
     QVariantMap ret;
-    ret.insert("threshold", _threshold);
-    ret.insert("amplitude", _amplitude);
-    ret.insert("leftSideZero", _leftIsZero);
+    ret.insert("Threshold", _threshold);
+    ret.insert("Amplitude", _amplitude);
+    ret.insert("Left is zero", bool(_stepDirection));
 
     return ret;
 }
@@ -55,9 +55,9 @@ void StepFunctionModel::setParameter(const QVariant &parameter)
     if(parameter.canConvert(QMetaType::QVariantMap))
     {
         auto parMap = parameter.toMap();
-        _threshold = parMap.value("threshold").toFloat();
-        _amplitude = parMap.value("amplitude").toFloat();
-        _leftIsZero = parMap.value("leftSideZero").toBool();
+        _threshold = parMap.value("Threshold").toFloat();
+        _amplitude = parMap.value("Amplitude").toFloat();
+        _stepDirection = StepDirection(parMap.value("Left is zero").toBool());
     }
     else if(parameter.canConvert(QMetaType::QVariantList))
     {
@@ -70,7 +70,7 @@ void StepFunctionModel::setParameter(const QVariant &parameter)
         }
         _threshold = parList.at(0).toFloat();
         _amplitude = parList.at(1).toFloat();
-        _leftIsZero = parList.at(2).toBool();
+        _stepDirection = StepDirection(parList.at(2).toBool());
     }
     else
         qWarning() << "StepFunctionModel::setParameter: Could not set parameters! "

@@ -50,9 +50,9 @@ CompositeVolume TwoMaterialThresholdVolumeDecomposer::decompose(const VoxelVolum
     ModelBasedVolumeDecomposer decomposer;
     float scale = _absMaterial1->valueAt(referenceEnergy) / _absMaterial2->valueAt(referenceEnergy);
     decomposer.addMaterial(_absMaterial1,
-                           std::make_shared<StepFunctionModel>(_threshold, 1.0f, false));
+                           std::make_shared<StepFunctionModel>(_threshold, 1.0f, StepFunctionModel::RightIsZero));
     decomposer.addMaterial(_absMaterial2,
-                           std::make_shared<StepFunctionModel>(_threshold * scale, 1.0f, true));
+                           std::make_shared<StepFunctionModel>(_threshold * scale, 1.0f, StepFunctionModel::LeftIsZero));
 
     return decomposer.decompose(volume, referenceEnergy);
 }

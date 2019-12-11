@@ -13,7 +13,9 @@ class StepFunctionModel : public AbstractDataModel
     public: AbstractDataModel* clone() const override;
 
 public:
-    StepFunctionModel(float threshold = 0.0f, float amplitude = 1.0f, bool leftIsZero = true);
+    enum StepDirection{ RightIsZero = 0, Downwards = 0, LeftIsZero = 1, Upwards = 1 };
+
+    StepFunctionModel(float threshold = 0.0f, float amplitude = 1.0f, StepDirection stepDirection = LeftIsZero);
 
     QVariant parameter() const override;
     void setParameter(const QVariant& parameter) override;
@@ -21,7 +23,7 @@ public:
 private:
     float _threshold;
     float _amplitude;
-    bool _leftIsZero;
+    StepDirection _stepDirection;
 };
 
 } // namespace CTL
