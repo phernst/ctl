@@ -1,5 +1,6 @@
 #include "abstractdatamodel.h"
 #include "datamodeloperations.h"
+#include <QDebug>
 
 namespace CTL {
 

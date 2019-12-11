@@ -1,4 +1,5 @@
 #include "stepfunctionmodels.h"
+#include <QDebug>
 
 namespace CTL {
 

@@ -1,4 +1,5 @@
 #include "tabulateddatamodel.h"
+#include <QDebug>
 
 namespace CTL {
 

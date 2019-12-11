@@ -2,7 +2,6 @@
 #define ABSTRACTDATAMODEL_H
 
 #include "io/serializationinterface.h"
-#include <QDebug>
 #include <memory>
 
 namespace CTL {
@@ -92,10 +91,14 @@ protected:
 };
 
 // Data model operators
-std::shared_ptr<AbstractDataModel> operator+(std::shared_ptr<AbstractDataModel> lhs, std::shared_ptr<AbstractDataModel> rhs);
-std::shared_ptr<AbstractDataModel> operator-(std::shared_ptr<AbstractDataModel> lhs, std::shared_ptr<AbstractDataModel> rhs);
-std::shared_ptr<AbstractDataModel> operator*(std::shared_ptr<AbstractDataModel> lhs, std::shared_ptr<AbstractDataModel> rhs);
-std::shared_ptr<AbstractDataModel> operator/(std::shared_ptr<AbstractDataModel> lhs, std::shared_ptr<AbstractDataModel> rhs);
+std::shared_ptr<AbstractDataModel> operator+(std::shared_ptr<AbstractDataModel> lhs,
+                                             std::shared_ptr<AbstractDataModel> rhs);
+std::shared_ptr<AbstractDataModel> operator-(std::shared_ptr<AbstractDataModel> lhs,
+                                             std::shared_ptr<AbstractDataModel> rhs);
+std::shared_ptr<AbstractDataModel> operator*(std::shared_ptr<AbstractDataModel> lhs,
+                                             std::shared_ptr<AbstractDataModel> rhs);
+std::shared_ptr<AbstractDataModel> operator/(std::shared_ptr<AbstractDataModel> lhs,
+                                             std::shared_ptr<AbstractDataModel> rhs);
 
 
 class AbstractIntegrableDataModel : public AbstractDataModel
