@@ -317,7 +317,7 @@ template std::vector<Radon3DCoord> IntermedGen2D3D::randomSubset(std::vector<Rad
 // -----------------------------
 
 IntermediateProj::IntermediateProj(const Chunk2D<float>& proj, const mat::Matrix<3, 3>& K, bool useWeighting)
-    : _K(K)
+    : _intrinsicK(K)
     , _useWeighting(useWeighting)
 {
     // perform cosine pre-weighting of projections
@@ -347,8 +347,8 @@ OCL::ImageResampler IntermediateProj::sampler(const SamplingRange& angleRange, u
     return OCL::ImageResampler(intermedFct, angleRange, distRange);
 }
 
-Chunk2D<float> IntermediateProj::sampled(const SamplingRange &angleRange, uint nbAngles,
-                                         const SamplingRange &distRange, uint nbDist) const
+Chunk2D<float> IntermediateProj::sampled(const SamplingRange& angleRange, uint nbAngles,
+                                         const SamplingRange& distRange, uint nbDist) const
 {
     if(nbDist < 2)
         throw std::runtime_error("IntermediateProj::sampler: nbDist must be greater than 1.");
@@ -370,49 +370,95 @@ Chunk2D<float> IntermediateProj::sampled(const SamplingRange &angleRange, uint n
     return radonTransf;
 }
 
-void IntermediateProj::postWeighting(Chunk2D<float>& radonTrans,
+std::vector<float> IntermediateProj::sampled(const std::vector<Radon2DCoord>& samplingPts,
+                                             float plusMinusH) const
+{
+    // sampling points for central difference
+    std::vector<Radon2DCoord> samplingPtsDerivative;
+    samplingPtsDerivative.reserve(2 * samplingPts.size());
+    for(const auto& centralCoord : samplingPts)
+    {
+        samplingPtsDerivative.push_back({ centralCoord.angle(), centralCoord.dist() - plusMinusH });
+        samplingPtsDerivative.push_back({ centralCoord.angle(), centralCoord.dist() + plusMinusH });
+    }
+
+    // line integrals
+    auto lineIntegrals = _radon2D->sampleTransform(samplingPtsDerivative);
+    auto* lineItegralPtr = lineIntegrals.data();
+
+    // derivative
+    std::vector<float> ret(samplingPts.size());
+    for(auto& val : ret)
+    {
+        // factor 1/(2h) for central difference
+        val = (lineItegralPtr[1] - lineItegralPtr[0]) / (2.0f * plusMinusH);
+        lineItegralPtr += 2;
+    }
+
+    if(_useWeighting)
+        postWeighting(ret, samplingPts);
+
+    return ret;
+}
+
+void IntermediateProj::postWeighting(Chunk2D<float>& radonTransDerivative,
                                      const std::vector<float>& theta,
                                      const std::vector<float>& s) const
 {
-    const auto& K = this->_K;
+    const auto& K = _intrinsicK;
+    const auto p = mat::Matrix<2, 1>{ K.get<0, 2>(), K.get<1, 2>() };
+    const auto originShiftTransp = (p - _radon2D->origin()).transposed();
+    const auto sSize = s.size();
+    const auto tSize = theta.size();
+
+    for(uint tIdx = 0; tIdx < tSize; ++tIdx)
+    {
+        mat::Matrix<2, 1> n = { std::cos(theta[tIdx]), std::sin(theta[tIdx]) };
+        auto sCorr = originShiftTransp * n;
+
+        for(uint sIdx = 0; sIdx < sSize; ++sIdx)
+        {
+            auto cosPlaneAnlge = cosineOfPlaneAngle((s[sIdx] - sCorr) * n + p, K);
+            radonTransDerivative(tIdx, sIdx) /= float(std::pow(cosPlaneAnlge, 2.0));
+        }
+    }
+}
+
+void IntermediateProj::postWeighting(std::vector<float>& lineIntegralDerivative,
+                                     const std::vector<Radon2DCoord>& samplingPts) const
+{
+    const auto& K = _intrinsicK;
+    const auto p = mat::Matrix<2, 1>{ K.get<0, 2>(), K.get<1, 2>() };
+    const auto originShiftTransp = (p - _radon2D->origin()).transposed();
+
+    std::transform(lineIntegralDerivative.cbegin(), lineIntegralDerivative.cend(), // input 1
+                   samplingPts.cbegin(),                                           // input 2
+                   lineIntegralDerivative.begin(),                                 // output
+                   [&K, &p, &originShiftTransp](float val, const Radon2DCoord& coord)
+                   {
+                       mat::Matrix<2, 1> n{ std::cos(coord.angle()), std::sin(coord.angle()) };
+                       auto sCorr = originShiftTransp * n;
+                       auto cosPlaneAnlge = cosineOfPlaneAngle((coord.dist() - sCorr) * n + p, K);
+                       return val / float(std::pow(cosPlaneAnlge, 2.0));
+                   });
+}
+
+double IntermediateProj::cosineOfPlaneAngle(const mat::Matrix<2, 1>& x, const Matrix3x3 K)
+{
     // cosine of an angle between the vector pointing from the source to a certain pixel location
     // on the detector and the z-axis (principal ray) of the CT cooradinate frame (CTS):
     // 1. calculate direction d = K^-1 * [x1,x2,1]^t
     // 2. normalize and
     // 3. take 3rd component
-    auto cosineOfPlaneAngle = [&K](const mat::Matrix<2, 1>& x)
-    {
-        // back substitution to find 'd' in K*d = [x,y,1]^t
-        mat::Matrix<3, 1> d;
-        d.get<2>() = 1.0;
-        d.get<1>() = (x.get<1>() - K.get<1, 2>()) / K.get<1, 1>();
-        d.get<0>() = (x.get<0>() - d.get<1>() * K.get<0, 1>() - K.get<0, 2>()) / K.get<0, 0>();
 
-        // cosine to z-axis = <unitDirection, [0 0 1]^t>
-        return d.get<2>() / d.norm();
-    };
+    // back substitution to find 'd' in K*d = [x,y,1]^t
+    mat::Matrix<3, 1> d;
+    d.get<2>() = 1.0;
+    d.get<1>() = (x.get<1>() - K.get<1, 2>()) / K.get<1, 1>();
+    d.get<0>() = (x.get<0>() - d.get<1>() * K.get<0, 1>() - K.get<0, 2>()) / K.get<0, 0>();
 
-    const auto sSize = s.size();
-    const auto tSize = theta.size();
-    const auto p = mat::Matrix<2, 1>{ _K(0, 2), _K(1, 2) };
-    const auto originShiftTransp = (p - _radon2D->origin()).transposed();
-
-    mat::Matrix<2, 1> n;
-    double cosPlaneAnlge;
-    float sCorr;
-    uint tIdx, sIdx;
-
-    for(tIdx = 0; tIdx < tSize; ++tIdx)
-    {
-        n = { std::cos(theta[tIdx]), std::sin(theta[tIdx]) };
-        sCorr = originShiftTransp * n;
-
-        for(sIdx = 0; sIdx < sSize; ++sIdx)
-        {
-            cosPlaneAnlge = cosineOfPlaneAngle((s[sIdx] - sCorr) * n + p);
-            radonTrans(tIdx, sIdx) /= std::pow(cosPlaneAnlge, 2.0);
-        }
-    }
+    // cosine to z-axis = <unitDirection, [0 0 1]^t>
+    return d.get<2>() / d.norm();
 }
 
 void IntermediateProj::setDerivativeMethod(imgproc::DiffMethod method) { _derivativeMethod = method; }

@@ -61,7 +61,6 @@ public:
     imgproc::DiffMethod derivativeMethodInProjectionDomain() const;
     void setDerivativeMethodInProjectionDomain(const imgproc::DiffMethod& method);
 
-
     const std::vector<Radon3DCoord>& lastSampling() const;
 
     // fully on the fly
@@ -147,16 +146,22 @@ public:
 
     Chunk2D<float> sampled(const SamplingRange& angleRange, uint nbAngles,
                            const SamplingRange& distRange, uint nbDist) const;
+    std::vector<float> sampled(const std::vector<Radon2DCoord>& samplingPts,
+                               float plusMinusH = 1.0f) const;
 
 private:
-    mat::Matrix<3, 3> _K;
+    mat::Matrix<3, 3> _intrinsicK;
     std::unique_ptr<OCL::RadonTransform2D> _radon2D;
     imgproc::DiffMethod _derivativeMethod = imgproc::CentralDifference;
     bool _useWeighting;
 
-    void postWeighting(Chunk2D<float>& radonTrans,
+    void postWeighting(Chunk2D<float>& radonTransDerivative,
                        const std::vector<float>& theta,
                        const std::vector<float>& s) const;
+    void postWeighting(std::vector<float>& lineIntegralDerivative,
+                       const std::vector<Radon2DCoord>& samplingPts) const;
+
+    static double cosineOfPlaneAngle(const mat::Matrix<2, 1>& x, const Matrix3x3 K);
 };
 
 class IntermediateVol
