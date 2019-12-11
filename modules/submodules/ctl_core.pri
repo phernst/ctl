@@ -94,7 +94,8 @@ HEADERS += \
     $$PWD/../src/projectors/dynamicprojector.h \
     $$PWD/../src/projectors/poissonnoiseextension.h \
     $$PWD/../src/projectors/projectorextension.h \
-    $$PWD/../src/projectors/spectralprojectorextension.h
+    $$PWD/../src/projectors/spectralprojectorextension.h \
+    $$PWD/../src/models/datamodeloperations.h
 
 SOURCES += \
     $$PWD/../src/acquisition/acquisitionsetup.cpp \
@@ -149,7 +150,9 @@ SOURCES += \
     $$PWD/../src/projectors/detectorsaturationextension.cpp \
     $$PWD/../src/projectors/dynamicprojector.cpp \
     $$PWD/../src/projectors/poissonnoiseextension.cpp \
-    $$PWD/../src/projectors/spectralprojectorextension.cpp
+    $$PWD/../src/projectors/spectralprojectorextension.cpp \
+    $$PWD/../src/models/abstractdatamodel.cpp \
+    $$PWD/../src/models/datamodeloperations.cpp
 
 # Qt-free headers and sources
 HEADERS += \
