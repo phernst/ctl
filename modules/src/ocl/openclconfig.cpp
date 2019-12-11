@@ -13,7 +13,7 @@ static std::vector<cl::Platform> findPlatforms();
 // ---------------------------------------
 // Constructor
 OpenCLConfig::OpenCLConfig(bool initialize)
-    : _isValid(false)
+    : _isValid(false), _kernelFileDir()
 {
     if(initialize)
         if(!setDevices(CL_DEVICE_TYPE_GPU))
@@ -199,6 +199,14 @@ bool OpenCLConfig::kernelExists(const std::string &kernelName, const std::string
 {
     return programExists(programName) &&
            _programs.at(programName).kernelExists(kernelName);
+}
+
+void OpenCLConfig::setKernelFileDir(const std::string& kernelFileDir) {
+    _kernelFileDir = kernelFileDir;
+}
+
+const std::string& OpenCLConfig::getKernelFileDir() const {
+    return _kernelFileDir;
 }
 
 cl::Kernel* OpenCLConfig::kernel(const std::string& kernelName, const std::string& programName)

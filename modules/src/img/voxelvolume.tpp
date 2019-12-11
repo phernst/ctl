@@ -1,5 +1,7 @@
 #include "voxelvolume.h"
 
+#include <stdexcept>
+
 namespace CTL {
 
 /*!
@@ -193,7 +195,6 @@ typename std::vector<T>::reference VoxelVolume<T>::operator()(uint x, uint y, ui
     const size_t voxPerLine = size_t(_dim.x);
     size_t lup = z * voxPerSlice + y * voxPerLine + x;
 
-    Q_ASSERT(lup < _data.size());
     return _data[lup];
 }
 
@@ -207,7 +208,6 @@ typename std::vector<T>::const_reference VoxelVolume<T>::operator()(uint x, uint
     const size_t voxPerLine = size_t(_dim.x);
     size_t lup = z * voxPerSlice + y * voxPerLine + x;
 
-    Q_ASSERT(lup < _data.size());
     return _data[lup];
 }
 
@@ -217,8 +217,6 @@ typename std::vector<T>::const_reference VoxelVolume<T>::operator()(uint x, uint
 template <typename T>
 Chunk2D<T> VoxelVolume<T>::sliceX(uint slice) const
 {
-    Q_ASSERT(slice < _dim.x);
-
     Chunk2D<T> ret(_dim.y, _dim.z);
     ret.allocateMemory();
 
@@ -241,8 +239,6 @@ Chunk2D<T> VoxelVolume<T>::sliceX(uint slice) const
 template <typename T>
 Chunk2D<T> VoxelVolume<T>::sliceY(uint slice) const
 {
-    Q_ASSERT(slice < _dim.y);
-
     Chunk2D<T> ret(_dim.x, _dim.z);
 
     const size_t voxPerXZSlice = size_t(_dim.x) * _dim.z;
@@ -267,8 +263,6 @@ Chunk2D<T> VoxelVolume<T>::sliceY(uint slice) const
 template <typename T>
 Chunk2D<T> VoxelVolume<T>::sliceZ(uint slice) const
 {
-    Q_ASSERT(slice < _dim.z);
-
     Chunk2D<T> ret(_dim.x, _dim.y);
 
     const size_t voxPerSlice = size_t(_dim.x) * _dim.y;
@@ -395,8 +389,7 @@ T VoxelVolume<T>::min() const
  */
 template <typename T>
 VoxelVolume<T>& VoxelVolume<T>::operator+=(const VoxelVolume<T>& other)
-{    
-    Q_ASSERT(dimensions() == other.dimensions());
+{
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '+=' operation.");
 
@@ -417,7 +410,6 @@ VoxelVolume<T>& VoxelVolume<T>::operator+=(const VoxelVolume<T>& other)
 template <typename T>
 VoxelVolume<T>& VoxelVolume<T>::operator-=(const VoxelVolume<T>& other)
 {
-    Q_ASSERT(dimensions() == other.dimensions());
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '-=' operation.");
 
@@ -487,7 +479,6 @@ VoxelVolume<T>& VoxelVolume<T>::operator/=(const T& divisor)
 template <typename T>
 VoxelVolume<T> VoxelVolume<T>::operator+(const VoxelVolume<T>& other) const
 {
-    Q_ASSERT(dimensions() == other.dimensions());
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '+' operation.");
 
@@ -506,7 +497,6 @@ VoxelVolume<T> VoxelVolume<T>::operator+(const VoxelVolume<T>& other) const
 template <typename T>
 VoxelVolume<T> VoxelVolume<T>::operator-(const VoxelVolume<T>& other) const
 {
-    Q_ASSERT(dimensions() == other.dimensions());
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '-' operation.");
 

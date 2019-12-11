@@ -103,11 +103,6 @@ Homography3D::Homography3D(const Matrix<3, 3>& rotation)
 {
 }
 
-Homography3D::Homography3D(double angle, Qt::Axis axis)
-    : Homography3D(rotationMatrix(angle, axis))
-{
-}
-
 Homography3D::Homography3D(const Matrix<3, 3>& rotation, const Matrix<3, 1>& translation)
     : Matrix<4, 4>{
           rotation.get<0, 0>(), rotation.get<0, 1>(), rotation.get<0, 2>(), translation.get<0>(),
@@ -117,19 +112,9 @@ Homography3D::Homography3D(const Matrix<3, 3>& rotation, const Matrix<3, 1>& tra
 {
 }
 
-Homography3D::Homography3D(double angle, Qt::Axis axis, const Matrix<3, 1>& translation)
-    : Homography3D(rotationMatrix(angle, axis), translation)
-{
-}
-
 Homography3D Homography3D::passive(const Matrix<3, 3>& rotation)
 {
     return Homography3D(rotation.transposed());
-}
-
-Homography3D Homography3D::passive(double angle, Qt::Axis axis)
-{
-    return Homography3D(-angle, axis);
 }
 
 Homography3D Homography3D::passive(const Matrix<3, 1>& translation)
@@ -140,12 +125,6 @@ Homography3D Homography3D::passive(const Matrix<3, 1>& translation)
 Homography3D Homography3D::passive(const Matrix<3, 3>& rotation, const Matrix<3, 1>& translation)
 {
     auto Rt = rotation.transposed();
-    return { Rt, -(Rt * translation) };
-}
-
-Homography3D Homography3D::passive(double angle, Qt::Axis axis, const Matrix<3, 1>& translation)
-{
-    auto Rt = rotationMatrix(-angle, axis);
     return { Rt, -(Rt * translation) };
 }
 

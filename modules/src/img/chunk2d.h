@@ -1,9 +1,10 @@
 #ifndef CHUNK2D_H
 #define CHUNK2D_H
 
-#include <QtGlobal>
 #include <string>
 #include <vector>
+
+typedef unsigned int uint;
 
 namespace CTL {
 /*!

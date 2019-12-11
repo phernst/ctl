@@ -2,7 +2,6 @@
 #define HOMOGRAPHY_H
 
 #include "matrix.h"
-#include <qnamespace.h>
 
 namespace CTL {
 namespace mat {
@@ -47,19 +46,15 @@ public:
     // specialized ctors
     // rotation
     explicit Homography3D(const Matrix<3, 3>& rotation);
-    Homography3D(double angle, Qt::Axis axis);
     // translation
     explicit Homography3D(const Matrix<3, 1>& translation);
     // Euclidian transform
     Homography3D(const Matrix<3, 3>& rotation, const Matrix<3, 1>& translation);
-    Homography3D(double angle, Qt::Axis axis, const Matrix<3, 1>& translation);
 
     // "passive" factories for describing the transformation of the coordinate system
     static Homography3D passive(const Matrix<3, 3>& rotation);
-    static Homography3D passive(double angle, Qt::Axis axis);
     static Homography3D passive(const Matrix<3, 1>& translation);
     static Homography3D passive(const Matrix<3, 3>& rotation, const Matrix<3, 1>& translation);
-    static Homography3D passive(double angle, Qt::Axis axis, const Matrix<3, 1>& translation);
 };
 
 } // namespace mat

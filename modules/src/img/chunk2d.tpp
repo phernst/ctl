@@ -192,7 +192,6 @@ void Chunk2D<T>::setData(const std::vector<T>& data)
 template <typename T>
 bool Chunk2D<T>::hasEqualSizeAs(const std::vector<T>& other) const
 {
-    Q_ASSERT(nbElements() == other.size());
     return nbElements() == other.size();
 }
 
@@ -203,7 +202,6 @@ bool Chunk2D<T>::hasEqualSizeAs(const std::vector<T>& other) const
 template <typename T>
 Chunk2D<T>& Chunk2D<T>::operator+=(const Chunk2D<T>& other)
 {
-    Q_ASSERT(_dim == other.dimensions());
     if(_dim != other.dimensions())
         throw std::domain_error("Chunk2D requires same dimensions for '+' operation:\n"
                                 + dimensions().info() + " += " + other.dimensions().info());
@@ -222,7 +220,6 @@ Chunk2D<T>& Chunk2D<T>::operator+=(const Chunk2D<T>& other)
 template <typename T>
 Chunk2D<T>& Chunk2D<T>::operator-=(const Chunk2D<T>& other)
 {
-    Q_ASSERT(_dim == other.dimensions());
     if(_dim != other.dimensions())
         throw std::domain_error("Chunk2D requires same dimensions for '-' operation:\n"
                                 + dimensions().info() + " -= " + other.dimensions().info());
@@ -483,7 +480,6 @@ void Chunk2D<T>::freeMemory()
 template <typename T>
 typename std::vector<T>::reference Chunk2D<T>::operator()(uint x, uint y)
 {
-    Q_ASSERT((y * _dim.width + x) < allocatedElements());
     return _data[y * _dim.width + x];
 }
 
@@ -494,7 +490,6 @@ typename std::vector<T>::reference Chunk2D<T>::operator()(uint x, uint y)
 template <typename T>
 typename std::vector<T>::const_reference Chunk2D<T>::operator()(uint x, uint y) const
 {
-    Q_ASSERT((y * _dim.width + x) < allocatedElements());
     return _data[y * _dim.width + x];
 }
 

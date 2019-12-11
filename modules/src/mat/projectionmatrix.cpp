@@ -122,7 +122,6 @@ void ProjectionMatrix::normalize()
 {
     double denom = Matrix<3, 1>({ get<2, 0>(), get<2, 1>(), get<2, 2>() }).norm();
     denom = std::copysign(denom, det(M()));
-    Q_ASSERT(!qFuzzyIsNull(denom));
     *this /= denom;
 }
 
@@ -137,7 +136,6 @@ ProjectionMatrix ProjectionMatrix::normalized() const
 {
     double denom = Matrix<3, 1>({ get<2, 0>(), get<2, 1>(), get<2, 2>() }).norm();
     denom = std::copysign(denom, det(M()));
-    Q_ASSERT(!qFuzzyIsNull(denom));
     return *this / denom;
 }
 
@@ -230,7 +228,6 @@ Matrix<3, 1> ProjectionMatrix::principalRayDirection() const
 {
     Matrix<3, 1> ret({ get<2, 0>(), get<2, 1>(), get<2, 2>() });
     const auto vecNorm = ret.norm();
-    Q_ASSERT(!qFuzzyIsNull(vecNorm));
     const double scale = std::copysign(1.0 / vecNorm, det(M()));
     ret *= scale;
     return ret;
@@ -258,7 +255,6 @@ Matrix<3, 1> ProjectionMatrix::sourcePosition() const
 {
     // normalization to convert homogeneous to cartesian coordinates
     double hom2cart = -det(horzcat(horzcat(column<0>(), column<1>()), column<2>()));
-    Q_ASSERT(!qFuzzyIsNull(hom2cart));
     Matrix<3, 1> ret({ det(horzcat(horzcat(column<1>(), column<2>()), column<3>())),
                       -det(horzcat(horzcat(column<0>(), column<2>()), column<3>())),
                        det(horzcat(horzcat(column<0>(), column<1>()), column<3>())) });
@@ -299,7 +295,6 @@ Matrix<2, 1> ProjectionMatrix::principalPoint() const
     auto M_ = M();
     auto pP = M_ * M_.row<2>().transposed();
     Matrix<2, 1> ret({ pP.get<0>(), pP.get<1>() });
-    Q_ASSERT(!qFuzzyIsNull(pP.get<2>()));
     ret /= pP.get<2>();
     return ret;
 }

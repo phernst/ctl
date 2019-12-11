@@ -2,20 +2,13 @@
 #define MATRIX_UTILS_H
 
 #include "matrix_types.h"
-#include <QVariant>
-#include <QVector>
 
 namespace CTL {
 namespace mat {
 
-// # converter and maker functions
-
-// conversion of the Matrix content to a QVector
-template <uint Rows, uint Cols>
-QVector<double> toQVector(const Matrix<Rows, Cols>& matrix);
+// # maker functions
 
 // rotation matrix and related
-Matrix3x3 rotationMatrix(double angle, Qt::Axis axis);
 Matrix3x3 rotationMatrix(double angle, const Vector3x1& axis);
 Matrix3x3 rotationMatrix(const Vector3x1& axis) noexcept;
 Vector3x1 rotationAxis(const Matrix3x3& rotMat, bool lengthEqualsAngle = true);
@@ -54,9 +47,6 @@ struct Location
 
     Location() = default;
     Location(const Vector3x1& pos, const Matrix3x3& rot);
-
-    QVariant toVariant() const;
-    void fromVariant(const QVariant& variant);
 };
 
 } // namespace mat

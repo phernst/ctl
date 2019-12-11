@@ -69,6 +69,10 @@ public:
     bool kernelExists(const std::string& kernelName,
                       const std::string& programName = OCL_CORE_PROGRAM) const;
 
+    // kernel file directory
+    void setKernelFileDir(const std::string& kernelFileDir);
+    const std::string& getKernelFileDir() const;
+
     // kernel getter with lazy compilation on demand
     cl::Kernel* kernel(const std::string& kernelName,
                        const std::string& programName = OCL_CORE_PROGRAM);
@@ -123,6 +127,7 @@ private:
     std::vector<cl::Device> _devices;
     std::unordered_map<std::string, Program> _programs;
     bool _isValid;
+    std::string _kernelFileDir;
 
     // help functions
     bool createContext();

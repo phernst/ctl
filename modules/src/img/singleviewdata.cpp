@@ -1,6 +1,7 @@
 #include "singleviewdata.h"
 #include <cmath>
-#include <QDebug>
+#include <iostream>
+#include <algorithm>
 
 namespace CTL
 {
@@ -205,12 +206,10 @@ void SingleViewData::setDataFromVector(const std::vector<float> &dataVector)
 {
     const size_t elementsPerModule = _moduleDim.height*_moduleDim.width;
 
-    Q_ASSERT(elementsPerModule);
     if(elementsPerModule == 0)
         throw std::domain_error("SingleViewData has null-dimension");
 
     // check if number of elements in 'dataVector' is multiple of required number of elements in a single view (specified in '_viewDim')
-    Q_ASSERT(dataVector.size() % elementsPerModule == 0);
     if(dataVector.size() % elementsPerModule != 0)
         throw std::domain_error("data vector has incompatible size for ProjectionData");
 
@@ -253,14 +252,14 @@ Chunk2D<float> SingleViewData::combined(const ModuleLayout &layout, bool *ok) co
         {
             if(layout(row,col) < 0) // skip layout tile if module ID is negative
             {
-                qDebug() << "Module position (" << row << "," << col << ") skipped. [index:"
-                         << layout(row,col) << "]";
+                std::clog << "Module position (" << row << "," << col << ") skipped. [index:"
+                         << layout(row,col) << "]" << std::endl;
                 continue;
             }
             // data from this module goes at position (row,col) in the combined chunk
             auto moduleID = static_cast<uint>(layout(row,col));
 
-            Q_ASSERT(moduleID < nbModules()); // check if module is available in the data
+            // check if module is available in the data
             if(moduleID >= nbModules())
             {
                 if(ok) *ok = false;
@@ -357,7 +356,6 @@ float SingleViewData::min() const
  */
 bool SingleViewData::hasEqualSizeAs(const ModuleData &other) const
 {
-    Q_ASSERT(other.dimensions() == _moduleDim);
     return other.dimensions() == _moduleDim;
 }
 
@@ -367,7 +365,6 @@ bool SingleViewData::hasEqualSizeAs(const ModuleData &other) const
  */
 bool SingleViewData::hasEqualSizeAs(const std::vector<float> &other) const
 {
-    Q_ASSERT(other.size() == elementsPerModule());
     return other.size() == elementsPerModule();
 }
 
@@ -406,7 +403,6 @@ void SingleViewData::allocateMemory(uint nbModules, float initValue)
  */
 SingleViewData& SingleViewData::operator += (const SingleViewData& other)
 {
-    Q_ASSERT(dimensions() == other.dimensions());
     if(dimensions() != other.dimensions())
         throw std::domain_error("SingleViewData requires same dimensions for '+' operation:\n" +
                                 dimensions().info() + " += " + other.dimensions().info());
@@ -424,7 +420,6 @@ SingleViewData& SingleViewData::operator += (const SingleViewData& other)
  */
 SingleViewData& SingleViewData::operator -= (const SingleViewData& other)
 {
-    Q_ASSERT(dimensions() == other.dimensions());
     if(dimensions() != other.dimensions())
         throw std::domain_error("SingleViewData requires same dimensions for '-' operation:\n" +
                                 dimensions().info() + " -= " + other.dimensions().info());
@@ -574,7 +569,6 @@ uint SingleViewData::elementsPerModule() const
  */
 SingleViewData::ModuleData& SingleViewData::module(uint i)
 {
-    Q_ASSERT(i < nbModules());
     return _data.at(i);
 }
 
@@ -584,7 +578,6 @@ SingleViewData::ModuleData& SingleViewData::module(uint i)
  */
 const SingleViewData::ModuleData& SingleViewData::module(uint i) const
 {
-    Q_ASSERT(i < nbModules());
     return _data.at(i);
 }
 

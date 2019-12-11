@@ -1,7 +1,11 @@
 #include "radontransform2d.h"
 #include "mat/matrix_utils.h"
+
+#ifdef NOQT
+#include "ocl/cldirfileloader.h"
+#else
 #include "ocl/clfileloader.h"
-#include <QDebug>
+#endif
 
 const std::string CL_FILE_NAME = "processing/radon2d.cl"; //!< path to .cl file
 const std::string CL_KERNEL_NAME = "radon2d"; //!< name of the OpenCL kernel function
@@ -10,6 +14,10 @@ const std::string CL_PROGRAM_NAME = "radonTransform2D"; //!< OCL program name
 
 namespace CTL {
 namespace OCL {
+
+#ifdef NOQT
+using ClFileLoader = ClDirFileLoader;
+#endif
 
 /*!
  * Creates a RadonTransform2D instance that allows to compute the 2D Radon transform of \a image.
@@ -30,7 +38,7 @@ RadonTransform2D::RadonTransform2D(const Chunk2D<float> &image, uint oclDeviceNb
              image.width(),
              image.height())
 {
-    OCL::ClFileLoader clFile(CL_FILE_NAME);
+    const auto clFile { ClFileLoader{ CL_FILE_NAME } };
     if(!clFile.isValid())
         throw std::runtime_error(CL_FILE_NAME + "\nis not readable");
     const auto clSourceCode = clFile.loadSourceCode();
@@ -44,9 +52,8 @@ RadonTransform2D::RadonTransform2D(const Chunk2D<float> &image, uint oclDeviceNb
         _kernel       = OpenCLConfig::instance().kernel(CL_KERNEL_NAME, CL_PROGRAM_NAME);
         _kernelSubset = OpenCLConfig::instance().kernel(CL_KERNEL_NAME_SUBSET, CL_PROGRAM_NAME);
 
-    } catch(const cl::Error& err)
+    } catch(const cl::Error&)
     {
-        qCritical() << "OpenCL error:" << err.what() << "(" << err.err() << ")";
         throw std::runtime_error("OpenCL error");
     }
 

@@ -1,9 +1,10 @@
 #include "matrix_algorithm.h"
-#include <QDebug>
+#include <iostream>
 
 namespace CTL {
 namespace mat {
 
+static bool fuzzyIsNull(double d);
 static bool qrdcmp(Matrix3x3 &a, double *d);
 static Matrix3x3 mirror(const Matrix3x3 &a);
 static void positiveDiag4RQ(PairMat3x3 *qr);
@@ -15,7 +16,7 @@ PairMat3x3 QRdecomposition(const Matrix3x3 &A)
     Matrix3x3 Btmp = A;
 
     if(qrdcmp(Btmp, d.data())) // check if singular
-        qWarning() << "QR decomposition: matrix is close to singular";
+        std::clog << "QR decomposition: matrix is close to singular" << std::endl;
 
     const auto B = Btmp.transposed();
     const Matrix3x3 R{ d.get<0>(), B.get<1,0>(), B.get<2,0>(),
@@ -62,9 +63,8 @@ PairMat3x3 RQdecomposition(const Matrix3x3 &A, bool unique, bool normalize)
     // reject scale (+ enforce positive determinant)
     if(normalize)
     {
-        bool singular = qFuzzyIsNull(ret.R.get<2,2>());
-        if(singular) qWarning() << "mat::RQdecomposition: unable to normalize, since R(2,2)==0";
-        Q_ASSERT(!singular);
+        bool singular = fuzzyIsNull(ret.R.get<2,2>());
+        if(singular) std::clog << "mat::RQdecomposition: unable to normalize, since R(2,2)==0" << std::endl;
         double det = ret.R.get<0,0>() * ret.R.get<1,1>() * ret.R.get<2,2>();
         ret.R /= std::copysign(ret.R.get<2,2>(), det);
     }
@@ -84,8 +84,12 @@ double det(const Matrix3x3 & m)
         m[0][2]*(m[1][0]*m[2][1] - m[2][0]*m[1][1]) ;
 }
 
-
 // # static functions
+
+bool fuzzyIsNull(double d)
+{
+    return std::abs(d) <= 0.000000000001;
+}
 
 bool qrdcmp(Matrix3x3 & a, double *d)
 {
@@ -100,7 +104,7 @@ bool qrdcmp(Matrix3x3 & a, double *d)
         for(i = k; i < n; i++)
             if(scale < std::fabs(a[i][k]))
                 scale = std::fabs(a[i][k]);
-        if(qFuzzyIsNull(scale))
+        if(fuzzyIsNull(scale))
         {
             sing = true;
             c[k] = 0.0;
@@ -130,7 +134,7 @@ bool qrdcmp(Matrix3x3 & a, double *d)
         }
     }
     d[n-1] = a[n-1][n-1];
-    if(qFuzzyIsNull(d[n-1]))
+    if(fuzzyIsNull(d[n-1]))
         sing = true;
     return sing;
 }

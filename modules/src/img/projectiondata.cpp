@@ -137,12 +137,10 @@ void ProjectionData::setDataFromVector(const std::vector<float> &dataVector)
 {
     const size_t elementsPerView = _viewDim.nbChannels*_viewDim.nbRows*_viewDim.nbModules;
 
-    Q_ASSERT(elementsPerView);
     if(elementsPerView == 0)
         throw std::domain_error("ProjectionData has null-dimension");
 
     // check if number of elements in 'dataVector' is multiple of required number of elements in a single view (specified in '_viewDim')
-    Q_ASSERT(dataVector.size() % elementsPerView == 0);
     if(dataVector.size() % elementsPerView != 0)
         throw std::domain_error("data vector has incompatible size for ProjectionData");
 
@@ -410,7 +408,6 @@ bool ProjectionData::operator!=(const ProjectionData &other) const
  */
 bool ProjectionData::hasEqualSizeAs(const SingleViewData &other) const
 {
-    Q_ASSERT(other.dimensions() == _viewDim);
     return other.dimensions() == _viewDim;
 }
 
@@ -451,7 +448,6 @@ void ProjectionData::allocateMemory(uint nbViews, float initValue)
  */
 ProjectionData& ProjectionData::operator += (const ProjectionData& other)
 {
-    Q_ASSERT(dimensions() == other.dimensions());
     if(dimensions() != other.dimensions())
         throw std::domain_error("ProjectionData requires same dimensions for '+' operation:\n" +
                                 dimensions().info() + " += " + other.dimensions().info());
@@ -484,7 +480,6 @@ ProjectionData& ProjectionData::operator += (const ProjectionData& other)
  */
 ProjectionData& ProjectionData::operator -= (const ProjectionData& other)
 {
-    Q_ASSERT(dimensions() == other.dimensions());
     if(dimensions() != other.dimensions())
         throw std::domain_error("ProjectionData requires same dimensions for '-' operation:\n" +
                                 dimensions().info() + " -= " + other.dimensions().info());
@@ -651,7 +646,6 @@ uint ProjectionData::nbViews() const { return static_cast<uint>(_data.size()); }
  */
 SingleViewData& ProjectionData::view(uint i)
 {
-    Q_ASSERT(i < nbViews());
     return _data.at(i);
 }
 
@@ -660,7 +654,6 @@ SingleViewData& ProjectionData::view(uint i)
  */
 const SingleViewData& ProjectionData::view(uint i) const
 {
-    Q_ASSERT(i < nbViews());
     return _data.at(i);
 }
 
