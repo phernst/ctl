@@ -99,7 +99,18 @@ std::shared_ptr<AbstractDataModel> operator*(std::shared_ptr<AbstractDataModel> 
                                              std::shared_ptr<AbstractDataModel> rhs);
 std::shared_ptr<AbstractDataModel> operator/(std::shared_ptr<AbstractDataModel> lhs,
                                              std::shared_ptr<AbstractDataModel> rhs);
-
+std::shared_ptr<AbstractDataModel> operator|(std::shared_ptr<AbstractDataModel> lhs,
+                                             std::shared_ptr<AbstractDataModel> rhs);
+std::shared_ptr<AbstractDataModel>& operator+=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs);
+std::shared_ptr<AbstractDataModel>& operator-=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs);
+std::shared_ptr<AbstractDataModel>& operator*=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs);
+std::shared_ptr<AbstractDataModel>& operator/=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs);
+std::shared_ptr<AbstractDataModel>& operator|=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs);
 
 class AbstractIntegrableDataModel : public AbstractDataModel
 {

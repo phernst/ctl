@@ -53,6 +53,11 @@ float DataModelDiv::valueAt(float position) const
     return _lhs->valueAt(position) / _rhs->valueAt(position);
 }
 
+float DataModelCat::valueAt(float position) const
+{
+    return _rhs->valueAt(_lhs->valueAt(position));
+}
+
 AbstractDataModel* DataModelAdd::clone() const { return new DataModelAdd(*this); }
 
 AbstractDataModel* DataModelSub::clone() const { return new DataModelSub(*this); }
@@ -60,5 +65,7 @@ AbstractDataModel* DataModelSub::clone() const { return new DataModelSub(*this);
 AbstractDataModel* DataModelMul::clone() const { return new DataModelMul(*this); }
 
 AbstractDataModel* DataModelDiv::clone() const { return new DataModelDiv(*this); }
+
+AbstractDataModel* DataModelCat::clone() const { return new DataModelCat(*this); }
 
 } // namespace CTL

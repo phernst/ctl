@@ -75,6 +75,18 @@ public:
     using AbstractDataModelOperation::AbstractDataModelOperation;
 };
 
+class DataModelCat : public AbstractDataModelOperation
+{
+    CTL_TYPE_ID(5)
+
+    // abstract interface
+    public:virtual float valueAt(float position) const override;
+    public:virtual AbstractDataModel* clone() const override;
+
+public:
+    using AbstractDataModelOperation::AbstractDataModelOperation;
+};
+
 } // namespace CTL
 
 #endif // DATAMODELOPERATIONS_H

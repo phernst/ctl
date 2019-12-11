@@ -76,6 +76,47 @@ std::shared_ptr<AbstractDataModel> operator/(std::shared_ptr<AbstractDataModel> 
     return std::make_shared<DataModelDiv>(std::move(lhs), std::move(rhs));
 }
 
+std::shared_ptr<AbstractDataModel> operator|(std::shared_ptr<AbstractDataModel> lhs,
+                                             std::shared_ptr<AbstractDataModel> rhs)
+{
+    return std::make_shared<DataModelCat>(std::move(lhs), std::move(rhs));
+}
+
+std::shared_ptr<AbstractDataModel>& operator+=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs)
+{
+    lhs = lhs + rhs;
+    return lhs;
+}
+
+std::shared_ptr<AbstractDataModel>& operator-=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs)
+{
+    lhs = lhs - rhs;
+    return lhs;
+}
+
+std::shared_ptr<AbstractDataModel>& operator*=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs)
+{
+    lhs = lhs * rhs;
+    return lhs;
+}
+
+std::shared_ptr<AbstractDataModel>& operator/=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs)
+{
+    lhs = lhs / rhs;
+    return lhs;
+}
+
+std::shared_ptr<AbstractDataModel>& operator|=(std::shared_ptr<AbstractDataModel>& lhs,
+                                               const std::shared_ptr<AbstractDataModel>& rhs)
+{
+    lhs = lhs | rhs;
+    return lhs;
+}
+
 // DataModelPtr
 // ============
 
