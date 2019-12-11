@@ -91,7 +91,7 @@ protected:
     AbstractDataModel& operator=(AbstractDataModel&&) = default;
 };
 
-// data model operations
+// Data model operators
 std::shared_ptr<AbstractDataModel> operator+(std::shared_ptr<AbstractDataModel> lhs, std::shared_ptr<AbstractDataModel> rhs);
 std::shared_ptr<AbstractDataModel> operator-(std::shared_ptr<AbstractDataModel> lhs, std::shared_ptr<AbstractDataModel> rhs);
 std::shared_ptr<AbstractDataModel> operator*(std::shared_ptr<AbstractDataModel> lhs, std::shared_ptr<AbstractDataModel> rhs);

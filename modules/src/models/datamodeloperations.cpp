@@ -61,28 +61,4 @@ AbstractDataModel* DataModelMul::clone() const { return new DataModelMul(*this);
 
 AbstractDataModel* DataModelDiv::clone() const { return new DataModelDiv(*this); }
 
-std::shared_ptr<AbstractDataModel> operator+(std::shared_ptr<AbstractDataModel> lhs,
-                                             std::shared_ptr<AbstractDataModel> rhs)
-{
-    return std::make_shared<DataModelAdd>(std::move(lhs), std::move(rhs));
-}
-
-std::shared_ptr<AbstractDataModel> operator-(std::shared_ptr<AbstractDataModel> lhs,
-                                             std::shared_ptr<AbstractDataModel> rhs)
-{
-    return std::make_shared<DataModelSub>(std::move(lhs), std::move(rhs));
-}
-
-std::shared_ptr<AbstractDataModel> operator*(std::shared_ptr<AbstractDataModel> lhs,
-                                             std::shared_ptr<AbstractDataModel> rhs)
-{
-    return std::make_shared<DataModelMul>(std::move(lhs), std::move(rhs));
-}
-
-std::shared_ptr<AbstractDataModel> operator/(std::shared_ptr<AbstractDataModel> lhs,
-                                             std::shared_ptr<AbstractDataModel> rhs)
-{
-    return std::make_shared<DataModelDiv>(std::move(lhs), std::move(rhs));
-}
-
 } // namespace CTL
