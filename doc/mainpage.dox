@@ -44,7 +44,6 @@
  Module are subdivided into submodules. So far, the following modules are available:
      - ctl.pri
          + ctl_core.pri: the core library
-             + ctl_core_qtfree.pri
          + den_file_io.pri: .den file handling
          + nrrd_file_io.pri: .nrrd file handling
      - ctl_ocl.pri

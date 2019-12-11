@@ -1,6 +1,3 @@
-# include Qt-free sources
-include(ctl_core_qtfree.pri)
-
 # specify folder for the executable
 CONFIG(debug, debug|release) {
     DESTDIR = bin
@@ -13,7 +10,12 @@ CONFIG += CTL_CORE_MODULE
 
 # enable logging function names and line numbers even for release builds
 DEFINES += QT_MESSAGELOGCONTEXT
+# disable min/max macros in Windows headers
+DEFINES += NOMINMAX
 
+INCLUDEPATH += $$PWD/../src
+
+# Qt-dependent headers and sources
 HEADERS += \
     $$PWD/../src/acquisition/abstractpreparestep.h \
     $$PWD/../src/acquisition/acquisitionsetup.h \
@@ -79,19 +81,19 @@ HEADERS += \
     $$PWD/../src/models/tabulateddatamodel.h \
     $$PWD/../src/models/xrayspectrummodels.h \
     $$PWD/../src/models/xydataseries.h \
+    $$PWD/../src/processing/abstractvolumedecomposer.h \
     $$PWD/../src/processing/errormetrics.h \
     $$PWD/../src/processing/diff.h \
     $$PWD/../src/processing/filter.h \
     $$PWD/../src/processing/imageprocessing.h \
     $$PWD/../src/processing/modelbasedvolumedecomposer.h \
-    $$PWD/../src/processing/abstractvolumedecomposer.h \
     $$PWD/../src/projectors/abstractprojector.h \
     $$PWD/../src/projectors/abstractprojectorconfig.h \
     $$PWD/../src/projectors/arealfocalspotextension.h \
     $$PWD/../src/projectors/detectorsaturationextension.h \
     $$PWD/../src/projectors/dynamicprojector.h \
-    $$PWD/../src/projectors/projectorextension.h \
     $$PWD/../src/projectors/poissonnoiseextension.h \
+    $$PWD/../src/projectors/projectorextension.h \
     $$PWD/../src/projectors/spectralprojectorextension.h
 
 SOURCES += \
@@ -148,6 +150,15 @@ SOURCES += \
     $$PWD/../src/projectors/dynamicprojector.cpp \
     $$PWD/../src/projectors/poissonnoiseextension.cpp \
     $$PWD/../src/projectors/spectralprojectorextension.cpp
+
+# Qt-free headers and sources
+HEADERS += \
+    $$PWD/../src/mat/deg.h \
+    $$PWD/../src/mat/matrix.h \
+    $$PWD/../src/processing/coordinates.h
+
+SOURCES += \
+    $$PWD/../src/mat/matrix.tpp
 
 # create a file that contains the absolute path to database
 DATABASE_ROOT = $$PWD/../../database
