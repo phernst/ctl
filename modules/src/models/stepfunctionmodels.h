@@ -26,6 +26,42 @@ private:
     StepDirection _stepDirection;
 };
 
+class ConstantModel : public AbstractDataModel
+{
+    CTL_TYPE_ID(51)
+
+    public: float valueAt(float position) const override;
+    public: AbstractDataModel* clone() const override;
+
+public:
+    ConstantModel(float amplitude = 1.0f);
+
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
+
+private:
+    float _amplitude;
+};
+
+class RectFunctionModel : public AbstractDataModel
+{
+    CTL_TYPE_ID(52)
+
+    public: float valueAt(float position) const override;
+    public: AbstractDataModel* clone() const override;
+
+public:
+    RectFunctionModel(float rectBegin = -0.5f, float rectEnd = 0.5f, float amplitude = 1.0f);
+
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
+
+private:
+    float _rectBegin;
+    float _rectEnd;
+    float _amplitude;
+};
+
 } // namespace CTL
 
 #endif // STEPFUNCTIONMODELS_H
