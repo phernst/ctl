@@ -246,6 +246,34 @@ inline void ProjectorExtension::use(std::unique_ptr<AbstractProjector> other)
     this->use(other.release());
 }
 
+// pipe operators
+inline std::unique_ptr<ProjectorExtension> operator|(std::unique_ptr<AbstractProjector> lhs,
+                                                     std::unique_ptr<ProjectorExtension> rhs)
+{
+    rhs->use(std::move(lhs));
+    return rhs;
+}
+
+inline std::unique_ptr<ProjectorExtension> operator|(std::unique_ptr<AbstractProjector> lhs,
+                                                     ProjectorExtension* rhs)
+{
+    rhs->use(std::move(lhs));
+    return std::unique_ptr<ProjectorExtension>{ rhs };
+}
+
+inline std::unique_ptr<AbstractProjector>& operator|=(std::unique_ptr<AbstractProjector>& lhs,
+                                                      std::unique_ptr<ProjectorExtension> rhs)
+{
+    lhs = std::move(lhs) | std::move(rhs);
+    return lhs;
+}
+
+inline std::unique_ptr<AbstractProjector>& operator|=(std::unique_ptr<AbstractProjector>& lhs,
+                                                      ProjectorExtension* rhs)
+{
+    lhs = std::move(lhs) | rhs;
+    return lhs;
+}
 
 // factory function `makeExtension` (2 overloads, one for each ctor)
 template <typename ProjectorExtensionType>
