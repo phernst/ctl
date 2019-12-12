@@ -178,16 +178,15 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
         for(const auto& prep : firstView.prepareSteps())
             view.addPrepareStep(prep);
 
-    auto poissonExt = makeExtension<PoissonNoiseExtension>(std::move(projector));
-    poissonExt->setParallelizationEnabled(true);
-    // poissonExt->configurate(setup, rcConfig);
+    auto compoundProjector = std::move(projector) |
+                             makeExtension<PoissonNoiseExtension>() |
+                             makeExtension<ArealFocalSpotExtension>();
 
-    auto focalSpotExt = makeExtension<ArealFocalSpotExtension>(std::move(poissonExt));
-    focalSpotExt->setDiscretization(QSize(2, 2));
-    focalSpotExt->configure(setup, rcConfig);
+    compoundProjector->setDiscretization(QSize(2, 2));
+    compoundProjector->configure(setup, rcConfig);
 
     // repeatedly compute noisy projections
-    auto projsWithNoise = focalSpotExt->project(_testVolume);
+    auto projsWithNoise = compoundProjector->project(_testVolume);
 
     // ### evaluate results ###
     evaluatePoissonSimulation(projsWithNoise, projectionsClean, setup.system()->photonsPerPixelMean());
