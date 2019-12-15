@@ -131,7 +131,7 @@ protected:
     Vector3x1 _focalSpotPosition = Vector3x1(0.0); //!< Position of the focal spot (relative to source center).
     double _fluxModifier = 1.0; //!< Global (multiplicative) modifier for the photon flux.
 
-    DataModelPtr _spectrumModel; //!< Data model for the emitted radiation spectrum.
+    DataModelPtr<AbstractXraySpectrumModel> _spectrumModel; //!< Data model for the emitted radiation spectrum.
 };
 
 /*!
@@ -202,7 +202,7 @@ inline AbstractSource::AbstractSource(const QSizeF& focalSpotSize,
     : SystemComponent(name)
     , _focalSpotSize(focalSpotSize)
     , _focalSpotPosition(focalSpotPosition)
-    , _spectrumModel(std::unique_ptr<AbstractDataModel>(spectumModel))
+    , _spectrumModel(spectumModel)
 {
 }
 
@@ -227,8 +227,9 @@ inline IntervalDataSeries AbstractSource::spectrum(uint nbSamples) const
     if(!hasSpectrumModel())
         throw std::runtime_error("No spectrum model set.");
 
-    auto spec = IntervalDataSeries::sampledFromModel(static_cast<const AbstractIntegrableDataModel&>(*_spectrumModel),
-                                                     energyRange().from, energyRange().to, nbSamples);
+    auto spec = IntervalDataSeries::sampledFromModel(*_spectrumModel,
+                                                     energyRange().from, energyRange().to,
+                                                     nbSamples);
     spec.normalizeByIntegral();
 
     return spec;
@@ -262,9 +263,9 @@ inline const Vector3x1& AbstractSource::focalSpotPosition() const { return _foca
 /*!
  * Returns a pointer to the spectrum model of this instance.
  */
-inline const AbstractXraySpectrumModel *AbstractSource::spectrumModel() const
+inline const AbstractXraySpectrumModel* AbstractSource::spectrumModel() const
 {
-    return static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get());
+    return _spectrumModel.get();
 }
 
 /*!
@@ -310,7 +311,7 @@ inline IntervalDataSeries AbstractSource::spectrum(EnergyRange range, uint nbSam
     if(!hasSpectrumModel())
         throw std::runtime_error("No spectrum model set.");
 
-    auto spec = IntervalDataSeries::sampledFromModel(static_cast<const AbstractIntegrableDataModel&>(*_spectrumModel),
+    auto spec = IntervalDataSeries::sampledFromModel(*_spectrumModel,
                                                      range.from, range.to, nbSamples);
     spec.normalizeByIntegral();
 
@@ -322,7 +323,7 @@ inline IntervalDataSeries AbstractSource::spectrum(EnergyRange range, uint nbSam
  *
  * \sa setSpectrumModel().
  */
-inline bool AbstractSource::hasSpectrumModel() const { return (_spectrumModel.ptr != nullptr); }
+inline bool AbstractSource::hasSpectrumModel() const { return static_cast<bool>(_spectrumModel); }
 
 /*!
  * Returns a formatted string with information about the object.
@@ -369,7 +370,7 @@ inline void AbstractSource::setSpectrumModel(AbstractXraySpectrumModel* model)
  */
 inline void AbstractSource::setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model)
 {
-    _spectrumModel.ptr = std::move(model);
+    _spectrumModel = std::move(model);
 }
 
 // Use SerializationInterface::fromVariant() documentation.
@@ -390,7 +391,8 @@ inline void AbstractSource::fromVariant(const QVariant& variant)
 
     _focalSpotSize = fsQSize;
     _focalSpotPosition = fsPosVec;
-    _spectrumModel.ptr.reset(SerializationHelper::parseDataModel(specMod));
+    _spectrumModel.reset(static_cast<AbstractXraySpectrumModel*>(
+                             SerializationHelper::parseDataModel(specMod)));
 }
 
 // Use SerializationInterface::toVariant() documentation.
@@ -407,7 +409,7 @@ inline QVariant AbstractSource::toVariant() const
     fsSize.insert("width", _focalSpotSize.width());
     fsSize.insert("height", _focalSpotSize.height());
 
-    QVariant specMod = _spectrumModel.ptr ? _spectrumModel->toVariant() : QVariant();
+    QVariant specMod = _spectrumModel ? _spectrumModel->toVariant() : QVariant();
 
     ret.insert("focal spot position", fsPos);
     ret.insert("focal spot size", fsSize);

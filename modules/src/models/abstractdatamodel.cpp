@@ -117,47 +117,6 @@ std::shared_ptr<AbstractDataModel>& operator|=(std::shared_ptr<AbstractDataModel
     return lhs;
 }
 
-// DataModelPtr
-// ============
-
-DataModelPtr::DataModelPtr(std::unique_ptr<AbstractDataModel> model)
-    : ptr(std::move(model))
-{
-}
-
-DataModelPtr::DataModelPtr(const DataModelPtr& other)
-    : ptr(other.ptr ? other->clone() : nullptr)
-{
-}
-
-DataModelPtr& DataModelPtr::operator=(const DataModelPtr &other)
-{
-    ptr.reset(other.ptr ? other->clone() : nullptr);
-        return *this;
-}
-
-AbstractDataModel* DataModelPtr::operator->() const
-{
-    Q_ASSERT(ptr);
-    return ptr.get();
-}
-
-AbstractDataModel& DataModelPtr::operator*() const
-{
-    Q_ASSERT(ptr);
-    return *ptr;
-}
-
-AbstractDataModel* DataModelPtr::get() const
-{
-    return ptr.get();
-}
-
-void DataModelPtr::reset(AbstractDataModel* model)
-{
-    ptr.reset(model);
-}
-
 // Documentation
 // =============
 

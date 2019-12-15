@@ -158,6 +158,7 @@ SOURCES += \
 HEADERS += \
     $$PWD/../src/mat/deg.h \
     $$PWD/../src/mat/matrix.h \
+    $$PWD/../src/models/copyableuniqueptr.h \
     $$PWD/../src/processing/coordinates.h
 
 SOURCES += \

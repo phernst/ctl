@@ -2,6 +2,7 @@
 #define ABSTRACTDATAMODEL_H
 
 #include "io/serializationinterface.h"
+#include "copyableuniqueptr.h"
 #include <memory>
 
 namespace CTL {
@@ -128,23 +129,12 @@ protected:
     AbstractIntegrableDataModel& operator=(AbstractIntegrableDataModel&&) = default;
 };
 
-struct DataModelPtr
-{
-    DataModelPtr(std::unique_ptr<AbstractDataModel> model = nullptr);
-    DataModelPtr(const DataModelPtr& other);
-    DataModelPtr(DataModelPtr&& other) = default;
-    DataModelPtr& operator=(const DataModelPtr& other);
-    DataModelPtr& operator=(DataModelPtr&& other) = default;
-    ~DataModelPtr() = default;
+// Declare DataModelPtr (copyable unique_ptr)
+template <class ModelType, class =
+          typename std::enable_if<std::is_convertible<ModelType*, AbstractDataModel*>::value>::type>
+using DataModelPtr = CopyableUniquePtr<ModelType>;
 
-    AbstractDataModel* operator->() const;
-    AbstractDataModel& operator*() const;
-
-    AbstractDataModel* get() const;
-    void reset(AbstractDataModel* model = nullptr);
-
-    std::unique_ptr<AbstractDataModel> ptr;
-};
+using AbstractDataModelPtr = DataModelPtr<AbstractDataModel>;
 
 // factory function `makeDataModel`
 template <typename ModelType, typename... ConstructorArguments>
