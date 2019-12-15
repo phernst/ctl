@@ -44,7 +44,7 @@ CopyableUniquePtr<T>::CopyableUniquePtr(std::unique_ptr<T> uniquePtr) noexcept
 
 template<class T>
 CopyableUniquePtr<T>::CopyableUniquePtr(const CopyableUniquePtr<T>& other)
-    : ptr(other.ptr ? static_cast<T*>(other->clone()) : nullptr)
+    : ptr(other ? static_cast<T*>(other->clone()) : nullptr)
 {
 }
 
@@ -53,7 +53,7 @@ CopyableUniquePtr<T>&
 CopyableUniquePtr<T>::operator=(const CopyableUniquePtr<T>& other)
 {
     ptr.reset(other ? static_cast<T*>(other->clone()) : nullptr);
-        return *this;
+    return *this;
 }
 
 template<class T>

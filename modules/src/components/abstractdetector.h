@@ -181,10 +181,7 @@ inline AbstractDetector::SaturationModelType AbstractDetector::saturationModelTy
     return _saturationModelType;
 }
 
-inline double AbstractDetector::skewCoefficient() const
-{
-    return _skewCoefficient;
-}
+inline double AbstractDetector::skewCoefficient() const { return _skewCoefficient; }
 
 /*!
  * Returns true if this instance has a saturation model.
@@ -307,7 +304,7 @@ inline void AbstractDetector::setSaturationModel(AbstractDataModel* model,
  * refers to extinction values or intensities.
  */
 inline void AbstractDetector::setSaturationModel(std::unique_ptr<AbstractDataModel> model,
-                                          SaturationModelType type)
+                                                 SaturationModelType type)
 {
     _saturationModel = std::move(model);
     _saturationModelType = type;
