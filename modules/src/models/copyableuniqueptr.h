@@ -10,8 +10,9 @@ namespace CTL {
  * copy assignment by using the `clone` method of type `T`.
  */
 template <class T>
-struct CopyableUniquePtr
+class CopyableUniquePtr
 {
+public:
     CopyableUniquePtr(T* pointer = nullptr) noexcept;
     CopyableUniquePtr(std::unique_ptr<T> uniquePtr) noexcept;
 
@@ -21,31 +22,35 @@ struct CopyableUniquePtr
     CopyableUniquePtr& operator=(CopyableUniquePtr<T>&& other) = default;
     ~CopyableUniquePtr() = default;
 
+    T* get() const noexcept;
+    bool isNull() const noexcept;
+    void reset(T* pointer = nullptr) noexcept;
+    std::unique_ptr<T>& wrapped() noexcept;
+    const std::unique_ptr<T>& wrapped() const noexcept;
+
     T* operator->() const noexcept;
     T& operator*() const;
     explicit operator bool() const noexcept;
 
-    T* get() const noexcept;
-    void reset(T* pointer = nullptr) noexcept;
-
-    std::unique_ptr<T> ptr; //!< the wrapped unique_ptr
+private:
+    std::unique_ptr<T> _uPtr; //!< the wrapped unique_ptr
 };
 
 template<class T>
 CopyableUniquePtr<T>::CopyableUniquePtr(T* pointer) noexcept
-    : ptr(pointer)
+    : _uPtr(pointer)
 {
 }
 
 template<class T>
 CopyableUniquePtr<T>::CopyableUniquePtr(std::unique_ptr<T> uniquePtr) noexcept
-    : ptr(std::move(uniquePtr))
+    : _uPtr(std::move(uniquePtr))
 {
 }
 
 template<class T>
 CopyableUniquePtr<T>::CopyableUniquePtr(const CopyableUniquePtr<T>& other)
-    : ptr(other ? static_cast<T*>(other->clone()) : nullptr)
+    : _uPtr(other ? static_cast<T*>(other->clone()) : nullptr)
 {
 }
 
@@ -53,38 +58,56 @@ template<class T>
 CopyableUniquePtr<T>&
 CopyableUniquePtr<T>::operator=(const CopyableUniquePtr<T>& other)
 {
-    ptr.reset(other ? static_cast<T*>(other->clone()) : nullptr);
+    _uPtr.reset(other ? static_cast<T*>(other->clone()) : nullptr);
     return *this;
 }
 
 template<class T>
-T* CopyableUniquePtr<T>::operator->() const noexcept
+bool CopyableUniquePtr<T>::isNull() const noexcept
 {
-    return ptr.get();
-}
-
-template<class T>
-T& CopyableUniquePtr<T>::operator*() const
-{
-    return *ptr;
-}
-
-template<class T>
-CopyableUniquePtr<T>::operator bool() const noexcept
-{
-    return static_cast<bool>(ptr);
+    return _uPtr == nullptr;
 }
 
 template<class T>
 T* CopyableUniquePtr<T>::get() const noexcept
 {
-    return ptr.get();
+    return _uPtr.get();
 }
 
 template<class T>
 void CopyableUniquePtr<T>::reset(T* pointer) noexcept
 {
-    ptr.reset(pointer);
+    _uPtr.reset(pointer);
+}
+
+template<class T>
+std::unique_ptr<T>& CopyableUniquePtr<T>::wrapped() noexcept
+{
+    return _uPtr;
+}
+
+template<class T>
+const std::unique_ptr<T>& CopyableUniquePtr<T>::wrapped() const noexcept
+{
+    return _uPtr;
+}
+
+template<class T>
+T* CopyableUniquePtr<T>::operator->() const noexcept
+{
+    return _uPtr.get();
+}
+
+template<class T>
+T& CopyableUniquePtr<T>::operator*() const
+{
+    return *_uPtr;
+}
+
+template<class T>
+CopyableUniquePtr<T>::operator bool() const noexcept
+{
+    return static_cast<bool>(_uPtr);
 }
 
 } // namespace CTL
