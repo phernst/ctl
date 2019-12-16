@@ -5,8 +5,9 @@
 
 namespace CTL {
 /*!
- * \brief Wrapper class that holds a `unique_ptr<T>` and provides copy construction/assignment by
- * using the `clone` method of type `T`.
+ * \class CopyableUniquePtr
+ * \brief Wrapper template class that holds a `unique_ptr<T>` and provides copy construction and
+ * copy assignment by using the `clone` method of type `T`.
  */
 template <class T>
 struct CopyableUniquePtr

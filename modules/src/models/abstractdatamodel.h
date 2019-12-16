@@ -3,7 +3,6 @@
 
 #include "io/serializationinterface.h"
 #include "copyableuniqueptr.h"
-#include <memory>
 
 namespace CTL {
 
