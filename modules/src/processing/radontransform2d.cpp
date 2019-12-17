@@ -183,5 +183,12 @@ mat::Matrix<2, 3> RadonTransform2D::xAxisToLineMapping(const mat::Matrix<3, 1>& 
     return mat::horzcat(Rt, t);
 }
 
+std::vector<Generic2DCoord> toGeneric2DCoord(const std::vector<Radon2DCoord>& radonCoord)
+{
+    std::vector<Generic2DCoord> ret(radonCoord.size());
+    std::copy(radonCoord.cbegin(), radonCoord.cend(), ret.begin());
+    return ret;
+}
+
 } // namespace OCL
 } // namespace CTL

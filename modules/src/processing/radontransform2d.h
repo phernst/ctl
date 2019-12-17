@@ -80,6 +80,8 @@ private:
     cl::Image2D _image; //!< Image data to be transformed
 };
 
+std::vector<Generic2DCoord> toGeneric2DCoord(const std::vector<Radon2DCoord>& radonCoord);
+
 } // namespace OCL
 } // namespace CTL
 

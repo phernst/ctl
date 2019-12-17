@@ -1,6 +1,6 @@
 /******************************************************************************
 ** Template implementation for "matrix.h"
-** by Robert Frysch | Aug 13, 2019
+** by Robert Frysch | Aug 16, 2019
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -243,12 +243,37 @@ auto Matrix<Rows, Cols>::subMat() const
     Matrix<nbRowsSub, nbColsSub> ret;
     constexpr int rowInc = toRow >= fromRow ? 1 : -1;
     constexpr int colInc = toCol >= fromCol ? 1 : -1;
-    uint row = fromRow, subRow = 0;
-    uint col = fromCol, subCol = 0;
 
-    for(row = fromRow, subRow = 0; row != (toRow + rowInc); row += rowInc, ++subRow)
-        for(col = fromCol, subCol = 0; col != (toCol + colInc); col += colInc, ++subCol)
+    for(int row = fromRow,
+            endRow = toRow + rowInc,
+            subRow = 0; row != endRow; row += rowInc, ++subRow)
+        for(int col = fromCol,
+                endCol = toCol + colInc,
+                subCol = 0; col != endCol; col += colInc, ++subCol)
             ret(subRow, subCol) = (*this)(row, col);
+
+    return ret;
+}
+
+// sub-vector extraction
+template <uint Rows, uint Cols>
+template <uint from, uint to>
+auto Matrix<Rows, Cols>::subMat() const -> Matrix<vecRowDim(from, to), vecColDim(from, to)>
+{
+    static_assert(Rows == 1u || Cols == 1u, "subMat<from, to>() supports only vectors.");
+    constexpr auto nbRowsRet = vecRowDim(from, to);
+    constexpr auto nbColsRet = vecColDim(from, to);
+    constexpr auto nbElem = (Rows == 1u ? Cols : Rows);
+    static_assert(from < nbElem, "`from` exceeds vector dimension");
+    static_assert(to < nbElem, "`to` exceeds vector dimension");
+
+    Matrix<nbRowsRet, nbColsRet> ret;
+    constexpr int inc = to >= from ? 1 : -1;
+
+    for(int el = from,
+            endEl = to + inc,
+            sub = 0; el != endEl; el += inc, ++sub)
+        ret(sub) = (*this)(el);
 
     return ret;
 }
@@ -443,6 +468,18 @@ template <uint Rows, uint Cols>
 constexpr uint Matrix<Rows, Cols>::rangeDim(uint from, uint to)
 {
     return to >= from ? to - from + 1u : from - to + 1u;
+}
+
+template <uint Rows, uint Cols>
+constexpr uint Matrix<Rows, Cols>::vecRowDim(uint from, uint to)
+{
+    return Rows > 1u ? rangeDim(from, to) : 1u;
+}
+
+template <uint Rows, uint Cols>
+constexpr uint Matrix<Rows, Cols>::vecColDim(uint from, uint to)
+{
+    return Cols > 1u ? rangeDim(from, to) : 1u;
 }
 
 } // namespace mat

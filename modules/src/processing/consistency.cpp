@@ -8,6 +8,13 @@
 
 #include <random>
 
+namespace {
+
+template <class T>
+std::vector<T> randomSubset(std::vector<T>&& fullSamples, uint seed, float subsampleLevel);
+
+} // unnamed namespace
+
 namespace CTL {
 
 // #### IntermediateFctPair ####
@@ -90,6 +97,191 @@ const std::shared_ptr<const std::vector<float>>& IntermediateFctPair::ptrToSecon
 
 namespace OCL {
 
+// #### IntermedGen2D2D ####
+// -------------------------
+
+double IntermedGen2D2D::angleIncrement() const
+{
+    return _angleIncrement;
+}
+
+float IntermedGen2D2D::subsampleLevel() const
+{
+    return _subsampleLevel;
+}
+
+void IntermedGen2D2D::setAngleIncrement(double angleIncrement)
+{
+    _angleIncrement = angleIncrement;
+}
+
+void IntermedGen2D2D::setSubsampleLevel(float subsampleLevel)
+{
+    _subsampleLevel = subsampleLevel;
+    _useSubsampling = true;
+}
+
+void IntermedGen2D2D::toggleSubsampling(bool enabled)
+{
+    _useSubsampling = enabled;
+}
+
+IntermediateFctPair IntermedGen2D2D::intermedFctPair(const Chunk2D<float>& proj1,
+                                                     const mat::ProjectionMatrix& P1,
+                                                     const Chunk2D<float>& proj2,
+                                                     const mat::ProjectionMatrix& P2,
+                                                     float plusMinusH) const
+{
+    if(proj1.dimensions() != proj2.dimensions())
+        throw std::runtime_error("IntermedGen2D2D::intermedFctPair: size of projections must match.");
+
+    auto radon2DCoords = linePairs(P1, P2, proj1.dimensions());
+
+    if(_useSubsampling)
+    {
+        uint seed = std::random_device{}(); // pull random seed for subsampling
+        radon2DCoords.first = randomSubset(std::move(radon2DCoords.first), seed, _subsampleLevel);
+        radon2DCoords.second = randomSubset(std::move(radon2DCoords.second), seed, _subsampleLevel);
+    }
+
+    const IntermediateProj intermedFct1(proj1, P1.intrinsicMatK());
+    const IntermediateProj intermedFct2(proj2, P2.intrinsicMatK());
+
+    return { intermedFct1.sampled(radon2DCoords.first, plusMinusH),
+             intermedFct2.sampled(radon2DCoords.second, plusMinusH),
+             IntermediateFctPair::ProjectionDomain };
+}
+
+IntermediateFctPair IntermedGen2D2D::intermedFctPair(const ImageResampler& radon2dSampler1,
+                                                     const mat::ProjectionMatrix& P1,
+                                                     const ImageResampler& radon2dSampler2,
+                                                     const mat::ProjectionMatrix& P2,
+                                                     const Chunk2D<float>::Dimensions& projSize) const
+{
+    if(radon2dSampler1.imgDim() != radon2dSampler2.imgDim())
+        throw std::runtime_error("IntermedGen2D2D::intermedFctPair: size of projections must match.");
+
+    auto radon2DCoords = linePairs(P1, P2, projSize);
+
+    if(_useSubsampling)
+    {
+        uint seed = std::random_device{}(); // pull random seed for subsampling
+        radon2DCoords.first = randomSubset(std::move(radon2DCoords.first), seed, _subsampleLevel);
+        radon2DCoords.second = randomSubset(std::move(radon2DCoords.second), seed, _subsampleLevel);
+    }
+
+    return { radon2dSampler1.sample(toGeneric2DCoord(radon2DCoords.first)),
+             radon2dSampler2.sample(toGeneric2DCoord(radon2DCoords.second)),
+             IntermediateFctPair::ProjectionDomain };
+}
+
+std::pair<IntermedGen2D2D::Lines, IntermedGen2D2D::Lines>
+IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::ProjectionMatrix& P2,
+                           const Chunk2D<float>::Dimensions& projSize,
+                           const mat::Matrix<2, 1>& originRadon, double angleIncrement)
+{
+    const auto source1 = P1.sourcePosition();
+    const auto source2 = P2.sourcePosition();
+    const auto M1 = P1.M(), M1transp = P1.M().transposed();
+    const auto M2 = P2.M(), M2transp = P2.M().transposed();
+
+    // vector parallel to the connection between the sources (baseline)
+    auto baseLine = source2 - source1;
+    const auto src2srcDistance = baseLine.norm();
+    if(qFuzzyIsNull(src2srcDistance))
+        throw std::runtime_error("IntermedGen2D2D::intermedFctPair: distance between the two source "
+                                 "positions is close to zero.");
+    baseLine /= baseLine.norm();
+
+    // initialize plane normal
+    const auto initNormal = orthonormalTo(baseLine);
+
+    // rotate plane around baseline
+    const auto nbRotAngles = size_t(PI / std::abs(angleIncrement) + 0.5);
+    const auto negSource1 = -source1.transposed();
+    const auto originRadonTransp = originRadon.transposed();
+    const auto maxDist2Corner = maxDistanceToCorners(projSize, originRadon);
+    Lines lines1, lines2;
+
+    for(size_t i = 0; i < nbRotAngles; ++i)
+    {
+        // plane `p` in homogeneous coordinates [nx, ny, nz, -d]
+        const auto rotAngle = i * angleIncrement;
+        const auto n = mat::rotationMatrix(rotAngle, baseLine) * initNormal;
+        const auto p = mat::vertcat(n, negSource1 * n);
+
+        // Pluecker matrix of the intersection line of `p` with the plane at infinity
+        const mat::Matrix<3, 3> L{  0.0,  p(2), -p(1),
+                                  -p(2),   0.0,  p(0),
+                                   p(1), -p(0),   0.0 };
+
+        // transform Pluecker line representation to local CT frames
+        const auto L1 = M1 * L * M1transp;
+        const auto L2 = M2 * L * M2transp;
+
+        // 2D radon parameters of the lines
+        const auto line1 = plueckerTo2DRadon(L1, originRadonTransp);
+        const auto line2 = plueckerTo2DRadon(L2, originRadonTransp);
+
+        // boundary checks and append coordinates
+        if(std::abs(line1.dist()) < maxDist2Corner && std::abs(line2.dist()) < maxDist2Corner)
+        {
+            lines1.push_back(line1);
+            lines2.push_back(line2);
+        }
+    }
+
+    return std::make_pair(std::move(lines1), std::move(lines2));
+}
+
+std::pair<IntermedGen2D2D::Lines, IntermedGen2D2D::Lines>
+IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::ProjectionMatrix& P2,
+                           const Chunk2D<float>::Dimensions& projSize) const
+{
+    const auto originRadon2D = 0.5 * (mat::Matrix<2, 1>(projSize.width, projSize.height) -
+                                      mat::Matrix<2, 1>(1.0));
+    return linePairs(P1, P2, projSize, originRadon2D, _angleIncrement);
+}
+
+double IntermedGen2D2D::maxDistanceToCorners(const Chunk2D<float>::Dimensions& projSize,
+                                             const mat::Matrix<2, 1>& originRadon)
+{
+    const mat::Matrix<2, 1> corner1(0.0, 0.0);
+    const mat::Matrix<2, 1> corner2(projSize.width - 1.0, 0.0);
+    const mat::Matrix<2, 1> corner3(0.0, projSize.height - 1.0);
+    const mat::Matrix<2, 1> corner4(projSize.width - 1.0, projSize.height - 1.0);
+    return std::max({ (corner1 - originRadon).norm(),
+                      (corner2 - originRadon).norm(),
+                      (corner3 - originRadon).norm(),
+                      (corner4 - originRadon).norm() });
+}
+
+mat::Matrix<3, 1> IntermedGen2D2D::orthonormalTo(const mat::Matrix<3, 1>& v)
+{
+    const auto smallestDim = uint(std::min_element(v.begin(), v.end()) - v.begin());
+    auto ret = mat::Matrix<3, 1>(0.0);
+    ret(smallestDim) = 1.0;
+    ret = mat::cross(v, ret);
+    ret /= ret.norm();
+    return ret;
+}
+
+Radon2DCoord IntermedGen2D2D::plueckerTo2DRadon(const mat::Matrix<3, 3>& L,
+                                                const mat::Matrix<1, 2>& originRadon)
+{
+    // detector lines `l` in homogeneous coordinates
+    mat::Matrix<3, 1> l{ L.get<1, 2>(), L.get<2, 0>(), L.get<0, 1>() };
+
+    // normalize with length of line normal to obtain [nx, ny, -s]
+    l /= l.subMat<0, 1>().norm();
+
+    // radon parameter distance `s` and angle `mu`
+    const auto mu = std::atan2(l.get<1>(), l.get<0>());
+    const auto s = -l.get<2>() - originRadon * l.subMat<0, 1>();
+
+    return { float(mu), float(s) };
+}
+
 // #### IntermedGen2D3D ####
 // -----------------------------
 
@@ -124,11 +316,12 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
     if(_useSubsampling)
     {
         uint seed = std::random_device{}(); // pull random seed for subsampling
-        intermProj = randomSubset(std::move(intermProj), seed);
+        intermProj = randomSubset(std::move(intermProj), seed, _subsampleLevel);
         _lastSampling = randomSubset(intersectionPlanesWCS(muRange.linspace(nbMu),
                                                            sRange.linspace(nbS),
                                                            P,
-                                                           intermedFctOfProj.origin()), seed);
+                                                           intermedFctOfProj.origin()),
+                                     seed, _subsampleLevel);
     }
     else
         _lastSampling = intersectionPlanesWCS(muRange.linspace(nbMu),
@@ -163,11 +356,12 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
     if(_useSubsampling)
     {
         uint seed = std::random_device{}(); // pull random seed for subsampling
-        intermProj = randomSubset(std::move(intermProj), seed);
+        intermProj = randomSubset(std::move(intermProj), seed, _subsampleLevel);
         _lastSampling = randomSubset(intersectionPlanesWCS(muRange.linspace(nbMu),
                                                            sRange.linspace(nbS),
                                                            P,
-                                                           intermedFctOfProj.origin()), seed);
+                                                           intermedFctOfProj.origin()),
+                                     seed, _subsampleLevel);
     }
     else
         _lastSampling = intersectionPlanesWCS(muRange.linspace(nbMu),
@@ -183,13 +377,13 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
 
 IntermediateFctPair IntermedGen2D3D::intermedFctPair(const OCL::ImageResampler& radon2dSampler,
                                                      const mat::ProjectionMatrix& P,
+                                                     const Chunk2D<float>::Dimensions& projSize,
                                                      const OCL::VolumeResampler& radon3dSampler)
 {
-    const auto& imgDim = radon2dSampler.imgDim();
-    const auto imgDiag = mat::Matrix<2, 1>(imgDim.width, imgDim.height).norm();
+    const auto imgDiag = mat::Matrix<2, 1>(projSize.width, projSize.height).norm();
     const auto nbS  = uint(ceil(imgDiag * _accuracy));
     const auto nbMu = uint(ceil(double(nbS) * PI_2));
-    const mat::Matrix<2, 1> orig{ (imgDim.width - 1) * 0.5, (imgDim.height - 1) * 0.5 };
+    const mat::Matrix<2, 1> orig{ (projSize.width - 1) * 0.5, (projSize.height - 1) * 0.5 };
     const SamplingRange sRange{ -0.5f * float(imgDiag), 0.5f * float(imgDiag) };
     const SamplingRange muRange{ float(0.0_deg), float(180.0_deg) };
 
@@ -205,8 +399,9 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const OCL::ImageResampler& 
     if(_useSubsampling)
     {
         const uint seed = std::random_device{}(); // pull random seed for subsampling
-        radon2DSamples = randomSubset(std::move(radon2DSamples), seed);
-        _lastSampling = randomSubset(intersectionPlanesWCS(muSamples, sSamples, P, orig), seed);
+        radon2DSamples = randomSubset(std::move(radon2DSamples), seed, _subsampleLevel);
+        _lastSampling = randomSubset(intersectionPlanesWCS(muSamples, sSamples, P, orig),
+                                     seed, _subsampleLevel);
     }
     else
         _lastSampling = intersectionPlanesWCS(muSamples, sSamples, P, orig);
@@ -244,11 +439,19 @@ void IntermedGen2D3D::toggleSubsampling(bool enabled)
     _useSubsampling = enabled;
 }
 
+ /*!
+  * Constructs a vector that has a list of Radon3DCoord for all combinations of the 2D Radon line
+  * coordinates `mu` (the angle) and `dist` (aka 's'), which is stored in `mu`-major order, i.e.
+  * first all `mu` with the first `dist`, then all `mu` with the second `dist` etc. The 3D Radon
+  * coordinates for a plane are determined by a projection matrix (plane must contain the source
+  * position). The `origin` specifies the placement of the coordinate frame where `mu` and `dist`
+  * are defined.
+  */
 std::vector<Radon3DCoord>
 IntermedGen2D3D::intersectionPlanesWCS(const std::vector<float>& mu,
-                                          const std::vector<float>& dist,
-                                          const mat::ProjectionMatrix& P,
-                                          const mat::Matrix<2, 1>& origin) const
+                                       const std::vector<float>& dist,
+                                       const mat::ProjectionMatrix& P,
+                                       const mat::Matrix<2, 1>& origin) const
 {
     std::vector<Radon3DCoord> ret;
     ret.reserve(mu.size() * dist.size());
@@ -278,46 +481,11 @@ IntermedGen2D3D::intersectionPlanesWCS(const std::vector<float>& mu,
     return ret;
 }
 
-template<class T>
-std::vector<T> IntermedGen2D3D::randomSubset(std::vector<T>&& fullSamples, uint seed) const
-{
-    auto newNbElements = size_t(std::ceil(_subsampleLevel * fullSamples.size()));
-    std::vector<T> ret(newNbElements);
-//    std::vector<T> ret;
-//    ret.reserve(newNbElements);
-
-    std::mt19937 rng;
-    rng.seed(seed);
-
-    std::vector<int> indices(fullSamples.size());
-    std::iota(indices.begin(), indices.end(), 0);
-
-    std::shuffle(indices.begin(), indices.end(), rng);
-
-    indices.resize(newNbElements);
-    std::sort(indices.begin(), indices.end());
-
-    for(uint smpl = 0; smpl < newNbElements; ++smpl)
-        ret[smpl] = fullSamples[indices[smpl]];
-
-
-    //std::shuffle(fullSamples.begin(), fullSamples.end(), rng);
-
-    //std::copy_n(fullSamples.begin(), newNbElements, ret.begin());
-
-    //std::copy_n(fullSamples.begin(), newNbElements, ret.begin());
-
-    return ret;
-}
-
-template std::vector<float> IntermedGen2D3D::randomSubset(std::vector<float> &&fullSamples, uint seed) const;
-template std::vector<Radon3DCoord> IntermedGen2D3D::randomSubset(std::vector<Radon3DCoord> &&fullSamples, uint seed) const;
-
 // #### IntermediateProj ####
-// -----------------------------
+// --------------------------
 
 IntermediateProj::IntermediateProj(const Chunk2D<float>& proj, const mat::Matrix<3, 3>& K, bool useWeighting)
-    : _K(K)
+    : _intrinsicK(K)
     , _useWeighting(useWeighting)
 {
     // perform cosine pre-weighting of projections
@@ -347,8 +515,8 @@ OCL::ImageResampler IntermediateProj::sampler(const SamplingRange& angleRange, u
     return OCL::ImageResampler(intermedFct, angleRange, distRange);
 }
 
-Chunk2D<float> IntermediateProj::sampled(const SamplingRange &angleRange, uint nbAngles,
-                                         const SamplingRange &distRange, uint nbDist) const
+Chunk2D<float> IntermediateProj::sampled(const SamplingRange& angleRange, uint nbAngles,
+                                         const SamplingRange& distRange, uint nbDist) const
 {
     if(nbDist < 2)
         throw std::runtime_error("IntermediateProj::sampler: nbDist must be greater than 1.");
@@ -370,49 +538,95 @@ Chunk2D<float> IntermediateProj::sampled(const SamplingRange &angleRange, uint n
     return radonTransf;
 }
 
-void IntermediateProj::postWeighting(Chunk2D<float>& radonTrans,
+std::vector<float> IntermediateProj::sampled(const std::vector<Radon2DCoord>& samplingPts,
+                                             float plusMinusH) const
+{
+    // sampling points for central difference
+    std::vector<Radon2DCoord> samplingPtsDerivative;
+    samplingPtsDerivative.reserve(2 * samplingPts.size());
+    for(const auto& centralCoord : samplingPts)
+    {
+        samplingPtsDerivative.push_back({ centralCoord.angle(), centralCoord.dist() - plusMinusH });
+        samplingPtsDerivative.push_back({ centralCoord.angle(), centralCoord.dist() + plusMinusH });
+    }
+
+    // line integrals
+    auto lineIntegrals = _radon2D->sampleTransform(samplingPtsDerivative);
+    auto* lineItegralPtr = lineIntegrals.data();
+
+    // derivative
+    std::vector<float> ret(samplingPts.size());
+    for(auto& val : ret)
+    {
+        // factor 1/(2h) for central difference
+        val = (lineItegralPtr[1] - lineItegralPtr[0]) / (2.0f * plusMinusH);
+        lineItegralPtr += 2;
+    }
+
+    if(_useWeighting)
+        postWeighting(ret, samplingPts);
+
+    return ret;
+}
+
+void IntermediateProj::postWeighting(Chunk2D<float>& radonTransDerivative,
                                      const std::vector<float>& theta,
                                      const std::vector<float>& s) const
 {
-    const auto& K = this->_K;
+    const auto& K = _intrinsicK;
+    const auto p = mat::Matrix<2, 1>{ K.get<0, 2>(), K.get<1, 2>() };
+    const auto originShiftTransp = (p - _radon2D->origin()).transposed();
+    const auto sSize = s.size();
+    const auto tSize = theta.size();
+
+    for(uint tIdx = 0; tIdx < tSize; ++tIdx)
+    {
+        mat::Matrix<2, 1> n = { std::cos(theta[tIdx]), std::sin(theta[tIdx]) };
+        auto sCorr = originShiftTransp * n;
+
+        for(uint sIdx = 0; sIdx < sSize; ++sIdx)
+        {
+            auto cosPlaneAnlge = cosineOfPlaneAngle((s[sIdx] - sCorr) * n + p, K);
+            radonTransDerivative(tIdx, sIdx) /= float(std::pow(cosPlaneAnlge, 2.0));
+        }
+    }
+}
+
+void IntermediateProj::postWeighting(std::vector<float>& lineIntegralDerivative,
+                                     const std::vector<Radon2DCoord>& samplingPts) const
+{
+    const auto& K = _intrinsicK;
+    const auto p = mat::Matrix<2, 1>{ K.get<0, 2>(), K.get<1, 2>() };
+    const auto originShiftTransp = (p - _radon2D->origin()).transposed();
+
+    std::transform(lineIntegralDerivative.cbegin(), lineIntegralDerivative.cend(), // input 1
+                   samplingPts.cbegin(),                                           // input 2
+                   lineIntegralDerivative.begin(),                                 // output
+                   [&K, &p, &originShiftTransp](float val, const Radon2DCoord& coord)
+                   {
+                       mat::Matrix<2, 1> n{ std::cos(coord.angle()), std::sin(coord.angle()) };
+                       auto sCorr = originShiftTransp * n;
+                       auto cosPlaneAnlge = cosineOfPlaneAngle((coord.dist() - sCorr) * n + p, K);
+                       return val / float(std::pow(cosPlaneAnlge, 2.0));
+                   });
+}
+
+double IntermediateProj::cosineOfPlaneAngle(const mat::Matrix<2, 1>& x, const Matrix3x3 K)
+{
     // cosine of an angle between the vector pointing from the source to a certain pixel location
     // on the detector and the z-axis (principal ray) of the CT cooradinate frame (CTS):
     // 1. calculate direction d = K^-1 * [x1,x2,1]^t
     // 2. normalize and
     // 3. take 3rd component
-    auto cosineOfPlaneAngle = [&K](const mat::Matrix<2, 1>& x)
-    {
-        // back substitution to find 'd' in K*d = [x,y,1]^t
-        mat::Matrix<3, 1> d;
-        d.get<2>() = 1.0;
-        d.get<1>() = (x.get<1>() - K.get<1, 2>()) / K.get<1, 1>();
-        d.get<0>() = (x.get<0>() - d.get<1>() * K.get<0, 1>() - K.get<0, 2>()) / K.get<0, 0>();
 
-        // cosine to z-axis = <unitDirection, [0 0 1]^t>
-        return d.get<2>() / d.norm();
-    };
+    // back substitution to find 'd' in K*d = [x,y,1]^t
+    mat::Matrix<3, 1> d;
+    d.get<2>() = 1.0;
+    d.get<1>() = (x.get<1>() - K.get<1, 2>()) / K.get<1, 1>();
+    d.get<0>() = (x.get<0>() - d.get<1>() * K.get<0, 1>() - K.get<0, 2>()) / K.get<0, 0>();
 
-    const auto sSize = s.size();
-    const auto tSize = theta.size();
-    const auto p = mat::Matrix<2, 1>{ _K(0, 2), _K(1, 2) };
-    const auto originShiftTransp = (p - _radon2D->origin()).transposed();
-
-    mat::Matrix<2, 1> n;
-    double cosPlaneAnlge;
-    float sCorr;
-    uint tIdx, sIdx;
-
-    for(tIdx = 0; tIdx < tSize; ++tIdx)
-    {
-        n = { std::cos(theta[tIdx]), std::sin(theta[tIdx]) };
-        sCorr = originShiftTransp * n;
-
-        for(sIdx = 0; sIdx < sSize; ++sIdx)
-        {
-            cosPlaneAnlge = cosineOfPlaneAngle((s[sIdx] - sCorr) * n + p);
-            radonTrans(tIdx, sIdx) /= std::pow(cosPlaneAnlge, 2.0);
-        }
-    }
+    // cosine to z-axis = <unitDirection, [0 0 1]^t>
+    return d.get<2>() / d.norm();
 }
 
 void IntermediateProj::setDerivativeMethod(imgproc::DiffMethod method) { _derivativeMethod = method; }
@@ -676,3 +890,31 @@ void Radon3DCoordTransform::transformRadonToHom() const
 
 } // namespace OCL
 } // namespace CTL
+
+
+namespace {
+
+template<class T>
+std::vector<T> randomSubset(std::vector<T>&& fullSamples, uint seed, float subsampleLevel)
+{
+    auto newNbElements = size_t(std::ceil(subsampleLevel * fullSamples.size()));
+    std::vector<T> ret(newNbElements);
+
+    std::mt19937 rng;
+    rng.seed(seed);
+
+    std::vector<int> indices(fullSamples.size());
+    std::iota(indices.begin(), indices.end(), 0);
+
+    std::shuffle(indices.begin(), indices.end(), rng);
+
+    indices.resize(newNbElements);
+    std::sort(indices.begin(), indices.end());
+
+    for(uint smpl = 0; smpl < newNbElements; ++smpl)
+        ret[smpl] = fullSamples[indices[smpl]];
+
+    return ret;
+}
+
+} // unnamed namespace

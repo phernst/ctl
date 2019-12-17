@@ -564,6 +564,22 @@ uint SingleViewData::elementsPerModule() const
 }
 
 /*!
+ * Same as `module(0)`.
+ */
+const SingleViewData::ModuleData &SingleViewData::first() const
+{
+    return this->module(0);
+}
+
+/*!
+ * Same as `module(0)`.
+ */
+SingleViewData::ModuleData &SingleViewData::first()
+{
+    return this->module(0);
+}
+
+/*!
  * Returns a (modifiable) reference to the projection data of module \a i. Does not perform boundary
  * checks.
  */

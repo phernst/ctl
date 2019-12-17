@@ -17,7 +17,7 @@ class VolumeSlicerWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit VolumeSlicerWidget(QWidget *parent = 0);
+    explicit VolumeSlicerWidget(QWidget *parent = nullptr);
     ~VolumeSlicerWidget();
 
 private:

@@ -102,7 +102,7 @@ protected:
     QSizeF _pixelDimensions; //!< Size of individual pixels (in mm).
     double _skewCoefficient = 0.0; //!< specifies non-orthogonality of pixels
 
-    DataModelPtr _saturationModel; //!< Data model for saturation of measured values.
+    AbstractDataModelPtr _saturationModel; //!< Data model for saturation of measured values.
     SaturationModelType _saturationModelType = Undefined; //!< States whether saturation model refers to intensity or extinction values.
 };
 
@@ -181,17 +181,14 @@ inline AbstractDetector::SaturationModelType AbstractDetector::saturationModelTy
     return _saturationModelType;
 }
 
-inline double AbstractDetector::skewCoefficient() const
-{
-    return _skewCoefficient;
-}
+inline double AbstractDetector::skewCoefficient() const { return _skewCoefficient; }
 
 /*!
  * Returns true if this instance has a saturation model.
  */
 inline bool AbstractDetector::hasSaturationModel() const
 {
-    return (_saturationModel.ptr != nullptr);
+    return static_cast<bool>(_saturationModel);
 }
 
 /*!
@@ -257,7 +254,7 @@ inline void AbstractDetector::fromVariant(const QVariant& variant)
     _pixelDimensions.setHeight(pixelDim.value("height").toDouble());
 
     QVariant saturationModel = varMap.value("saturation model");
-    _saturationModel.ptr.reset(SerializationHelper::parseDataModel(saturationModel));
+    _saturationModel.reset(SerializationHelper::parseDataModel(saturationModel));
 
     int satModTypeVal = varMap.value("saturation model type").toMap().value("enum value").toInt();
     _saturationModelType = SaturationModelType(satModTypeVal);
@@ -276,7 +273,7 @@ inline QVariant AbstractDetector::toVariant() const
     pixelDim.insert("width",_pixelDimensions.width());
     pixelDim.insert("height", _pixelDimensions.height());
 
-    QVariant saturationModel = hasSaturationModel() ? _saturationModel.ptr->toVariant()
+    QVariant saturationModel = hasSaturationModel() ? _saturationModel->toVariant()
                                                     : QVariant();
 
     QVariantMap satModelType;
@@ -295,7 +292,8 @@ inline QVariant AbstractDetector::toVariant() const
  * Sets the saturation model to \a model. The argument \a type must specify whether the passed model
  * refers to extinction values or intensities.
  */
-inline void AbstractDetector::setSaturationModel(AbstractDataModel *model, AbstractDetector::SaturationModelType type)
+inline void AbstractDetector::setSaturationModel(AbstractDataModel* model,
+                                                 AbstractDetector::SaturationModelType type)
 {
     _saturationModel.reset(model);
     _saturationModelType = type;
@@ -306,9 +304,9 @@ inline void AbstractDetector::setSaturationModel(AbstractDataModel *model, Abstr
  * refers to extinction values or intensities.
  */
 inline void AbstractDetector::setSaturationModel(std::unique_ptr<AbstractDataModel> model,
-                                          SaturationModelType type)
+                                                 SaturationModelType type)
 {
-    _saturationModel.ptr = std::move(model);
+    _saturationModel = std::move(model);
     _saturationModelType = type;
 }
 

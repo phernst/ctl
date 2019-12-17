@@ -5,7 +5,7 @@
 #include <QWidget>
 #include <QQuaternion>
 
-const float PLANEVIS_VIS_SCALE = 50.0f;
+constexpr float PLANEVIS_VIS_SCALE = 50.0f;
 
 // forward delcarations
 namespace CTL {

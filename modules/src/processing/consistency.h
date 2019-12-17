@@ -12,7 +12,18 @@
 #include "processing/radontransform3d.h"
 #include "processing/volumeresampler.h"
 
+/*
+ * This header introduces classes for applications of Grangeat data consistency conditions.
+ */
+
 namespace CTL {
+
+/*!
+ * \class IntermediateFctPair
+ * \brief Holds a pair of two corresponding intermediate function 'signals' as `shared_ptr`s to
+ * `vector`s. The first vector is associated with an intermediate function from a projection image,
+ * while the second vector may be computed from a projection or a volume.
+ */
 
 class IntermediateFctPair
 {
@@ -50,6 +61,86 @@ private:
 
 namespace OCL {
 
+/*!
+ * \class IntermedGen2D2D
+ * \brief Generator class that produces intermediate function pairs from two 2D projection images.
+ */
+
+/*!
+ * \class IntermedGen2D3D
+ * \brief Generator class that produces intermediate function pairs from a 2D projection image and a
+ * 3D volume.
+ */
+
+/*!
+ * \class IntermediateProj
+ * \brief Transforms projections to Grangeat's intermediate space.
+ */
+
+/*!
+ * \class IntermediateVol
+ * \brief Transforms volumes to Grangeat's intermediate space.
+ */
+
+/*!
+ * \class Radon3DCoordTransform
+ * \brief Helper class that transforms (spherical) 3D Radon coordinates under an Euclidian
+ * transform of the coordinate frame.
+ */
+
+class IntermedGen2D2D
+{
+public:
+    using Lines = std::vector<Radon2DCoord>;
+
+    // getter
+    double angleIncrement() const;
+    float subsampleLevel() const;
+    // setter
+    void setAngleIncrement(double angleIncrement);
+    void setSubsampleLevel(float subsampleLevel);
+    void toggleSubsampling(bool enabled);
+
+    // on the fly (using central difference with `plusMinusH`)
+    IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj1,
+                                        const mat::ProjectionMatrix& P1,
+                                        const Chunk2D<float>& proj2,
+                                        const mat::ProjectionMatrix& P2,
+                                        float plusMinusH = 1.0f) const;
+
+    // precomputed (origin must be the default origin: [(X-1)/2, (Y-1)/2])
+    IntermediateFctPair intermedFctPair(const OCL::ImageResampler& radon2dSampler1,
+                                        const mat::ProjectionMatrix& P1,
+                                        const OCL::ImageResampler& radon2dSampler2,
+                                        const mat::ProjectionMatrix& P2,
+                                        const Chunk2D<float>::Dimensions& projSize) const;
+
+    // origin defaults to (projSize-[1,1])/2
+    std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
+                                      const mat::ProjectionMatrix& P2,
+                                      const Chunk2D<float>::Dimensions& projSize) const;
+
+
+
+private:
+    // compute corresponding line pairs; line pairs intersect the detector with `projSize`
+    static std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
+                                             const mat::ProjectionMatrix& P2,
+                                             const Chunk2D<float>::Dimensions& projSize,
+                                             const mat::Matrix<2, 1>& originRadon,
+                                             double angleIncrement = 0.01_deg);
+
+    static double maxDistanceToCorners(const Chunk2D<float>::Dimensions& projSize,
+                                       const mat::Matrix<2, 1>& originRadon);
+    static mat::Matrix<3, 1> orthonormalTo(const mat::Matrix<3, 1>& v);
+    static Radon2DCoord plueckerTo2DRadon(const mat::Matrix<3, 3>& L,
+                                          const mat::Matrix<1, 2>& originRadon);
+
+    double _angleIncrement = 0.01_deg; //!< increment rotation angle around the baseline
+    float _subsampleLevel = 1.0f;
+    bool _useSubsampling = false;
+};
+
 class IntermedGen2D3D
 {
 public:
@@ -61,10 +152,9 @@ public:
     imgproc::DiffMethod derivativeMethodInProjectionDomain() const;
     void setDerivativeMethodInProjectionDomain(const imgproc::DiffMethod& method);
 
-
     const std::vector<Radon3DCoord>& lastSampling() const;
 
-    // fully on the fly
+    // fully on the fly (using central difference with `plusMinusH_mm`)
     IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj,
                                         const mat::ProjectionMatrix& P,
                                         const VoxelVolume<float>& volume,
@@ -77,6 +167,7 @@ public:
     // fully precomputed (origin must be the default origin: [(X-1)/2, (Y-1)/2])
     IntermediateFctPair intermedFctPair(const OCL::ImageResampler& radon2dSampler,
                                         const mat::ProjectionMatrix& P,
+                                        const Chunk2D<float>::Dimensions& projSize,
                                         const OCL::VolumeResampler& radon3dSampler);
 
 private:
@@ -86,18 +177,61 @@ private:
     std::vector<Radon3DCoord> _lastSampling;
     imgproc::DiffMethod _derivativeMethod = imgproc::CentralDifference;
 
-    // Constructs a vector that has a list of Radon3DCoord for all combinations of the 2D Radon line
-    // coordinates `mu` (the angle) and `dist` (aka 's'), which is stored in `mu`-major order, i.e.
-    // first all `mu` with the first `dist`, then all `mu` with the second `dist` etc. The 3D Radon
-    // coordinates for a plane are determined by a projection matrix (plane must contain the source
-    // position). The `origin` specifies the placement of the coordinate frame where `mu` and `dist`
-    // are defined.
     std::vector<Radon3DCoord> intersectionPlanesWCS(const std::vector<float>& mu,
                                                     const std::vector<float>& dist,
                                                     const mat::ProjectionMatrix& P,
-                                                    const mat::Matrix<2,1>& origin) const;
-    template<class T>
-    std::vector<T> randomSubset(std::vector<T>&& fullSamples, uint seed) const;
+                                                    const mat::Matrix<2, 1>& origin) const;
+};
+
+class IntermediateProj
+{
+public:
+    IntermediateProj(const Chunk2D<float>& proj, const mat::Matrix<3,3>& K, bool useWeighting = true);
+    explicit IntermediateProj(const Chunk2D<float>& proj);
+
+    void setDerivativeMethod(imgproc::DiffMethod method);
+    void setOrigin(float x, float y);
+
+    mat::Matrix<2, 1> origin() const;
+
+    OCL::ImageResampler sampler(const SamplingRange& angleRange, uint nbAngles,
+                                const SamplingRange& distRange, uint nbDist) const;
+
+    Chunk2D<float> sampled(const SamplingRange& angleRange, uint nbAngles,
+                           const SamplingRange& distRange, uint nbDist) const;
+    std::vector<float> sampled(const std::vector<Radon2DCoord>& samplingPts,
+                               float plusMinusH = 1.0f) const;
+
+private:
+    mat::Matrix<3, 3> _intrinsicK;
+    std::unique_ptr<OCL::RadonTransform2D> _radon2D;
+    imgproc::DiffMethod _derivativeMethod = imgproc::CentralDifference;
+    bool _useWeighting;
+
+    void postWeighting(Chunk2D<float>& radonTransDerivative,
+                       const std::vector<float>& theta,
+                       const std::vector<float>& s) const;
+    void postWeighting(std::vector<float>& lineIntegralDerivative,
+                       const std::vector<Radon2DCoord>& samplingPts) const;
+
+    static double cosineOfPlaneAngle(const mat::Matrix<2, 1>& x, const Matrix3x3 K);
+};
+
+class IntermediateVol
+{
+public:
+    explicit IntermediateVol(const VoxelVolume<float>& vol);
+
+    OCL::VolumeResampler sampler(const SamplingRange& phiRange, uint nbPhi,
+                                 const SamplingRange& thetaRange, uint nbTheta,
+                                 const SamplingRange& distRange, uint nbDist,
+                                 imgproc::DiffMethod method = imgproc::CentralDifference) const;
+
+    std::vector<float> sampled(const std::vector<Radon3DCoord>& samplingPointsWCS, float plusMinusH_mm) const;
+
+
+private:
+    OCL::RadonTransform3D _radon3D;
 };
 
 class Radon3DCoordTransform
@@ -130,52 +264,6 @@ private:
     void recreateBuffers(size_t nbCoords);
     void transformRadonToHom() const;
 };
-
-class IntermediateProj
-{
-public:
-    IntermediateProj(const Chunk2D<float>& proj, const mat::Matrix<3,3>& K, bool useWeighting = true);
-    explicit IntermediateProj(const Chunk2D<float>& proj);
-
-    void setDerivativeMethod(imgproc::DiffMethod method);
-    void setOrigin(float x, float y);
-
-    mat::Matrix<2, 1> origin() const;
-
-    OCL::ImageResampler sampler(const SamplingRange& angleRange, uint nbAngles,
-                                const SamplingRange& distRange, uint nbDist) const;
-
-    Chunk2D<float> sampled(const SamplingRange& angleRange, uint nbAngles,
-                           const SamplingRange& distRange, uint nbDist) const;
-
-private:
-    mat::Matrix<3, 3> _K;
-    std::unique_ptr<OCL::RadonTransform2D> _radon2D;
-    imgproc::DiffMethod _derivativeMethod = imgproc::CentralDifference;
-    bool _useWeighting;
-
-    void postWeighting(Chunk2D<float>& radonTrans,
-                       const std::vector<float>& theta,
-                       const std::vector<float>& s) const;
-};
-
-class IntermediateVol
-{
-public:
-    explicit IntermediateVol(const VoxelVolume<float>& vol);
-
-    OCL::VolumeResampler sampler(const SamplingRange& phiRange, uint nbPhi,
-                                 const SamplingRange& thetaRange, uint nbTheta,
-                                 const SamplingRange& distRange, uint nbDist,
-                                 imgproc::DiffMethod method = imgproc::CentralDifference) const;
-
-    std::vector<float> sampled(const std::vector<Radon3DCoord>& samplingPointsWCS, float plusMinusH_mm) const;
-
-
-private:
-    OCL::RadonTransform3D _radon3D;
-};
-
 
 } // namespace OCL
 } // namespace CTL

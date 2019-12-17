@@ -41,18 +41,25 @@
 
      include(example_module.pri)
 
- So far, the following modules are available:
- \li ctl.pri: the core library
- \li den_file_io.pri: .den file handling
- \li nrrd_file_io.pri: .nrrd file handling
- \li ocl_config.pri: uniform OpenCL environment/configuration
- \li ocl_routines.pri: OpenCL based algorithms (e.g. cone-beam projectors or Radon transform)
- \li gui-widgets.pri: widgets for visualization purposes
- \li grangeat-2d3d-regist.pri: Grangeat-based 2D/3D registration using NLopt
+ Module are subdivided into submodules. So far, the following modules are available:
+     - ctl.pri
+         + ctl_core.pri: the core library
+         + den_file_io.pri: .den file handling
+         + nrrd_file_io.pri: .nrrd file handling
+     - ctl_ocl.pri
+         + ocl_config.pri: uniform OpenCL environment/configuration
+         + ocl_routines.pri: OpenCL based algorithms (e.g. cone-beam projectors or Radon transform)
+     - ctl_qtgui
+         + gui_widgets.pri: widgets for visualization purposes
+         + gui_widgets_3d.pri: widgets for 3d visualization purposes
+     - ctl_nlopt
+         + grangeat_2d3d_regist.pri: Grangeat-based 2D/3D registration using NLopt
+         + ocl_config.pri (see above)
+         + ocl_routines.pri (see above)
 
  \subsection step6 Install Qt3D for the GUI
 
- ![Screenshot of a GUI that uses the AcquisitionVisualizerWidget (widget from the gui-widgets.pri module)](GUI-mockUp.png)
+ ![Screenshot of a GUI that uses the AcquisitionVisualizerWidget (widget from the ctl_qtgui.pri module)](GUI-mockUp.png)
 
  For the 3d visualization widgets you need to install the Qt3D module (Qt version >= 5.9 required):
 
