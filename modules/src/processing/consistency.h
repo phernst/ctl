@@ -120,9 +120,11 @@ public:
                                       const mat::ProjectionMatrix& P2,
                                       const Chunk2D<float>::Dimensions& projSize) const;
 
-
-
 private:
+    double _angleIncrement = 0.01_deg; //!< increment rotation angle around the baseline
+    float _subsampleLevel = 1.0f;
+    bool _useSubsampling = false;
+
     // compute corresponding line pairs; line pairs intersect the detector with `projSize`
     static std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
                                              const mat::ProjectionMatrix& P2,
@@ -135,10 +137,6 @@ private:
     static mat::Matrix<3, 1> orthonormalTo(const mat::Matrix<3, 1>& v);
     static Radon2DCoord plueckerTo2DRadon(const mat::Matrix<3, 3>& L,
                                           const mat::Matrix<1, 2>& originRadon);
-
-    double _angleIncrement = 0.01_deg; //!< increment rotation angle around the baseline
-    float _subsampleLevel = 1.0f;
-    bool _useSubsampling = false;
 };
 
 class IntermedGen2D3D
@@ -171,10 +169,10 @@ public:
                                         const OCL::VolumeResampler& radon3dSampler);
 
 private:
+    std::vector<Radon3DCoord> _lastSampling;
     float _accuracy = 1.0f;
     float _subsampleLevel = 1.0f;
     bool _useSubsampling = false;
-    std::vector<Radon3DCoord> _lastSampling;
     imgproc::DiffMethod _derivativeMethod = imgproc::CentralDifference;
 
     std::vector<Radon3DCoord> intersectionPlanesWCS(const std::vector<float>& mu,
