@@ -107,18 +107,34 @@ IntermediateFctPair IntermedGen2D2D::intermedFctPair(const Chunk2D<float>& proj1
                                                      const mat::ProjectionMatrix& P1,
                                                      const Chunk2D<float>& proj2,
                                                      const mat::ProjectionMatrix& P2,
-                                                     float plusMinusH)
+                                                     float plusMinusH) const
 {
     if(proj1.dimensions() != proj2.dimensions())
         throw std::runtime_error("IntermedGen2D2D::intermedFctPair: size of projections must match.");
 
+    const auto radon2DCoords = linePairs(P1, P2, proj1.dimensions());
+
     const IntermediateProj intermedFct1(proj1, P1.intrinsicMatK());
     const IntermediateProj intermedFct2(proj2, P2.intrinsicMatK());
 
-    const auto radon2DCoords = linePairs(P1, P2, proj1.dimensions(), _angleIncrement);
-
     return { intermedFct1.sampled(radon2DCoords.first, plusMinusH),
              intermedFct2.sampled(radon2DCoords.second, plusMinusH),
+             IntermediateFctPair::ProjectionDomain };
+}
+
+IntermediateFctPair IntermedGen2D2D::intermedFctPair(const ImageResampler& radon2dSampler1,
+                                                     const mat::ProjectionMatrix& P1,
+                                                     const ImageResampler& radon2dSampler2,
+                                                     const mat::ProjectionMatrix& P2,
+                                                     const Chunk2D<float>::Dimensions& projSize) const
+{
+    if(radon2dSampler1.imgDim() != radon2dSampler2.imgDim())
+        throw std::runtime_error("IntermedGen2D2D::intermedFctPair: size of projections must match.");
+
+    const auto radon2DCoords = linePairs(P1, P2, projSize);
+
+    return { radon2dSampler1.sample(toGeneric2DCoord(radon2DCoords.first)),
+             radon2dSampler2.sample(toGeneric2DCoord(radon2DCoords.second)),
              IntermediateFctPair::ProjectionDomain };
 }
 
@@ -183,11 +199,11 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
 
 std::pair<IntermedGen2D2D::Lines, IntermedGen2D2D::Lines>
 IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::ProjectionMatrix& P2,
-                           const Chunk2D<float>::Dimensions& projSize, double angleIncrement)
+                           const Chunk2D<float>::Dimensions& projSize) const
 {
     const auto originRadon2D = 0.5 * (mat::Matrix<2, 1>(projSize.width, projSize.height) -
                                       mat::Matrix<2, 1>(1.0));
-    return linePairs(P1, P2, projSize, originRadon2D, angleIncrement);
+    return linePairs(P1, P2, projSize, originRadon2D, _angleIncrement);
 }
 
 double IntermedGen2D2D::maxDistanceToCorners(const Chunk2D<float>::Dimensions& projSize,
@@ -322,13 +338,13 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
 
 IntermediateFctPair IntermedGen2D3D::intermedFctPair(const OCL::ImageResampler& radon2dSampler,
                                                      const mat::ProjectionMatrix& P,
+                                                     const Chunk2D<float>::Dimensions& projSize,
                                                      const OCL::VolumeResampler& radon3dSampler)
 {
-    const auto& imgDim = radon2dSampler.imgDim();
-    const auto imgDiag = mat::Matrix<2, 1>(imgDim.width, imgDim.height).norm();
+    const auto imgDiag = mat::Matrix<2, 1>(projSize.width, projSize.height).norm();
     const auto nbS  = uint(ceil(imgDiag * _accuracy));
     const auto nbMu = uint(ceil(double(nbS) * PI_2));
-    const mat::Matrix<2, 1> orig{ (imgDim.width - 1) * 0.5, (imgDim.height - 1) * 0.5 };
+    const mat::Matrix<2, 1> orig{ (projSize.width - 1) * 0.5, (projSize.height - 1) * 0.5 };
     const SamplingRange sRange{ -0.5f * float(imgDiag), 0.5f * float(imgDiag) };
     const SamplingRange muRange{ float(0.0_deg), float(180.0_deg) };
 
@@ -393,9 +409,9 @@ void IntermedGen2D3D::toggleSubsampling(bool enabled)
   */
 std::vector<Radon3DCoord>
 IntermedGen2D3D::intersectionPlanesWCS(const std::vector<float>& mu,
-                                          const std::vector<float>& dist,
-                                          const mat::ProjectionMatrix& P,
-                                          const mat::Matrix<2, 1>& origin) const
+                                       const std::vector<float>& dist,
+                                       const mat::ProjectionMatrix& P,
+                                       const mat::Matrix<2, 1>& origin) const
 {
     std::vector<Radon3DCoord> ret;
     ret.reserve(mu.size() * dist.size());

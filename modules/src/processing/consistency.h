@@ -96,32 +96,33 @@ public:
     double angleIncrement() const;
     void setAngleIncrement(double angleIncrement);
 
-    // on the fly
+    // on the fly (using central difference with `plusMinusH`)
     IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj1,
                                         const mat::ProjectionMatrix& P1,
                                         const Chunk2D<float>& proj2,
                                         const mat::ProjectionMatrix& P2,
-                                        float plusMinusH = 1.0f);
+                                        float plusMinusH = 1.0f) const;
 
     // precomputed (origin must be the default origin: [(X-1)/2, (Y-1)/2])
     IntermediateFctPair intermedFctPair(const OCL::ImageResampler& radon2dSampler1,
                                         const mat::ProjectionMatrix& P1,
                                         const OCL::ImageResampler& radon2dSampler2,
-                                        const mat::ProjectionMatrix& P2);
+                                        const mat::ProjectionMatrix& P2,
+                                        const Chunk2D<float>::Dimensions& projSize) const;
 
+    // origin defaults to (projSize-[1,1])/2
+    std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
+                                      const mat::ProjectionMatrix& P2,
+                                      const Chunk2D<float>::Dimensions& projSize) const;
+
+private:
     // compute corresponding line pairs; line pairs intersect the detector with `projSize`
     static std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
                                              const mat::ProjectionMatrix& P2,
                                              const Chunk2D<float>::Dimensions& projSize,
                                              const mat::Matrix<2, 1>& originRadon,
                                              double angleIncrement = 0.01_deg);
-    // `originRadon` defaults to (projSize-[1,1])/2
-    static std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
-                                             const mat::ProjectionMatrix& P2,
-                                             const Chunk2D<float>::Dimensions& projSize,
-                                             double angleIncrement = 0.01_deg);
 
-private:
     static double maxDistanceToCorners(const Chunk2D<float>::Dimensions& projSize,
                                        const mat::Matrix<2, 1>& originRadon);
     static mat::Matrix<3, 1> orthonormalTo(const mat::Matrix<3, 1>& v);
@@ -144,7 +145,7 @@ public:
 
     const std::vector<Radon3DCoord>& lastSampling() const;
 
-    // fully on the fly
+    // fully on the fly (using central difference with `plusMinusH_mm`)
     IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj,
                                         const mat::ProjectionMatrix& P,
                                         const VoxelVolume<float>& volume,
@@ -157,6 +158,7 @@ public:
     // fully precomputed (origin must be the default origin: [(X-1)/2, (Y-1)/2])
     IntermediateFctPair intermedFctPair(const OCL::ImageResampler& radon2dSampler,
                                         const mat::ProjectionMatrix& P,
+                                        const Chunk2D<float>::Dimensions& projSize,
                                         const OCL::VolumeResampler& radon3dSampler);
 
 private:
