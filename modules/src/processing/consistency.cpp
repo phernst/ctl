@@ -8,6 +8,13 @@
 
 #include <random>
 
+namespace {
+
+template <class T>
+std::vector<T> randomSubset(std::vector<T>&& fullSamples, uint seed, float subsampleLevel);
+
+} // unnamed namespace
+
 namespace CTL {
 
 // #### IntermediateFctPair ####
@@ -98,9 +105,25 @@ double IntermedGen2D2D::angleIncrement() const
     return _angleIncrement;
 }
 
+float IntermedGen2D2D::subsampleLevel() const
+{
+    return _subsampleLevel;
+}
+
 void IntermedGen2D2D::setAngleIncrement(double angleIncrement)
 {
     _angleIncrement = angleIncrement;
+}
+
+void IntermedGen2D2D::setSubsampleLevel(float subsampleLevel)
+{
+    _subsampleLevel = subsampleLevel;
+    _useSubsampling = true;
+}
+
+void IntermedGen2D2D::toggleSubsampling(bool enabled)
+{
+    _useSubsampling = enabled;
 }
 
 IntermediateFctPair IntermedGen2D2D::intermedFctPair(const Chunk2D<float>& proj1,
@@ -112,7 +135,14 @@ IntermediateFctPair IntermedGen2D2D::intermedFctPair(const Chunk2D<float>& proj1
     if(proj1.dimensions() != proj2.dimensions())
         throw std::runtime_error("IntermedGen2D2D::intermedFctPair: size of projections must match.");
 
-    const auto radon2DCoords = linePairs(P1, P2, proj1.dimensions());
+    auto radon2DCoords = linePairs(P1, P2, proj1.dimensions());
+
+    if(_useSubsampling)
+    {
+        uint seed = std::random_device{}(); // pull random seed for subsampling
+        radon2DCoords.first = randomSubset(std::move(radon2DCoords.first), seed, _subsampleLevel);
+        radon2DCoords.second = randomSubset(std::move(radon2DCoords.second), seed, _subsampleLevel);
+    }
 
     const IntermediateProj intermedFct1(proj1, P1.intrinsicMatK());
     const IntermediateProj intermedFct2(proj2, P2.intrinsicMatK());
@@ -131,7 +161,14 @@ IntermediateFctPair IntermedGen2D2D::intermedFctPair(const ImageResampler& radon
     if(radon2dSampler1.imgDim() != radon2dSampler2.imgDim())
         throw std::runtime_error("IntermedGen2D2D::intermedFctPair: size of projections must match.");
 
-    const auto radon2DCoords = linePairs(P1, P2, projSize);
+    auto radon2DCoords = linePairs(P1, P2, projSize);
+
+    if(_useSubsampling)
+    {
+        uint seed = std::random_device{}(); // pull random seed for subsampling
+        radon2DCoords.first = randomSubset(std::move(radon2DCoords.first), seed, _subsampleLevel);
+        radon2DCoords.second = randomSubset(std::move(radon2DCoords.second), seed, _subsampleLevel);
+    }
 
     return { radon2dSampler1.sample(toGeneric2DCoord(radon2DCoords.first)),
              radon2dSampler2.sample(toGeneric2DCoord(radon2DCoords.second)),
@@ -279,11 +316,12 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
     if(_useSubsampling)
     {
         uint seed = std::random_device{}(); // pull random seed for subsampling
-        intermProj = randomSubset(std::move(intermProj), seed);
+        intermProj = randomSubset(std::move(intermProj), seed, _subsampleLevel);
         _lastSampling = randomSubset(intersectionPlanesWCS(muRange.linspace(nbMu),
                                                            sRange.linspace(nbS),
                                                            P,
-                                                           intermedFctOfProj.origin()), seed);
+                                                           intermedFctOfProj.origin()),
+                                     seed, _subsampleLevel);
     }
     else
         _lastSampling = intersectionPlanesWCS(muRange.linspace(nbMu),
@@ -318,11 +356,12 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
     if(_useSubsampling)
     {
         uint seed = std::random_device{}(); // pull random seed for subsampling
-        intermProj = randomSubset(std::move(intermProj), seed);
+        intermProj = randomSubset(std::move(intermProj), seed, _subsampleLevel);
         _lastSampling = randomSubset(intersectionPlanesWCS(muRange.linspace(nbMu),
                                                            sRange.linspace(nbS),
                                                            P,
-                                                           intermedFctOfProj.origin()), seed);
+                                                           intermedFctOfProj.origin()),
+                                     seed, _subsampleLevel);
     }
     else
         _lastSampling = intersectionPlanesWCS(muRange.linspace(nbMu),
@@ -360,8 +399,9 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const OCL::ImageResampler& 
     if(_useSubsampling)
     {
         const uint seed = std::random_device{}(); // pull random seed for subsampling
-        radon2DSamples = randomSubset(std::move(radon2DSamples), seed);
-        _lastSampling = randomSubset(intersectionPlanesWCS(muSamples, sSamples, P, orig), seed);
+        radon2DSamples = randomSubset(std::move(radon2DSamples), seed, _subsampleLevel);
+        _lastSampling = randomSubset(intersectionPlanesWCS(muSamples, sSamples, P, orig),
+                                     seed, _subsampleLevel);
     }
     else
         _lastSampling = intersectionPlanesWCS(muSamples, sSamples, P, orig);
@@ -440,32 +480,6 @@ IntermedGen2D3D::intersectionPlanesWCS(const std::vector<float>& mu,
 
     return ret;
 }
-
-template<class T>
-std::vector<T> IntermedGen2D3D::randomSubset(std::vector<T>&& fullSamples, uint seed) const
-{
-    auto newNbElements = size_t(std::ceil(_subsampleLevel * fullSamples.size()));
-    std::vector<T> ret(newNbElements);
-
-    std::mt19937 rng;
-    rng.seed(seed);
-
-    std::vector<int> indices(fullSamples.size());
-    std::iota(indices.begin(), indices.end(), 0);
-
-    std::shuffle(indices.begin(), indices.end(), rng);
-
-    indices.resize(newNbElements);
-    std::sort(indices.begin(), indices.end());
-
-    for(uint smpl = 0; smpl < newNbElements; ++smpl)
-        ret[smpl] = fullSamples[indices[smpl]];
-
-    return ret;
-}
-
-template std::vector<float> IntermedGen2D3D::randomSubset(std::vector<float> &&fullSamples, uint seed) const;
-template std::vector<Radon3DCoord> IntermedGen2D3D::randomSubset(std::vector<Radon3DCoord> &&fullSamples, uint seed) const;
 
 // #### IntermediateProj ####
 // --------------------------
@@ -876,3 +890,31 @@ void Radon3DCoordTransform::transformRadonToHom() const
 
 } // namespace OCL
 } // namespace CTL
+
+
+namespace {
+
+template<class T>
+std::vector<T> randomSubset(std::vector<T>&& fullSamples, uint seed, float subsampleLevel)
+{
+    auto newNbElements = size_t(std::ceil(subsampleLevel * fullSamples.size()));
+    std::vector<T> ret(newNbElements);
+
+    std::mt19937 rng;
+    rng.seed(seed);
+
+    std::vector<int> indices(fullSamples.size());
+    std::iota(indices.begin(), indices.end(), 0);
+
+    std::shuffle(indices.begin(), indices.end(), rng);
+
+    indices.resize(newNbElements);
+    std::sort(indices.begin(), indices.end());
+
+    for(uint smpl = 0; smpl < newNbElements; ++smpl)
+        ret[smpl] = fullSamples[indices[smpl]];
+
+    return ret;
+}
+
+} // unnamed namespace

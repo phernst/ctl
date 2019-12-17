@@ -93,8 +93,13 @@ class IntermedGen2D2D
 public:
     using Lines = std::vector<Radon2DCoord>;
 
+    // getter
     double angleIncrement() const;
+    float subsampleLevel() const;
+    // setter
     void setAngleIncrement(double angleIncrement);
+    void setSubsampleLevel(float subsampleLevel);
+    void toggleSubsampling(bool enabled);
 
     // on the fly (using central difference with `plusMinusH`)
     IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj1,
@@ -115,6 +120,8 @@ public:
                                       const mat::ProjectionMatrix& P2,
                                       const Chunk2D<float>::Dimensions& projSize) const;
 
+
+
 private:
     // compute corresponding line pairs; line pairs intersect the detector with `projSize`
     static std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
@@ -130,6 +137,8 @@ private:
                                           const mat::Matrix<1, 2>& originRadon);
 
     double _angleIncrement = 0.01_deg; //!< increment rotation angle around the baseline
+    float _subsampleLevel = 1.0f;
+    bool _useSubsampling = false;
 };
 
 class IntermedGen2D3D
@@ -172,8 +181,6 @@ private:
                                                     const std::vector<float>& dist,
                                                     const mat::ProjectionMatrix& P,
                                                     const mat::Matrix<2, 1>& origin) const;
-    template<class T>
-    std::vector<T> randomSubset(std::vector<T>&& fullSamples, uint seed) const;
 };
 
 class IntermediateProj
