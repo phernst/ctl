@@ -12,7 +12,18 @@
 #include "processing/radontransform3d.h"
 #include "processing/volumeresampler.h"
 
+/*
+ * This header introduces classes for applications of Grangeat data consistency conditions.
+ */
+
 namespace CTL {
+
+/*!
+ * \class IntermediateFctPair
+ * \brief Holds a pair of two corresponding intermediate function 'signals' as `shared_ptr`s to
+ * `vector`s. The first vector is associated with an intermediate function from a projection image,
+ * while the second vector may be computed from a projection or a volume.
+ */
 
 class IntermediateFctPair
 {
@@ -50,6 +61,76 @@ private:
 
 namespace OCL {
 
+/*!
+ * \class IntermedGen2D2D
+ * \brief Generator class that produces intermediate function pairs from two 2D projection images.
+ */
+
+/*!
+ * \class IntermedGen2D3D
+ * \brief Generator class that produces intermediate function pairs from a 2D projection image and a
+ * 3D volume.
+ */
+
+/*!
+ * \class IntermediateProj
+ * \brief Transforms projections to Grangeat's intermediate space.
+ */
+
+/*!
+ * \class IntermediateVol
+ * \brief Transforms volumes to Grangeat's intermediate space.
+ */
+
+/*!
+ * \class Radon3DCoordTransform
+ * \brief Helper class that transforms (spherical) 3D Radon coordinates under an Euclidian
+ * transform of the coordinate frame.
+ */
+
+class IntermedGen2D2D
+{
+public:
+    using Lines = std::vector<Radon2DCoord>;
+
+    double angleIncrement() const;
+    void setAngleIncrement(double angleIncrement);
+
+    // on the fly
+    IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj1,
+                                        const mat::ProjectionMatrix& P1,
+                                        const Chunk2D<float>& proj2,
+                                        const mat::ProjectionMatrix& P2,
+                                        float plusMinusH = 1.0f);
+
+    // precomputed (origin must be the default origin: [(X-1)/2, (Y-1)/2])
+    IntermediateFctPair intermedFctPair(const OCL::ImageResampler& radon2dSampler1,
+                                        const mat::ProjectionMatrix& P1,
+                                        const OCL::ImageResampler& radon2dSampler2,
+                                        const mat::ProjectionMatrix& P2);
+
+    // compute corresponding line pairs; line pairs intersect the detector with `projSize`
+    static std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
+                                             const mat::ProjectionMatrix& P2,
+                                             const Chunk2D<float>::Dimensions& projSize,
+                                             const mat::Matrix<2, 1>& originRadon,
+                                             double angleIncrement = 0.01_deg);
+    // `originRadon` defaults to (projSize-[1,1])/2
+    static std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
+                                             const mat::ProjectionMatrix& P2,
+                                             const Chunk2D<float>::Dimensions& projSize,
+                                             double angleIncrement = 0.01_deg);
+
+private:
+    static double maxDistanceToCorners(const Chunk2D<float>::Dimensions& projSize,
+                                       const mat::Matrix<2, 1>& originRadon);
+    static mat::Matrix<3, 1> orthonormalTo(const mat::Matrix<3, 1>& v);
+    static Radon2DCoord plueckerTo2DRadon(const mat::Matrix<3, 3>& L,
+                                          const mat::Matrix<1, 2>& originRadon);
+
+    double _angleIncrement = 0.01_deg; //!< increment rotation angle around the baseline
+};
+
 class IntermedGen2D3D
 {
 public:
@@ -85,49 +166,12 @@ private:
     std::vector<Radon3DCoord> _lastSampling;
     imgproc::DiffMethod _derivativeMethod = imgproc::CentralDifference;
 
-    // Constructs a vector that has a list of Radon3DCoord for all combinations of the 2D Radon line
-    // coordinates `mu` (the angle) and `dist` (aka 's'), which is stored in `mu`-major order, i.e.
-    // first all `mu` with the first `dist`, then all `mu` with the second `dist` etc. The 3D Radon
-    // coordinates for a plane are determined by a projection matrix (plane must contain the source
-    // position). The `origin` specifies the placement of the coordinate frame where `mu` and `dist`
-    // are defined.
     std::vector<Radon3DCoord> intersectionPlanesWCS(const std::vector<float>& mu,
                                                     const std::vector<float>& dist,
                                                     const mat::ProjectionMatrix& P,
-                                                    const mat::Matrix<2,1>& origin) const;
+                                                    const mat::Matrix<2, 1>& origin) const;
     template<class T>
     std::vector<T> randomSubset(std::vector<T>&& fullSamples, uint seed) const;
-};
-
-class Radon3DCoordTransform
-{
-public:
-    explicit Radon3DCoordTransform(const std::vector<Radon3DCoord>& initialCoords, uint oclDeviceNb = 0);
-    explicit Radon3DCoordTransform(const std::vector<HomCoordPlaneNormalized>& initialCoords, uint oclDeviceNb = 0);
-
-    void resetIninitialCoords(const std::vector<Radon3DCoord>& initialCoords);
-    void resetIninitialCoords(const std::vector<HomCoordPlaneNormalized>& initialCoords);
-
-    const cl::Buffer& transform(const Homography3D& homography) const;
-    const cl::Buffer& transform(const Matrix3x3 &rotation, const Vector3x1 &translation) const;
-    std::vector<Radon3DCoord> transformedCoords(const Matrix3x3 &rotation,
-                                                const Vector3x1 &translation) const;
-
-    std::vector<HomCoordPlaneNormalized> initialHomCoords() const;
-
-private:
-    Radon3DCoordTransform(size_t nbCoords, uint oclDeviceNb);
-
-    cl::CommandQueue _q;
-    PinnedBufHostWrite<float> _homTransfBuf;
-    PinnedBufHostWrite<float> _initialPlanesRadonCoord;
-    cl::Buffer _initialPlanesHomCoord;
-    cl::Buffer _transformedCoords;
-
-    void addKernels() const;
-    size_t nbCoords() const;
-    void recreateBuffers(size_t nbCoords);
-    void transformRadonToHom() const;
 };
 
 class IntermediateProj
@@ -181,6 +225,36 @@ private:
     OCL::RadonTransform3D _radon3D;
 };
 
+class Radon3DCoordTransform
+{
+public:
+    explicit Radon3DCoordTransform(const std::vector<Radon3DCoord>& initialCoords, uint oclDeviceNb = 0);
+    explicit Radon3DCoordTransform(const std::vector<HomCoordPlaneNormalized>& initialCoords, uint oclDeviceNb = 0);
+
+    void resetIninitialCoords(const std::vector<Radon3DCoord>& initialCoords);
+    void resetIninitialCoords(const std::vector<HomCoordPlaneNormalized>& initialCoords);
+
+    const cl::Buffer& transform(const Homography3D& homography) const;
+    const cl::Buffer& transform(const Matrix3x3 &rotation, const Vector3x1 &translation) const;
+    std::vector<Radon3DCoord> transformedCoords(const Matrix3x3 &rotation,
+                                                const Vector3x1 &translation) const;
+
+    std::vector<HomCoordPlaneNormalized> initialHomCoords() const;
+
+private:
+    Radon3DCoordTransform(size_t nbCoords, uint oclDeviceNb);
+
+    cl::CommandQueue _q;
+    PinnedBufHostWrite<float> _homTransfBuf;
+    PinnedBufHostWrite<float> _initialPlanesRadonCoord;
+    cl::Buffer _initialPlanesHomCoord;
+    cl::Buffer _transformedCoords;
+
+    void addKernels() const;
+    size_t nbCoords() const;
+    void recreateBuffers(size_t nbCoords);
+    void transformRadonToHom() const;
+};
 
 } // namespace OCL
 } // namespace CTL
