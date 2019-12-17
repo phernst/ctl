@@ -42,6 +42,8 @@ public:
     const std::vector<SingleViewData>& data() const;
     std::vector<SingleViewData>& data();
     Dimensions dimensions() const;
+    const SingleViewData& first() const;
+    SingleViewData& first();
     uint nbViews() const;
     SingleViewData& view(uint i);
     const SingleViewData& view(uint i) const;

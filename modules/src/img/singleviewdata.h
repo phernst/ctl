@@ -43,6 +43,8 @@ public:
     std::vector<ModuleData>& data();
     Dimensions dimensions() const;
     uint elementsPerModule() const;
+    const ModuleData& first() const;
+    ModuleData& first();
     ModuleData& module(uint i);
     const ModuleData& module(uint i) const;
     uint nbModules() const;

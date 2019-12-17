@@ -642,6 +642,22 @@ ProjectionData::Dimensions ProjectionData::dimensions() const
 }
 
 /*!
+ * Same as `view(0)`.
+ */
+const SingleViewData& ProjectionData::first() const
+{
+    return this->view(0);
+}
+
+/*!
+ * Same as `view(0)`.
+ */
+SingleViewData &ProjectionData::first()
+{
+    return this->view(0);
+}
+
+/*!
  * Returns the number of views in the data.
  */
 uint ProjectionData::nbViews() const { return static_cast<uint>(_data.size()); }
