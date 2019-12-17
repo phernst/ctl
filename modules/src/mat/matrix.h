@@ -1,6 +1,6 @@
 /******************************************************************************
 ** 'Matrix' template class for basic matrix calculations
-** by Robert Frysch | Aug 13, 2019
+** by Robert Frysch | Dec 16, 2019
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -91,6 +91,9 @@ class Matrix : public MatrixBase<Rows, Cols>
 {
     // helper function for `subMat()`
     static constexpr uint rangeDim(uint from, uint to);
+    // helper function for vectors' `subMat()`
+    static constexpr uint vecRowDim(uint from, uint to);
+    static constexpr uint vecColDim(uint from, uint to);
 
 public:
     Matrix() = default;
@@ -109,6 +112,9 @@ public:
     // sub-matrix extraction
     template <uint fromRow, uint toRow, uint fromCol, uint toCol>
     auto subMat() const -> Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>;
+    // sub-vector extraction
+    template <uint from, uint to>
+    auto subMat() const -> Matrix<vecRowDim(from, to), vecColDim(from, to)>;
 
     // single vector extraction
     template <uint i>
