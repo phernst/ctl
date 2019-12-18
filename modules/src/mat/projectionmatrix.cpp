@@ -311,7 +311,7 @@ Matrix<2, 1> ProjectionMatrix::principalPoint() const
 Matrix<2, 1> ProjectionMatrix::focalLength() const
 {
     auto K = intrinsicMatK();
-    return { { K.get<0, 0>(), K.get<1, 1>() } };
+    return { K.get<0, 0>(), K.get<1, 1>() };
 }
 
 /*!

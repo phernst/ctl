@@ -1,6 +1,7 @@
 #ifndef TST_PROJECTIONSMATRIX_H
 #define TST_PROJECTIONSMATRIX_H
 
+#define ENABLE_FROBENIUS_NORM
 #include "mat/projectionmatrix.h"
 #include <QtTest>
 
@@ -22,6 +23,7 @@ private Q_SLOTS:
     void projectionOntoDetector();
     void equalityTest();
     void comparatorTest();
+    void subMatExtraction();
 
 private:
     CTL::mat::ProjectionMatrix P;

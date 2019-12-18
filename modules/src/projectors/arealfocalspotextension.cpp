@@ -92,7 +92,7 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
             // preparation of spot position
             const auto spotSize = xraySource->focalSpotSize();
             const Vector3x1 focalSpotShift = {
-                { point.x() * spotSize.width(), point.y() * spotSize.height(), 0.0 } };
+                point.x() * spotSize.width(), point.y() * spotSize.height(), 0.0 };
             const mat::Location additionalDisplacement(focalSpotShift, mat::eye<3>());
             auto displacer = std::make_shared<prepare::GantryDisplacementParam>();
             displacer->setSourceDisplacement(_setup.system()->gantry()->sourceDisplacement());

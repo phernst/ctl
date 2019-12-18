@@ -1,6 +1,7 @@
 /******************************************************************************
 ** Template implementation for "matrix.h"
-** by Robert Frysch | Aug 16, 2019
+**
+** by Robert Frysch
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -14,20 +15,68 @@ namespace mat {
 
 // ### MatrixBase ###
 // constructors
+/*!
+ * Construct an instance and initialize all elements with a \a fillValue.
+ */
 template <uint Rows, uint Cols>
 MatrixBase<Rows, Cols>::MatrixBase(double fillValue)
 {
     std::fill(this->begin(), this->end(), fillValue);
 }
 
+/*!
+ * Construct an instance from a C-style array.
+ */
 template <uint Rows, uint Cols>
 inline MatrixBase<Rows, Cols>::MatrixBase(const double (&initArray)[Rows * Cols])
 {
     std::copy_n(initArray, Rows * Cols, _m);
 }
 
-// individual element access with 2 indizes
-// -> run time boundary check (throws out_of_range)
+// accessors
+/*!
+ * Returns a pointer to the first element in a \a row. A run time boundary check is not performed.
+ * Elements are stored in row major order.
+ */
+template <uint Rows, uint Cols>
+double* MatrixBase<Rows, Cols>::operator[](uint row)
+{
+    return _m + row * Cols;
+}
+/*!
+ * Returns a pointer to the first element in a \a row. A run time boundary check is not performed.
+ * Elements are stored in row major order.
+ */
+template <uint Rows, uint Cols>
+const double* MatrixBase<Rows, Cols>::operator[](uint row) const
+{
+    return _m + row * Cols;
+}
+
+/*!
+ * Returns a reference to the element with index (\a row, \a column). A run time boundary check
+ * is not performed.
+ */
+template <uint Rows, uint Cols>
+double& MatrixBase<Rows, Cols>::operator()(uint row, uint column)
+{
+    return (*this)[row][column];
+}
+/*!
+ * Returns the element with index (\a row, \a column). A run time boundary check
+ * is not performed.
+ */
+template <uint Rows, uint Cols>
+double MatrixBase<Rows, Cols>::operator()(uint row, uint column) const
+{
+    return (*this)[row][column];
+}
+
+/*!
+ * Returns a reference to the element with index (\a row, \a column). A run time boundary check
+ * is performed and an exception is thrown if an index exceeds the matrix dimensions (throws
+ * out_of_range).
+ */
 template <uint Rows, uint Cols>
 double& MatrixBase<Rows, Cols>::at(uint row, uint column) noexcept(false)
 {
@@ -37,6 +86,11 @@ double& MatrixBase<Rows, Cols>::at(uint row, uint column) noexcept(false)
         throw std::out_of_range("column index exceeds matrix dimensions");
     return (*this)[row][column];
 }
+/*!
+ * Returns the element with index (\a row, \a column). A run time boundary check
+ * is performed and an exception is thrown if an index exceeds the matrix dimensions (throws
+ * out_of_range).
+ */
 template <uint Rows, uint Cols>
 double MatrixBase<Rows, Cols>::at(uint row, uint column) const noexcept(false)
 {
@@ -46,7 +100,12 @@ double MatrixBase<Rows, Cols>::at(uint row, uint column) const noexcept(false)
         throw std::out_of_range("column index exceeds matrix dimensions");
     return (*this)[row][column];
 }
-// -> compile time boundary check (never fails)
+
+/*!
+ * Returns a reference to the element with index (\a row, \a column). A compile time boundary check
+ * is performed.
+ * This function never fails.
+ */
 template <uint Rows, uint Cols>
 template <uint row, uint column>
 double& MatrixBase<Rows, Cols>::get() noexcept
@@ -55,6 +114,11 @@ double& MatrixBase<Rows, Cols>::get() noexcept
     static_assert(column < Cols, "column index must not exceed matrix dimension");
     return (*this)[row][column];
 }
+/*!
+ * Returns the element with index (\a row, \a column). A compile time boundary check
+ * is performed.
+ * This function never fails.
+ */
 template <uint Rows, uint Cols>
 template <uint row, uint column>
 double MatrixBase<Rows, Cols>::get() const noexcept
@@ -64,8 +128,35 @@ double MatrixBase<Rows, Cols>::get() const noexcept
     return (*this)[row][column];
 }
 
-// individual element access with 1 index
-// -> run time boundary check (throws out_of_range)
+/*!
+ * Returns a reference to the element from a 1D index lookup \a n, where the matrix elements are
+ * stored in row major order. This function is handy in particular when dealing with vectors.
+ * A run time boundary check is not performed.
+ */
+template <uint Rows, uint Cols>
+double& MatrixBase<Rows, Cols>::operator()(uint n)
+{
+    return _m[n];
+}
+/*!
+ * Returns a reference to the element from a 1D index lookup \a n, where the matrix elements are
+ * stored in row major order. This function is handy in particular when dealing with vectors.
+ * A run time boundary check is not performed.
+ */
+template <uint Rows, uint Cols>
+double MatrixBase<Rows, Cols>::operator()(uint n) const
+{
+    return _m[n];
+}
+
+/*!
+ * Returns a reference to the element from a 1D index lookup \a n, where the matrix elements are
+ * stored in row major order. This function is handy in particular when dealing with vectors.
+ * A run time boundary check is performed and an exception is thrown if an index exceeds the matrix
+ * dimensions (throws out_of_range).
+ *
+ * \sa at(uint row, uint column)
+ */
 template <uint Rows, uint Cols>
 double& MatrixBase<Rows, Cols>::at(uint n) noexcept(false)
 {
@@ -73,6 +164,14 @@ double& MatrixBase<Rows, Cols>::at(uint n) noexcept(false)
         throw std::out_of_range("index exceeds matrix dimensions");
     return _m[n];
 }
+/*!
+ * Returns the element from a 1D index lookup \a n, where the matrix elements are
+ * stored in row major order. This function is handy in particular when dealing with vectors.
+ * A run time boundary check is performed and an exception is thrown if an index exceeds the matrix
+ * dimensions (throws out_of_range).
+ *
+ * \sa at(uint row, uint column) const
+ */
 template <uint Rows, uint Cols>
 double MatrixBase<Rows, Cols>::at(uint n) const noexcept(false)
 {
@@ -80,7 +179,12 @@ double MatrixBase<Rows, Cols>::at(uint n) const noexcept(false)
         throw std::out_of_range("index exceeds matrix dimensions");
     return _m[n];
 }
-// -> compile time boundary check (never fails)
+
+/*!
+ * Returns a reference to the element from a 1D index lookup \a n, where the matrix elements are
+ * stored in row major order. This function is handy in particular when dealing with vectors.
+ * A compile time boundary check is performed. This function never fails.
+ */
 template <uint Rows, uint Cols>
 template <uint n>
 double& MatrixBase<Rows, Cols>::get() noexcept
@@ -88,6 +192,11 @@ double& MatrixBase<Rows, Cols>::get() noexcept
     static_assert(n < Rows * Cols, "index must not exceed matrix dimensions");
     return _m[n];
 }
+/*!
+ * Returns the element from a 1D index lookup \a n, where the matrix elements are
+ * stored in row major order. This function is handy in particular when dealing with vectors.
+ * A compile time boundary check is performed. This function never fails.
+ */
 template <uint Rows, uint Cols>
 template <uint n>
 double MatrixBase<Rows, Cols>::get() const noexcept
@@ -97,6 +206,10 @@ double MatrixBase<Rows, Cols>::get() const noexcept
 }
 
 // formatting matrix entries to a string
+/*!
+ * Prints the content of the matrix into the returned string. The \a lineModifier may be used to
+ * annotate or emphasis the output by prefixing each line by a character sequence.
+ */
 template <uint Rows, uint Cols>
 std::string MatrixBase<Rows, Cols>::info(const char* lineModifier) const
 {
@@ -143,6 +256,11 @@ std::string MatrixBase<Rows, Cols>::info(const char* lineModifier) const
     return ret;
 }
 
+/*!
+ * Returns the norm of a row or column vector, i.e. from a `Matrix<1, N>` or `Matrix<N, 1>`.
+ * If the macro `ENABLE_FROBENIUS_NORM` is defined, it can be also used for arbitrary matrices.
+ * In this case it computes the Frobenius norm of the matrix (sqrt of the sum of squared elements).
+ */
 template <uint Rows, uint Cols>
 double MatrixBase<Rows, Cols>::norm() const
 {
@@ -158,7 +276,10 @@ double MatrixBase<Rows, Cols>::norm() const
     return std::sqrt(ret);
 }
 
-// Test that all elements are equal, it means have the equal representation of all elements
+/*!
+ * Returns `true` if all elements are equal, which means they have the equal (byte) representation
+ * of all elements; otherwise false.
+ */
 template <uint Rows, uint Cols>
 bool MatrixBase<Rows, Cols>::operator==(const MatrixBase<Rows, Cols>& other) const
 {
@@ -172,8 +293,10 @@ bool MatrixBase<Rows, Cols>::operator==(const MatrixBase<Rows, Cols>& other) con
     return true;
 }
 
-// Test that there is at least one element that is not equal for both matrices, it means does not
-// have the equal representation of all elements
+/*!
+ * Returns `true` if there is at least one element that is not equal for both matrices, which means
+ * the matrices does not have the equal (byte) representation.
+ */
 template <uint Rows, uint Cols>
 bool MatrixBase<Rows, Cols>::operator!=(const MatrixBase<Rows, Cols>& other) const
 {
@@ -181,27 +304,45 @@ bool MatrixBase<Rows, Cols>::operator!=(const MatrixBase<Rows, Cols>& other) con
 }
 
 // ### Matrix ###
-// ctors
+// constructors
+/*!
+ * Construct an instance and initialize all elements with a \a fillValue.
+ */
 template <uint Rows, uint Cols>
 Matrix<Rows, Cols>::Matrix(double fillValue)
     : MatrixBase<Rows, Cols>(fillValue)
 {
 }
 
+/*!
+ * Construct an instance from a C-style array.
+ */
 template <uint Rows, uint Cols>
 inline Matrix<Rows, Cols>::Matrix(const double (&initArray)[Rows * Cols])
     : MatrixBase<Rows, Cols>(initArray)
 {
 }
 
+/*!
+ * Construct an instance from a list of arguments that specifies each element in row major order.
+ * The the length of the argument list must be equal to the total number of matrix elements.
+ */
 template <uint Rows, uint Cols>
-template<typename... Doubles, typename>
+template <typename... Doubles, typename>
 inline Matrix<Rows, Cols>::Matrix(double firstElement, Doubles... matrixElements)
     : MatrixBase<Rows, Cols>({ firstElement, static_cast<double>(matrixElements)... })
 {
 }
 
 // factory
+/*!
+ * Returns a \a Rows x \a Cols matrix that is extracted from a \a vector that stores these
+ * matrices in row major order. The \a NthMat matrix is read from the container, meaning that
+ * \a NthMat*`Rows`*`Cols` elements are skipped.
+ * Optionally, a pointer \a ok to a boolean can be passed to check if the reading was successful.
+ * It is set to `false` if the \a vector size would be exceeded. In this case it returns a
+ * zero-initialized matrix.
+ */
 template <uint Rows, uint Cols>
 template <class Container>
 Matrix<Rows, Cols>
@@ -227,58 +368,80 @@ Matrix<Rows, Cols>::fromContainer(const Container& vector, size_t NthMat, bool* 
     return ret;
 }
 
-// sub-matrix extraction
+/*!
+ * `subMat<fromRow, toRow, fromCol, toCol>()` returns a submatrix specified by the boundary indices
+ * for the rows (\a fromRow, \a toRow) and for the columns (\a fromCol, \a toCol).
+ * For instance `M.subMat<0,1, 1,1>()` will return the first to elements of the second column of `M`
+ * as a 2x1 matrix (vector) if the dimensions of the matrix `M` are at least 2x2, otherwise (in case
+ * the dimensions are exceeded) it results in a  compiler error.
+ * Except the size of the matrix from which is extracted, there are no further limitation for
+ * choosing the boundaries (the template arguments). The dimension of the returned matrix is
+ * `abs(toRow-fromRow+1) x abs(toCol-fromCol+1)`.
+ * If a 'from' index is larger than a 'to' index, the submatrix is extracted in reverse order, e.g.
+ * `M.subMat<1,0, 0,1>()` returns the upper left 2x2 submatrix with its rows flipped in the up-down
+ * direction.
+ *
+ * \code
+ *  // Example for extracting a single element from a 2x2 matrix (bottom right corner).
+ *  const Matrix<2, 2> mat{ 11., 12.,
+ *                          21., 22. };
+ *  qInfo() << (mat.subMat<1,1, 1,1>() == 22.);
+ * \endcode
+ */
 template <uint Rows, uint Cols>
 template <uint fromRow, uint toRow, uint fromCol, uint toCol>
-auto Matrix<Rows, Cols>::subMat() const
--> Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>
+auto Matrix<Rows, Cols>::subMat() const ->
+Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>
 {
-    static_assert(fromRow < Rows, "fromRow exceeds matrix dimension");
-    static_assert(toRow < Rows, "toRow exceeds matrix dimension");
-    static_assert(fromCol < Cols, "fromCol exceeds matrix dimension");
-    static_assert(toCol < Cols, "toCol exceeds matrix dimension");
-    constexpr auto nbRowsSub = toRow >= fromRow ? toRow - fromRow + 1 : fromRow - toRow + 1;
-    constexpr auto nbColsSub = toCol >= fromCol ? toCol - fromCol + 1 : fromCol - toCol + 1;
+    static_assert(fromRow < Rows, "`fromRow` exceeds matrix dimension.");
+    static_assert(toRow < Rows, "`toRow` exceeds matrix dimension.");
+    static_assert(fromCol < Cols, "`fromCol` exceeds matrix dimension.");
+    static_assert(toCol < Cols, "`toCol` exceeds matrix dimension.");
 
-    Matrix<nbRowsSub, nbColsSub> ret;
-    constexpr int rowInc = toRow >= fromRow ? 1 : -1;
-    constexpr int colInc = toCol >= fromCol ? 1 : -1;
+    Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)> ret;
+    constexpr auto rowInc = toRow >= fromRow ? 1u : -1u;
+    constexpr auto colInc = toCol >= fromCol ? 1u : -1u;
 
-    for(int row = fromRow,
-            endRow = toRow + rowInc,
-            subRow = 0; row != endRow; row += rowInc, ++subRow)
-        for(int col = fromCol,
-                endCol = toCol + colInc,
-                subCol = 0; col != endCol; col += colInc, ++subCol)
+    for(auto row = fromRow, endRow = toRow + rowInc, subRow = 0u;
+        row != endRow;
+        row += rowInc, ++subRow)
+        for(auto col = fromCol, endCol = toCol + colInc, subCol = 0u;
+            col != endCol;
+            col += colInc, ++subCol)
             ret(subRow, subCol) = (*this)(row, col);
 
     return ret;
 }
 
-// sub-vector extraction
+/*!
+ * This subvector extraction is a simplified overload of `subMat<fromRow, toRow, fromCol, toCol>()`
+ * that is more handy to use for vectors. The behavior of `subMat<from, to>()` is equivalent to
+ * `subMat<from, to, 0, 0>()` for column vectors or
+ * `subMat<0, 0, from, to>()` for row vectors.
+ */
 template <uint Rows, uint Cols>
 template <uint from, uint to>
 auto Matrix<Rows, Cols>::subMat() const -> Matrix<vecRowDim(from, to), vecColDim(from, to)>
 {
-    static_assert(Rows == 1u || Cols == 1u, "subMat<from, to>() supports only vectors.");
-    constexpr auto nbRowsRet = vecRowDim(from, to);
-    constexpr auto nbColsRet = vecColDim(from, to);
-    constexpr auto nbElem = (Rows == 1u ? Cols : Rows);
-    static_assert(from < nbElem, "`from` exceeds vector dimension");
-    static_assert(to < nbElem, "`to` exceeds vector dimension");
+    static_assert(Rows == 1u || Cols == 1u, "`subMat<from, to>()` supports only vectors.");
+    constexpr auto nbElem = Rows == 1u ? Cols : Rows;
+    static_assert(from < nbElem, "`from` exceeds vector dimension.");
+    static_assert(to < nbElem, "`to` exceeds vector dimension.");
 
-    Matrix<nbRowsRet, nbColsRet> ret;
-    constexpr int inc = to >= from ? 1 : -1;
+    Matrix<vecRowDim(from, to), vecColDim(from, to)> ret;
+    constexpr auto inc = to >= from ? 1u : -1u;
 
-    for(int el = from,
-            endEl = to + inc,
-            sub = 0; el != endEl; el += inc, ++sub)
+    for(auto el = from, endEl = to + inc, sub = 0u;
+        el != endEl;
+        el += inc, ++sub)
         ret(sub) = (*this)(el);
 
     return ret;
 }
 
-// single vector extraction
+/*!
+ * Returns the \a i'th row of the matrix.
+ */
 template <uint Rows, uint Cols>
 template <uint i>
 Matrix<1, Cols> Matrix<Rows, Cols>::row() const
@@ -289,6 +452,9 @@ Matrix<1, Cols> Matrix<Rows, Cols>::row() const
     return ret;
 }
 
+/*!
+ * Returns the \a j'th column of the matrix.
+ */
 template <uint Rows, uint Cols>
 template <uint j>
 Matrix<Rows, 1> Matrix<Rows, Cols>::column() const
@@ -304,7 +470,9 @@ Matrix<Rows, 1> Matrix<Rows, Cols>::column() const
     return ret;
 }
 
-// unary operators
+/*!
+ * Returns the transposed matrix.
+ */
 template <uint Rows, uint Cols>
 Matrix<Cols, Rows> Matrix<Rows, Cols>::transposed() const
 {
@@ -432,7 +600,9 @@ Matrix<Rows, Cols> Matrix<Rows, Cols>::operator-(const Matrix<Rows, Cols>& rhs) 
     return ret;
 }
 
-// standard matrix multiplication
+/*!
+ * Return the result of a standard matrix multiplication.
+ */
 template <uint Rows1, uint Cols1_Rows2>
 template <uint Cols2>
 Matrix<Rows1, Cols2> Matrix<Rows1, Cols1_Rows2>::

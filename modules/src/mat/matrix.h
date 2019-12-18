@@ -1,6 +1,6 @@
 /******************************************************************************
 ** 'Matrix' template class for basic matrix calculations
-** by Robert Frysch | Dec 16, 2019
+** by Robert Frysch | Dec 18, 2019
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -18,6 +18,23 @@ typedef unsigned int uint;
 namespace CTL {
 namespace mat {
 
+/*!
+ * \class MatrixBase
+ *
+ * \brief Helper base class that provides an access interface to the Matrix template class and its
+ * scalar specialization.
+ */
+
+/*!
+ * \class Matrix
+ *
+ * \brief This template class is an abstraction of a small matrix with a size known at compile time.
+ *
+ * Basic algebraic operations are provided and dimension checks are carried out during compilation.
+ * No heap allocation is performed.
+ * Elements are stored in row major order.
+ */
+
 // uniform interface and ressource
 template <uint Rows, uint Cols>
 class MatrixBase
@@ -26,19 +43,19 @@ public:
     // construction
     MatrixBase() = default;
     explicit MatrixBase(double fillValue);
-    MatrixBase(const double (&initArray)[Rows * Cols]);
+    explicit MatrixBase(const double (&initArray)[Rows * Cols]);
 
     // select row
-    double* operator[](uint row) { return _m + row * Cols; }
-    const double* operator[](uint row) const { return _m + row * Cols; }
+    double* operator[](uint row);
+    const double* operator[](uint row) const;
 
     // individual element access with 2 indizes
     // -> standard access (without boundary check)
-    double& operator()(uint row, uint column) { return (*this)[row][column]; }
-    double operator()(uint row, uint column) const { return (*this)[row][column]; }
+    double& operator()(uint row, uint column);
+    double operator()(uint row, uint column) const;
     // -> run time boundary check (throws out_of_range)
-    double& at(uint row, uint column);
-    double at(uint row, uint column) const;
+    double& at(uint row, uint column) noexcept(false);
+    double at(uint row, uint column) const noexcept(false);
     // -> compile time boundary check (never fails)
     template <uint row, uint column>
     double& get() noexcept;
@@ -47,8 +64,8 @@ public:
 
     // individual element access with 1 index
     // -> standard access (without boundary check)
-    double& operator()(uint n) { return _m[n]; }
-    double operator()(uint n) const { return _m[n]; }
+    double& operator()(uint n);
+    double operator()(uint n) const;
     // -> run time boundary check (throws out_of_range)
     double& at(uint n);
     double at(uint n) const;
@@ -98,9 +115,9 @@ class Matrix : public MatrixBase<Rows, Cols>
 public:
     Matrix() = default;
     explicit Matrix(double fillValue);
-    Matrix(const double (&initArray)[Rows * Cols]);
-    template<typename... Doubles,
-             typename = typename std::enable_if<sizeof...(Doubles) + 1u == Rows * Cols>::type>
+    explicit Matrix(const double (&initArray)[Rows * Cols]);
+    template <typename... Doubles,
+              typename = typename std::enable_if<sizeof...(Doubles) + 1u == Rows * Cols>::type>
     Matrix(double firstElement, Doubles... matrixElements);
 
     // factory function that copies (+ cast if necessary) the 'NthMat' matrix from

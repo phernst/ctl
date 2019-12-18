@@ -170,3 +170,46 @@ void ProjectionMatrixTest::comparatorTest()
     QCOMPARE(compare.volumeOffset().get<2>(), -20.0);
     QCOMPARE(compare(P3, P4).meanError, 42.0);
 }
+
+void ProjectionMatrixTest::subMatExtraction()
+{
+    ProjectionMatrix Pmat{ 1, 2, 3, 4,
+                           5, 6, 7, 8,
+                           9, 10,11,12 };
+
+    const auto M = Pmat.subMat<0,2, 0,2>();
+    const auto resM = M - Matrix<3, 3>{ 1, 2, 3,
+                                        5, 6, 7,
+                                        9, 10,11 };
+    QVERIFY(qFuzzyIsNull(resM.norm()));
+
+    const auto m3 = Pmat.subMat<2,2, 0,2>();
+    QCOMPARE(m3.get<0>(), 9.0);
+    QCOMPARE(m3.get<1>(), 10.0);
+    QCOMPARE(m3.get<2>(), 11.0);
+
+    const auto p4 = Pmat.subMat<0,2, 3,3>();
+    QCOMPARE(p4.get<0>(), 4.0);
+    QCOMPARE(p4.get<1>(), 8.0);
+    QCOMPARE(p4.get<2>(), 12.0);
+
+    const auto p4Rev = p4.subMat<2,0>();
+    const auto p4Rev2 = Matrix<3, 1>{12, 8, 4};
+    QCOMPARE(p4Rev2, p4Rev);
+
+    const auto flipud = Pmat.subMat<2,0, 0,3>();
+    const auto resud = flipud - ProjectionMatrix{ 9, 10,11,12,
+                                                  5, 6, 7, 8,
+                                                  1, 2, 3, 4};
+    QVERIFY(qFuzzyIsNull(resud.norm()));
+
+    const auto fliprl = Pmat.subMat<0,2, 3,0>();
+    const auto resrl = fliprl - ProjectionMatrix{ 4, 3, 2, 1,
+                                                  8, 7, 6, 5,
+                                                  12,11,10,9 };
+    QVERIFY(qFuzzyIsNull(resrl.norm()));
+
+    const auto cornerElem = Pmat.subMat<2,2, 3,3>();
+    QCOMPARE(cornerElem.ref(), 12.0);
+    QCOMPARE(cornerElem, 12.0);
+}
