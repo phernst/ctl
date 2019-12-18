@@ -205,6 +205,15 @@ double MatrixBase<Rows, Cols>::get() const noexcept
     return _m[n];
 }
 
+/*!
+ * Returns the total number of elements that is `Rows*Cols`.
+ */
+template <uint Rows, uint Cols>
+constexpr size_t MatrixBase<Rows, Cols>::size() const
+{
+    return static_cast<size_t>(Rows) * static_cast<size_t>(Cols);
+}
+
 // formatting matrix entries to a string
 /*!
  * Prints the content of the matrix into the returned string. The \a lineModifier may be used to

@@ -86,6 +86,9 @@ public:
     const double* end() const { return std::end(_m); }
     const double* constEnd() const { return std::end(_m); }
 
+    // size
+    constexpr size_t size() const;
+
     // convert content to string
     static const char SEPARATOR_CHARACTER_FOR_INFO_STRING = '_';
     std::string info(const char* lineModifier = "") const;
