@@ -291,12 +291,14 @@ template <uint Rows, uint Cols>
 bool MatrixBase<Rows, Cols>::operator==(const MatrixBase<Rows, Cols>& rhs) const
 {
     auto rhsPtr = rhs.begin();
+
     for(auto val : _m)
     {
         if(val != *rhsPtr)
             return false;
         ++rhsPtr;
     }
+
     return true;
 }
 
@@ -530,6 +532,7 @@ Matrix<Rows, Cols>& Matrix<Rows, Cols>::operator/=(double scalar)
     std::transform(this->constBegin(), this->constEnd(), this->begin(), [scalar](double val) {
         return val / scalar;
     });
+
     return *this;
 }
 
@@ -572,7 +575,6 @@ template <uint Rows, uint Cols>
 Matrix<Rows, Cols> Matrix<Rows, Cols>::operator/(double scalar) const
 {
     Matrix<Rows, Cols> ret;
-    auto lhsPtr = this->constBegin();
 
     std::transform(this->constBegin(), this->constEnd(), ret.begin(), [scalar](double val) {
         return val / scalar;
@@ -634,6 +636,7 @@ operator*(const Matrix<Cols1_Rows2, Cols2>& rhs) const
             *retPtr = val;
             ++retPtr;
         }
+
     return ret;
 }
 
