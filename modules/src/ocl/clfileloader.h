@@ -45,11 +45,13 @@ namespace OCL {
  */
 class ClFileLoader
 {
+    static QString _oclSourceDir;
+
 public:
     ClFileLoader() = default;
-    ClFileLoader(const char* fileName);
-    ClFileLoader(std::string fileName);
-    ClFileLoader(const QString& fileName);
+    explicit ClFileLoader(const char* fileName);
+    explicit ClFileLoader(std::string fileName);
+    explicit ClFileLoader(const QString& fileName);
 
     void setFileName(const char* fileName);
     void setFileName(std::string fileName);
@@ -59,10 +61,18 @@ public:
     bool isValid() const;
     std::string loadSourceCode() const;
 
+    // static methods for adjusting the path of the OpenCL source files
+    static void setOpenCLSourceDir(const char* path);
+    static void setOpenCLSourceDir(const QString& path);
+    static void setOpenCLSourceDir(QString&& path);
+    static void setOpenCLSourceDir(const std::string& path);
+
+    static const QString& openCLSourceDir();
+
 private:
     std::string _fn;
 
-    const QString& absoluteOpenCLSourceDir() const;
+    static const QString& absoluteOpenCLSourceDir();
 };
 
 } // namespace OCL

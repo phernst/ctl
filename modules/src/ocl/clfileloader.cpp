@@ -5,9 +5,12 @@
 #include <QString>
 
 static QString determineOpenCLSourceDir();
+static void ensureProperEnding(QString& path);
 
 namespace CTL {
 namespace OCL {
+
+QString ClFileLoader::_oclSourceDir;
 
 // constructors
 /*!
@@ -86,13 +89,42 @@ std::string ClFileLoader::loadSourceCode() const
     return file.readAll().toStdString();
 }
 
+void ClFileLoader::setOpenCLSourceDir(const char* path)
+{
+    setOpenCLSourceDir(QString(path));
+}
+
+void ClFileLoader::setOpenCLSourceDir(const QString& path)
+{
+    _oclSourceDir = path;
+    ensureProperEnding(_oclSourceDir);
+}
+
+void ClFileLoader::setOpenCLSourceDir(QString&& path)
+{
+    _oclSourceDir = std::move(path);
+    ensureProperEnding(_oclSourceDir);
+}
+
+void ClFileLoader::setOpenCLSourceDir(const std::string& path)
+{
+    setOpenCLSourceDir(QString::fromStdString(path));
+}
+
+const QString& ClFileLoader::openCLSourceDir()
+{
+    return absoluteOpenCLSourceDir();
+}
+
 /*!
  * Returns the absolute path to the "ocl_src" directory in a platform-independent way.
  */
-const QString& ClFileLoader::absoluteOpenCLSourceDir() const
+const QString& ClFileLoader::absoluteOpenCLSourceDir()
 {
-    static const QString ret = determineOpenCLSourceDir();
-    return ret;
+    if(_oclSourceDir.isEmpty())
+        _oclSourceDir = determineOpenCLSourceDir();
+
+    return _oclSourceDir;
 }
 
 } // namespace OCL
@@ -101,10 +133,15 @@ const QString& ClFileLoader::absoluteOpenCLSourceDir() const
 QString determineOpenCLSourceDir()
 {
     QString ret = QCoreApplication::applicationDirPath();
-    if(!ret.isEmpty() &&
-       !ret.endsWith(QStringLiteral("/")) &&
-       !ret.endsWith(QStringLiteral("\\")))
-        ret += QStringLiteral("/");
+    ensureProperEnding(ret);
     ret += QStringLiteral("cl_src/");
     return ret;
+}
+
+static void ensureProperEnding(QString& path)
+{
+    if(!path.isEmpty() &&
+       !path.endsWith(QStringLiteral("/")) &&
+       !path.endsWith(QStringLiteral("\\")))
+        path += QStringLiteral("/");
 }
