@@ -209,7 +209,6 @@ void ProjectionMatrixTest::subMatExtraction()
                                                   12,11,10,9 };
     QVERIFY(qFuzzyIsNull(resrl.norm()));
 
-    const auto cornerElem = Pmat.subMat<2,2, 3,3>();
-    QCOMPARE(cornerElem.ref(), 12.0);
+    const auto cornerElem = Pmat.subMat<2,2, 3,3>().ref();
     QCOMPARE(cornerElem, 12.0);
 }
