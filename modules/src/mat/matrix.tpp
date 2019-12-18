@@ -334,7 +334,7 @@ inline Matrix<Rows, Cols>::Matrix(const double (&initArray)[Rows * Cols])
 
 /*!
  * Construct an instance from a list of arguments that specifies each element in row major order.
- * The the length of the argument list must be equal to the total number of matrix elements.
+ * The length of the argument list must match the total number of matrix elements.
  */
 template <uint Rows, uint Cols>
 template <typename... Doubles, typename>
