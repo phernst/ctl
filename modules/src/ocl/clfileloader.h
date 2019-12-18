@@ -48,7 +48,7 @@ class ClFileLoader
     static QString _oclSourceDir;
 
 public:
-    ClFileLoader() = default;
+    explicit ClFileLoader() = default;
     explicit ClFileLoader(const char* fileName);
     explicit ClFileLoader(std::string fileName);
     explicit ClFileLoader(const QString& fileName);

@@ -89,35 +89,70 @@ std::string ClFileLoader::loadSourceCode() const
     return file.readAll().toStdString();
 }
 
+/*!
+ * Sets the path of the OpenCL directory to \a path. The filename of an OpenCL file is a relative
+ * path to this directory. If this function is never called, a default directory is used, which is
+ * the folder "cl_src" in the directory of the current application (the executable).
+ *
+ * \sa setFileName(const char* path)
+ */
 void ClFileLoader::setOpenCLSourceDir(const char* path)
 {
     setOpenCLSourceDir(QString(path));
 }
 
+/*!
+ * Sets the path of the OpenCL directory to \a path. The filename of an OpenCL file is a relative
+ * path to this directory. If this function is never called, a default directory is used, which is
+ * the folder "cl_src" in the directory of the current application (the executable).
+ *
+ * \sa setFileName(const QString& path)
+ */
 void ClFileLoader::setOpenCLSourceDir(const QString& path)
 {
     _oclSourceDir = path;
     ensureProperEnding(_oclSourceDir);
 }
 
+/*!
+ * Sets the path of the OpenCL directory to \a path. The filename of an OpenCL file is a relative
+ * path to this directory. If this function is never called, a default directory is used, which is
+ * the folder "cl_src" in the directory of the current application (the executable).
+ *
+ * \sa setFileName(const QString& path)
+ */
 void ClFileLoader::setOpenCLSourceDir(QString&& path)
 {
     _oclSourceDir = std::move(path);
     ensureProperEnding(_oclSourceDir);
 }
 
+/*!
+ * Sets the path of the OpenCL directory to \a path. The filename of an OpenCL file is a relative
+ * path to this directory. If this function is never called, a default directory is used, which is
+ * the folder "cl_src" in the directory of the current application (the executable).
+ *
+ * \sa setFileName(std::string path)
+ */
 void ClFileLoader::setOpenCLSourceDir(const std::string& path)
 {
     setOpenCLSourceDir(QString::fromStdString(path));
 }
 
+/*!
+ * Returns the path to the OpenCL directory, where OpenCL kernel files are stored.
+ * This could be the default path ("cl_src" next to the executable) or the path that has been set
+ * by setOpenCLSourceDir().
+ */
 const QString& ClFileLoader::openCLSourceDir()
 {
     return absoluteOpenCLSourceDir();
 }
 
 /*!
- * Returns the absolute path to the "ocl_src" directory in a platform-independent way.
+ * Returns the absolute path to the "ocl_src" directory. If no OpenCL source directory has been set,
+ * it determines the absolute path "<executable's directory>/cl_src" in a platform-independent way
+ * provided that `QCoreApplication` has been instatiated in the main() of the application.
  */
 const QString& ClFileLoader::absoluteOpenCLSourceDir()
 {
