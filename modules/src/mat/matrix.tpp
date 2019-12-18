@@ -8,7 +8,6 @@
 ******************************************************************************/
 
 #include "matrix.h" // optional, only for the IDE
-#include <stdexcept>
 
 namespace CTL {
 namespace mat {
@@ -279,9 +278,8 @@ double MatrixBase<Rows, Cols>::norm() const
                   "For using 'norm()' as the Frobenius norm of a matrix, "
                   "please define 'ENABLE_FROBENIUS_NORM' before including 'matrix.h'.");
 #endif
-    double ret = 0.0;
-    for(auto val : _m)
-        ret += val * val;
+    const auto ret = std::inner_product(this->constBegin(), this->constEnd(), this->constBegin(),
+                                        0.0);
     return std::sqrt(ret);
 }
 
@@ -290,14 +288,14 @@ double MatrixBase<Rows, Cols>::norm() const
  * of all elements; otherwise false.
  */
 template <uint Rows, uint Cols>
-bool MatrixBase<Rows, Cols>::operator==(const MatrixBase<Rows, Cols>& other) const
+bool MatrixBase<Rows, Cols>::operator==(const MatrixBase<Rows, Cols>& rhs) const
 {
-    auto otherPtr = other.begin();
+    auto rhsPtr = rhs.begin();
     for(auto val : _m)
     {
-        if(val != *otherPtr)
+        if(val != *rhsPtr)
             return false;
-        ++otherPtr;
+        ++rhsPtr;
     }
     return true;
 }
@@ -307,9 +305,9 @@ bool MatrixBase<Rows, Cols>::operator==(const MatrixBase<Rows, Cols>& other) con
  * the matrices does not have the equal (byte) representation.
  */
 template <uint Rows, uint Cols>
-bool MatrixBase<Rows, Cols>::operator!=(const MatrixBase<Rows, Cols>& other) const
+bool MatrixBase<Rows, Cols>::operator!=(const MatrixBase<Rows, Cols>& rhs) const
 {
-    return !(*this == other);
+    return !(*this == rhs);
 }
 
 // ### Matrix ###
@@ -360,8 +358,7 @@ Matrix<Rows, Cols>::fromContainer(const Container& vector, size_t NthMat, bool* 
     auto offSet = NthMat * Rows * Cols;
     if(offSet + Rows * Cols > static_cast<size_t>(vector.size()))
     {
-        if(ok)
-            *ok = false;
+        if(ok) *ok = false;
         return Matrix<Rows, Cols>(0.0);
     }
 
@@ -372,8 +369,9 @@ Matrix<Rows, Cols>::fromContainer(const Container& vector, size_t NthMat, bool* 
         val = static_cast<double>(*vecIt);
         ++vecIt;
     }
-    if(ok)
-        *ok = true;
+
+    if(ok) *ok = true;
+
     return ret;
 }
 
@@ -449,7 +447,7 @@ auto Matrix<Rows, Cols>::subMat() const -> Matrix<vecRowDim(from, to), vecColDim
 }
 
 /*!
- * Returns the \a i'th row of the matrix.
+ * Returns the \a i'th row of the matrix. Performes compile time boundary check.
  */
 template <uint Rows, uint Cols>
 template <uint i>
@@ -457,12 +455,14 @@ Matrix<1, Cols> Matrix<Rows, Cols>::row() const
 {
     static_assert(i < Rows, "row index must not exceed matrix dimensions");
     Matrix<1, Cols> ret;
+
     std::copy_n((*this)[i], Cols, ret.begin());
+
     return ret;
 }
 
 /*!
- * Returns the \a j'th column of the matrix.
+ * Returns the \a j'th column of the matrix. Performes compile time boundary check.
  */
 template <uint Rows, uint Cols>
 template <uint j>
@@ -471,11 +471,13 @@ Matrix<Rows, 1> Matrix<Rows, Cols>::column() const
     static_assert(j < Cols, "column index must not exceed matrix dimensions");
     Matrix<Rows, 1> ret;
     auto scrPtr = this->constBegin() + j;
+
     for(auto& val : ret)
     {
         val = *scrPtr;
         scrPtr += Cols;
     }
+
     return ret;
 }
 
@@ -487,27 +489,27 @@ Matrix<Cols, Rows> Matrix<Rows, Cols>::transposed() const
 {
     Matrix<Cols, Rows> ret;
     auto scrPtr = this->constBegin();
-    uint row, column;
 
-    for(row = 0; row < Rows; ++row)
-        for(column = 0; column < Cols; ++column)
+    for(auto row = 0u; row < Rows; ++row)
+        for(auto column = 0u; column < Cols; ++column)
         {
             ret(column, row) = *scrPtr;
             ++scrPtr;
         }
+
     return ret;
 }
 
+// unary minus operator
 template <uint Rows, uint Cols>
 Matrix<Rows, Cols> Matrix<Rows, Cols>::operator-() const
 {
     Matrix<Rows, Cols> ret;
-    auto scrPtr = this->constBegin();
-    for(auto& val : ret)
-    {
-        val = -*scrPtr;
-        ++scrPtr;
-    }
+
+    std::transform(this->constBegin(), this->constEnd(), ret.begin(), [](double val) {
+        return -val;
+    });
+
     return ret;
 }
 
@@ -515,40 +517,41 @@ Matrix<Rows, Cols> Matrix<Rows, Cols>::operator-() const
 template <uint Rows, uint Cols>
 Matrix<Rows, Cols>& Matrix<Rows, Cols>::operator*=(double scalar)
 {
-    for(auto& val : *this)
-        val *= scalar;
+    std::transform(this->constBegin(), this->constEnd(), this->begin(), [scalar](double val) {
+        return val * scalar;
+    });
+
     return *this;
 }
 
 template <uint Rows, uint Cols>
 Matrix<Rows, Cols>& Matrix<Rows, Cols>::operator/=(double scalar)
 {
-    for(auto& val : *this)
-        val /= scalar;
+    std::transform(this->constBegin(), this->constEnd(), this->begin(), [scalar](double val) {
+        return val / scalar;
+    });
     return *this;
 }
 
 template <uint Rows, uint Cols>
-Matrix<Rows, Cols>& Matrix<Rows, Cols>::operator+=(const Matrix<Rows, Cols>& other)
+Matrix<Rows, Cols>& Matrix<Rows, Cols>::operator+=(const Matrix<Rows, Cols>& rhs)
 {
-    auto otherPtr = other.begin();
-    for(auto& val : *this)
-    {
-        val += *otherPtr;
-        ++otherPtr;
-    }
+    std::transform(this->constBegin(), this->constEnd(), rhs.constBegin(), this->begin(),
+                   [](double leftVal, double rightVal) {
+        return leftVal + rightVal;
+    });
+
     return *this;
 }
 
 template <uint Rows, uint Cols>
-Matrix<Rows, Cols>& Matrix<Rows, Cols>::operator-=(const Matrix<Rows, Cols>& other)
+Matrix<Rows, Cols>& Matrix<Rows, Cols>::operator-=(const Matrix<Rows, Cols>& rhs)
 {
-    auto otherPtr = other.begin();
-    for(auto& val : *this)
-    {
-        val -= *otherPtr;
-        ++otherPtr;
-    }
+    std::transform(this->constBegin(), this->constEnd(), rhs.constBegin(), this->begin(),
+                   [](double leftVal, double rightVal) {
+        return leftVal - rightVal;
+    });
+
     return *this;
 }
 
@@ -557,12 +560,11 @@ template <uint Rows, uint Cols>
 Matrix<Rows, Cols> Matrix<Rows, Cols>::operator*(double scalar) const
 {
     Matrix<Rows, Cols> ret;
-    auto lhsPtr = this->constBegin();
-    for(auto& val : ret)
-    {
-        val = *lhsPtr * scalar;
-        ++lhsPtr;
-    }
+
+    std::transform(this->constBegin(), this->constEnd(), ret.begin(), [scalar](double val) {
+        return val * scalar;
+    });
+
     return ret;
 }
 
@@ -571,11 +573,11 @@ Matrix<Rows, Cols> Matrix<Rows, Cols>::operator/(double scalar) const
 {
     Matrix<Rows, Cols> ret;
     auto lhsPtr = this->constBegin();
-    for(auto& val : ret)
-    {
-        val = *lhsPtr / scalar;
-        ++lhsPtr;
-    }
+
+    std::transform(this->constBegin(), this->constEnd(), ret.begin(), [scalar](double val) {
+        return val / scalar;
+    });
+
     return ret;
 }
 
@@ -583,14 +585,12 @@ template <uint Rows, uint Cols>
 Matrix<Rows, Cols> Matrix<Rows, Cols>::operator+(const Matrix<Rows, Cols>& rhs) const
 {
     Matrix<Rows, Cols> ret;
-    auto lhsPtr = this->constBegin();
-    auto rhsPtr = rhs.constBegin();
-    for(auto& val : ret)
-    {
-        val = *lhsPtr + *rhsPtr;
-        ++lhsPtr;
-        ++rhsPtr;
-    }
+
+    std::transform(this->constBegin(), this->constEnd(), rhs.constBegin(), ret.begin(),
+                   [](double leftVal, double rightVal) {
+        return leftVal + rightVal;
+    });
+
     return ret;
 }
 
@@ -598,14 +598,12 @@ template <uint Rows, uint Cols>
 Matrix<Rows, Cols> Matrix<Rows, Cols>::operator-(const Matrix<Rows, Cols>& rhs) const
 {
     Matrix<Rows, Cols> ret;
-    auto lhsPtr = this->constBegin();
-    auto rhsPtr = rhs.constBegin();
-    for(auto& val : ret)
-    {
-        val = *lhsPtr - *rhsPtr;
-        ++lhsPtr;
-        ++rhsPtr;
-    }
+
+    std::transform(this->constBegin(), this->constEnd(), rhs.constBegin(), ret.begin(),
+                   [](double leftVal, double rightVal) {
+        return leftVal - rightVal;
+    });
+
     return ret;
 }
 
@@ -620,18 +618,14 @@ operator*(const Matrix<Cols1_Rows2, Cols2>& rhs) const
     const Matrix<Rows1, Cols1_Rows2>& lhs = *this;
     Matrix<Rows1, Cols2> ret;
     auto retPtr = ret.begin();
-    const double* lhsPtr;
-    const double* rhsPtr;
-    double val;
-    uint row, column, i;
 
-    for(row = 0; row < Rows1; ++row)
-        for(column = 0; column < Cols2; ++column)
+    for(auto row = 0u; row < Rows1; ++row)
+        for(auto column = 0u; column < Cols2; ++column)
         {
-            val = 0.0;
-            lhsPtr = lhs[row];
-            rhsPtr = rhs[0] + column;
-            for(i = 0; i < Cols1_Rows2; ++i)
+            auto val = 0.0;
+            auto* lhsPtr = lhs[row];
+            auto* rhsPtr = rhs[0] + column;
+            for(auto i = 0u; i < Cols1_Rows2; ++i)
             {
                 val += *lhsPtr * *rhsPtr;
                 lhsPtr += 1;

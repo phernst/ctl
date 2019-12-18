@@ -10,7 +10,9 @@
 #define MATRIX_H
 
 #include <algorithm>
-#include <cmath> // required for sqrt() in 'MatrixBase::norm()'
+#include <cmath>
+#include <numeric>
+#include <stdexcept>
 #include <string>
 
 typedef unsigned int uint;
@@ -97,8 +99,8 @@ public:
     double norm() const;
 
     // equality operator
-    bool operator==(const MatrixBase<Rows, Cols>& other) const;
-    bool operator!=(const MatrixBase<Rows, Cols>& other) const;
+    bool operator==(const MatrixBase<Rows, Cols>& rhs) const;
+    bool operator!=(const MatrixBase<Rows, Cols>& rhs) const;
 
 private:
     // the data
@@ -148,8 +150,8 @@ public:
     // compound assignment
     Matrix<Rows, Cols>& operator*=(double scalar);
     Matrix<Rows, Cols>& operator/=(double scalar);
-    Matrix<Rows, Cols>& operator+=(const Matrix<Rows, Cols>& other);
-    Matrix<Rows, Cols>& operator-=(const Matrix<Rows, Cols>& other);
+    Matrix<Rows, Cols>& operator+=(const Matrix<Rows, Cols>& rhs);
+    Matrix<Rows, Cols>& operator-=(const Matrix<Rows, Cols>& rhs);
     // binary operators
     Matrix<Rows, Cols> operator*(double scalar) const;
     Matrix<Rows, Cols> operator/(double scalar) const;
