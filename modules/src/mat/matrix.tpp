@@ -224,7 +224,7 @@ std::string MatrixBase<Rows, Cols>::info(const char* lineModifier) const
     // number of spaces (SEPARATOR_CHARACTER_FOR_INFO_STRING) between numbers
     // -> must be at least 3, otherwise last column will be truncated
     static const uint numSpacesInBetween = 3;
-    // prpare begin of each line (row) using lineModifier
+    // prepare begin of each line (row) using lineModifier
     size_t lineModSize = std::char_traits<char>::length(lineModifier);
     std::string lineBegin(lineModSize + 1, '|');
     lineBegin.replace(0, lineModSize, lineModifier);
@@ -610,12 +610,12 @@ Matrix<Rows, Cols> Matrix<Rows, Cols>::operator-(const Matrix<Rows, Cols>& rhs) 
 }
 
 /*!
- * Return the result of a standard matrix multiplication.
+ * Returns the result of a standard matrix multiplication.
  */
 template <uint Rows1, uint Cols1_Rows2>
 template <uint Cols2>
-Matrix<Rows1, Cols2> Matrix<Rows1, Cols1_Rows2>::
-operator*(const Matrix<Cols1_Rows2, Cols2>& rhs) const
+Matrix<Rows1, Cols2>
+Matrix<Rows1, Cols1_Rows2>::operator*(const Matrix<Cols1_Rows2, Cols2>& rhs) const
 {
     const Matrix<Rows1, Cols1_Rows2>& lhs = *this;
     Matrix<Rows1, Cols2> ret;
