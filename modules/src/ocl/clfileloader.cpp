@@ -90,9 +90,10 @@ std::string ClFileLoader::loadSourceCode() const
 }
 
 /*!
- * Sets the path of the OpenCL directory to \a path. The filename of an OpenCL file is a relative
- * path to this directory. If this function is never called, a default directory is used, which is
- * the folder "cl_src" in the directory of the current application (the executable).
+ * Sets the path of the OpenCL source directory to \a path. The filename of an OpenCL C file (.cl)
+ * is a relative path w.r.t. this directory. If this function is never called or called with an
+ * empty string, a default directory is used, which is the folder "cl_src" in the directory of the
+ * current application (the executable).
  *
  * \sa setFileName(const char* path)
  */
@@ -102,9 +103,10 @@ void ClFileLoader::setOpenCLSourceDir(const char* path)
 }
 
 /*!
- * Sets the path of the OpenCL directory to \a path. The filename of an OpenCL file is a relative
- * path to this directory. If this function is never called, a default directory is used, which is
- * the folder "cl_src" in the directory of the current application (the executable).
+ * Sets the path of the OpenCL source directory to \a path. The filename of an OpenCL C file (.cl)
+ * is a relative path w.r.t. this directory. If this function is never called or called with an
+ * empty string, a default directory is used, which is the folder "cl_src" in the directory of the
+ * current application (the executable).
  *
  * \sa setFileName(const QString& path)
  */
@@ -115,9 +117,10 @@ void ClFileLoader::setOpenCLSourceDir(const QString& path)
 }
 
 /*!
- * Sets the path of the OpenCL directory to \a path. The filename of an OpenCL file is a relative
- * path to this directory. If this function is never called, a default directory is used, which is
- * the folder "cl_src" in the directory of the current application (the executable).
+ * Sets the path of the OpenCL source directory to \a path. The filename of an OpenCL C file (.cl)
+ * is a relative path w.r.t. this directory. If this function is never called or called with an
+ * empty string, a default directory is used, which is the folder "cl_src" in the directory of the
+ * current application (the executable).
  *
  * \sa setFileName(const QString& path)
  */
@@ -128,9 +131,10 @@ void ClFileLoader::setOpenCLSourceDir(QString&& path)
 }
 
 /*!
- * Sets the path of the OpenCL directory to \a path. The filename of an OpenCL file is a relative
- * path to this directory. If this function is never called, a default directory is used, which is
- * the folder "cl_src" in the directory of the current application (the executable).
+ * Sets the path of the OpenCL source directory to \a path. The filename of an OpenCL C file (.cl)
+ * is a relative path w.r.t. this directory. If this function is never called or called with an
+ * empty string, a default directory is used, which is the folder "cl_src" in the directory of the
+ * current application (the executable).
  *
  * \sa setFileName(std::string path)
  */
@@ -140,7 +144,7 @@ void ClFileLoader::setOpenCLSourceDir(const std::string& path)
 }
 
 /*!
- * Returns the path to the OpenCL directory, where OpenCL kernel files are stored.
+ * Returns the path to the OpenCL directory, where OpenCL C kernel files are stored.
  * This could be the default path ("cl_src" next to the executable) or the path that has been set
  * by setOpenCLSourceDir().
  */
