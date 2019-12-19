@@ -24,7 +24,8 @@ MatrixBase<Rows, Cols>::MatrixBase(double fillValue)
 }
 
 /*!
- * Construct an instance from a C-style array.
+ * Construct an instance from a C-style array. The array length must match the total number of
+ * matrix elements, otherwise it results in a compilation error.
  */
 template <uint Rows, uint Cols>
 inline MatrixBase<Rows, Cols>::MatrixBase(const double (&initArray)[Rows * Cols])
@@ -349,7 +350,8 @@ Matrix<Rows, Cols>::Matrix(double fillValue)
 }
 
 /*!
- * Construct an instance from a C-style array.
+ * Construct an instance from a C-style array. The array length must match the total number of
+ * matrix elements, otherwise it results in a compilation error.
  *
  * \code
  *  double ar[4] = { 1., 2., 3., 4. };
@@ -364,7 +366,8 @@ inline Matrix<Rows, Cols>::Matrix(const double (&initArray)[Rows * Cols])
 
 /*!
  * Construct an instance from a list of arguments that specifies each element in row major order.
- * The length of the argument list must match the total number of matrix elements.
+ * The length of the argument list must match the total number of matrix elements, otherwise it
+ * results in a compilation error.
  *
  * \code
  *  Matrix<3, 3> M{ 1.1, 1.2, 1.3,
@@ -430,7 +433,7 @@ Matrix<Rows, Cols>::fromContainer(const Container& vector, size_t NthMat, bool* 
  *  // Example for extracting a single element from a 2x2 matrix (bottom right corner).
  *  const Matrix<2, 2> mat{ 11., 12.,
  *                          21., 22. };
- *  qInfo() << (mat.subMat<1,1, 1,1>() == 22.); // prints `true`
+ *  bool test = (mat.subMat<1,1, 1,1>() == 22.); // test is `true`
  * \endcode
  */
 template <uint Rows, uint Cols>
