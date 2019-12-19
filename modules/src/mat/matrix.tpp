@@ -818,6 +818,11 @@ inline Matrix<1, 1>& Matrix<1, 1>::operator-=(double scalar)
 
 // ### Free functions and operators ###
 
+/*!
+* Returns the result of a scalar multiplication of \a scalar with the `Matrix` \a rhs.
+*
+* \relates Matrix
+*/
 template <uint Rows, uint Cols>
 CTL::mat::Matrix<Rows, Cols> operator*(double scalar, const CTL::mat::Matrix<Rows, Cols>& rhs)
 {
@@ -826,6 +831,8 @@ CTL::mat::Matrix<Rows, Cols> operator*(double scalar, const CTL::mat::Matrix<Row
 
 /*!
  * Returns a diagonal \a N x \a N matrix with \a diagElements on the main diagonal.
+ *
+ * \relates Matrix
  */
 template <uint N>
 Matrix<N, N> diag(const Matrix<N, 1>& diagElements)
@@ -838,6 +845,8 @@ Matrix<N, N> diag(const Matrix<N, 1>& diagElements)
 
 /*!
  * Returns an \a N x \a N identity matrix.
+ *
+ * \relates Matrix
  */
 template <uint N>
 Matrix<N, N> eye()
@@ -856,6 +865,8 @@ Matrix<N, N> eye()
 /*!
  * Returns a (\a Rows) x (\a Cols1 + \a Cols2) matrix that is a horizontal concatenation of
  * \a m1 and \a m2.
+ *
+ * \relates Matrix
  */
 template <uint Rows, uint Cols1, uint Cols2>
 Matrix<Rows, Cols1 + Cols2> horzcat(const Matrix<Rows, Cols1>& m1, const Matrix<Rows, Cols2>& m2)
@@ -875,6 +886,8 @@ Matrix<Rows, Cols1 + Cols2> horzcat(const Matrix<Rows, Cols1>& m1, const Matrix<
 /*!
  * Returns a (\a Rows1 + \a Rows2) x (\a Cols) matrix that is a vertical concatenation of
  * \a m1 and \a m2.
+ *
+ * \relates Matrix
  */
 template <uint Rows1, uint Rows2, uint Cols>
 Matrix<Rows1 + Rows2, Cols> vertcat(const Matrix<Rows1, Cols>& m1, const Matrix<Rows2, Cols>& m2)
