@@ -206,6 +206,86 @@ double MatrixBase<Rows, Cols>::get() const noexcept
 }
 
 /*!
+ * Returns a pointer to the first element of the matrix.
+ * The elements are internally stored in a linear array in row major order.
+ * Same as begin().
+ */
+template <uint Rows, uint Cols>
+double* MatrixBase<Rows, Cols>::data() { return _m; }
+
+/*!
+ * Returns a pointer to the first element of the matrix. This `const` version prohibits
+ * manipulations of the matrix elements through dereferencing the pointer.
+ * The elements are internally stored in a linear array in row major order.
+ * Same as begin().
+ */
+template <uint Rows, uint Cols>
+const double* MatrixBase<Rows, Cols>::data() const { return _m; }
+
+/*!
+ * Returns a pointer to the first element of the matrix. This `const` version prohibits
+ * manipulations of the matrix elements through dereferencing the pointer, even when this methods is
+ * called from a non-const instance.
+ * The elements are internally stored in a linear array in row major order.
+ * Same as constBegin().
+ */
+template <uint Rows, uint Cols>
+const double* MatrixBase<Rows, Cols>::constData() const { return _m; }
+
+/*!
+ * Returns a pointer to the first element of the matrix.
+ * The elements are internally stored in a linear array in row major order.
+ * Same as data().
+ */
+template <uint Rows, uint Cols>
+double* MatrixBase<Rows, Cols>::begin() { return _m; }
+
+/*!
+ * Returns a pointer to the first element of the matrix. This `const` version prohibits
+ * manipulations of the matrix elements through dereferencing the pointer.
+ * The elements are internally stored in a linear array in row major order.
+ * Same as data().
+ */
+template <uint Rows, uint Cols>
+const double* MatrixBase<Rows, Cols>::begin() const { return _m; }
+
+/*!
+ * Returns a pointer to the first element of the matrix. This `const` version prohibits
+ * manipulations of the matrix elements through dereferencing the pointer, even when this methods is
+ * called from a non-const instance.
+ * The elements are internally stored in a linear array in row major order.
+ * Same as constData().
+ */
+template <uint Rows, uint Cols>
+const double* MatrixBase<Rows, Cols>::constBegin() const { return _m; }
+
+/*!
+ * Returns a pointer to the element following the last element of the matrix.
+ * This pointer is useful for having a boundary when looping over the matrix elements.
+ * However, attempting to access it results in undefined behavior.
+ */
+template <uint Rows, uint Cols>
+double* MatrixBase<Rows, Cols>::end() { return std::end(_m); }
+
+/*!
+ * Returns a pointer to the element following the last element of the matrix.
+ * This pointer is useful for having a boundary when looping over the matrix elements.
+ * However, attempting to access it results in undefined behavior.
+ */
+template <uint Rows, uint Cols>
+const double* MatrixBase<Rows, Cols>::end() const { return std::end(_m); }
+
+/*!
+ * Returns a pointer to the element following the last element of the matrix. This `const` version
+ * prohibits manipulations of the matrix elements through dereferencing the pointer, even when this
+ * methods is called from a non-const instance.
+ * This pointer is useful for having a boundary when looping over the matrix elements.
+ * However, attempting to access it results in undefined behavior.
+ */
+template <uint Rows, uint Cols>
+const double* MatrixBase<Rows, Cols>::constEnd() const { return std::end(_m); }
+
+/*!
  * Returns the total number of elements that is `Rows*Cols`.
  */
 template <uint Rows, uint Cols>
@@ -333,7 +413,7 @@ bool MatrixBase<Rows, Cols>::operator!=(const MatrixBase<Rows, Cols>& rhs) const
     return !(*this == rhs);
 }
 
-// ### Matrix ###
+// ### Matrix template ###
 // constructors
 /*!
  * Construct an instance and initialize all elements with a \a fillValue.
@@ -697,7 +777,46 @@ constexpr uint Matrix<Rows, Cols>::vecColDim(uint from, uint to)
     return Cols > 1u ? rangeDim(from, to) : 1u;
 }
 
-// free functions and operators
+// ### Scalar specialization ###
+
+inline Matrix<1, 1>::Matrix(double value)
+    : MatrixBase<1, 1>(value)
+{
+}
+
+inline double Matrix<1, 1>::value() const { return *begin(); }
+
+inline double& Matrix<1, 1>::ref() { return *begin(); }
+
+inline const double& Matrix<1, 1>::ref() const { return *begin(); }
+
+inline Matrix<1, 1>::operator double() const { return *begin(); }
+
+inline Matrix<1, 1>& Matrix<1, 1>::operator*=(double scalar)
+{
+    ref() *= scalar;
+    return *this;
+}
+
+inline Matrix<1, 1>& Matrix<1, 1>::operator/=(double scalar)
+{
+    ref() /= scalar;
+    return *this;
+}
+
+inline Matrix<1, 1>& Matrix<1, 1>::operator+=(double scalar)
+{
+    ref() += scalar;
+    return *this;
+}
+
+inline Matrix<1, 1>& Matrix<1, 1>::operator-=(double scalar)
+{
+    ref() -= scalar;
+    return *this;
+}
+
+// ### Free functions and operators ###
 
 template <uint Rows, uint Cols>
 CTL::mat::Matrix<Rows, Cols> operator*(double scalar, const CTL::mat::Matrix<Rows, Cols>& rhs)

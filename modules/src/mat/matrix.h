@@ -1,6 +1,6 @@
 /******************************************************************************
 ** 'Matrix' template class for basic matrix calculations
-** by Robert Frysch | Dec 18, 2019
+** by Robert Frysch | Dec 19, 2019
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -37,7 +37,7 @@ namespace mat {
  * Elements are stored in row major order.
  */
 
-// uniform interface and ressource
+// Base class for uniform interface and ressource
 template <uint Rows, uint Cols>
 class MatrixBase
 {
@@ -78,15 +78,15 @@ public:
     double get() const noexcept;
 
     // pointer access to array (row-major order)
-    double* data() { return _m; } // optional, for convenience
-    const double* data() const { return _m; } // optional, for convenience
-    const double* constData() const { return _m; } // optional, for convenience
-    double* begin() { return _m; }
-    const double* begin() const { return _m; }
-    const double* constBegin() const { return _m; }
-    double* end() { return std::end(_m); }
-    const double* end() const { return std::end(_m); }
-    const double* constEnd() const { return std::end(_m); }
+    double* data();
+    const double* data() const;
+    const double* constData() const;
+    double* begin();
+    const double* begin() const;
+    const double* constBegin() const;
+    double* end();
+    const double* end() const;
+    const double* constEnd() const;
 
     // size
     constexpr size_t size() const;
@@ -107,7 +107,7 @@ private:
     double _m[Rows * Cols];
 };
 
-// actual Matrix class for matrices and vectors
+// Actual Matrix class for matrices and vectors
 template <uint Rows, uint Cols>
 class Matrix : public MatrixBase<Rows, Cols>
 {
@@ -161,53 +161,34 @@ public:
     Matrix<Rows, Cols2> operator*(const Matrix<Cols, Cols2>& rhs) const;
 };
 
-// scalar specialization
+// Scalar specialization
 template <>
 class Matrix<1, 1> : public MatrixBase<1, 1>
 {
 public:
     Matrix() = default;
-    Matrix(double value)
-        : MatrixBase<1, 1>(value)
-    {
-    }
+    Matrix(double value);
 
     // dedicated access to scalar value
-    double value() const { return *begin(); }
-    double& ref() { return *begin(); }
-    const double& ref() const { return *begin(); }
+    double value() const;
+    double& ref();
+    const double& ref() const;
 
     // implicit conversion to 'double'
-    operator double() const { return *begin(); }
+    operator double() const;
 
     // operations
-    Matrix<1, 1> transposed() const { return *this; }
-    Matrix<1, 1>& operator*=(double scalar)
-    {
-        ref() *= scalar;
-        return *this;
-    }
-    Matrix<1, 1>& operator/=(double scalar)
-    {
-        ref() /= scalar;
-        return *this;
-    }
-    Matrix<1, 1>& operator+=(double scalar)
-    {
-        ref() += scalar;
-        return *this;
-    }
-    Matrix<1, 1>& operator-=(double scalar)
-    {
-        ref() -= scalar;
-        return *this;
-    }
+    Matrix<1, 1>& operator*=(double scalar);
+    Matrix<1, 1>& operator/=(double scalar);
+    Matrix<1, 1>& operator+=(double scalar);
+    Matrix<1, 1>& operator-=(double scalar);
 };
 
-// global operators
+// Free operators
 template <uint Rows, uint Cols>
 CTL::mat::Matrix<Rows, Cols> operator*(double scalar, const CTL::mat::Matrix<Rows, Cols>& rhs);
 
+// Free functions
 // diagonal squared matrix
 template <uint N>
 Matrix<N, N> diag(const Matrix<N, 1>& diagElements);
