@@ -1,5 +1,5 @@
 #include "volumeslicer.h"
-#include "mat/matrix_utils.h"
+#include "mat/matrix_algorithm.h"
 #include "ocl/clfileloader.h"
 
 #include <QDebug>

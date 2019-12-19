@@ -204,15 +204,27 @@ public:
     }
 };
 
-} // namespace mat
-} // namespace CTL
-
 // global operators
 template <uint Rows, uint Cols>
-CTL::mat::Matrix<Rows, Cols> operator*(double scalar, const CTL::mat::Matrix<Rows, Cols>& rhs)
-{
-    return rhs * scalar;
-}
+CTL::mat::Matrix<Rows, Cols> operator*(double scalar, const CTL::mat::Matrix<Rows, Cols>& rhs);
+
+// diagonal squared matrix
+template <uint N>
+Matrix<N, N> diag(const Matrix<N, 1>& diagElements);
+
+// NxN identity matrix
+template <uint N>
+Matrix<N, N> eye();
+
+// concatenation
+template <uint Rows, uint Cols1, uint Cols2>
+Matrix<Rows, Cols1 + Cols2> horzcat(const Matrix<Rows, Cols1>& m1, const Matrix<Rows, Cols2>& m2);
+
+template <uint Rows1, uint Rows2, uint Cols>
+Matrix<Rows1 + Rows2, Cols> vertcat(const Matrix<Rows1, Cols>& m1, const Matrix<Rows2, Cols>& m2);
+
+} // namespace mat
+} // namespace CTL
 
 #include "matrix.tpp"
 

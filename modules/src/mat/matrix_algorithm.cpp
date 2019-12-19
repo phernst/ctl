@@ -76,6 +76,13 @@ PairMat3x3 RQdecomposition(const Matrix3x3 &A, bool unique, bool normalize)
     return ret;
 }
 
+Vector3x1 cross(const Vector3x1& l, const Vector3x1& r)
+{
+    return { l.get<1>() * r.get<2>() - l.get<2>() * r.get<1>(),
+             l.get<2>() * r.get<0>() - l.get<0>() * r.get<2>(),
+             l.get<0>() * r.get<1>() - l.get<1>() * r.get<0>() };
+}
+
 double det(const Matrix3x3 & m)
 {
     return

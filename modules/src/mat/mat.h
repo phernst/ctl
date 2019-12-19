@@ -11,6 +11,7 @@
  */
 
 #include "matrix_algorithm.h"
+#include "matrix_utils.h"
 #include "pmatcomparator.h"
 #include "deg.h"
 

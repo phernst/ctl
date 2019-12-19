@@ -697,5 +697,87 @@ constexpr uint Matrix<Rows, Cols>::vecColDim(uint from, uint to)
     return Cols > 1u ? rangeDim(from, to) : 1u;
 }
 
+// free functions and operators
+
+template <uint Rows, uint Cols>
+CTL::mat::Matrix<Rows, Cols> operator*(double scalar, const CTL::mat::Matrix<Rows, Cols>& rhs)
+{
+    return rhs * scalar;
+}
+
+/*!
+ * Returns a diagonal \a N x \a N matrix with \a diagElements on the main diagonal.
+ */
+template <uint N>
+Matrix<N, N> diag(const Matrix<N, 1>& diagElements)
+{
+    Matrix<N, N> ret(0.0);
+    for(uint d = 0; d < N; ++d)
+        ret(d, d) = diagElements(d);
+    return ret;
+}
+
+/*!
+ * Returns an \a N x \a N identity matrix.
+ */
+template <uint N>
+Matrix<N, N> eye()
+{
+    static Matrix<N, N> ret(0.0);
+    static bool toBeInit = true;
+    if(toBeInit)
+    {
+        for(uint i = 0; i < N; ++i)
+            ret(i, i) = 1.0;
+        toBeInit = false;
+    }
+    return ret;
+}
+
+/*!
+ * Returns a (\a Rows) x (\a Cols1 + \a Cols2) matrix that is a horizontal concatenation of
+ * \a m1 and \a m2.
+ */
+template <uint Rows, uint Cols1, uint Cols2>
+Matrix<Rows, Cols1 + Cols2> horzcat(const Matrix<Rows, Cols1>& m1, const Matrix<Rows, Cols2>& m2)
+{
+    Matrix<Rows, Cols1 + Cols2> ret;
+    auto dstPtr = ret.begin();
+    for(uint row = 0; row < Rows; ++row)
+    {
+        std::copy_n(m1[row], Cols1, dstPtr);
+        dstPtr += Cols1;
+        std::copy_n(m2[row], Cols2, dstPtr);
+        dstPtr += Cols2;
+    }
+    return ret;
+}
+
+/*!
+ * Returns a (\a Rows1 + \a Rows2) x (\a Cols) matrix that is a vertical concatenation of
+ * \a m1 and \a m2.
+ */
+template <uint Rows1, uint Rows2, uint Cols>
+Matrix<Rows1 + Rows2, Cols> vertcat(const Matrix<Rows1, Cols>& m1, const Matrix<Rows2, Cols>& m2)
+{
+    Matrix<Rows1 + Rows2, Cols> ret;
+    std::copy(m1.begin(), m1.end(), ret[0]);
+    std::copy(m2.begin(), m2.end(), ret[Rows1]);
+    return ret;
+}
+// variadic versions (auto return type = C++14 feature)
+#if __cplusplus >= 201402L
+template <uint Rows, uint Cols1, uint Cols2, class... Matrices>
+auto horzcat(const Matrix<Rows, Cols1>& m1, const Matrix<Rows, Cols2>& m2, const Matrices&... mats)
+{
+    return horzcat(horzcat(m1, m2), mats...);
+}
+template <uint Rows1, uint Rows2, uint Cols, class... Matrices>
+auto vertcat(const Matrix<Rows1, Cols>& m1, const Matrix<Rows2, Cols>& m2, const Matrices&... mats)
+{
+    return vertcat(vertcat(m1, m2), mats...);
+}
+#endif
+
 } // namespace mat
 } // namespace CTL
