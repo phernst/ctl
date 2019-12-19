@@ -91,7 +91,7 @@ namespace OCL {
 class IntermedGen2D2D
 {
 public:
-    using Lines = std::vector<Radon2DCoord>;
+    using LineSet = std::vector<Radon2DCoord>;
 
     // getter
     double angleIncrement() const;
@@ -116,9 +116,9 @@ public:
                                         const Chunk2D<float>::Dimensions& projSize) const;
 
     // origin defaults to (projSize-[1,1])/2
-    std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
-                                      const mat::ProjectionMatrix& P2,
-                                      const Chunk2D<float>::Dimensions& projSize) const;
+    std::pair<LineSet, LineSet> linePairs(const mat::ProjectionMatrix& P1,
+                                          const mat::ProjectionMatrix& P2,
+                                          const Chunk2D<float>::Dimensions& projSize) const;
 
 private:
     double _angleIncrement = 0.01_deg; //!< increment rotation angle around the baseline
@@ -126,11 +126,11 @@ private:
     bool _useSubsampling = false;
 
     // compute corresponding line pairs; line pairs intersect the detector with `projSize`
-    static std::pair<Lines, Lines> linePairs(const mat::ProjectionMatrix& P1,
-                                             const mat::ProjectionMatrix& P2,
-                                             const Chunk2D<float>::Dimensions& projSize,
-                                             const mat::Matrix<2, 1>& originRadon,
-                                             double angleIncrement = 0.01_deg);
+    static std::pair<LineSet, LineSet> linePairs(const mat::ProjectionMatrix& P1,
+                                                 const mat::ProjectionMatrix& P2,
+                                                 const Chunk2D<float>::Dimensions& projSize,
+                                                 const mat::Matrix<2, 1>& originRadon,
+                                                 double angleIncrement = 0.01_deg);
 
     static double maxDistanceToCorners(const Chunk2D<float>::Dimensions& projSize,
                                        const mat::Matrix<2, 1>& originRadon);

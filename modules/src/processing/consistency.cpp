@@ -175,7 +175,7 @@ IntermediateFctPair IntermedGen2D2D::intermedFctPair(const ImageResampler& radon
              IntermediateFctPair::ProjectionDomain };
 }
 
-std::pair<IntermedGen2D2D::Lines, IntermedGen2D2D::Lines>
+std::pair<IntermedGen2D2D::LineSet, IntermedGen2D2D::LineSet>
 IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::ProjectionMatrix& P2,
                            const Chunk2D<float>::Dimensions& projSize,
                            const mat::Matrix<2, 1>& originRadon, double angleIncrement)
@@ -191,7 +191,7 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
     if(qFuzzyIsNull(src2srcDistance))
         throw std::runtime_error("IntermedGen2D2D::intermedFctPair: distance between the two source "
                                  "positions is close to zero.");
-    baseLine /= baseLine.norm();
+    baseLine /= src2srcDistance;
 
     // initialize plane normal
     const auto initNormal = orthonormalTo(baseLine);
@@ -201,7 +201,7 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
     const auto negSource1 = -source1.transposed();
     const auto originRadonTransp = originRadon.transposed();
     const auto maxDist2Corner = maxDistanceToCorners(projSize, originRadon);
-    Lines lines1, lines2;
+    LineSet lineSet1, lineSet2;
 
     for(size_t i = 0; i < nbRotAngles; ++i)
     {
@@ -226,15 +226,15 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
         // boundary checks and append coordinates
         if(std::abs(line1.dist()) < maxDist2Corner && std::abs(line2.dist()) < maxDist2Corner)
         {
-            lines1.push_back(line1);
-            lines2.push_back(line2);
+            lineSet1.push_back(line1);
+            lineSet2.push_back(line2);
         }
     }
 
-    return std::make_pair(std::move(lines1), std::move(lines2));
+    return std::make_pair(std::move(lineSet1), std::move(lineSet2));
 }
 
-std::pair<IntermedGen2D2D::Lines, IntermedGen2D2D::Lines>
+std::pair<IntermedGen2D2D::LineSet, IntermedGen2D2D::LineSet>
 IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::ProjectionMatrix& P2,
                            const Chunk2D<float>::Dimensions& projSize) const
 {
