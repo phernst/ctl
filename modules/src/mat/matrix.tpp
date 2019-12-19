@@ -612,22 +612,22 @@ Matrix<Rows, Cols> Matrix<Rows, Cols>::operator-(const Matrix<Rows, Cols>& rhs) 
 /*!
  * Returns the result of a standard matrix multiplication.
  */
-template <uint Rows1, uint Cols1_Rows2>
+template <uint Rows, uint Cols>
 template <uint Cols2>
-Matrix<Rows1, Cols2>
-Matrix<Rows1, Cols1_Rows2>::operator*(const Matrix<Cols1_Rows2, Cols2>& rhs) const
+Matrix<Rows, Cols2>
+Matrix<Rows, Cols>::operator*(const Matrix<Cols, Cols2>& rhs) const
 {
-    const Matrix<Rows1, Cols1_Rows2>& lhs = *this;
-    Matrix<Rows1, Cols2> ret;
+    const Matrix<Rows, Cols>& lhs = *this;
+    Matrix<Rows, Cols2> ret;
     auto retPtr = ret.begin();
 
-    for(auto row = 0u; row < Rows1; ++row)
+    for(auto row = 0u; row < Rows; ++row)
         for(auto column = 0u; column < Cols2; ++column)
         {
             auto val = 0.0;
             auto* lhsPtr = lhs[row];
             auto* rhsPtr = rhs[0] + column;
-            for(auto i = 0u; i < Cols1_Rows2; ++i)
+            for(auto i = 0u; i < Cols; ++i)
             {
                 val += *lhsPtr * *rhsPtr;
                 lhsPtr += 1;
