@@ -779,17 +779,32 @@ constexpr uint Matrix<Rows, Cols>::vecColDim(uint from, uint to)
 
 // ### Scalar specialization ###
 
+/*!
+ * Initializes the 1x1 matrix with \a value.
+ */
 inline Matrix<1, 1>::Matrix(double value)
     : MatrixBase<1, 1>(value)
 {
 }
 
+/*!
+ * Returns the value of the 1x1 matrix.
+ */
 inline double Matrix<1, 1>::value() const { return *begin(); }
 
+/*!
+ * Returns a reference to the value of the 1x1 matrix.
+ */
 inline double& Matrix<1, 1>::ref() { return *begin(); }
 
+/*!
+ * Returns a `const` reference to the value of the 1x1 matrix.
+ */
 inline const double& Matrix<1, 1>::ref() const { return *begin(); }
 
+/*!
+ * Implicit conversion to `double`.
+ */
 inline Matrix<1, 1>::operator double() const { return *begin(); }
 
 inline Matrix<1, 1>& Matrix<1, 1>::operator*=(double scalar)
