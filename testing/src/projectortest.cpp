@@ -53,9 +53,9 @@ void ProjectorTest::testSpectralExtension()
     system.addComponent(std::move(tubeGantry));
 
     auto volume = SpectralVolumeData::createBall(40.0f, 0.5f, 1.0f,
-                                                 database::attenuationModel(database::composite::Water));
+                                                 database::attenuationModel(database::Composite::Water));
     auto volume2 = SpectralVolumeData::createBall(30.0f, 0.5f, 0.3f,
-                                                  database::attenuationModel(database::composite::Bone_Cortical));
+                                                  database::attenuationModel(database::Composite::Bone_Cortical));
 
     CompositeVolume compVol;
     compVol.addMaterialVolume(volume);

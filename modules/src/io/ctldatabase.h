@@ -10,7 +10,7 @@ namespace CTL {
 
 namespace database {
 
-enum class element{
+enum class Element {
     H = 1,
     He = 2,
     Li = 3,
@@ -105,7 +105,7 @@ enum class element{
     U = 92
 };
 
-enum class composite{
+enum class Composite {
     Adipose_Tissue = 1001,
     Air = 1002,
     Air_Equivalent_Plastic = 1003,
@@ -156,13 +156,13 @@ enum class composite{
     Water = 1048
 };
 
-enum class spectrum{
+enum class Spectrum {
   Example = 2001
 };
 
-std::shared_ptr<AbstractIntegrableDataModel> attenuationModel(database::element element);
-std::shared_ptr<AbstractIntegrableDataModel> attenuationModel(database::composite composite);
-std::shared_ptr<TabulatedDataModel> xRaySpectrum(database::spectrum spectrum);
+std::shared_ptr<AbstractIntegrableDataModel> attenuationModel(database::Element Element);
+std::shared_ptr<AbstractIntegrableDataModel> attenuationModel(database::Composite Composite);
+std::shared_ptr<TabulatedDataModel> xRaySpectrum(database::Spectrum Spectrum);
 
 }
 
@@ -173,9 +173,9 @@ public:
 
     void setDataBaseRoot(const QString& path);
 
-    std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::composite composite);
-    std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::element element);
-    std::shared_ptr<TabulatedDataModel> loadXRaySpectrum(database::spectrum spectrum);
+    std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::Composite composite);
+    std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::Element element);
+    std::shared_ptr<TabulatedDataModel> loadXRaySpectrum(database::Spectrum spectrum);
 
 private:
     CTLDatabaseHandler();

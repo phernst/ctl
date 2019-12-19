@@ -129,7 +129,7 @@ SpectralVolumeData SpectralVolumeData::fromHUVolume(VoxelVolume<float> HUValues,
                                                     float referenceEnergy)
 {
     // transform to attenuation values
-    auto muWater = database::attenuationModel(database::composite::Water)->valueAt(referenceEnergy);
+    auto muWater = database::attenuationModel(database::Composite::Water)->valueAt(referenceEnergy);
     HUValues = (HUValues*(muWater/1000.0f)) + muWater;
 
     // transform to densities (g/cm^3)
