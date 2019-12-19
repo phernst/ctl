@@ -217,6 +217,26 @@ constexpr size_t MatrixBase<Rows, Cols>::size() const
 /*!
  * Prints the content of the matrix into the returned string. The \a lineModifier may be used to
  * annotate or emphasis the output by prefixing each line by a character sequence.
+ *
+ * \code
+ *  Matrix<2, 4> M{  1.1, -1.2, -1.3, 1.4,
+ *                  -2.1,  2.2, -2.3, 2.4 };
+ *  std::cout << M.info("important 2 rows: ");
+ *
+ *  // possible output:
+ *  // important 2 rows: |_1.100000___-1.200000___-1.300000____1.400000|
+ *  // important 2 rows: |-2.100000____2.200000___-2.300000____2.400000|
+ * \endcode
+ *
+ * The conversion from `double` to string is performed using `std::to_string`.
+ * You may switch between language specific decimal "." or "," using the function
+ * \code
+ *  std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+ * \endcode
+ * or
+ * \code
+ *  std::setlocale(LC_NUMERIC, "de_DE.UTF-8");
+ * \endcode
  */
 template <uint Rows, uint Cols>
 std::string MatrixBase<Rows, Cols>::info(const char* lineModifier) const
@@ -316,6 +336,11 @@ bool MatrixBase<Rows, Cols>::operator!=(const MatrixBase<Rows, Cols>& rhs) const
 // constructors
 /*!
  * Construct an instance and initialize all elements with a \a fillValue.
+ *
+ * \code
+ *  // 4x4 matrix where each element equals one:
+ *  Matrix<4, 4> M{ 1.0 };
+ * \endcode
  */
 template <uint Rows, uint Cols>
 Matrix<Rows, Cols>::Matrix(double fillValue)
@@ -325,6 +350,11 @@ Matrix<Rows, Cols>::Matrix(double fillValue)
 
 /*!
  * Construct an instance from a C-style array.
+ *
+ * \code
+ *  double ar[4] = { 1., 2., 3., 4. };
+    Matrix<2, 2> M{ ar };
+ * \endcode
  */
 template <uint Rows, uint Cols>
 inline Matrix<Rows, Cols>::Matrix(const double (&initArray)[Rows * Cols])
@@ -335,6 +365,12 @@ inline Matrix<Rows, Cols>::Matrix(const double (&initArray)[Rows * Cols])
 /*!
  * Construct an instance from a list of arguments that specifies each element in row major order.
  * The length of the argument list must match the total number of matrix elements.
+ *
+ * \code
+ *  Matrix<3, 3> M{ 1.1, 1.2, 1.3,
+ *                  2.1, 2.2, 2.3,
+ *                  3.1, 3.2, 3.3 };
+ * \endcode
  */
 template <uint Rows, uint Cols>
 template <typename... Doubles, typename>
@@ -394,7 +430,7 @@ Matrix<Rows, Cols>::fromContainer(const Container& vector, size_t NthMat, bool* 
  *  // Example for extracting a single element from a 2x2 matrix (bottom right corner).
  *  const Matrix<2, 2> mat{ 11., 12.,
  *                          21., 22. };
- *  qInfo() << (mat.subMat<1,1, 1,1>() == 22.);
+ *  qInfo() << (mat.subMat<1,1, 1,1>() == 22.); // prints `true`
  * \endcode
  */
 template <uint Rows, uint Cols>
