@@ -134,7 +134,6 @@ private:
 
     static double maxDistanceToCorners(const Chunk2D<float>::Dimensions& projSize,
                                        const mat::Matrix<2, 1>& originRadon);
-    static mat::Matrix<3, 1> orthonormalTo(const mat::Matrix<3, 1>& v);
     static Radon2DCoord plueckerTo2DRadon(const mat::Matrix<3, 3>& L,
                                           const mat::Matrix<1, 2>& originRadon);
 };

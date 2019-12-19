@@ -256,16 +256,6 @@ double IntermedGen2D2D::maxDistanceToCorners(const Chunk2D<float>::Dimensions& p
                       (corner4 - originRadon).norm() });
 }
 
-mat::Matrix<3, 1> IntermedGen2D2D::orthonormalTo(const mat::Matrix<3, 1>& v)
-{
-    const auto smallestDim = uint(std::min_element(v.begin(), v.end()) - v.begin());
-    auto ret = mat::Matrix<3, 1>(0.0);
-    ret(smallestDim) = 1.0;
-    ret = mat::cross(v, ret);
-    ret /= ret.norm();
-    return ret;
-}
-
 Radon2DCoord IntermedGen2D2D::plueckerTo2DRadon(const mat::Matrix<3, 3>& L,
                                                 const mat::Matrix<1, 2>& originRadon)
 {
