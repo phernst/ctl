@@ -58,6 +58,16 @@ std::shared_ptr<TabulatedDataModel> CTLDatabaseHandler::loadXRaySpectrum(databas
     return _serializer.deserialize<TabulatedDataModel>(_fileMap.value(int(spectrum)));
 }
 
+float CTLDatabaseHandler::loadDensity(database::Composite composite)
+{
+    return _serializer.variantFromJsonFile(_fileMap.value(int(composite))).toMap().value("density", -1.0f).toFloat();
+}
+
+float CTLDatabaseHandler::loadDensity(database::Element element)
+{
+    return _serializer.variantFromJsonFile(_fileMap.value(int(element))).toMap().value("density", -1.0f).toFloat();
+}
+
 void CTLDatabaseHandler::makeFileMap()
 {
     static QStringList elementFiles{
@@ -245,4 +255,16 @@ std::shared_ptr<TabulatedDataModel> database::xRaySpectrum(database::Spectrum sp
     return CTLDatabaseHandler::instance().loadXRaySpectrum(spectrum);
 }
 
+float database::density(database::Composite composite)
+{
+    return CTLDatabaseHandler::instance().loadDensity(composite);
 }
+
+
+float database::density(database::Element element)
+{
+    return CTLDatabaseHandler::instance().loadDensity(element);
+}
+
+}
+

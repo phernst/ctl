@@ -19,10 +19,10 @@ class JsonSerializer : public AbstractSerializer
     public: std::unique_ptr<AcquisitionSetup> deserializeAquisitionSetup(const QString& fileName) const override;
     public: std::unique_ptr<SerializationInterface> deserializeMiscObject(const QString& fileName) const override;
 
+    static QVariant variantFromJsonFile(const QString& fileName);
 private:
     // methods
     static QJsonObject convertVariantToJsonObject(const QVariant& variant);
-    static QVariant variantFromJsonFile(const QString& fileName);
 };
 
 } // namespace CTL

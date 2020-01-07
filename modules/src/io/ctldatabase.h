@@ -164,6 +164,9 @@ std::shared_ptr<AbstractIntegrableDataModel> attenuationModel(database::Element 
 std::shared_ptr<AbstractIntegrableDataModel> attenuationModel(database::Composite Composite);
 std::shared_ptr<TabulatedDataModel> xRaySpectrum(database::Spectrum Spectrum);
 
+float density(database::Composite composite);
+float density(database::Element element);
+
 }
 
 class CTLDatabaseHandler
@@ -176,6 +179,9 @@ public:
     std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::Composite composite);
     std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::Element element);
     std::shared_ptr<TabulatedDataModel> loadXRaySpectrum(database::Spectrum spectrum);
+
+    float loadDensity(database::Composite composite);
+    float loadDensity(database::Element element);
 
 private:
     CTLDatabaseHandler();
