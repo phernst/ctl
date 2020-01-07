@@ -1,5 +1,5 @@
 {
-    "density": 1.000E+00,
+    "density": 1.000e+00,
     "name": "Tissue, Soft (ICRU Four-Component)",
     "type-id": 30,
     "parameters": {

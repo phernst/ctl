@@ -1,5 +1,5 @@
 {
-    "density": 8.375E-05,
+    "density": 8.375e-05,
     "name": "Hydrogen",
     "type-id": 30,
     "parameters": {
