@@ -1,4 +1,5 @@
 {
+    "density": 1.064E-03,
     "name": "Tissue-Equivalent Gas, Methane Based",
     "type-id": 30,
     "parameters": {
