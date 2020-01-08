@@ -91,8 +91,7 @@ public:
     TASMIPSpectrumModel();
 
 private:
-    AbstractDataModelPtr _tasmipData;
-    XraySpectrumTabulatedModel* _tasmipDataPtr;
+    DataModelPtr<XraySpectrumTabulatedModel> _tasmipData;
 
     void initializeModelData();
 };

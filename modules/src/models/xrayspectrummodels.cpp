@@ -290,14 +290,14 @@ AbstractDataModel* HeuristicCubicSpectrumModel::clone() const
 
 float TASMIPSpectrumModel::valueAt(float position) const
 {
-    _tasmipDataPtr->setParameter(_energy);
-    return _tasmipDataPtr->valueAt(position);
+    _tasmipData->setParameter(_energy);
+    return _tasmipData->valueAt(position);
 }
 
 float TASMIPSpectrumModel::binIntegral(float position, float binWidth) const
 {
-    _tasmipDataPtr->setParameter(_energy);
-    return _tasmipDataPtr->binIntegral(position, binWidth);
+    _tasmipData->setParameter(_energy);
+    return _tasmipData->binIntegral(position, binWidth);
 }
 
 AbstractDataModel* TASMIPSpectrumModel::clone() const
@@ -315,12 +315,10 @@ void TASMIPSpectrumModel::setParameter(const QVariant& parameter)
 }
 
 TASMIPSpectrumModel::TASMIPSpectrumModel()
+    : _tasmipData(makeDataModel<XraySpectrumTabulatedModel>())
 {
-    _tasmipData = AbstractDataModelPtr(makeDataModel<XraySpectrumTabulatedModel>());
-    _tasmipDataPtr = static_cast<XraySpectrumTabulatedModel*>(_tasmipData.get());
     initializeModelData();
 }
-
 
 /*
  * TASMIP coefficients taken from
@@ -521,7 +519,7 @@ void TASMIPSpectrumModel::initializeModelData()
         QVector<float> specVals(nbBins);
         std::transform(specBins.cbegin(), specBins.cend(), specVals.begin(), flux);
 
-        _tasmipDataPtr->addLookupTable(tubeVoltage, TabulatedDataModel(specBinsF, specVals));
+        _tasmipData->addLookupTable(tubeVoltage, TabulatedDataModel(specBinsF, specVals));
     }
 }
 
