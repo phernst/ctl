@@ -3,7 +3,13 @@
 
 #include <QObject>
 #include <QtTest>
-#include "components/xraytube.h"
+
+namespace CTL
+{
+class XrayTube;
+class XraySpectrumTabulatedModel;
+class IntervalDataSeries;
+}
 
 class SpectrumTest : public QObject
 {

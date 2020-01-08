@@ -3,6 +3,8 @@
 #include <QTime>
 
 #include "components/xraylaser.h"
+#include "components/xraytube.h"
+#include "models/xrayspectrummodels.h"
 
 void SpectrumTest::initTestCase()
 {
