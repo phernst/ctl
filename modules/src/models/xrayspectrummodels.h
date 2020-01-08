@@ -76,6 +76,27 @@ class HeuristicCubicSpectrumModel : public AbstractXraySpectrumModel
     public: AbstractDataModel* clone() const override;
 };
 
+class TASMIPSpectrumModel : public AbstractXraySpectrumModel
+{
+    CTL_TYPE_ID(43)
+
+    // abstract interfaces
+    public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
+    public: AbstractDataModel* clone() const override;
+
+    void setParameter(const QVariant& parameter) override;
+
+public:
+    TASMIPSpectrumModel();
+
+private:
+    AbstractDataModelPtr _tasmipData;
+    XraySpectrumTabulatedModel* _tasmipDataPtr;
+
+    void initializeModelData();
+};
+
 } // namespace CTL
 
 #endif // XRAYSPECTRUMMODELS_H
