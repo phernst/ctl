@@ -165,9 +165,9 @@ inline void Location::fromVariant(const QVariant& variant)
 
     QVector<double> posDbl, rotDbl;
 
-    for(const auto& val : pos)
+    for(const auto& val : qAsConst(pos))
         posDbl.append(val.toDouble());
-    for(const auto& val : rot)
+    for(const auto& val : qAsConst(rot))
         rotDbl.append(val.toDouble());
 
     position = Vector3x1::fromContainer(posDbl, 0);

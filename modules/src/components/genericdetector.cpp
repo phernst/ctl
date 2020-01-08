@@ -84,7 +84,7 @@ void GenericDetector::fromVariant(const QVariant& variant)
     _moduleLocations.clear();
     QVariantMap varMap = variant.toMap();
     auto locations = varMap.value("module locations").toList();
-    for(const auto& var : locations)
+    for(const auto& var : qAsConst(locations))
     {
         mat::Location loc;
         loc.fromVariant(var);

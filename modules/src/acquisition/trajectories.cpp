@@ -1,9 +1,9 @@
-#include "preparesteps.h"
 #include "trajectories.h"
 #include "acquisitionsetup.h"
 #include "components/carmgantry.h"
 #include "components/cylindricaldetector.h"
 #include "components/flatpaneldetector.h"
+#include "preparesteps.h"
 
 #include <QDebug>
 

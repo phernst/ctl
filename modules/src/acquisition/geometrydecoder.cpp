@@ -1,7 +1,6 @@
 #include "geometrydecoder.h"
-
-#include "components/allgenerictypes.h"
 #include "acquisition/preparesteps.h"
+#include "components/allgenerictypes.h"
 
 namespace CTL {
 

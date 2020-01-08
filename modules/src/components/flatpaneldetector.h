@@ -36,7 +36,7 @@ public:
     const QSize& nbPixels() const;
 
     // other methods
-    const QSizeF panelDimensions() const;
+    QSizeF panelDimensions() const;
 
     // static methods
     static QString defaultName();

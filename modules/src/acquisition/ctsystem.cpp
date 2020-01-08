@@ -209,7 +209,7 @@ void CTsystem::fromVariant(const QVariant &variant)
     // fill in components
     this->clear();
     QVariantList componentVariantList = varMap.value("components").toList();
-    for(const auto& comp : componentVariantList)
+    for(const auto& comp : qAsConst(componentVariantList))
         this->addComponent(SerializationHelper::parseComponent(comp));
 }
 

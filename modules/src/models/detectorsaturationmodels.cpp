@@ -306,4 +306,4 @@ float DetectorSaturationSplineModel::spline2(float x) const
             (_b-_softB)*(_b-_softB)/(4.0f*_softB);
 }
 
-}
+} // namespace CTL

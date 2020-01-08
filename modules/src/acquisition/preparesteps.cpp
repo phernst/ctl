@@ -474,14 +474,14 @@ void GenericDetectorParam::fromVariant(const QVariant &variant)
         QVariantList moduleList = varMap.value("module locations").toList();
         QVector<mat::Location> modLocs;
         modLocs.reserve(moduleList.size());
-        for(const auto& mod : moduleList)
+        for(const auto& mod : qAsConst(moduleList))
         {
             mat::Location loc;
             loc.fromVariant(mod);
             modLocs.append(loc);
         }
 
-        _newModuleLocations = { true, std::move(modLocs) };
+        _newModuleLocations = { true, modLocs };
     }
     if(varMap.contains("pixel size"))
     {

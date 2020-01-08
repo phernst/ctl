@@ -219,7 +219,7 @@ void AcquisitionSetup::View::fromVariant(const QVariant& variant)
     QVariantList prepareStepVarList = varMap.value("prepare steps").toList();
     std::vector<PrepareStep> prepSteps;
     prepSteps.reserve(prepareStepVarList.size());
-    for(const auto& prep : prepareStepVarList)
+    for(const auto& prep : qAsConst(prepareStepVarList))
         this->addPrepareStep(PrepareStep(SerializationHelper::parsePrepareStep(prep)));
 
     this->setTimeStamp(varMap.value("time stamp").toDouble());
@@ -512,7 +512,7 @@ void AcquisitionSetup::fromVariant(const QVariant &variant)
     this->resetSystem(std::move(system));
 
     QVariantList viewVarList = varMap.value("views").toList();
-    for(const auto& v : viewVarList)
+    for(const auto& v : qAsConst(viewVarList))
     {
         AcquisitionSetup::View view;
         view.fromVariant(v);

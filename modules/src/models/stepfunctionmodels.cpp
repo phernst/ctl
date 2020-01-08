@@ -121,7 +121,7 @@ void ConstantModel::setParameter(const QVariant &parameter)
     else if(parameter.canConvert(QMetaType::QVariantList))
     {
         auto parList = parameter.toList();
-        if(parList.size()<1)
+        if(parList.size() < 1)
         {
             qWarning() << "ConstantModel::setParameter: Could not set parameters! "
                           "reason: contained QVariantList has too few entries (required: 1 float)";
