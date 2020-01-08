@@ -39,7 +39,8 @@ ProjectionData RayCasterAdapter::project(const VolumeData& volume)
     _rayCaster.setVolumeInfo(nbVoxel, voxelSize);
     _rayCaster.setVolumeOffset(volumeOff);
 
-    auto result = _rayCaster.project(_pMatsVectorized.toStdVector(), volume.constData());
+    auto result = _rayCaster.project({ _pMatsVectorized.begin(), _pMatsVectorized.end() },
+                                     volume.constData());
 
     ProjectionData ret(_viewDim);
     ret.setDataFromVector(result);
