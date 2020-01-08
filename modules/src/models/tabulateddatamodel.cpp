@@ -154,7 +154,7 @@ float TabulatedDataModel::binIntegral(float position, float binWidth) const
         ++currentPosition;
     }
 
-    if(currentPosition.key() == to)
+    if(qFuzzyCompare(currentPosition.key(), to))
         return ret;
 
     // compute contribution of upper end

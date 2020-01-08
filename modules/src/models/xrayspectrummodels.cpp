@@ -259,15 +259,16 @@ AbstractDataModel *KramersLawSpectrumModel::clone() const
 
 float HeuristicCubicSpectrumModel::valueAt(float position) const
 {
-    return (position<_energy) ? _energy * std::pow(_energy-position, 2.0) - std::pow(_energy-position, 3.0)
-                              : 0.0f;
+    return (position < _energy) ? _energy * std::pow(_energy - position, 2.0f) - std::pow(_energy - position, 3.0f)
+                                : 0.0f;
 }
 
 float HeuristicCubicSpectrumModel::binIntegral(float position, float binWidth) const
 {
     auto antiderivative = [this](float E)
     {
-        return -1.0/3.0 * _energy * std::pow(_energy-E, 3.0) + 1.0/4.0 * std::pow(_energy-E, 4.0);
+        return (-1.0f / 3.0f) * _energy * std::pow(_energy - E, 3.0f) +
+               (1.0f / 4.0f) * std::pow(_energy - E, 4.0f);
     };
 
     const float bot = position - 0.5f*binWidth;
@@ -336,15 +337,15 @@ TASMIPSpectrumModel::TASMIPSpectrumModel()
  */
 void TASMIPSpectrumModel::initializeModelData()
 {
-    constexpr int nbBins = 140;
+    static constexpr auto nbBins = 140u;
 
-    float coeff[nbBins][4]={
-    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000},
+    static constexpr float coeff[nbBins][4]={
+    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // 0.0 keV...0.5 keV
+    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // 0.5 keV...1.5 keV
+    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // 1.5 keV...2.5 keV
+    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // 2.5 keV...3.5 keV
+    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // 3.5 keV...4.5 keV
+    {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // ...
     {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000},
     {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000},
     {+0.000000e+000,+0.000000e+000,+0.000000e+000,+0.000000e+000},
@@ -474,40 +475,53 @@ void TASMIPSpectrumModel::initializeModelData()
     {+1.306709e+003,+0.000000e+000,+0.000000e+000,+0.000000e+000},
     {+1.153422e+003,+0.000000e+000,+0.000000e+000,+0.000000e+000},
     {+9.817065e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+8.099662e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+6.688839e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+5.277812e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+3.498336e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000},
-    {+1.718605e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000}
+    {+8.099662e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // ...
+    {+6.688839e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // 135.5 keV...136.5 keV
+    {+5.277812e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // 136.5 keV...137.5 keV
+    {+3.498336e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000}, // 137.5 keV...138.5 keV
+    {+1.718605e+002,+0.000000e+000,+0.000000e+000,+0.000000e+000}  // 138.5 keV...139.5 keV
     };
 
-    double tubeVoltage = 0.0;
+    static_assert(sizeof coeff == nbBins * 4 * sizeof(float),
+                  "number of coefficients does not match.");
 
-    auto flux = [&coeff, &tubeVoltage] (float energyBin)
+    float tubeVoltage = 0.0f;
+
+    auto flux = [&tubeVoltage](uint energyBin) -> float
     {
-        double sum = 0.0;
-        if(energyBin > tubeVoltage)
-            return sum;
+        const auto binStart = energyBin - 0.5f;
+        if(binStart > tubeVoltage)
+            return 0.0f;
 
-        for(int i=0; i<4; ++i)
-            sum += coeff[int(floor(energyBin))][i] * std::pow(tubeVoltage, i);
+        const auto& coeffsOfBin = coeff[energyBin];
+        const auto tubVoltagePow2 = tubeVoltage * tubeVoltage;
 
-        if(sum<0.0)
-            sum = 0.0;
+        const auto val = coeffsOfBin[0] +
+                         coeffsOfBin[1] * tubeVoltage +
+                         coeffsOfBin[2] * tubVoltagePow2 +
+                         coeffsOfBin[3] * tubVoltagePow2 * tubeVoltage;
 
-        return sum;
+        return val > 0.0f ? val : 0.0f;
     };
 
-    QVector<float> specBins(nbBins);
-    std::iota(specBins.begin(), specBins.end(), 0);
+    // prepare list of energies for each bin
+    std::array<uint, nbBins> specBins;
+    std::iota(specBins.begin(), specBins.end(), 0u); // 0 keV, 1 keV, 2 keV, ..., 139 keV
 
-    for(int kvBin = 0; kvBin < 141; ++kvBin)
+    // convert to floating point values
+    QVector<float> specBinsF(nbBins);
+    std::transform(specBins.cbegin(), specBins.cend(), specBinsF.begin(), [](uint binEnergy) {
+        return float(binEnergy);
+    });
+
+    // compute spectrum for tube voltages in 1 kV steps: 0 kV, 1 kV, 2 kV, ..., 140 kV
+    for(auto kV = 0u; kV <= nbBins; ++kV)
     {
-        tubeVoltage = double(kvBin);
+        tubeVoltage = float(kV);
         QVector<float> specVals(nbBins);
-        std::transform(specBins.begin(), specBins.end(), specVals.begin(), flux);
+        std::transform(specBins.cbegin(), specBins.cend(), specVals.begin(), flux);
 
-        _tasmipDataPtr->addLookupTable(tubeVoltage, TabulatedDataModel(specBins, specVals));
+        _tasmipDataPtr->addLookupTable(tubeVoltage, TabulatedDataModel(specBinsF, specVals));
     }
 }
 

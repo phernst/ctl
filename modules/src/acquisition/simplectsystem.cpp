@@ -203,8 +203,8 @@ float SimpleCTsystem::photonsPerPixelMean() const
  */
 float SimpleCTsystem::photonsPerPixel(uint module) const
 {
-    return this->source()->photonFlux() * 1.0e-4 *
-            GeometryEncoder::effectivePixelArea(*this, module);
+    return float(this->source()->photonFlux()) * 1.0e-4f *
+           GeometryEncoder::effectivePixelArea(*this, module);
 }
 
 /*!
