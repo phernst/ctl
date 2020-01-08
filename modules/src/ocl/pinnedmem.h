@@ -353,7 +353,7 @@ PinnedBufBase<T>::PinnedBufBase(size_t nbElements, cl_mem_flags devAccess, cl_ma
                  ? cl::Buffer(OpenCLConfig::instance().context(), devAccess, sizeof(T) * nbElements)
                  : cl::Buffer())
 {
-    this->setHostPtr(reinterpret_cast<T*>(
+    this->setHostPtr(static_cast<T*>(
                      queue.enqueueMapBuffer(_pinnedBuf, CL_TRUE, hostAccess, 0,
                                             sizeof(T) * nbElements)));
 }

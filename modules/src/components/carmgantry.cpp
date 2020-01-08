@@ -113,7 +113,7 @@ QString CarmGantry::info() const
  */
 QString CarmGantry::defaultName()
 {
-    static const QString defName(QStringLiteral("C-arm gantry"));
+    const QString defName(QStringLiteral("C-arm gantry"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

@@ -90,7 +90,7 @@ QString GenericGantry::info() const
  */
 QString GenericGantry::defaultName()
 {
-    static const QString defName(QStringLiteral("Generic gantry"));
+    const QString defName(QStringLiteral("Generic gantry"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

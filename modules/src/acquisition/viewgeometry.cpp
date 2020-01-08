@@ -52,9 +52,9 @@ void SingleViewGeometry::clear() { _pMats.clear(); }
 std::vector<float> SingleViewGeometry::concatenatedStdVector() const
 {
     std::vector<float> ret;
-    ret.reserve(_pMats.size() * 12);
+    ret.reserve(_pMats.size() * 12u);
 
-    for(const auto& pmat : qAsConst(_pMats))
+    for(const auto& pmat : _pMats)
         for(const auto el : pmat)
             ret.push_back(static_cast<float>(el));
 
@@ -118,7 +118,7 @@ std::vector<float> FullGeometry::concatenatedStdVector() const
     if(nbViews == 0)
         return ret;
 
-    ret.reserve(nbViews * this->view(0).nbModules() * 12);
+    ret.reserve(nbViews * this->view(0).nbModules() * 12u);
 
     for(const auto& view : *this)
         for(const auto viewPMat : view.concatenatedStdVector())

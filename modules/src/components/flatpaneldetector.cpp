@@ -35,7 +35,7 @@ QString FlatPanelDetector::info() const
  */
 QString FlatPanelDetector::defaultName()
 {
-    static const QString defName(QStringLiteral("Flat panel detector"));
+    const QString defName(QStringLiteral("Flat panel detector"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

@@ -18,7 +18,7 @@ void cosWeighting(Chunk2D<float>& proj, const mat::Matrix<3,3>& K)
         direction.get<0>() = (x - direction.get<1>()*K.get<0,1>() - K.get<0,2>()) / K.get<0,0>();
 
         // cosine to z-axis = <unitDirection, [0 0 1]^t>
-        return direction.get<2>() / direction.norm();
+        return float(direction.get<2>() / direction.norm());
     };
 
     const uint xSize = proj.width();

@@ -16,7 +16,7 @@ class XrayTube : public AbstractSource
 public:
     XrayTube(const QString &name);
     XrayTube(const QSizeF &focalSpotSize = QSizeF(0.0, 0.0),
-             const Vector3x1 &focalSpotPosition = Vector3x1(0.0f),
+             const Vector3x1 &focalSpotPosition = Vector3x1(0.0),
              double tubeVoltage = 100.0,
              double mAs = 1.0,
              const QString &name = defaultName());

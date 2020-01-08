@@ -105,7 +105,7 @@ SystemComponent* XrayTube::clone() const { return new XrayTube(*this); }
  */
 QString XrayTube::defaultName()
 {
-    static const QString defName(QStringLiteral("X-ray tube"));
+    const QString defName(QStringLiteral("X-ray tube"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

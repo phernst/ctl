@@ -536,8 +536,8 @@ std::vector<float> IntermediateProj::sampled(const std::vector<Radon2DCoord>& sa
     samplingPtsDerivative.reserve(2 * samplingPts.size());
     for(const auto& centralCoord : samplingPts)
     {
-        samplingPtsDerivative.push_back({ centralCoord.angle(), centralCoord.dist() - plusMinusH });
-        samplingPtsDerivative.push_back({ centralCoord.angle(), centralCoord.dist() + plusMinusH });
+        samplingPtsDerivative.emplace_back(centralCoord.angle(), centralCoord.dist() - plusMinusH);
+        samplingPtsDerivative.emplace_back(centralCoord.angle(), centralCoord.dist() + plusMinusH);
     }
 
     // line integrals
@@ -887,13 +887,13 @@ namespace {
 template<class T>
 std::vector<T> randomSubset(std::vector<T>&& fullSamples, uint seed, float subsampleLevel)
 {
-    auto newNbElements = size_t(std::ceil(subsampleLevel * fullSamples.size()));
+    auto newNbElements = uint(std::ceil(subsampleLevel * fullSamples.size()));
     std::vector<T> ret(newNbElements);
 
     std::mt19937 rng;
     rng.seed(seed);
 
-    std::vector<int> indices(fullSamples.size());
+    std::vector<uint> indices(fullSamples.size());
     std::iota(indices.begin(), indices.end(), 0);
 
     std::shuffle(indices.begin(), indices.end(), rng);

@@ -18,7 +18,7 @@ SystemComponent::SystemComponent(const QString& name)
  */
 QString SystemComponent::defaultName()
 {
-    static const QString defName(QStringLiteral("Generic system component"));
+    const QString defName = QStringLiteral("Generic system component");
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

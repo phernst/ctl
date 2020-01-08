@@ -25,8 +25,8 @@ void ModelBasedVolumeDecomposer::addMaterial(
     std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
     std::shared_ptr<AbstractDataModel> segmentationModel)
 {
-    _absorptionModels.push_back(absorptionModel);
-    _segmentationModels.push_back(segmentationModel);
+    _absorptionModels.push_back(std::move(absorptionModel));
+    _segmentationModels.push_back(std::move(segmentationModel));
 }
 
 uint ModelBasedVolumeDecomposer::nbMaterials() const
@@ -38,8 +38,8 @@ TwoMaterialThresholdVolumeDecomposer::TwoMaterialThresholdVolumeDecomposer(
     std::shared_ptr<AbstractIntegrableDataModel> absorptionModelMaterial1,
     std::shared_ptr<AbstractIntegrableDataModel> absorptionModelMaterial2,
     float thresholdDensity1)
-    : _absMaterial1(absorptionModelMaterial1)
-    , _absMaterial2(absorptionModelMaterial2)
+    : _absMaterial1(std::move(absorptionModelMaterial1))
+    , _absMaterial2(std::move(absorptionModelMaterial2))
     , _threshold(thresholdDensity1)
 {
 }

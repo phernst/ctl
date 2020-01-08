@@ -128,10 +128,8 @@ double CorrelationError::operator()(const std::vector<float>& first,
         qWarning("undefined correlation");
         return 1.0;
     }
-    else
-    {
-        return 1.0 - (numer / std::sqrt(resDenom));
-    }
+
+    return 1.0 - (numer / std::sqrt(resDenom));
 }
 
 double CosineSimilarityError::operator()(const std::vector<float>& first,
@@ -157,10 +155,8 @@ double CosineSimilarityError::operator()(const std::vector<float>& first,
         qWarning("undefined cosine similarity");
         return 1.0;
     }
-    else
-    {
-        return 1.0 - (numer / std::sqrt(resDenom));
-    }
+
+    return 1.0 - (numer / std::sqrt(resDenom));
 }
 
 double GemanMcClure::operator()(const std::vector<float>& first,

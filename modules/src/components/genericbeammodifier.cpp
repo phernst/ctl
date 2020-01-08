@@ -40,7 +40,7 @@ QString GenericBeamModifier::info() const
  */
 QString GenericBeamModifier::defaultName()
 {
-    static const QString defName(QStringLiteral("Generic beam modifier"));
+    const QString defName(QStringLiteral("Generic beam modifier"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

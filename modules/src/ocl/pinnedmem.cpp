@@ -79,7 +79,7 @@ PinnedImag3DBase::PinnedImag3DBase(size_t xDim, size_t yDim, size_t zDim,
                  : cl::Image3D())
 {
     size_t rowPitch, slicePitch;
-    this->setHostPtr(reinterpret_cast<float*>(
+    this->setHostPtr(static_cast<float*>(
                      queue.enqueueMapImage(_pinnedImg, CL_TRUE, hostAccess, zeros(), dimensions(),
                                            &rowPitch, &slicePitch)));
 }

@@ -23,7 +23,7 @@ GenericSource::GenericSource(const IntervalDataSeries& spectrum, double photonFl
     : GenericSource(focalSpotSize, focalSpotPosition, name)
 {
     setSpectrum(spectrum, true);
-    if(photonFlux != -1.0)
+    if(photonFlux > 0.0)
         setPhotonFlux(photonFlux);
 }
 
@@ -43,7 +43,7 @@ GenericSource::GenericSource(const QSizeF& focalSpotSize,
  */
 QString GenericSource::defaultName()
 {
-    static const QString defName(QStringLiteral("Generic source"));
+    const QString defName(QStringLiteral("Generic source"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

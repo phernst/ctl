@@ -107,7 +107,7 @@ void MessageHandler::blacklistFile(const QString& fileName, bool blacklist)
 
 void MessageHandler::blacklistMessageType(QtMsgType type, bool blacklist)
 {
-    if(type >= 0 && type < 5)
+    if(type < 5)
         _blacklistMsgType[type] = blacklist;
 }
 

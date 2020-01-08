@@ -25,7 +25,7 @@ public:
     void setDetectorSize(uint nbRows, uint nbColumns);
     void setIncrement(float incrementMM);
     void setVolumeOffset(const float (&offset)[3]);
-    void setVolumeInfo(const uint (&nbVoxel)[3], const float (&voxelSize)[3]);
+    void setVolumeInfo(const uint (&nbVoxel)[3], const float (&voxSize)[3]);
 
 private:
     cl::Context context;

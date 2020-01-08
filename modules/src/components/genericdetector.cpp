@@ -71,7 +71,7 @@ QString GenericDetector::info() const
  */
 QString GenericDetector::defaultName()
 {
-    static const QString defName(QStringLiteral("Generic detector"));
+    const QString defName(QStringLiteral("Generic detector"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

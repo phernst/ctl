@@ -79,8 +79,8 @@ float SpectrumTest::calcIntensity(float energy) const
 
 float SpectrumTest::calcAnalyticIntegral(float from, float to) const
 {
-    double d_from = static_cast<double>(from);
-    double d_to = static_cast<double>(to);
+    auto d_from = static_cast<double>(from);
+    auto d_to = static_cast<double>(to);
     return static_cast<float>(0.5 * double(_m) * (d_to * d_to - d_from * d_from)
                               + double(_n) * (d_to - d_from));
 }

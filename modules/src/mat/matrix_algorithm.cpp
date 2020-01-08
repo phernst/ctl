@@ -99,7 +99,7 @@ Vector3x1 cross(const Vector3x1& l, const Vector3x1& r)
 /*!
  * Returns the determinant of the 3x3 matrix \a m.
  */
-double det(const Matrix3x3 & m)
+double det(const Matrix3x3& m)
 {
     return
         m[0][0]*(m[1][1]*m[2][2] - m[2][1]*m[1][2]) -

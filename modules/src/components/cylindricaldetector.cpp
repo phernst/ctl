@@ -140,7 +140,7 @@ double CylindricalDetector::curvatureRadius() const
  */
 QString CylindricalDetector::defaultName()
 {
-    static const QString defName(QStringLiteral("Cylindrical detector"));
+    const QString defName(QStringLiteral("Cylindrical detector"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

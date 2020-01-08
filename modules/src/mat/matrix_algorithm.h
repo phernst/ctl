@@ -19,7 +19,7 @@ PairMat3x3 RQdecomposition(const Matrix3x3 &A, bool unique = true, bool normaliz
 Vector3x1 cross(const Vector3x1& l, const Vector3x1& r);
 
 // determinant
-double det(const Matrix3x3 & A);
+double det(const Matrix3x3& m);
 
 // compute a normalized orthogonal vector
 mat::Matrix<3, 1> orthonormalTo(const mat::Matrix<3, 1>& v);

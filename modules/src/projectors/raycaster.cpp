@@ -210,12 +210,12 @@ void RayCaster::setVolumeOffset(const float (&offset)[3])
     volOffset = { { offset[0], offset[1], offset[2] } };
 }
 
-void RayCaster::setVolumeInfo(const uint (&nbVoxel)[3], const float (&vSize)[3])
+void RayCaster::setVolumeInfo(const uint (&nbVoxel)[3], const float (&voxSize)[3])
 {
     volDim[0] = nbVoxel[0];
     volDim[1] = nbVoxel[1];
     volDim[2] = nbVoxel[2];
-    voxelSize = { { vSize[0], vSize[1], vSize[2] } };
+    voxelSize = { { voxSize[0], voxSize[1], voxSize[2] } };
 }
 
 } // namespace OCL
