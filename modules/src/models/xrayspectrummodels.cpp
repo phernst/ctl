@@ -10,21 +10,6 @@ DECLARE_SERIALIZABLE_TYPE(FixedXraySpectrumModel)
 DECLARE_SERIALIZABLE_TYPE(KramersLawSpectrumModel)
 DECLARE_SERIALIZABLE_TYPE(HeuristicCubicSpectrumModel)
 
-// ____________________________
-// # AbstractXraySpectrumModel
-// ----------------------------
-void AbstractXraySpectrumModel::setParameter(const QVariant &parameter)
-{
-    if(parameter.canConvert(QMetaType::Float))
-        _energy = parameter.toFloat();
-    else
-        _energy = parameter.toMap().value("energy").toFloat();
-}
-
-QVariant AbstractXraySpectrumModel::parameter() const
-{
-    return QVariantMap{std::make_pair(QString("energy"), _energy)};
-}
 
 // _____________________________
 // # XraySpectrumTabulatedModel

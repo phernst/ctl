@@ -2,7 +2,7 @@
 #define ABSTRACTSOURCE_H
 #include "mat/matrix_types.h"
 #include "models/intervaldataseries.h"
-#include "models/xrayspectrummodels.h"
+#include "models/abstractxrayspectrummodel.h"
 #include "systemcomponent.h"
 #include <QJsonArray>
 #include <QSizeF>

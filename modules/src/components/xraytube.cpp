@@ -1,4 +1,5 @@
 #include "xraytube.h"
+#include "models/xrayspectrummodels.h"
 
 namespace CTL {
 

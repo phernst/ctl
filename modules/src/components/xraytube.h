@@ -1,7 +1,6 @@
 #ifndef XRAYTUBE_H
 #define XRAYTUBE_H
 
-#include "models/xrayspectrummodels.h"
 #include "abstractsource.h"
 
 namespace CTL {
@@ -41,6 +40,8 @@ public:
     void setTubeVoltage(double voltage);
     void setMilliampereSeconds(double mAs);
     void setIntensityConstant(double value);
+
+
 
     // static methods
     static QString defaultName();
