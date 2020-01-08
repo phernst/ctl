@@ -18,7 +18,7 @@ namespace mat {
  * Construct an instance and initialize all elements with a \a fillValue.
  */
 template <uint Rows, uint Cols>
-MatrixBase<Rows, Cols>::MatrixBase(double fillValue)
+inline MatrixBase<Rows, Cols>::MatrixBase(double fillValue)
 {
     std::fill(this->begin(), this->end(), fillValue);
 }
@@ -31,6 +31,16 @@ template <uint Rows, uint Cols>
 inline MatrixBase<Rows, Cols>::MatrixBase(const double (&initArray)[Rows * Cols])
 {
     std::copy_n(initArray, Rows * Cols, _m);
+}
+
+/*!
+ * Directly initialize the underlying C-style array `double[]` using the passed elements.
+ */
+template <uint Rows, uint Cols>
+template <typename... Doubles>
+inline MatrixBase<Rows, Cols>::MatrixBase(double firstElement, Doubles... matrixElements)
+    : _m{ firstElement, matrixElements... }
+{
 }
 
 // accessors
@@ -458,7 +468,7 @@ inline Matrix<Rows, Cols>::Matrix(const double (&initArray)[Rows * Cols])
 template <uint Rows, uint Cols>
 template <typename... Doubles, typename>
 inline Matrix<Rows, Cols>::Matrix(double firstElement, Doubles... matrixElements)
-    : MatrixBase<Rows, Cols>({ firstElement, static_cast<double>(matrixElements)... })
+    : MatrixBase<Rows, Cols>(firstElement, static_cast<double>(matrixElements)...)
 {
 }
 

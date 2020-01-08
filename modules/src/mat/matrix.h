@@ -1,6 +1,6 @@
 /******************************************************************************
 ** 'Matrix' template class for basic matrix calculations
-** by Robert Frysch | Dec 19, 2019
+** by Robert Frysch | Jan 08, 2020
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -46,6 +46,8 @@ public:
     MatrixBase() = default;
     explicit MatrixBase(double fillValue);
     explicit MatrixBase(const double (&initArray)[Rows * Cols]);
+    template <typename... Doubles>
+    MatrixBase(double firstElement, Doubles... matrixElements);
 
     // select row
     double* operator[](uint row);
