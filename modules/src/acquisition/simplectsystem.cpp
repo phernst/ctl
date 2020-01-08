@@ -189,13 +189,13 @@ void SimpleCTsystem::addBeamModifier(std::unique_ptr<AbstractBeamModifier> modif
 }
 
 /*!
- * Returns the number of photons that incide on a detector pixel avergared over all detector
+ * Returns the number of photons that incide on a detector pixel averaged over all detector
  * modules.
  */
 float SimpleCTsystem::photonsPerPixelMean() const
 {
     const auto& counts = photonsPerPixel();
-    return std::accumulate(counts.begin(), counts.end(), 0.0f);
+    return std::accumulate(counts.begin(), counts.end(), 0.0f) / counts.size();
 }
 
 /*!
