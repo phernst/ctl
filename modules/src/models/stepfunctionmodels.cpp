@@ -16,10 +16,10 @@ StepFunctionModel::StepFunctionModel(float threshold, float amplitude, StepDirec
 
 float StepFunctionModel::valueAt(float position) const
 {
-    if(position > _threshold)
-        return _amplitude * float(_stepDirection == LeftIsZero);
-    else
+    if(position < _threshold)
         return _amplitude * float(_stepDirection == RightIsZero);
+
+    return _amplitude * float(_stepDirection == LeftIsZero);
 }
 
 AbstractDataModel* StepFunctionModel::clone() const
@@ -53,7 +53,7 @@ QVariant StepFunctionModel::parameter() const
  * 2. As a QVariantList: In this case, the list must contain two floating point values and one
  * boolean sorted in the following order: \a threshold, \a amplitude, \a stepDirection.
  */
-void StepFunctionModel::setParameter(const QVariant &parameter)
+void StepFunctionModel::setParameter(const QVariant& parameter)
 {
     if(parameter.canConvert(QMetaType::QVariantMap))
     {
@@ -65,7 +65,7 @@ void StepFunctionModel::setParameter(const QVariant &parameter)
     else if(parameter.canConvert(QMetaType::QVariantList))
     {
         auto parList = parameter.toList();
-        if(parList.size()<3)
+        if(parList.size() < 3)
         {
             qWarning() << "StepFunctionModel::setParameter: Could not set parameters! "
                           "reason: contained QVariantList has too few entries (required: 2 float, 1 bool)";
@@ -111,7 +111,7 @@ QVariant ConstantModel::parameter() const
  * 1. As a QVariantMap with one key-value-pair: ("amplitude", \a amplitude).
  * 2. As a QVariantList: In this case, the list must contain one floating point value, i.e. \a amplitude.
  */
-void ConstantModel::setParameter(const QVariant &parameter)
+void ConstantModel::setParameter(const QVariant& parameter)
 {
     if(parameter.canConvert(QMetaType::QVariantMap))
     {
@@ -143,10 +143,12 @@ RectFunctionModel::RectFunctionModel(float rectBegin, float rectEnd, float ampli
 
 float RectFunctionModel::valueAt(float position) const
 {
-    if(position < _rectBegin  || position > _rectEnd)
+    if(position < _rectBegin)
         return 0.0f;
-    else
+    if(position < _rectEnd)
         return _amplitude;
+
+    return 0.0f;
 }
 
 AbstractDataModel* RectFunctionModel::clone() const
@@ -180,7 +182,7 @@ QVariant RectFunctionModel::parameter() const
  * 2. As a QVariantList: In this case, the list must contain three floating point values sorted in
  * the following order: \a rectBegin, \a rectEnd, \a amplitude.
  */
-void RectFunctionModel::setParameter(const QVariant &parameter)
+void RectFunctionModel::setParameter(const QVariant& parameter)
 {
     if(parameter.canConvert(QMetaType::QVariantMap))
     {
@@ -192,7 +194,7 @@ void RectFunctionModel::setParameter(const QVariant &parameter)
     else if(parameter.canConvert(QMetaType::QVariantList))
     {
         auto parList = parameter.toList();
-        if(parList.size()<3)
+        if(parList.size() < 3)
         {
             qWarning() << "RectFunctionModel::setParameter: Could not set parameters! "
                           "reason: contained QVariantList has too few entries (required: 3 float)";

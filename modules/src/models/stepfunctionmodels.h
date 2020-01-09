@@ -3,6 +3,12 @@
 
 #include "abstractdatamodel.h"
 
+/*
+ * All step functions are implemented with left-closed and right-open intervals,
+ * i.e. they are piecewise constant on intervals of the form [a,b).
+ * This allows seamless compositions of these models.
+ */
+
 namespace CTL {
 
 class StepFunctionModel : public AbstractDataModel
