@@ -247,7 +247,10 @@ int main(int argc, char* argv[])
 
 --------------
 
-![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl)
+![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=code)
+![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=comments)
+![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=blanks)
+![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=files)
 
 If you have any problems or questions regarding the CTL, please contact us:  
 <sw4g.production@gmail.com>.
