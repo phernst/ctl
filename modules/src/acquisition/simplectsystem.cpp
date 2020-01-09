@@ -203,7 +203,8 @@ float SimpleCTsystem::photonsPerPixelMean() const
  */
 float SimpleCTsystem::photonsPerPixel(uint module) const
 {
-    return float(this->source()->photonFlux()) * 1.0e-4f *
+    constexpr auto convertUnit = 1.0e-2f; // convert unit of flux unit: 1/cm² -> 1/mm²
+    return float(this->source()->photonFlux()) * convertUnit *
            GeometryEncoder::effectivePixelArea(*this, module);
 }
 
