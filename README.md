@@ -247,6 +247,7 @@ int main(int argc, char* argv[])
 
 --------------
 
+Statistics on the master branch:  
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=code)
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=comments)
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=blanks)
