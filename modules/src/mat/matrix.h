@@ -1,6 +1,6 @@
 /******************************************************************************
 ** 'Matrix' template class for basic matrix calculations
-** by Robert Frysch | Jan 08, 2020
+** by Robert Frysch | Jan 12, 2020
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -146,7 +146,9 @@ public:
     template <uint j>
     Matrix<Rows, 1> column() const;
 
-    // unary operators
+    // unary operators etc.
+    void normalize();
+    Matrix<Rows, Cols> normalized() const;
     Matrix<Cols, Rows> transposed() const;
     Matrix<Rows, Cols> operator-() const;
     // compound assignment

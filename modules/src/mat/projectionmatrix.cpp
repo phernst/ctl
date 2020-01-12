@@ -115,7 +115,11 @@ void ProjectionMatrix::changeDetectorResolution(double resamplingFactorX, double
 }
 
 /*!
- * Normalizes the current projection matrix.
+ * Normalizes the current projection matrix in place.
+ *
+ * Note that this function may shadow the `Matrix::normalize` function, which normalizes the current
+ * matrix using its Frobenius norm (if `ENABLE_FROBENIUS_NORM` has been defined).
+ *
  * \sa normalized()
  */
 void ProjectionMatrix::normalize()
@@ -132,6 +136,9 @@ void ProjectionMatrix::normalize()
  * Moreover, it normalizes the sign, so that the determinant of
  * \f$M\f$ is positive \f$(P = \left[\begin{array}{cc}
  * M & \mathbf{p}_{4}\end{array}\right])\f$.
+ *
+ * Note that this function may shadow the `Matrix::normalized` function, which computes a normalized
+ * matrix using its Frobenius norm (if `ENABLE_FROBENIUS_NORM` has been defined).
  */
 ProjectionMatrix ProjectionMatrix::normalized() const
 {
