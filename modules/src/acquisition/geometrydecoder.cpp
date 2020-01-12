@@ -75,7 +75,7 @@ Matrix3x3 GeometryDecoder::computeSourceRotation(const QVector<mat::Location>& m
 
     // vector from source to detector centroid
     Vector3x1 src2centroid = centroid - sourcePosition;
-    src2centroid /= src2centroid.norm();
+    src2centroid.normalize();
 
     // construct a rotation matrix that rotates the z-axis to `src2centroid` vector, i.e. it needs
     // to have the form

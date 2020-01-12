@@ -214,7 +214,7 @@ Matrix<3, 1> ProjectionMatrix::directionSourceToPixel(double x, double y,
     case NoNormalization:
         break;
     case NormalizeAsUnitVector:
-        ret /= ret.norm();
+        ret.normalize();
         break;
     case NormalizeByX: // same as NormalizeByChannel
         ret *= std::fabs(R.get<0,0>());

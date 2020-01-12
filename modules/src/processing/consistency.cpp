@@ -473,7 +473,7 @@ IntermedGen2D3D::intersectionPlanesWCS(const std::vector<float>& mu,
             n2D = { std::cos(angle), std::sin(angle) };
             const auto z = s + originTransp * n2D;
             n3D = Mtransp * vertcat(n2D, mat::Matrix<1, 1>{ -z });
-            n3D /= n3D.norm();
+            n3D.normalize();
 
             coordWCS.azimuth() = std::atan2(float(n3D.get<1>()), float(n3D.get<0>()));
             coordWCS.polar() = std::acos(float(n3D.get<2>()));

@@ -617,7 +617,7 @@ Matrix<Rows, 1> Matrix<Rows, Cols>::column() const
 
 /*!
  * Normalizes the current instance of a vector in place by dividing the elements by its Euclidian
- * norm.
+ * norm. This transforms the vector into a unit vector.
  * If the macro `ENABLE_FROBENIUS_NORM` has been defined before including the `matrix.h` header
  * this function can be applied for arbitrary matrices (not only vectors). In this case, the matrix
  * is normalized by its Frobenius norm.
@@ -629,8 +629,8 @@ void Matrix<Rows, Cols>::normalize()
 }
 
 /*!
- * Returns a vector (or Matrix if Frobenius norm is enables) that is normalized by its Euclidian
- * norm (or Frobenius norm).
+ * Returns a (unit) vector (or Matrix if Frobenius norm is enables) that is normalized by its
+ * Euclidian norm (or Frobenius norm).
  *
  * To enable the Frobenius norm, `ENABLE_FROBENIUS_NORM` has to be defined before including the
  * `matrix.h` header.

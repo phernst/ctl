@@ -211,7 +211,7 @@ VolumeSlicer::createInverseTransformationToXYPlane(const mat::Matrix<4, 1>& plan
     axis = std::abs(r3(axis)) < std::abs(r3.get<2>()) ? axis : 2;
     r2(axis) = 1.0;
     r2 = mat::cross(r3, r2);
-    r2 /= r2.norm();
+    r2.normalize();
     r1 = mat::cross(r2, r3);
 
     const auto rotationMatrix = mat::horzcat(mat::horzcat(r1, r2), r3);

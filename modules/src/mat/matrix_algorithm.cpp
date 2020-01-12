@@ -27,8 +27,8 @@ PairMat3x3 QRdecomposition(const Matrix3x3& A)
 
     Vector3x1 u1{ B.get<0,0>(), B.get<0,1>(), B.get<0,2>() };
     Vector3x1 u2{          0.0, B.get<1,1>(), B.get<1,2>() };
-    u1 /= u1.norm();
-    u2 /= u2.norm();
+    u1.normalize();
+    u2.normalize();
     Q1 = eye<3>() - 2.0*u1*u1.transposed();
     Q2 = eye<3>() - 2.0*u2*u2.transposed();
     Q = Q1*Q2;
@@ -116,7 +116,7 @@ mat::Matrix<3, 1> orthonormalTo(const mat::Matrix<3, 1>& v)
     auto ret = mat::Matrix<3, 1>(0.0);
     ret(smallestDim) = 1.0;
     ret = mat::cross(v, ret);
-    ret /= ret.norm();
+    ret.normalize();
     return ret;
 }
 
