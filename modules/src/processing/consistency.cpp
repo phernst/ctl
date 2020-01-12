@@ -117,8 +117,15 @@ void IntermedGen2D2D::setAngleIncrement(double angleIncrement)
 
 void IntermedGen2D2D::setSubsampleLevel(float subsampleLevel)
 {
-    _subsampleLevel = subsampleLevel;
-    _useSubsampling = true;
+    if(subsampleLevel <= 0.0f)
+        qWarning("New subsampling level ignored, since it is negative or zero.");
+    else if(subsampleLevel > 1.0f)
+        qWarning("New subsampling level ignored, since it is greater than one.");
+    else
+    {
+        _subsampleLevel = subsampleLevel;
+        _useSubsampling = true;
+    }
 }
 
 void IntermedGen2D2D::toggleSubsampling(bool enabled)
@@ -420,8 +427,15 @@ float IntermedGen2D3D::subsampleLevel() const
 
 void IntermedGen2D3D::setSubsampleLevel(float subsampleLevel)
 {
-    _subsampleLevel = subsampleLevel;
-    _useSubsampling = true;
+    if(subsampleLevel <= 0.0f)
+        qWarning("New subsampling level ignored, since it is negative or zero.");
+    else if(subsampleLevel > 1.0f)
+        qWarning("New subsampling level ignored, since it is greater than one.");
+    else
+    {
+        _subsampleLevel = subsampleLevel;
+        _useSubsampling = true;
+    }
 }
 
 void IntermedGen2D3D::toggleSubsampling(bool enabled)
@@ -461,9 +475,9 @@ IntermedGen2D3D::intersectionPlanesWCS(const std::vector<float>& mu,
             n3D = Mtransp * vertcat(n2D, mat::Matrix<1, 1>{ -z });
             n3D /= n3D.norm();
 
-            coordWCS.azimuth() = std::atan2(n3D.get<1>(), n3D.get<0>()); // azimuth
-            coordWCS.polar()   = std::acos(n3D.get<2>());                // polar
-            coordWCS.dist()    = srcPosTransp * n3D;                     // distance
+            coordWCS.azimuth() = std::atan2(float(n3D.get<1>()), float(n3D.get<0>()));
+            coordWCS.polar() = std::acos(float(n3D.get<2>()));
+            coordWCS.dist() = float(srcPosTransp * n3D);
 
             ret.push_back(coordWCS);
         }
