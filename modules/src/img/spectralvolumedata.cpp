@@ -66,25 +66,35 @@ VoxelVolume<float> SpectralVolumeData::muVolume(float centerEnergy, float binWid
     return (*this) * (averageMassAttenuationFactor(centerEnergy, binWidth) * cm2mm);
 }
 
-SpectralVolumeData SpectralVolumeData::createBall(float radius, float voxelSize, float density,
-                                                  std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
+SpectralVolumeData
+SpectralVolumeData::createBall(float radius,
+                               float voxelSize,
+                               float density,
+                               std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
 {
-    uint nbVox = static_cast<uint>(ceil(2.0f * radius / voxelSize));
+    const auto nbVox = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+    const auto center = float(nbVox - 1) / 2.0f;
 
-    SpectralVolumeData::Dimensions volDim{ nbVox, nbVox, nbVox };
-    SpectralVolumeData::VoxelSize voxSize = { voxelSize, voxelSize, voxelSize };
-    SpectralVolumeData volume({volDim, voxSize});
+    const SpectralVolumeData::Dimensions volDim{ nbVox, nbVox, nbVox };
+    const SpectralVolumeData::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    SpectralVolumeData volume{ { volDim, voxSize }, std::move(absorptionModel) };
     volume.fill(density);
-    volume.setAbsorptionModel(absorptionModel);
 
-    float center = float(nbVox-1)/2.0;
-    float rSquaredInVoxel = radius/voxelSize * radius/voxelSize ;
+    auto dist2Center = [center](float x, float y, float z)
+    {
+        const auto dx = x - center;
+        const auto dy = y - center;
+        const auto dz = z - center;
+        return dx * dx + dy * dy + dz * dz;
+    };
+    const auto rSquaredInVoxel = (radius / voxelSize) * (radius / voxelSize);
 
-    for(float x = 0.0f; x < nbVox; ++x)
-        for(float y = 0.0f; y < nbVox; ++y)
-            for(float z = 0.0f; z < nbVox; ++z)
-                if((x-center)*(x-center) + (y-center)*(y-center) + (z-center)*(z-center) > rSquaredInVoxel)
-                    volume(x,y,z) = 0.0f;
+    // erase exterior space
+    for(auto x = 0u; x < nbVox; ++x)
+        for(auto y = 0u; y < nbVox; ++y)
+            for(auto z = 0u; z < nbVox; ++z)
+                if(dist2Center(x, y, z) > rSquaredInVoxel)
+                    volume(x, y, z) = 0.0f;
 
     return volume;
 }

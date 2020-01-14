@@ -10,11 +10,11 @@ class SpectralVolumeData : public VoxelVolume<float>
 {
 public:
     SpectralVolumeData(const VoxelVolume<float>& materialDensity,
-                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel = nullptr,
-                        const QString& materialName = "NN");
+                       std::shared_ptr<AbstractIntegrableDataModel> absorptionModel = nullptr,
+                       const QString& materialName = "NN");
     SpectralVolumeData(VoxelVolume<float>&& materialDensity,
-                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel = nullptr,
-                        const QString& materialName = "NN");
+                       std::shared_ptr<AbstractIntegrableDataModel> absorptionModel = nullptr,
+                       const QString& materialName = "NN");
 
     // getter methods
     std::shared_ptr<AbstractIntegrableDataModel> absorptionModel() const;
