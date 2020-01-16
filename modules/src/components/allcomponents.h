@@ -3,6 +3,7 @@
 
 #include "components/allgenerictypes.h"
 
+#include "components/attenuationfilter.h"
 #include "components/carmgantry.h"
 #include "components/cylindricaldetector.h"
 #include "components/flatpaneldetector.h"

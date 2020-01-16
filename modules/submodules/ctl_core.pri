@@ -96,7 +96,9 @@ HEADERS += \
     $$PWD/../src/projectors/projectorextension.h \
     $$PWD/../src/projectors/spectralprojectorextension.h \
     $$PWD/../src/models/datamodeloperations.h \
-    $$PWD/../src/models/abstractxrayspectrummodel.h
+    $$PWD/../src/components/attenuationfilter.h \
+    $$PWD/../src/models/abstractxrayspectrummodel.h \
+    $$PWD/../src/acquisition/radiationencoder.h
 
 SOURCES += \
     $$PWD/../src/acquisition/acquisitionsetup.cpp \
@@ -154,7 +156,9 @@ SOURCES += \
     $$PWD/../src/projectors/spectralprojectorextension.cpp \
     $$PWD/../src/models/abstractdatamodel.cpp \
     $$PWD/../src/models/datamodeloperations.cpp \
-    $$PWD/../src/models/abstractxrayspectrummodel.cpp
+    $$PWD/../src/components/attenuationfilter.cpp \
+    $$PWD/../src/models/abstractxrayspectrummodel.cpp \
+    $$PWD/../src/acquisition/radiationencoder.cpp
 
 # Qt-free headers and sources
 HEADERS += \
