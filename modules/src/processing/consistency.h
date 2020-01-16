@@ -132,8 +132,6 @@ private:
                                                  const mat::Matrix<2, 1>& originRadon,
                                                  double angleIncrement = 0.01_deg);
 
-    static double maxDistanceToCorners(const Chunk2D<float>::Dimensions& projSize,
-                                       const mat::Matrix<2, 1>& originRadon);
     static Radon2DCoord plueckerTo2DRadon(const mat::Matrix<3, 3>& L,
                                           const mat::Matrix<1, 2>& originRadon);
 };

@@ -6,6 +6,7 @@
 #include "mat/matrix.h"
 #include "mat/mat.h"
 
+#include <bitset>
 #include <random>
 
 namespace {
@@ -187,6 +188,21 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
                            const Chunk2D<float>::Dimensions& projSize,
                            const mat::Matrix<2, 1>& originRadon, double angleIncrement)
 {
+    constexpr auto nbCorners = 4u;
+    const std::array<mat::Matrix<2, 1>, nbCorners> detectorCorners = {
+        mat::Matrix<2, 1>{ 0.0, 0.0 },
+        mat::Matrix<2, 1>{ projSize.width - 1.0, 0.0 },
+        mat::Matrix<2, 1>{ 0.0, projSize.height - 1.0 },
+        mat::Matrix<2, 1>{ projSize.width - 1.0, projSize.height - 1.0 }
+    };
+    auto intersectsDetector = [&detectorCorners, &originRadon](const Radon2DCoord& line)
+    {
+        const mat::Matrix<1, 2> n2D = { std::cos(line.angle()), std::sin(line.angle()) };
+        std::bitset<nbCorners> side;
+        for(auto i = 0u; i < side.size(); ++i)
+            side.set(i, std::signbit(n2D * (detectorCorners[i] - originRadon) - line.dist()));
+        return !(side.all() || side.none());
+    };
     const auto source1 = P1.sourcePosition();
     const auto source2 = P2.sourcePosition();
     const auto M1 = P1.M(), M1transp = P1.M().transposed();
@@ -196,8 +212,8 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
     auto baseLine = source2 - source1;
     const auto src2srcDistance = baseLine.norm();
     if(qFuzzyIsNull(src2srcDistance))
-        throw std::runtime_error("IntermedGen2D2D::intermedFctPair: distance between the two source "
-                                 "positions is close to zero.");
+        throw std::runtime_error("IntermedGen2D2D::intermedFctPair: distance between the two source"
+                                 " positions is close to zero.");
     baseLine /= src2srcDistance;
 
     // initialize plane normal
@@ -207,7 +223,6 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
     const auto nbRotAngles = size_t(PI / std::abs(angleIncrement) + 0.5);
     const auto negSource1 = -source1.transposed();
     const auto originRadonTransp = originRadon.transposed();
-    const auto maxDist2Corner = maxDistanceToCorners(projSize, originRadon);
     LineSet lineSet1, lineSet2;
 
     for(size_t i = 0; i < nbRotAngles; ++i)
@@ -231,7 +246,7 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
         const auto line2 = plueckerTo2DRadon(L2, originRadonTransp);
 
         // boundary checks and append coordinates
-        if(std::abs(line1.dist()) < maxDist2Corner && std::abs(line2.dist()) < maxDist2Corner)
+        if(intersectsDetector(line1) && intersectsDetector(line2))
         {
             lineSet1.push_back(line1);
             lineSet2.push_back(line2);
@@ -248,19 +263,6 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
     const auto originRadon2D = 0.5 * (mat::Matrix<2, 1>(projSize.width, projSize.height) -
                                       mat::Matrix<2, 1>(1.0));
     return linePairs(P1, P2, projSize, originRadon2D, _angleIncrement);
-}
-
-double IntermedGen2D2D::maxDistanceToCorners(const Chunk2D<float>::Dimensions& projSize,
-                                             const mat::Matrix<2, 1>& originRadon)
-{
-    const mat::Matrix<2, 1> corner1(0.0, 0.0);
-    const mat::Matrix<2, 1> corner2(projSize.width - 1.0, 0.0);
-    const mat::Matrix<2, 1> corner3(0.0, projSize.height - 1.0);
-    const mat::Matrix<2, 1> corner4(projSize.width - 1.0, projSize.height - 1.0);
-    return std::max({ (corner1 - originRadon).norm(),
-                      (corner2 - originRadon).norm(),
-                      (corner3 - originRadon).norm(),
-                      (corner4 - originRadon).norm() });
 }
 
 Radon2DCoord IntermedGen2D2D::plueckerTo2DRadon(const mat::Matrix<3, 3>& L,
