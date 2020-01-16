@@ -143,6 +143,17 @@ void SimpleCTsystem::replaceDetector(AbstractDetector* newDetector)
 }
 
 /*!
+ * Replaces the detector component of this instance by \a newDetector. The old detector object is
+ * destroyed. This instance takes ownership of \a newDetector.
+ *
+ * Does nothing if a nullptr is passed.
+ */
+void SimpleCTsystem::replaceDetector(std::unique_ptr<AbstractDetector> newDetector)
+{
+    replaceDetector(newDetector.release());
+}
+
+/*!
  * Replaces the gantry component of this instance by \a newGantry. The old gantry object is
  * destroyed. This instance takes ownership of \a newGantry.
  *
@@ -159,6 +170,17 @@ void SimpleCTsystem::replaceGantry(AbstractGantry* newGantry)
 }
 
 /*!
+ * Replaces the gantry component of this instance by \a newGantry. The old gantry object is
+ * destroyed. This instance takes ownership of \a newGantry.
+ *
+ * Does nothing if a nullptr is passed.
+ */
+void SimpleCTsystem::replaceGantry(std::unique_ptr<AbstractGantry> newGantry)
+{
+    replaceGantry(newGantry.release());
+}
+
+/*!
  * Replaces the source component of this instance by \a newSource. The old source object is
  * destroyed. This instance takes ownership of \a newSource.
  *
@@ -172,6 +194,17 @@ void SimpleCTsystem::replaceSource(AbstractSource* newSource)
         removeComponent(source());
         addComponent(newSource);
     }
+}
+
+/*!
+ * Replaces the source component of this instance by \a newSource. The old source object is
+ * destroyed. This instance takes ownership of \a newSource.
+ *
+ * Does nothing if a nullptr is passed.
+ */
+void SimpleCTsystem::replaceSource(std::unique_ptr<AbstractSource> newSource)
+{
+    replaceSource(newSource.release());
 }
 
 /*!
