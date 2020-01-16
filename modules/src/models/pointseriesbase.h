@@ -12,6 +12,7 @@ class PointSeriesBase
 {
 public:
     // getter methods
+    QList<QPointF>& data();
     const QList<QPointF>& data() const;
 
     // other methods
@@ -50,6 +51,11 @@ inline PointSeriesBase::PointSeriesBase(const QList<QPointF>& pointSeries)
 inline PointSeriesBase::PointSeriesBase(QList<QPointF>&& pointSeries)
     : _data(std::move(pointSeries))
 {
+}
+
+inline QList<QPointF>& PointSeriesBase::data()
+{
+    return _data;
 }
 
 inline const QList<QPointF>& PointSeriesBase::data() const
