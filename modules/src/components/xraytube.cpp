@@ -5,7 +5,7 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(XrayTube)
 
-const float DEFAULT_SPECTRUM_BIN_WIDTH = 10;
+constexpr float DEFAULT_SPECTRUM_BIN_WIDTH = 10;
 
 /*!
  * Constructs an XrayTube with a focal spot size of \a focalSpotSize and its focal spot positioned
@@ -18,7 +18,7 @@ XrayTube::XrayTube(const QSizeF &focalSpotSize,
                    double tubeVoltage,
                    double mAs,
                    const QString &name)
-    : AbstractSource(focalSpotSize, focalSpotPosition, new KramersLawSpectrumModel, name)
+    : AbstractSource(focalSpotSize, focalSpotPosition, new TASMIPSpectrumModel, name)
     , _mAs(mAs)
 {
     setTubeVoltage(tubeVoltage);
@@ -110,6 +110,16 @@ QString XrayTube::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
+void XrayTube::updateIntensityConstant()
+{
+    constexpr double perMM2toCM2 = 100.0;
+    _intensityConstant = IntervalDataSeries::sampledFromModel(*_spectrumModel,
+                                                              energyRange().from, energyRange().to,
+                                                              qRound(energyRange().to-energyRange().from)).integral() * perMM2toCM2;
+
+    qInfo("%f",_intensityConstant);
+}
+
 /*!
  * Returns the tube (acceleration) voltage (in keV).
  */
@@ -127,8 +137,12 @@ void XrayTube::setTubeVoltage(double voltage)
 {
     _tubeVoltage = voltage;
 
-    if(hasSpectrumModel())
-        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+    // now ensured to have spectrum model
+//    if(hasSpectrumModel())
+//        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+
+    _spectrumModel->setParameter(_tubeVoltage);
+    updateIntensityConstant();
 }
 
 /*!
@@ -136,10 +150,12 @@ void XrayTube::setTubeVoltage(double voltage)
  */
 void XrayTube::setMilliampereSeconds(double mAs) { _mAs = mAs; }
 
-/*!
- * Sets the intensity constant to \a value (in PHOTONS / (mAs * cm^2)).
- */
-void XrayTube::setIntensityConstant(double value) { _intensityConstant = value; }
+
+// deprecated, intensity constant derived from TASMIPSpectralModel
+//  /*!
+//   * Sets the intensity constant to \a value (in PHOTONS / (mAs * cm^2)).
+//   */
+//  void XrayTube::setIntensityConstant(double value) { _intensityConstant = value; }
 
 // Use SystemComponent::fromVariant() documentation.
 void XrayTube::fromVariant(const QVariant& variant)
@@ -164,10 +180,13 @@ QVariant XrayTube::toVariant() const
 
 void XrayTube::setSpectrumModel(AbstractXraySpectrumModel* model)
 {
-    AbstractSource::setSpectrumModel(model);
+// deprecated, XrayTube now fixed to TASMIPSpectrumModel
+//    AbstractSource::setSpectrumModel(model);
 
-    if(model)
-        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+//    if(model)
+//        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+
+    qWarning("Setting spectrum model in XrayTube deprecated, XrayTube now fixed to TASMIPSpectrumModel.");
 }
 
 uint XrayTube::spectrumDiscretizationHint() const

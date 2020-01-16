@@ -28,7 +28,7 @@ public:
     QString info() const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
-    void setSpectrumModel(AbstractXraySpectrumModel* model) override;
+    //void setSpectrumModel(AbstractXraySpectrumModel* model) override; //deprecated
     uint spectrumDiscretizationHint() const override;
 
     // getter methods
@@ -39,7 +39,7 @@ public:
     // setter methods
     void setTubeVoltage(double voltage);
     void setMilliampereSeconds(double mAs);
-    void setIntensityConstant(double value);
+    // void setIntensityConstant(double value); //deprecated
 
 
 
@@ -50,6 +50,11 @@ protected:
     double _tubeVoltage       = 100.0f;
     double _mAs               = 10.0f;
     double _intensityConstant = 3.2e8; // Default intensity constant [PHOTONS / (mAs * cm^2)]
+
+private:
+    void updateIntensityConstant();
+
+    void setSpectrumModel(AbstractXraySpectrumModel* model) override;
 };
 
 } // namespace CTL

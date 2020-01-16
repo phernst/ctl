@@ -45,7 +45,7 @@ void ProjectorTest::testSpectralExtension()
     auto tube = makeComponent<XrayTube>(QSizeF(1.0, 1.0), 80.0, 100000.0, "X-ray tube");
     auto tubeGantry = makeComponent<CarmGantry>(1200.0);
 
-    tube->setSpectrumModel(new HeuristicCubicSpectrumModel());
+    //tube->setSpectrumModel(new HeuristicCubicSpectrumModel());
 
     CTsystem system;
     system.addComponent(std::move(flatPanel));
@@ -96,7 +96,7 @@ void ProjectorTest::testSpectralExtension()
     io::BaseTypeIO<io::DenFileIO> io;
     // Non-linear composite
     auto proj = spectralExt->projectComposite(compVol);
-    io.write(proj, "testData/spectralExt_nonlin_projectComposite.den");
+    //io.write(proj, "testData/spectral_nonlin_composite.den");
     auto groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_composite.den");
     auto diff = proj-groundTruth;
     auto mean = projectionMean(diff);
@@ -107,6 +107,7 @@ void ProjectorTest::testSpectralExtension()
 
     // Non-linear simple
     proj = spectralExt->project(volume);
+    //io.write(proj, "testData/spectral_nonlin_simple.den");
     groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_simple.den");
     diff = proj-groundTruth;
     mean = projectionMean(diff);
@@ -123,6 +124,7 @@ void ProjectorTest::testSpectralExtension()
 
     // Linear composite
     proj = spectralExt->projectComposite(compVol);
+    //io.write(proj, "testData/spectral_lin_composite.den");
     groundTruth = io.readProjections("testData/spectralExtension/spectral_lin_composite.den");
     diff = proj-groundTruth;
     mean = projectionMean(diff);
@@ -133,6 +135,7 @@ void ProjectorTest::testSpectralExtension()
 
     // Linear simple
     proj = spectralExt->project(volume);
+    //io.write(proj, "testData/spectral_lin_simple.den");
     groundTruth = io.readProjections("testData/spectralExtension/spectral_lin_simple.den");
     diff = proj-groundTruth;
     mean = projectionMean(diff);
