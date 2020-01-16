@@ -142,6 +142,80 @@ void diffBuffer_SavitzkyGolay7(const std::vector<T*>& buffer)
     });
 }
 
+template <typename T>
+void diffBuffer_SpectralGauss3(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 15;
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return  - T(0.00148810) * pipe(0)
+                + T(0.00238095) * pipe(1)
+                - T(0.00416667) * pipe(2)
+                + T(0.00833333) * pipe(3)
+                - T(0.02083333) * pipe(4)
+                + T(0.08333333) * pipe(5)
+                + T(0.37500000) * pipe(6)
+
+                - T(0.37500000) * pipe(8)
+                - T(0.08333333) * pipe(9)
+                + T(0.02083333) * pipe(10)
+                - T(0.00833333) * pipe(11)
+                + T(0.00416667) * pipe(12)
+                - T(0.00238095) * pipe(13)
+                + T(0.00148810) * pipe(14);
+    });
+}
+
+template <typename T>
+void diffBuffer_SpectralGauss5(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 7;
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return  + T(0.01250000) * pipe(0)
+                + T(0.13020833) * pipe(1)
+                + T(0.20833333) * pipe(2)
+
+                - T(0.20833333) * pipe(4)
+                - T(0.13020833) * pipe(5)
+                - T(0.01250000) * pipe(6);
+    });
+}
+
+template <typename T>
+void diffBuffer_SpectralGauss7(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 7;
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return  + T(0.03828125) * pipe(0)
+                + T(0.12031250) * pipe(1)
+                + T(0.13671875) * pipe(2)
+
+                - T(0.13671875) * pipe(4)
+                - T(0.12031250) * pipe(5)
+                - T(0.03828125) * pipe(6);
+    });
+}
+
+template <typename T>
+void diffBuffer_SpectralGauss9(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 9;
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return  + T(0.01061663) * pipe(0)
+                + T(0.04977679) * pipe(1)
+                + T(0.10390625) * pipe(2)
+                + T(0.09843750) * pipe(3)
+
+                - T(0.09843750) * pipe(5)
+                - T(0.10390625) * pipe(6)
+                - T(0.04977679) * pipe(7)
+                - T(0.01061663) * pipe(8);
+    });
+}
+
 // Generic Filters
 template <typename T>
 void filterBuffer_Gauss3(const std::vector<T*>& buffer)
@@ -236,10 +310,10 @@ void filterBuffer_MaxAbs3(const std::vector<T*>& buffer)
 
 // # Method selection #
 template <typename T>
-using PtrToDiffFct = void (*)(const std::vector<T*>&);
+using PtrToFilterFct = void (*)(const std::vector<T*>&);
 
 template <typename T>
-PtrToDiffFct<T> selectFilterFct(int m)
+PtrToFilterFct<T> selectFilterFct(int m)
 {
     switch(m)
     {
@@ -252,6 +326,15 @@ PtrToDiffFct<T> selectFilterFct(int m)
         return &diffBuffer_SavitzkyGolay5;
     case DiffMethod::SavitzkyGolay7:
         return &diffBuffer_SavitzkyGolay7;
+    case DiffMethod::SpectralGauss3:
+        return &diffBuffer_SpectralGauss3;
+    case DiffMethod::SpectralGauss5:
+        return &diffBuffer_SpectralGauss5;
+    case DiffMethod::SpectralGauss7:
+        return &diffBuffer_SpectralGauss7;
+    case DiffMethod::SpectralGauss9:
+        return &diffBuffer_SpectralGauss9;
+
     // Generic Filters
     case FiltMethod::Gauss3:
         return &filterBuffer_Gauss3;
@@ -578,6 +661,40 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  * 0 & n=N-3,N-2,N-1
  * \end{cases}
  * \f$
+ */
+
+/*! \var FiltMethod::SpectralGauss3
+ * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
+ * a Gaussian kernel of size three: 1/4 * [1 2 1], i.e. with a standard deviation `sigma=0.87`.
+ * The filter is truncated to a size of 15, which covers 99.08% of the full filter size (in terms of
+ * the sum of absolute values).
+ * Values on the borders will be set to zero.
+ */
+
+/*! \var FiltMethod::SpectralGauss5
+ * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
+ * a Gaussian kernel of size five: 1/16 * [1 4 6 4 1], i.e. with a standard deviation `sigma=1.12`.
+ * The filter is truncated to a size of 7, which covers 99.07% of the full filter size (in terms of
+ * the sum of absolute values).
+ * Values on the borders will be set to zero.
+ */
+
+/*! \var FiltMethod::SpectralGauss7
+ * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
+ * a Gaussian kernel of size seven: 1/64 * [1 6 15 20 15 6 1], i.e. with a standard deviation
+ * `sigma=1.32`.
+ * The filter is truncated to a size of 7, which covers 99.07% of the full filter size (in terms of
+ * the sum of absolute values).
+ * Values on the borders will be set to zero.
+ */
+
+/*! \var FiltMethod::SpectralGauss9
+ * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
+ * a Gaussian kernel of size nine: 1/256 * [1 8 28 56 70 56 28 8 1], i.e. with a standard deviation
+ * `sigma=1.50`.
+ * The filter is truncated to a size of 9, which covers 99.76% of the full filter size (in terms of
+ * the sum of absolute values).
+ * Values on the borders will be set to zero.
  */
 
 } // namespace imgproc

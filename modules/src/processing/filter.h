@@ -12,11 +12,13 @@ class VoxelVolume;
 
 namespace imgproc {
 
-enum FiltMethod { Gauss3,
-                  Average3,
-                  Median3,
-                  MedianAbs3,
-                  MaxAbs3 };
+enum FiltMethod {
+    Gauss3,     // filter size: 3
+    Average3,   // filter size: 3
+    Median3,    // filter size: 3
+    MedianAbs3, // filter size: 3
+    MaxAbs3,    // filter size: 3
+};
 
 // one-dimensional filter
 template <uint dim>

@@ -13,10 +13,15 @@ class VoxelVolume;
 namespace imgproc {
 
 enum DiffMethod { // diff enum has to have negative values (non-negative are reserved for filter)
-                  CentralDifference = -1,
-                  DifferenceToNext = -2,
-                  SavitzkyGolay5 = -3,
-                  SavitzkyGolay7 = -4 };
+    CentralDifference = -1, // filter size: 3
+    DifferenceToNext  = -2, // filter size: 2
+    SavitzkyGolay5    = -3, // filter size: 5
+    SavitzkyGolay7    = -4, // filter size: 7
+    SpectralGauss3    = -5, // filter size: 15
+    SpectralGauss5    = -6, // filter size: 7
+    SpectralGauss7    = -7, // filter size: 7
+    SpectralGauss9    = -8, // filter size: 9
+};
 
 // partial derivatives
 template <uint dim>
