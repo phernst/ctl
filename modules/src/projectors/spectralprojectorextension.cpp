@@ -1,5 +1,6 @@
 #include "spectralprojectorextension.h"
 #include "acquisition/preparesteps.h"
+#include "acquisition/radiationencoder.h"
 #include "components/abstractdetector.h"
 #include "components/abstractsource.h"
 #include <limits>
@@ -195,10 +196,13 @@ void SpectralProjectorExtension::updateSpectralInformation()
     _spectralInfo.adjustedFluxMods = std::vector<std::vector<double>>(nbEnergyBins, std::vector<double>(nbViews));
     _spectralInfo.totalIntensities = std::vector<double>(nbViews, 0.0);
 
+    RadiationEncoder radiationEnc(_setup.system());
+
     for(uint view = 0; view < nbViews; ++view)
     {
         _setup.prepareView(view);
-        spectrum = srcPtr->spectrum(fullCoverageInterval, nbEnergyBins);
+        //spectrum = srcPtr->spectrum(fullCoverageInterval, nbEnergyBins);
+        spectrum = radiationEnc.finalSpectrum(fullCoverageInterval, nbEnergyBins);
         auto globalFluxMod = srcPtr->fluxModifier();
         for(uint bin = 0; bin < nbEnergyBins; ++bin)
         {

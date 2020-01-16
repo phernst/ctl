@@ -1,5 +1,6 @@
 #include "poissonnoiseextension.h"
 #include "acquisition/geometryencoder.h"
+#include "acquisition/radiationencoder.h"
 #include "components/genericsource.h"
 #include "img/chunk2d.h"
 
@@ -34,13 +35,14 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
     if(_useParallelization)
         launchMode |= std::launch::async;
 
+    RadiationEncoder radiationEnc(_setup.system());
     std::vector<std::future<void>> futures(ret.nbViews());
     for(uint view = 0; view < ret.nbViews(); ++view)
     {
         _setup.prepareView(view);
 
         futures[view] = std::async(launchMode, processViewCompact, std::ref(ret.view(view)),
-                                   _setup.system()->photonsPerPixel(), seed + view);
+                                   radiationEnc.photonsPerPixel(), seed + view);
     }
 
     for(const auto& future : futures)
