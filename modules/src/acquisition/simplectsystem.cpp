@@ -1,5 +1,6 @@
 #include "simplectsystem.h"
 #include "acquisition/geometryencoder.h"
+#include "acquisition/radiationencoder.h"
 #include "components/allgenerictypes.h"
 
 namespace CTL {
@@ -227,8 +228,7 @@ void SimpleCTsystem::addBeamModifier(std::unique_ptr<AbstractBeamModifier> modif
  */
 float SimpleCTsystem::photonsPerPixelMean() const
 {
-    const auto& counts = photonsPerPixel();
-    return std::accumulate(counts.begin(), counts.end(), 0.0f) / counts.size();
+    return RadiationEncoder(this).photonsPerPixelMean();
 }
 
 /*!
@@ -236,9 +236,7 @@ float SimpleCTsystem::photonsPerPixelMean() const
  */
 float SimpleCTsystem::photonsPerPixel(uint module) const
 {
-    constexpr auto convertUnit = 1.0e-2f; // convert unit of flux: 1/cm² -> 1/mm²
-    return float(this->source()->photonFlux()) * convertUnit *
-           GeometryEncoder::effectivePixelArea(*this, module);
+    return RadiationEncoder(this).photonsPerPixel(module);
 }
 
 /*!
@@ -246,12 +244,7 @@ float SimpleCTsystem::photonsPerPixel(uint module) const
  */
 std::vector<float> SimpleCTsystem::photonsPerPixel() const
 {
-    auto nbMod = this->detector()->nbDetectorModules();
-    std::vector<float> ret(nbMod);
-    for(uint mod = 0; mod < nbMod; ++mod)
-        ret[mod] = photonsPerPixel(mod);
-
-    return ret;
+    return RadiationEncoder(this).photonsPerPixel();
 }
 
 // use documentation of CTsystem::clone()
