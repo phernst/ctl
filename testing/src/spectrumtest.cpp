@@ -87,17 +87,17 @@ float SpectrumTest::calcAnalyticIntegral(float from, float to) const
 
 bool SpectrumTest::verifySampledSpectrum(const CTL::IntervalDataSeries &sampledSpec) const
 {
-    static const float eps = 1.0e-5f;
+    static constexpr float eps = 1.0e-4f;
 
     uint errors = 0;
     for(uint i=0; i<sampledSpec.nbSamples(); ++i)
     {
         float from = sampledSpec.samplingPoint(i) - 0.5f * sampledSpec.binWidth();
         float to   = from + sampledSpec.binWidth();
-        if( fabs(calcAnalyticIntegral(from, to) - sampledSpec.value(i)) > eps * calcAnalyticIntegral(from, to))
+        if( std::fabs(calcAnalyticIntegral(from, to) - sampledSpec.value(i)) > eps * calcAnalyticIntegral(from, to))
         {
             qInfo() << "deviation detected: [" << sampledSpec.samplingPoint(i) << " keV] " <<  sampledSpec.value(i) <<
-                       " (analytic: " << calcAnalyticIntegral(from, to) << ")";
+                       "(analytic: " << calcAnalyticIntegral(from, to) << ")";
             ++errors;
         }
     }
