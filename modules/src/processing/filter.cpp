@@ -304,6 +304,58 @@ void filterBuffer_MaxAbs3(const std::vector<T*>& buffer)
     });
 }
 
+template <typename T>
+void filterBuffer_RamLak43(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 43;
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return - T(0.0002297532508897) * pipe(0)
+
+               - T(0.0002806680987322) * pipe(2)
+
+               - T(0.0003505923309423) * pipe(4)
+
+               - T(0.0004503163717437) * pipe(6)
+
+               - T(0.0005995336310198) * pipe(8)
+
+               - T(0.0008373651540689) * pipe(10)
+
+               - T(0.0012508788103992) * pipe(12)
+
+               - T(0.0020677792580069) * pipe(14)
+
+               - T(0.0040528473456935) * pipe(16)
+
+               - T(0.0112579092935931) * pipe(18)
+
+               - T(0.1013211836423378) * pipe(20)
+               + T(0.2500000000000000) * pipe(21)
+               - T(0.1013211836423378) * pipe(22)
+
+               - T(0.0112579092935931) * pipe(24)
+
+               - T(0.0040528473456935) * pipe(26)
+
+               - T(0.0020677792580069) * pipe(28)
+
+               - T(0.0012508788103992) * pipe(30)
+
+               - T(0.0008373651540689) * pipe(32)
+
+               - T(0.0005995336310198) * pipe(34)
+
+               - T(0.0004503163717437) * pipe(36)
+
+               - T(0.0003505923309423) * pipe(38)
+
+               - T(0.0002806680987322) * pipe(40)
+
+               - T(0.0002297532508897) * pipe(42);
+    });
+}
+
 // ...
 // Add more methods here and
 // add it to enum `[Diff]/[Filt]Method` and following function `selectFilterFct`.
@@ -346,6 +398,8 @@ PtrToFilterFct<T> selectFilterFct(int m)
         return &filterBuffer_MedianAbs3;
     case FiltMethod::MaxAbs3:
         return &filterBuffer_MaxAbs3;
+    case FiltMethod::RamLak43:
+        return &filterBuffer_RamLak43;
     }
     return &filterBuffer_null;
 }
@@ -586,15 +640,18 @@ template void filter<1u>(VoxelVolume<double>& volume, FiltMethod m);
 template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
 
 /*!
- * \enum FiltMethod
+ * \enum DiffMethod
  * Enumeration for differentiation methods that can be used.
  *
- * To incorporate a new differentiation method, add a value to this enumeration and provide the
- * corresponding implementation of the method (see .cpp file for more information).
+ * To incorporate a new differentiation method, add a value to this enumeration (in diff.h) and
+ * provide the corresponding implementation of the method (see filter.cpp file for more information).
+ *
+ * In general, values on the borders will be set to zero, where no valid values are available for
+ * the differentiation, i.e. within the half size of the differential operator.
  */
 
-/*! \var FiltMethod::CentralDifference
- * This computes the central difference. Values on the borders will be set to zero.
+/*! \var DiffMethod::CentralDifference
+ * This computes the central difference.
  *
  * Assuming the dimension along which the difference is computed has (valid) indices
  * \f$ n=0,...,N-1 \f$.
@@ -610,7 +667,7 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  * \f$
  */
 
-/*! \var FiltMethod::DifferenceToNext
+/*! \var DiffMethod::DifferenceToNext
  * This computes the difference to the next value. The border value (last index) will be set to
  * zero to preserve input dimension.
  *
@@ -627,9 +684,8 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  * \f$
  */
 
-/*! \var FiltMethod::SavitzkyGolay5
- * This computes the derivative using a Savitzky-Golay-Filter of lenght 5. Values on the borders
- * will be set to zero.
+/*! \var DiffMethod::SavitzkyGolay5
+ * This computes the derivative using a Savitzky-Golay-Filter of lenght 5.
  *
  * Assuming the dimension along which the difference is computed has (valid) indices
  * \f$ n=0,...,N-1 \f$.
@@ -645,9 +701,8 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  * \f$
  */
 
-/*! \var FiltMethod::SavitzkyGolay7
- * This computes the derivative using a Savitzky-Golay-Filter of lenght 7. Values on the borders
- * will be set to zero.
+/*! \var DiffMethod::SavitzkyGolay7
+ * This computes the derivative using a Savitzky-Golay-Filter of lenght 7.
  *
  * Assuming the dimension along which the difference is computed has (valid) indices
  * \f$ n=0,...,N-1 \f$.
@@ -663,38 +718,62 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  * \f$
  */
 
-/*! \var FiltMethod::SpectralGauss3
+/*! \var DiffMethod::SpectralGauss3
  * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
- * a Gaussian kernel of size three: 1/4 * [1 2 1], i.e. with a standard deviation `sigma=0.87`.
- * The filter is truncated to a size of 15, which covers 99.08% of the full filter size (in terms of
+ * a Gaussian kernel of size three: 1/4 * [1 2 1], i.e. with a standard deviation `sigma=0.7071`.
+ * The filter is truncated to a size of 15, which covers 99.11% of the full filter size (in terms of
  * the sum of absolute values).
- * Values on the borders will be set to zero.
  */
 
-/*! \var FiltMethod::SpectralGauss5
+/*! \var DiffMethod::SpectralGauss5
  * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
- * a Gaussian kernel of size five: 1/16 * [1 4 6 4 1], i.e. with a standard deviation `sigma=1.12`.
- * The filter is truncated to a size of 7, which covers 99.07% of the full filter size (in terms of
+ * a Gaussian kernel of size five: 1/16 * [1 4 6 4 1], i.e. with a standard deviation `sigma=1.000`.
+ * The filter is truncated to a size of 7, which covers 99.12% of the full filter size (in terms of
  * the sum of absolute values).
- * Values on the borders will be set to zero.
  */
 
-/*! \var FiltMethod::SpectralGauss7
+/*! \var DiffMethod::SpectralGauss7
  * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
  * a Gaussian kernel of size seven: 1/64 * [1 6 15 20 15 6 1], i.e. with a standard deviation
- * `sigma=1.32`.
- * The filter is truncated to a size of 7, which covers 99.07% of the full filter size (in terms of
+ * `sigma=1.225`.
+ * The filter is truncated to a size of 7, which covers 99.13% of the full filter size (in terms of
  * the sum of absolute values).
- * Values on the borders will be set to zero.
  */
 
-/*! \var FiltMethod::SpectralGauss9
+/*! \var DiffMethod::SpectralGauss9
  * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
  * a Gaussian kernel of size nine: 1/256 * [1 8 28 56 70 56 28 8 1], i.e. with a standard deviation
- * `sigma=1.50`.
- * The filter is truncated to a size of 9, which covers 99.76% of the full filter size (in terms of
+ * `sigma=1.414`.
+ * The filter is truncated to a size of 9, which covers 99.81% of the full filter size (in terms of
  * the sum of absolute values).
- * Values on the borders will be set to zero.
+ */
+
+/*!
+ * \enum FiltMethod
+ * Enumeration for filter methods that can be used.
+ *
+ * To incorporate a new filter method, add a value to this enumeration (in filter.h) and provide the
+ * corresponding implementation of the method (see filter.cpp file for more information).
+ *
+ * In general, values on the borders will be set to zero, where no valid values are available for
+ * the filtering, i.e. within the half filter size.
+ */
+
+/*! \var FiltMethod::RamLak43
+ * This computes the truncated RamLak filter (discretization of the ramp filter) using only the
+ * central 43 filter elements. This covers 99.08% of the full filter size in terms of the sum of
+ * absolute values.
+ * The elements are defined as
+ *
+ * \f$
+ * h(n)=\begin{cases}
+ * \frac{1}{4} & n=0\\
+ * -\frac{1}{(\pi n)^{2}} & n\text{ odd}\\
+ * 0 & n\text{ even}
+ * \end{cases}
+ * \f$
+ *
+ * where 0 is the central element.
  */
 
 } // namespace imgproc
