@@ -80,35 +80,43 @@ SamplingRange IntervalDataSeries::samplingRange() const
     return { _data.front().x() - halfBinWidth, _data.back().x() + halfBinWidth };
 }
 
-void IntervalDataSeries::clampToRange(const SamplingRange &range)
+void IntervalDataSeries::clampToRange(const SamplingRange& range)
 {
     const auto halfBinWidth = 0.5f * _binWidth;
 
-    auto isFullyContained = [&range, halfBinWidth] (const QPointF& bin)
+    auto isFullyContained = [&range, halfBinWidth] (float binPos)
     {
-        return ( bin.x() - halfBinWidth >= range.start() ) && ( bin.x() + halfBinWidth <= range.end() );
+        const auto binStart = binPos - halfBinWidth;
+        const auto binEnd = binPos + halfBinWidth;
+        return binStart >= range.start() && binEnd <= range.end();
     };
 
-    auto isFullyOutside = [&range, halfBinWidth] (const QPointF& bin)
+    auto isFullyOutside = [&range, halfBinWidth] (float binPos)
     {
-        return ( bin.x() + halfBinWidth < range.start() ) || ( bin.x() - halfBinWidth > range.end() );
+        const auto binStart = binPos - halfBinWidth;
+        const auto binEnd = binPos + halfBinWidth;
+        return binEnd < range.start() || binStart > range.end();
     };
 
-    auto relBinOverlap = [&range, halfBinWidth] (const QPointF& bin)
+    auto relBinOverlap = [&range, halfBinWidth] (float binPos)
     {
-        auto absoluteOverlap = std::min( bin.x() + halfBinWidth, double(range.end()) )
-                               - std::max( bin.x() - halfBinWidth, double(range.start()) );
-        return absoluteOverlap / (2.0 * halfBinWidth);
+        const auto binStart = binPos - halfBinWidth;
+        const auto binEnd = binPos + halfBinWidth;
+        const auto absoluteOverlap = std::min(binEnd, range.end()) -
+                                     std::max(binStart, range.start());
+        return absoluteOverlap / (2.0f * halfBinWidth);
     };
 
     for(auto& pt : _data)
     {
-        if(isFullyContained(pt))
+        const auto binPos = float(pt.x());
+
+        if(isFullyContained(binPos))
             continue;
-        else if(isFullyOutside(pt))
+        else if(isFullyOutside(binPos))
             pt.ry() = 0.0;
         else
-            pt.ry() = pt.y() * relBinOverlap(pt);
+            pt.ry() = pt.y() * relBinOverlap(binPos);
     }
 }
 
