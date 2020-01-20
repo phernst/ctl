@@ -60,6 +60,9 @@ namespace CTL {
  * of the new class can then be de-/serialized with any of the serializer classes (see also
  * AbstractSerializer).
  */
+
+typedef Range<float> EnergyRange;
+
 class AbstractSource : public SystemComponent
 {
     CTL_TYPE_ID(300)
@@ -68,16 +71,8 @@ class AbstractSource : public SystemComponent
 public:
     static const uint DEFAULT_SPECTRUM_RESOLUTION_HINT = 10;
 
-    struct EnergyRange
-    {
-        float from;
-        float to;
-
-        float width() const { return to - from; }
-    };
-
     // abstract interface
-    public:virtual EnergyRange energyRange() const = 0;
+    public:virtual EnergyRange nominalEnergyRange() const = 0;
     protected:virtual double nominalPhotonFlux() const = 0;
 
 public:
@@ -90,6 +85,7 @@ public:
     QVariant toVariant() const override; // serialization
 
     // getter methods
+    EnergyRange energyRange() const;
     double photonFlux() const;
     double fluxModifier() const;
     const QSizeF& focalSpotSize() const;
@@ -102,6 +98,7 @@ public:
     void setFocalSpotSize(double width, double height); // convenience alternative
     void setFocalSpotPosition(const Vector3x1& position);
     void setFocalSpotPosition(double x, double y, double z); // convenience alternative
+    void setEnergyRangeRestriction(const EnergyRange& window);
 
     // other methods
     IntervalDataSeries spectrum(EnergyRange range, uint nbSamples) const;
@@ -132,6 +129,8 @@ protected:
     double _fluxModifier = 1.0; //!< Global (multiplicative) modifier for the photon flux.
 
     DataModelPtr<AbstractXraySpectrumModel> _spectrumModel; //!< Data model for the emitted radiation spectrum.
+    EnergyRange _restrictedEnergyWindow = { 0.0f, 0.0f }; //!< Windowed energy range.
+    bool _hasRestrictedEnergyWindow = false;
 };
 
 /*!
@@ -227,9 +226,26 @@ inline IntervalDataSeries AbstractSource::spectrum(uint nbSamples) const
     if(!hasSpectrumModel())
         throw std::runtime_error("No spectrum model set.");
 
+    const auto eRange = energyRange();
     auto spec = IntervalDataSeries::sampledFromModel(*_spectrumModel,
-                                                     energyRange().from, energyRange().to,
-                                                     nbSamples);
+                                                     eRange.start(), eRange.end(), nbSamples);
+
+    spec.normalizeByIntegral();
+
+    return spec;
+}
+
+
+inline IntervalDataSeries AbstractSource::spectrum(EnergyRange range, uint nbSamples) const
+{
+    if(!hasSpectrumModel())
+        throw std::runtime_error("No spectrum model set.");
+
+    auto spec = IntervalDataSeries::sampledFromModel(*_spectrumModel,
+                                                     range.start(), range.end(), nbSamples);
+    if(_hasRestrictedEnergyWindow)
+        spec.clampToRange({ _restrictedEnergyWindow.start(), _restrictedEnergyWindow.end() });
+
     spec.normalizeByIntegral();
 
     return spec;
@@ -306,16 +322,10 @@ inline void AbstractSource::setFocalSpotPosition(double x, double y, double z)
     _focalSpotPosition = Vector3x1({ x, y, z });
 }
 
-inline IntervalDataSeries AbstractSource::spectrum(EnergyRange range, uint nbSamples) const
+inline void AbstractSource::setEnergyRangeRestriction(const EnergyRange& window)
 {
-    if(!hasSpectrumModel())
-        throw std::runtime_error("No spectrum model set.");
-
-    auto spec = IntervalDataSeries::sampledFromModel(*_spectrumModel,
-                                                     range.from, range.to, nbSamples);
-    spec.normalizeByIntegral();
-
-    return spec;
+    _restrictedEnergyWindow = window;
+    _hasRestrictedEnergyWindow = true;
 }
 
 /*!
@@ -336,8 +346,8 @@ inline QString AbstractSource::info() const
     QString ret(SystemComponent::info());
 
     ret += typeInfoString(typeid(this))
-        + "\tEnergy range: [" + QString::number(energyRange().from) + "," +
-            QString::number(energyRange().to) + "] keV\n"
+        + "\tEnergy range: [" + QString::number(energyRange().start()) + "," +
+            QString::number(energyRange().end()) + "] keV\n"
         + "\tNominal photon flux: " + QString::number(nominalPhotonFlux())
             + "photons / cm^2 @ 1m\n"
         + "\tFlux modifier: "
@@ -416,6 +426,16 @@ inline QVariant AbstractSource::toVariant() const
     ret.insert("spectrum model", specMod);
 
     return ret;
+}
+
+inline EnergyRange AbstractSource::energyRange() const
+{
+    const auto nomRange = nominalEnergyRange();
+    if(!_hasRestrictedEnergyWindow)
+        return nomRange;
+
+    return { std::max(nomRange.start(), _restrictedEnergyWindow.start()),
+             std::min(nomRange.end(), _restrictedEnergyWindow.end()) };
 }
 
 /*!

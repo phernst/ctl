@@ -83,8 +83,8 @@ void GenericSource::fromVariant(const QVariant& variant)
     auto energy = varMap.value("energy range").toList();
     if(energy.size() != 2)
         qFatal("GenericSource::fromVariant(): Invalid number of values for energy range!");
-    _energyRange.from = energy.at(0).toFloat();
-    _energyRange.to = energy.at(1).toFloat();
+    _energyRange.start() = energy.at(0).toFloat();
+    _energyRange.end() = energy.at(1).toFloat();
     _samplingHint = varMap.value("sampling hint").toUInt();
 }
 
@@ -95,8 +95,8 @@ QVariant GenericSource::toVariant() const
 
     ret.insert("photon flux", _totalFlux);
     QVariantList energy;
-    energy.append(_energyRange.from);
-    energy.append(_energyRange.to);
+    energy.append(_energyRange.start());
+    energy.append(_energyRange.end());
     ret.insert("energy range", energy);
     ret.insert("sampling hint", _samplingHint);
 
@@ -167,8 +167,8 @@ void GenericSource::setSpectrum(const IntervalDataSeries& spectrum, bool updateF
     specModel->setLookupTable(std::move(spectrumData));
 
     setSpectrumModel(specModel);
-    _energyRange.from = spectrum.samplingPoints().front() - 0.5f * spectrum.binWidth();
-    _energyRange.to = spectrum.samplingPoints().back() + 0.5f * spectrum.binWidth();
+    _energyRange.start() = spectrum.samplingPoints().front() - 0.5f * spectrum.binWidth();
+    _energyRange.end() = spectrum.samplingPoints().back() + 0.5f * spectrum.binWidth();
     _samplingHint = spectrum.nbSamples();
 
     if(updateFlux)
@@ -181,7 +181,7 @@ SystemComponent* GenericSource::clone() const { return new GenericSource(*this);
 /*!
  * Returns the energy range [in keV] of the radiation emitted by this instance.
  */
-AbstractSource::EnergyRange GenericSource::energyRange() const { return _energyRange; }
+EnergyRange GenericSource::nominalEnergyRange() const { return _energyRange; }
 
 /*!
  * Returns a hint for a reasonable number of sampling points when querying a spectrum of the

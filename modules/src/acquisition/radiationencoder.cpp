@@ -36,7 +36,7 @@ IntervalDataSeries RadiationEncoder::finalSpectrum(uint nbSamples) const
  * The spectrum will by samples with \a nbSamples points equally distributed over the interval
  * specified by \a range.
  */
-IntervalDataSeries RadiationEncoder::finalSpectrum(AbstractSource::EnergyRange range, uint nbSamples) const
+IntervalDataSeries RadiationEncoder::finalSpectrum(EnergyRange range, uint nbSamples) const
 {
     auto spectrum = _system->source()->spectrum(range, nbSamples);
 

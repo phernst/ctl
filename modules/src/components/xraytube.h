@@ -10,7 +10,7 @@ class XrayTube : public AbstractSource
     CTL_TYPE_ID(320)
 
     // implementation of abstract interface
-    public:virtual EnergyRange energyRange() const override;
+    public:virtual EnergyRange nominalEnergyRange() const override;
     protected:virtual double nominalPhotonFlux() const override;
 
 public:

@@ -13,7 +13,7 @@ public:
     RadiationEncoder(const SimpleCTsystem* system);
 
     IntervalDataSeries finalSpectrum(uint nbSamples) const;
-    IntervalDataSeries finalSpectrum(AbstractSource::EnergyRange range, uint nbSamples) const;
+    IntervalDataSeries finalSpectrum(EnergyRange range, uint nbSamples) const;
     double finalPhotonFlux() const;
 
     float photonsPerPixelMean() const;

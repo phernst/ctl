@@ -164,7 +164,7 @@ void SpectralProjectorExtension::updateSpectralInformation()
 
     // analyze maximum required resolution
     float highestResolution = std::numeric_limits<float>::max();
-    AbstractSource::EnergyRange fullCoverageInterval{ std::numeric_limits<float>::max(), 0.0f };
+    EnergyRange fullCoverageInterval{ std::numeric_limits<float>::max(), 0.0f };
 
     for(uint view = 0; view < nbViews; ++view)
     {
@@ -172,13 +172,13 @@ void SpectralProjectorExtension::updateSpectralInformation()
         auto viewEnergyRange = srcPtr->energyRange();
         auto viewReso = viewEnergyRange.width() / float(srcPtr->spectrumDiscretizationHint());
         highestResolution = std::min(highestResolution, viewReso);
-        fullCoverageInterval.from = std::min(fullCoverageInterval.from, viewEnergyRange.from);
-        fullCoverageInterval.to   = std::max(fullCoverageInterval.to, viewEnergyRange.to);
+        fullCoverageInterval.start() = std::min(fullCoverageInterval.start(), viewEnergyRange.start());
+        fullCoverageInterval.end()   = std::max(fullCoverageInterval.end(), viewEnergyRange.end());
     }
 
     qDebug() << "highestResolution: " << highestResolution;
-    qDebug() << "fullCoverageInterval: [" << fullCoverageInterval.from << " , "
-                                          << fullCoverageInterval.to << "]";
+    qDebug() << "fullCoverageInterval: [" << fullCoverageInterval.start() << " , "
+                                          << fullCoverageInterval.end() << "]";
 
     // energy resolution is unset --> use automatic determination of highest resolution
     if(_deltaE == 0.0f)
@@ -188,7 +188,7 @@ void SpectralProjectorExtension::updateSpectralInformation()
     uint nbEnergyBins = std::max(uint(std::ceil(fullCoverageInterval.width() / _deltaE)), 1u);
     _spectralInfo.nbSamples = nbEnergyBins;
 
-    fullCoverageInterval.to = fullCoverageInterval.from + nbEnergyBins * _deltaE;
+    fullCoverageInterval.end() = fullCoverageInterval.start() + nbEnergyBins * _deltaE;
 
     // get (view-dependent) spectra
     IntervalDataSeries spectrum;
