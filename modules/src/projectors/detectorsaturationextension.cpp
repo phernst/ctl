@@ -63,6 +63,8 @@ void DetectorSaturationExtension::processCounts(ProjectionData& projections)
                 count = saturationModel->valueAt(count);
                 // back-transform to extinction and overwrite projection pixel value
                 pix = std::log(n0[mod] / count);
+
+                ++mod;
             }
         }
     };
@@ -112,6 +114,8 @@ void DetectorSaturationExtension::processIntensities(ProjectionData& projections
                 intensity = saturationModel->valueAt(intensity);
                 // back-transform to extinction and overwrite projection pixel value
                 pix = std::log(i0[mod] / intensity);
+
+                ++mod;
             }
         }
     };
