@@ -20,6 +20,9 @@ public:
     float photonsPerPixel(uint module) const;
     std::vector<float> photonsPerPixel() const;
 
+    float detectiveQuantumEfficieny() const;
+    float detectiveMeanEnergy() const;
+
 private:
     // member variables
     const SimpleCTsystem* _system; //!< Pointer to system whose radiation shall be encoded.
