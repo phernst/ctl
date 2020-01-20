@@ -37,6 +37,16 @@ XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, 
     return ret;
 }
 
+XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, const std::vector<float>& samplingPoints)
+{
+    XYDataSeries ret;
+
+    for(auto smpPt : samplingPoints)
+        ret.append(QPointF(smpPt, dataModel.valueAt(smpPt)));
+
+    return ret;
+}
+
 XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, float from, float to, uint nbSamples, Sampling samplingPattern)
 {
     switch (samplingPattern) {

@@ -20,6 +20,8 @@ public:
     static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel,
                                          const QVector<float>& samplingPoints);
     static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel,
+                                         const std::vector<float>& samplingPoints);
+    static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel,
                                          float from,
                                          float to,
                                          uint nbSamples,
