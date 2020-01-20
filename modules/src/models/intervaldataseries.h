@@ -3,6 +3,7 @@
 
 #include "pointseriesbase.h"
 #include "abstractdatamodel.h"
+#include "processing/coordinates.h"
 
 namespace CTL {
 
@@ -22,6 +23,7 @@ public:
     IntervalDataSeries normalizedByIntegral() const;
     float binWidth() const;
     float centroid() const;
+    SamplingRange samplingRange() const;
 
 private:
     float _binWidth{};

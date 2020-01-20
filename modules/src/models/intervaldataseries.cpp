@@ -68,4 +68,10 @@ float IntervalDataSeries::centroid() const
     return sum / integral();
 }
 
+SamplingRange IntervalDataSeries::samplingRange() const
+{
+    const auto halfBinWidth = 0.5f * _binWidth;
+    return { _data.front().x() - halfBinWidth, _data.back().x() + halfBinWidth };
+}
+
 } // namespace CTL
