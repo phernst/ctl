@@ -72,6 +72,8 @@ public:
     // setter methods
     void setSaturationModel(AbstractDataModel* model, SaturationModelType type);
     void setSaturationModel(std::unique_ptr<AbstractDataModel> model, SaturationModelType type);
+    void setSpectralResponseModel(AbstractDataModel* model);
+    void setSpectralResponseModel(std::unique_ptr<AbstractDataModel> model);
 
     // getter methods
     uint nbDetectorModules() const;
@@ -79,11 +81,13 @@ public:
     const QSizeF& pixelDimensions() const;
     ModuleLocation moduleLocation(uint module) const;
     const AbstractDataModel* saturationModel() const;
+    const AbstractDataModel* spectralResponseModel() const;
     SaturationModelType saturationModelType() const;
     double skewCoefficient() const;
 
     // other methods
     bool hasSaturationModel() const;
+    bool hasSpectralResponseModel() const;
     QSizeF moduleDimensions() const;
     SingleViewData::Dimensions viewDimensions() const;
 
@@ -102,6 +106,7 @@ protected:
     QSizeF _pixelDimensions; //!< Size of individual pixels (in mm).
     double _skewCoefficient = 0.0; //!< specifies non-orthogonality of pixels
 
+    AbstractDataModelPtr _spectralResponseModel; //!< Data model for spectral detector response.
     AbstractDataModelPtr _saturationModel; //!< Data model for saturation of measured values.
     SaturationModelType _saturationModelType = Undefined; //!< States whether saturation model refers to intensity or extinction values.
 };
@@ -181,6 +186,14 @@ inline AbstractDetector::SaturationModelType AbstractDetector::saturationModelTy
     return _saturationModelType;
 }
 
+/*!
+ * Returns a pointer to the spectral response model of this instance.
+ */
+inline const AbstractDataModel* AbstractDetector::spectralResponseModel() const
+{
+    return _spectralResponseModel.get();
+}
+
 inline double AbstractDetector::skewCoefficient() const { return _skewCoefficient; }
 
 /*!
@@ -189,6 +202,14 @@ inline double AbstractDetector::skewCoefficient() const { return _skewCoefficien
 inline bool AbstractDetector::hasSaturationModel() const
 {
     return static_cast<bool>(_saturationModel);
+}
+
+/*!
+ * Returns true if this instance has a saturation model.
+ */
+inline bool AbstractDetector::hasSpectralResponseModel() const
+{
+    return static_cast<bool>(_spectralResponseModel);
 }
 
 /*!
@@ -308,6 +329,24 @@ inline void AbstractDetector::setSaturationModel(std::unique_ptr<AbstractDataMod
 {
     _saturationModel = std::move(model);
     _saturationModelType = type;
+}
+
+/*!
+ * Sets the spectral response model to \a model. The model shall contain multiplicative factors
+ * describing the sensitivity of the detector to specific photon energies.
+ */
+inline void AbstractDetector::setSpectralResponseModel(AbstractDataModel* model)
+{
+    _spectralResponseModel.reset(model);
+}
+
+/*!
+ * Sets the spectral response model to \a model. The model shall contain multiplicative factors
+ * describing the sensitivity of the detector to specific photon energies.
+ */
+inline void AbstractDetector::setSpectralResponseModel(std::unique_ptr<AbstractDataModel> model)
+{
+    _spectralResponseModel = std::move(model);
 }
 
 /*!
