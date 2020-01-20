@@ -24,6 +24,7 @@ public:
     float binWidth() const;
     float centroid() const;
     SamplingRange samplingRange() const;
+    void clampToRange(const SamplingRange& range);
 
 private:
     float _binWidth{};

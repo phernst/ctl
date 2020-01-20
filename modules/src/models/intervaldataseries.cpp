@@ -80,4 +80,36 @@ SamplingRange IntervalDataSeries::samplingRange() const
     return { _data.front().x() - halfBinWidth, _data.back().x() + halfBinWidth };
 }
 
+void IntervalDataSeries::clampToRange(const SamplingRange &range)
+{
+    const auto halfBinWidth = 0.5f * _binWidth;
+
+    auto isFullyContained = [&range, halfBinWidth] (const QPointF& bin)
+    {
+        return ( bin.x() - halfBinWidth >= range.start() ) && ( bin.x() + halfBinWidth <= range.end() );
+    };
+
+    auto isFullyOutside = [&range, halfBinWidth] (const QPointF& bin)
+    {
+        return ( bin.x() + halfBinWidth < range.start() ) || ( bin.x() - halfBinWidth > range.end() );
+    };
+
+    auto relBinOverlap = [&range, halfBinWidth] (const QPointF& bin)
+    {
+        auto absoluteOverlap = std::min( bin.x() + halfBinWidth, double(range.end()) )
+                               - std::max( bin.x() - halfBinWidth, double(range.start()) );
+        return absoluteOverlap / (2.0 * halfBinWidth);
+    };
+
+    for(auto& pt : _data)
+    {
+        if(isFullyContained(pt))
+            continue;
+        else if(isFullyOutside(pt))
+            pt.ry() = 0.0;
+        else
+            pt.ry() = pt.y() * relBinOverlap(pt);
+    }
+}
+
 } // namespace CTL
