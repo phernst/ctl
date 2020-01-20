@@ -55,6 +55,9 @@ public:
     const T& start() const { return data[0]; }
     const T& end() const { return data[1]; }
 
+    // width of the range
+    T width() const { return data[1] - data[0]; }
+
     // spacing of the resulting linspace vector for given number of samples
     T spacing(uint nbSamples) const
     {
