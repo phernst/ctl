@@ -66,7 +66,14 @@ double AttenuationFilter::modifiedFlux(double inputFlux, const IntervalDataSerie
     IntervalDataSeries modifiedSpectrum(inputSpectrum);
 
     attenuateSpectrum(modifiedSpectrum);
-    auto fluxRatio = modifiedSpectrum.integral() / inputSpectrum.integral();
+
+    auto inputSpectrumIntegral = inputSpectrum.integral();
+    if(qFuzzyIsNull(inputSpectrumIntegral))
+    {
+        qWarning("Input spectrum has integral 0. Still assuming normalized spectrum.");
+        inputSpectrumIntegral = 1.0f;
+    }
+    auto fluxRatio = modifiedSpectrum.integral() / inputSpectrumIntegral;
 
     return inputFlux * fluxRatio;
 }

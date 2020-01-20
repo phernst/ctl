@@ -42,6 +42,12 @@ void IntervalDataSeries::normalizeByIntegral()
 {
     const auto intgr = integral();
 
+    if(qFuzzyIsNull(intgr))
+    {
+        qWarning("Trying to normalize data series with integral 0. Skipped normalization.");
+        return;
+    }
+
     for(auto& pt : _data)
         pt.ry() /= intgr;
 }
