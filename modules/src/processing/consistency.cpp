@@ -188,18 +188,18 @@ IntermedGen2D2D::linePairs(const mat::ProjectionMatrix& P1, const mat::Projectio
                            const Chunk2D<float>::Dimensions& projSize,
                            const mat::Matrix<2, 1>& originRadon, double angleIncrement)
 {
-    constexpr auto nbCorners = 4u;
+    static constexpr auto nbCorners = 4u;
     const std::array<mat::Matrix<2, 1>, nbCorners> detectorCorners = {
         mat::Matrix<2, 1>{ 0.0, 0.0 },
         mat::Matrix<2, 1>{ projSize.width - 1.0, 0.0 },
         mat::Matrix<2, 1>{ 0.0, projSize.height - 1.0 },
         mat::Matrix<2, 1>{ projSize.width - 1.0, projSize.height - 1.0 }
     };
-    auto intersectsDetector = [&detectorCorners, &originRadon](const Radon2DCoord& line)
+    auto intersectsDetector = [&](const Radon2DCoord& line)
     {
         const mat::Matrix<1, 2> n2D = { std::cos(line.angle()), std::sin(line.angle()) };
         std::bitset<nbCorners> side;
-        for(auto i = 0u; i < side.size(); ++i)
+        for(auto i = 0u; i < nbCorners; ++i)
             side.set(i, std::signbit(n2D * (detectorCorners[i] - originRadon) - line.dist()));
         return !(side.all() || side.none());
     };
