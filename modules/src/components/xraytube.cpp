@@ -117,7 +117,7 @@ void XrayTube::updateIntensityConstant()
                                                               energyRange().from, energyRange().to,
                                                               qRound(energyRange().to-energyRange().from)).integral() * perMM2toCM2;
 
-    qInfo("%f",_intensityConstant);
+    qDebug("New intensity constant: %f",_intensityConstant);
 }
 
 /*!
