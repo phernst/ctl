@@ -87,7 +87,7 @@ float SpectrumTest::calcAnalyticIntegral(float from, float to) const
 
 bool SpectrumTest::verifySampledSpectrum(const CTL::IntervalDataSeries &sampledSpec) const
 {
-    static constexpr float eps = 1.0e-4f;
+    static constexpr float eps = 1.0e-3f;
 
     uint errors = 0;
     for(uint i=0; i<sampledSpec.nbSamples(); ++i)
