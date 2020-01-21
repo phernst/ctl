@@ -4,6 +4,7 @@
 #include "abstractpreparestep.h"
 #include "simplectsystem.h"
 #include "mat/matrix_utils.h"
+#include "processing/coordinates.h"
 
 #include <QSizeF>
 
@@ -108,9 +109,10 @@ class SourceParam : public AbstractPrepareStep
     CTL_TYPE_ID(300)
 
 public:
-    void setFluxModifier(double modifier)                { _newFluxModifier = {true, modifier}; }
-    void setFocalSpotSize(const QSizeF &size)            { _newFocalSpotSize = {true, size}; }
-    void setFocalSpotPosition(const Vector3x1 &position) { _newSpotPosition = {true, position}; }
+    void setEnergyRangeRestriction(const Range<float>& range) { _energyRangeRestr = {true, range}; }
+    void setFluxModifier(double modifier)                     { _newFluxModifier = {true, modifier}; }
+    void setFocalSpotSize(const QSizeF &size)                 { _newFocalSpotSize = {true, size}; }
+    void setFocalSpotPosition(const Vector3x1 &position)      { _newSpotPosition = {true, position}; }
 
     // AbstractPrepareStep interface
     void prepare(SimpleCTsystem& system) const override;
@@ -122,6 +124,7 @@ protected:
     QPair<bool,double> _newFluxModifier    = {false, 0.0};
     QPair<bool,QSizeF> _newFocalSpotSize   = {false, QSizeF(0.0, 0.0)};
     QPair<bool,Vector3x1> _newSpotPosition = {false, Vector3x1(0.0)};
+    QPair<bool,Range<float>> _energyRangeRestr = {false, { 0.0f, 0.0f } };
 };
 
 class XrayLaserParam : public SourceParam

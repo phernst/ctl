@@ -280,6 +280,8 @@ void SourceParam::prepare(SimpleCTsystem& system) const
     auto sourcePtr = system.source();
 
     qDebug() << "PrepareAbstractSource --- preparing source\n"
+             << "- energy range\t" << _energyRangeRestr.first
+             << _energyRangeRestr.second.start() << "," << _energyRangeRestr.second.end() << "\n"
              << "- flux mod\t" << _newFluxModifier << "\n"
              << "- focal spot size\t" << _newFocalSpotSize << "\n"
              << "- focal spot pos\t" << _newSpotPosition.first;
@@ -291,6 +293,8 @@ void SourceParam::prepare(SimpleCTsystem& system) const
         sourcePtr->setFocalSpotSize(_newFocalSpotSize.second);
     if(_newSpotPosition.first)
         sourcePtr->setFocalSpotPosition(_newSpotPosition.second);
+    if(_energyRangeRestr.first)
+        sourcePtr->setEnergyRangeRestriction(_energyRangeRestr.second);
 }
 
 bool SourceParam::isApplicableTo(const CTsystem& system) const
