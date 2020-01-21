@@ -1,6 +1,7 @@
 #include "detectorsaturationextension.h"
 #include "components/abstractdetector.h"
 #include "components/abstractsource.h"
+#include "acquisition/radiationencoder.h"
 
 #include <future>
 
@@ -48,9 +49,10 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
 
 void DetectorSaturationExtension::processCounts(ProjectionData& projections)
 {
-    auto saturationModel = _setup.system()->detector()->saturationModel();
+    auto detectorPtr = _setup.system()->detector();
 
-    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& n0) {
+    auto processView = [detectorPtr](SingleViewData* view, const std::vector<float>& n0) {
+        const auto saturationModel = detectorPtr->saturationModel();
         float count;
         uint mod = 0;
         for(auto& module : view->data())
@@ -64,8 +66,8 @@ void DetectorSaturationExtension::processCounts(ProjectionData& projections)
                 // back-transform to extinction and overwrite projection pixel value
                 pix = std::log(n0[mod] / count);
 
-                ++mod;
             }
+            ++mod;
         }
     };
 
@@ -82,9 +84,10 @@ void DetectorSaturationExtension::processCounts(ProjectionData& projections)
 
 void DetectorSaturationExtension::processExtinctions(ProjectionData& projections)
 {
-    auto saturationModel = _setup.system()->detector()->saturationModel();
+    auto detectorPtr = _setup.system()->detector();
 
-    auto processView = [saturationModel](SingleViewData* view) {
+    auto processView = [detectorPtr](SingleViewData* view) {
+        const auto saturationModel = detectorPtr->saturationModel();
         for(auto& module : view->data())
             for(auto& pix : module.data())
                 pix = saturationModel->valueAt(pix);
@@ -98,10 +101,10 @@ void DetectorSaturationExtension::processExtinctions(ProjectionData& projections
 
 void DetectorSaturationExtension::processIntensities(ProjectionData& projections)
 {
-    auto saturationModel = _setup.system()->detector()->saturationModel();
-    auto sourcePtr = _setup.system()->source();
+    auto detectorPtr = _setup.system()->detector();
 
-    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& i0) {
+    auto processView = [detectorPtr](SingleViewData* view, const std::vector<float>& i0) {
+        const auto saturationModel = detectorPtr->saturationModel();
         float intensity;
         uint mod = 0;
         for(auto& module : view->data())
@@ -115,21 +118,22 @@ void DetectorSaturationExtension::processIntensities(ProjectionData& projections
                 // back-transform to extinction and overwrite projection pixel value
                 pix = std::log(i0[mod] / intensity);
 
-                ++mod;
             }
+            ++mod;
         }
     };
 
     std::vector<std::future<void>> futures;
     futures.reserve(_setup.nbViews());
     int v = 0;
-    std::vector<float> i0(_setup.system()->detector()->nbDetectorModules());
+    std::vector<float> i0(detectorPtr->nbDetectorModules());
+    RadiationEncoder enc(_setup.system());
 
     for(auto& view : projections.data())
     {
         _setup.prepareView(v++);
-        auto n0 = _setup.system()->photonsPerPixel();
-        auto meanEnergy = sourcePtr->spectrum(_nbSamples).centroid();
+        auto n0 = enc.photonsPerPixel();
+        auto meanEnergy = enc.finalSpectrum(_nbSamples).centroid();
         std::transform(n0.begin(), n0.end(), i0.begin(),
                        [meanEnergy](float count) { return count * meanEnergy; });
 
