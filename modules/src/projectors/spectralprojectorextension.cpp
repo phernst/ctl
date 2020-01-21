@@ -3,6 +3,7 @@
 #include "acquisition/radiationencoder.h"
 #include "components/abstractdetector.h"
 #include "components/abstractsource.h"
+#include "models/stepfunctionmodels.h"
 #include <limits>
 
 namespace CTL {
@@ -55,10 +56,17 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
 {
     if(ProjectorExtension::isLinear())
     {
+        constexpr auto cm2mm = 0.1f; // 1/cm -> 1/mm
+
         // project all material densities
         std::vector<ProjectionData> materialProjs;
         for(uint material = 0; material < volume.nbMaterials(); ++material)
-            materialProjs.push_back(ProjectorExtension::project(volume.materialVolume(material)));
+        {
+            if(volume.materialVolume(material).isMuVolume())
+                materialProjs.push_back(ProjectorExtension::project(volume.materialVolume(material).densityVolume()));
+            else // density information in volume.materialVolume(material)
+                materialProjs.push_back(ProjectorExtension::project(volume.materialVolume(material)));
+        }
 
         ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
         sumProj.allocateMemory(_setup.nbViews(), 0.0f);
@@ -77,11 +85,13 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
 
             for(uint material = 0; material < volume.nbMaterials(); ++material)
                 binProj += materialProjs[material]
-                           * volume.materialVolume(material).averageMassAttenuationFactor(
-                                 _spectralInfo.energyBins[bin], _spectralInfo.binWidth);
+                           * volume.materialVolume(material).meanMassAttenuationCoeff(
+                                 _spectralInfo.energyBins[bin], _spectralInfo.binWidth)
+                           * cm2mm; // cm^-1 --> mm^-1
 
-            binProj *= 0.1f; // cm^-1 --> mm^-1
+            //binProj *= 0.1f; // cm^-1 --> mm^-1
             binProj.transformToIntensity(_spectralInfo.intensities[bin]);
+            applyDetectorResponse(binProj, _spectralInfo.energyBins[bin]);
 
             sumProj += binProj;
         }
@@ -121,6 +131,8 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
             {
                 auto sourcePrep = std::make_shared<prepare::SourceParam>();
                 sourcePrep->setFluxModifier(_spectralInfo.adjustedFluxMods[bin][view]);
+                sourcePrep->setEnergyRangeRestriction({ _spectralInfo.energyBins[bin] - _spectralInfo.binWidth/2.0,
+                                                        _spectralInfo.energyBins[bin] + _spectralInfo.binWidth/2.0});
                 _setup.view(view).replacePrepareStep(sourcePrep);
             }
 
@@ -133,6 +145,7 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
                     material, _spectralInfo.energyBins[bin], _spectralInfo.binWidth));
 
             binProj.transformToIntensity(_spectralInfo.intensities[bin]);
+            applyDetectorResponse(binProj, _spectralInfo.energyBins[bin]);
 
             sumProj += binProj;
         }
@@ -197,26 +210,38 @@ void SpectralProjectorExtension::updateSpectralInformation()
     _spectralInfo.totalIntensities = std::vector<double>(nbViews, 0.0);
 
     RadiationEncoder radiationEnc(_setup.system());
+    auto constModel = makeDataModel<ConstantModel>();
 
     for(uint view = 0; view < nbViews; ++view)
     {
         _setup.prepareView(view);
-        //spectrum = srcPtr->spectrum(fullCoverageInterval, nbEnergyBins);
         spectrum = radiationEnc.finalSpectrum(fullCoverageInterval, nbEnergyBins);
         auto globalFluxMod = srcPtr->fluxModifier();
+        auto spectralResponse = _setup.system()->detector()->hasSpectralResponseModel()
+                ? _setup.system()->detector()->spectralResponseModel()
+                : constModel.get();
         for(uint bin = 0; bin < nbEnergyBins; ++bin)
         {
-            _spectralInfo.adjustedFluxMods[bin][view] = globalFluxMod * spectrum.value(bin);
-            _spectralInfo.intensities[bin][view] = spectrum.value(bin)
-                                                     * spectrum.samplingPoint(bin);
-            _spectralInfo.totalIntensities[view] += _spectralInfo.intensities[bin][view];
+            auto E = spectrum.samplingPoint(bin);
+            _spectralInfo.adjustedFluxMods[bin][view] = globalFluxMod * spectrum.value(bin) * spectralResponse->valueAt(E);
+            _spectralInfo.intensities[bin][view] = spectrum.value(bin) * E;
+            _spectralInfo.totalIntensities[view] += (_spectralInfo.intensities[bin][view] * spectralResponse->valueAt(E));
         }
     }
 
     _spectralInfo.energyBins = spectrum.samplingPoints();
     _spectralInfo.binWidth = spectrum.binWidth();
 
-    qDebug() << "binWidth: " << _spectralInfo.binWidth;
+    qDebug() << "binWidth: " << _spectralInfo.binWidth << _spectralInfo.energyBins;
+}
+
+void SpectralProjectorExtension::applyDetectorResponse(ProjectionData& intensity, float energy) const
+{
+    if(!_setup.system()->detector()->hasSpectralResponseModel())
+        return;
+
+    // multiplicative manipulation (i.e. fraction of radiation detected)
+    intensity *= _setup.system()->detector()->spectralResponseModel()->valueAt(energy);
 }
 
 } // namespace CTL

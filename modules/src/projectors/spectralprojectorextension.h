@@ -39,6 +39,7 @@ private:
     float _deltaE = 0.0f;   
 
     void updateSpectralInformation();
+    void applyDetectorResponse(ProjectionData& intensity, float energy) const;
 };
 
 

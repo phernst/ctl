@@ -9,29 +9,35 @@ namespace CTL {
 class SpectralVolumeData : public VoxelVolume<float>
 {
 public:
-    SpectralVolumeData(const VoxelVolume<float>& materialDensity,
-                       std::shared_ptr<AbstractIntegrableDataModel> absorptionModel = nullptr,
-                       const QString& materialName = "NN");
-    SpectralVolumeData(VoxelVolume<float>&& materialDensity,
-                       std::shared_ptr<AbstractIntegrableDataModel> absorptionModel = nullptr,
-                       const QString& materialName = "NN");
+    SpectralVolumeData(VoxelVolume<float> muValues);
+    SpectralVolumeData(VoxelVolume<float> muValues,
+                       std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
+                       float referenceEnergy,
+                       const QString& materialName = QString());
+    SpectralVolumeData(VoxelVolume<float> materialDensity,
+                       std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
+                       const QString& materialName = QString());
 
     // getter methods
     std::shared_ptr<AbstractIntegrableDataModel> absorptionModel() const;
-    float averageMassAttenuationFactor(float centerEnergy, float binWidth) const;
-    const VoxelVolume<float>& density() const;
-    float massAttenuationFactor(float atEnergy) const;
+    SpectralVolumeData densityVolume() const;
+    bool hasSpectralInformation() const;
+    bool isMuVolume() const;
+    float massAttenuationCoeff(float atEnergy) const;
     const QString& materialName() const;
-    VoxelVolume<float> muVolume(float centerEnergy, float binWidth) const;
+    float meanMassAttenuationCoeff(float centerEnergy, float binWidth) const;
+    SpectralVolumeData muVolume(float referenceEnergy) const;
+    SpectralVolumeData muVolume(float centerEnergy, float binWidth) const;
+    float referenceEnergy() const;
+    float referenceMassAttenuationCoeff() const;
 
     static SpectralVolumeData createBall(float radius, float voxelSize, float density,
                                          std::shared_ptr<AbstractIntegrableDataModel> absorptionModel = nullptr);
 
     // setter methods
-    void setAbsorptionModel(AbstractIntegrableDataModel* absorptionModel);
-    void setAbsorptionModel(std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
-    void setDensity(const VoxelVolume<float>& density);
-    void setDensity(VoxelVolume<float>&& density);
+    void replaceAbsorptionModel(AbstractIntegrableDataModel* absorptionModel);
+    void replaceAbsorptionModel(std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
+    void setDensity(VoxelVolume<float> density);
     void setMaterialName(const QString& name);
 
     using VoxelVolume<float>::operator=;
@@ -47,6 +53,17 @@ public:
 private:
     std::shared_ptr<AbstractIntegrableDataModel> _absorptionModel;
     QString _materialName;
+
+    bool _isMu = false;         //!< True if voxel data represents absorption coefficents.
+    float _refEnergy = -1.0f;   //!< Reference energy corresponding to mu values.
+    float _refMassAttenuationCoeff{-1.0f}; //!< Reference attenuation coeff. corresponding to mu values.
+
+    // other methods
+    void changeReferenceEnergy(float newReferenceEnergy);
+    void changeReferenceMassAttCoeff(float newReferenceMassAttCoeff, float correspondingRefEnergy);
+    void transformToAttenuationCoeff(float referenceEnergy);
+    void transformToAttenuationCoeff(float referenceMassAttCoeff, float correspondingRefEnergy);
+    void transformToDensity();
 };
 
 }

@@ -11,7 +11,7 @@ public:
 
     // getter methods
     const SpectralVolumeData& materialVolume(uint materialIdx) const;
-    VoxelVolume<float> muVolume(uint materialIdx, float centerEnergy, float binWidth) const;
+    SpectralVolumeData muVolume(uint materialIdx, float centerEnergy, float binWidth) const;
     uint nbMaterials() const;
 
     // other methods

@@ -9,7 +9,7 @@ const SpectralVolumeData& CompositeVolume::materialVolume(uint materialIdx) cons
     return _materialVolumes[materialIdx];
 }
 
-VoxelVolume<float> CompositeVolume::muVolume(uint materialIdx, float centerEnergy, float binWidth) const
+SpectralVolumeData CompositeVolume::muVolume(uint materialIdx, float centerEnergy, float binWidth) const
 {
     return _materialVolumes[materialIdx].muVolume(centerEnergy, binWidth);
 }
