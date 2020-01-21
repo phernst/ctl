@@ -113,9 +113,11 @@ QString XrayTube::defaultName()
 void XrayTube::updateIntensityConstant()
 {
     constexpr double perMM2toCM2 = 100.0;
+    const auto nbSpectralBins = std::max({ qRound(nominalEnergyRange().width()), 1 });
     _intensityConstant = IntervalDataSeries::sampledFromModel(*_spectrumModel,
-                                                              energyRange().start(), energyRange().end(),
-                                                              qRound(energyRange().width())).integral() * perMM2toCM2;
+                                                              nominalEnergyRange().start(), nominalEnergyRange().end(),
+                                                              nbSpectralBins).integral()
+                                                               * perMM2toCM2;
 
     qDebug("New intensity constant: %f",_intensityConstant);
 }
@@ -178,7 +180,7 @@ QVariant XrayTube::toVariant() const
     return ret;
 }
 
-void XrayTube::setSpectrumModel(AbstractXraySpectrumModel* model)
+void XrayTube::setSpectrumModel(AbstractXraySpectrumModel*)
 {
 // deprecated, XrayTube now fixed to TASMIPSpectrumModel
 //    AbstractSource::setSpectrumModel(model);
@@ -191,7 +193,7 @@ void XrayTube::setSpectrumModel(AbstractXraySpectrumModel* model)
 
 uint XrayTube::spectrumDiscretizationHint() const
 {
-    return std::max(uint(std::ceil(energyRange().width() / DEFAULT_SPECTRUM_BIN_WIDTH)), 1u);
+    return std::max({ int(std::ceil(energyRange().width() / DEFAULT_SPECTRUM_BIN_WIDTH)), 1 });
 }
 
 } // namespace CTL
