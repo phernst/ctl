@@ -42,7 +42,7 @@ void AttenuationFilter::attenuateSpectrum(IntervalDataSeries &inputSpectrum)
     {
         const auto E  = value.x();
         const auto i0 = value.y();
-        const auto mu = _attenuationModel->binIntegral(E, binWidth) / binWidth;
+        const auto mu = _attenuationModel->meanValue(E, binWidth);
 
         value.setY(i0 * std::exp(-_mm * mu * 0.1f * _density));
     };
