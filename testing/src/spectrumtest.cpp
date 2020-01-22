@@ -2,8 +2,10 @@
 #include <QDebug>
 #include <QTime>
 
+#include "components/attenuationfilter.h"
 #include "components/xraylaser.h"
 #include "components/xraytube.h"
+#include "io/ctldatabase.h"
 #include "models/xrayspectrummodels.h"
 
 void SpectrumTest::initTestCase()
@@ -46,6 +48,29 @@ void SpectrumTest::cleanupTestCase()
 {
     delete _tube;
     delete _model;
+}
+
+void SpectrumTest::testAttenuationFilter()
+{
+    constexpr auto laserEnergy = 42.0;
+
+    std::unique_ptr<CTL::AbstractSource> source;
+    std::unique_ptr<CTL::AbstractBeamModifier> filter(new CTL::AttenuationFilter(CTL::database::Element::Al, 4.2f));
+    CTL::IntervalDataSeries spectrum;
+    double flux;
+
+    source.reset(new CTL::XrayLaser(laserEnergy, 1.0));
+    flux = filter->modifiedFlux(source->photonFlux(), source->spectrum(1));
+    spectrum = filter->modifiedSpectrum(source->spectrum(1));
+    QCOMPARE(spectrum.value(0), 1.0f);
+    QVERIFY(flux < source->photonFlux());
+
+    source.reset(new CTL::XrayTube(100.0, 0.1));
+    flux = filter->modifiedFlux(source->photonFlux(), source->spectrum(10));
+    spectrum = filter->modifiedSpectrum(source->spectrum(10));
+    QVERIFY(flux < source->photonFlux());
+    QVERIFY(spectrum.centroid() > source->spectrum(10).centroid());
+
 }
 
 void SpectrumTest::testXrayLaserSpectrum()

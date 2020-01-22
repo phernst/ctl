@@ -22,6 +22,7 @@ private Q_SLOTS:
     void testXrayLaserSpectrum();
     void testSpectrumSampling();
     void cleanupTestCase();
+    void testAttenuationFilter();
 
 private:
     CTL::XrayTube* _tube;
