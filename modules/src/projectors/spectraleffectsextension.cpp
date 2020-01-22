@@ -1,4 +1,4 @@
-#include "spectralprojectorextension.h"
+#include "spectraleffectsextension.h"
 #include "acquisition/preparesteps.h"
 #include "acquisition/radiationencoder.h"
 #include "components/abstractdetector.h"
@@ -8,12 +8,12 @@
 
 namespace CTL {
 
-SpectralProjectorExtension::SpectralProjectorExtension(float energyBinWidth)
+SpectralEffectsExtension::SpectralEffectsExtension(float energyBinWidth)
     : _deltaE(energyBinWidth)
 {
 }
 
-void SpectralProjectorExtension::configure(const AcquisitionSetup& setup,
+void SpectralEffectsExtension::configure(const AcquisitionSetup& setup,
                                            const AbstractProjectorConfig& config)
 {
     _setup = setup;
@@ -34,7 +34,7 @@ void SpectralProjectorExtension::configure(const AcquisitionSetup& setup,
  * \end{align*}
  * \f$
  */
-ProjectionData SpectralProjectorExtension::project(const VolumeData& volume)
+ProjectionData SpectralEffectsExtension::project(const VolumeData& volume)
 {
     CompositeVolume vol;
     vol.addMaterialVolume(volume);
@@ -52,7 +52,7 @@ ProjectionData SpectralProjectorExtension::project(const VolumeData& volume)
  * \end{align*}
  * \f$
  */
-ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolume& volume)
+ProjectionData SpectralEffectsExtension::projectComposite(const CompositeVolume& volume)
 {
     if(ProjectorExtension::isLinear())
     {
@@ -159,14 +159,14 @@ ProjectionData SpectralProjectorExtension::projectComposite(const CompositeVolum
     }
 }
 
-bool SpectralProjectorExtension::isLinear() const { return false; }
+bool SpectralEffectsExtension::isLinear() const { return false; }
 
-void SpectralProjectorExtension::setSpectralSamplingResolution(float energyBinWidth)
+void SpectralEffectsExtension::setSpectralSamplingResolution(float energyBinWidth)
 {
     _deltaE = energyBinWidth;
 }
 
-void SpectralProjectorExtension::updateSpectralInformation()
+void SpectralEffectsExtension::updateSpectralInformation()
 {
     const auto srcPtr = _setup.system()->source();
     const uint nbViews = _setup.nbViews();
@@ -235,7 +235,7 @@ void SpectralProjectorExtension::updateSpectralInformation()
     qDebug() << "binWidth: " << _spectralInfo.binWidth << _spectralInfo.energyBins;
 }
 
-void SpectralProjectorExtension::applyDetectorResponse(ProjectionData& intensity, float energy) const
+void SpectralEffectsExtension::applyDetectorResponse(ProjectionData& intensity, float energy) const
 {
     if(!_setup.system()->detector()->hasSpectralResponseModel())
         return;

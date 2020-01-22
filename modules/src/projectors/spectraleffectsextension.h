@@ -1,5 +1,5 @@
-#ifndef SPECTRALPROJECTOREXTENSION_H
-#define SPECTRALPROJECTOREXTENSION_H
+#ifndef SPECTRALEFFECTSEXTENSION_H
+#define SPECTRALEFFECTSEXTENSION_H
 
 #include "projectorextension.h"
 #include "abstractprojectorconfig.h"
@@ -7,12 +7,12 @@
 
 namespace CTL {
 
-class SpectralProjectorExtension : public ProjectorExtension
+class SpectralEffectsExtension : public ProjectorExtension
 {
 public:
     using ProjectorExtension::ProjectorExtension;
-    SpectralProjectorExtension() = default;
-    explicit SpectralProjectorExtension(float energyBinWidth);
+    SpectralEffectsExtension() = default;
+    explicit SpectralEffectsExtension(float energyBinWidth);
 
     void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
     ProjectionData project(const VolumeData& volume) override;
@@ -45,4 +45,4 @@ private:
 
 } // namespace CTL
 
-#endif // SPECTRALPROJECTOREXTENSION_H
+#endif // SPECTRALEFFECTSEXTENSION_H

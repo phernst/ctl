@@ -7,7 +7,7 @@
 #include "projectors/arealfocalspotextension.h"
 #include "projectors/poissonnoiseextension.h"
 #include "projectors/raycasterprojector.h"
-#include "projectors/spectralprojectorextension.h"
+#include "projectors/spectraleffectsextension.h"
 
 #include "io/ctldatabase.h"
 
@@ -86,7 +86,7 @@ void ProjectorTest::testSpectralExtension()
     noiseExt->setFixedSeed(1337u);
     noiseExt->use(myProjector);
 
-    SpectralProjectorExtension* spectralExt = new SpectralProjectorExtension;
+    SpectralEffectsExtension* spectralExt = new SpectralEffectsExtension;
     spectralExt->setSpectralSamplingResolution(15.0f);
     //spectralExt->setSpectralRange(0,150);
     spectralExt->use(noiseExt);
