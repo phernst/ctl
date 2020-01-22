@@ -117,6 +117,14 @@ std::shared_ptr<AbstractDataModel>& operator|=(std::shared_ptr<AbstractDataModel
     return lhs;
 }
 
+// AbstractIntegrableDataModel
+
+float AbstractIntegrableDataModel::meanValue(float position, float binWidth) const
+{
+    return qFuzzyIsNull(binWidth) ? valueAt(position)
+                                  : binIntegral(position, binWidth) / binWidth;
+}
+
 // Documentation
 // =============
 

@@ -120,6 +120,8 @@ class AbstractIntegrableDataModel : public AbstractDataModel
 public:
     ~AbstractIntegrableDataModel() override = default;
 
+    float meanValue(float position, float binWidth) const;
+
 protected:
     AbstractIntegrableDataModel() = default;
     AbstractIntegrableDataModel(const AbstractIntegrableDataModel&) = default;
