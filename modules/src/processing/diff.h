@@ -21,6 +21,7 @@ enum DiffMethod { // diff enum has to have negative values (non-negative are res
     SpectralGauss5    = -6, // filter size: 7
     SpectralGauss7    = -7, // filter size: 7
     SpectralGauss9    = -8, // filter size: 9
+    SpectralCosine    = -9, // filter size: 11
 };
 
 // partial derivatives

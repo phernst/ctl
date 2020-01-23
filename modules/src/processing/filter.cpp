@@ -148,21 +148,21 @@ void diffBuffer_SpectralGauss3(const std::vector<T*>& buffer)
     constexpr uint filterSize = 15;
     meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
-        return  - T(0.00148810) * pipe(0)
-                + T(0.00238095) * pipe(1)
-                - T(0.00416667) * pipe(2)
-                + T(0.00833333) * pipe(3)
-                - T(0.02083333) * pipe(4)
-                + T(0.08333333) * pipe(5)
-                + T(0.37500000) * pipe(6)
+        return  + T(0.00148810) * pipe(0)
+                - T(0.00238095) * pipe(1)
+                + T(0.00416667) * pipe(2)
+                - T(0.00833333) * pipe(3)
+                + T(0.02083333) * pipe(4)
+                - T(0.08333333) * pipe(5)
+                - T(0.37500000) * pipe(6)
 
-                - T(0.37500000) * pipe(8)
-                - T(0.08333333) * pipe(9)
-                + T(0.02083333) * pipe(10)
-                - T(0.00833333) * pipe(11)
-                + T(0.00416667) * pipe(12)
-                - T(0.00238095) * pipe(13)
-                + T(0.00148810) * pipe(14);
+                + T(0.37500000) * pipe(8)
+                + T(0.08333333) * pipe(9)
+                - T(0.02083333) * pipe(10)
+                + T(0.00833333) * pipe(11)
+                - T(0.00416667) * pipe(12)
+                + T(0.00238095) * pipe(13)
+                - T(0.00148810) * pipe(14);
     });
 }
 
@@ -172,13 +172,13 @@ void diffBuffer_SpectralGauss5(const std::vector<T*>& buffer)
     constexpr uint filterSize = 7;
     meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
-        return  + T(0.01250000) * pipe(0)
-                + T(0.13020833) * pipe(1)
-                + T(0.20833333) * pipe(2)
+        return  - T(0.01250000) * pipe(0)
+                - T(0.13020833) * pipe(1)
+                - T(0.20833333) * pipe(2)
 
-                - T(0.20833333) * pipe(4)
-                - T(0.13020833) * pipe(5)
-                - T(0.01250000) * pipe(6);
+                + T(0.20833333) * pipe(4)
+                + T(0.13020833) * pipe(5)
+                + T(0.01250000) * pipe(6);
     });
 }
 
@@ -188,13 +188,13 @@ void diffBuffer_SpectralGauss7(const std::vector<T*>& buffer)
     constexpr uint filterSize = 7;
     meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
-        return  + T(0.03828125) * pipe(0)
-                + T(0.12031250) * pipe(1)
-                + T(0.13671875) * pipe(2)
+        return  - T(0.03828125) * pipe(0)
+                - T(0.12031250) * pipe(1)
+                - T(0.13671875) * pipe(2)
 
-                - T(0.13671875) * pipe(4)
-                - T(0.12031250) * pipe(5)
-                - T(0.03828125) * pipe(6);
+                + T(0.13671875) * pipe(4)
+                + T(0.12031250) * pipe(5)
+                + T(0.03828125) * pipe(6);
     });
 }
 
@@ -204,15 +204,35 @@ void diffBuffer_SpectralGauss9(const std::vector<T*>& buffer)
     constexpr uint filterSize = 9;
     meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
-        return  + T(0.01061663) * pipe(0)
-                + T(0.04977679) * pipe(1)
-                + T(0.10390625) * pipe(2)
-                + T(0.09843750) * pipe(3)
+        return  - T(0.01061663) * pipe(0)
+                - T(0.04977679) * pipe(1)
+                - T(0.10390625) * pipe(2)
+                - T(0.09843750) * pipe(3)
 
-                - T(0.09843750) * pipe(5)
-                - T(0.10390625) * pipe(6)
-                - T(0.04977679) * pipe(7)
-                - T(0.01061663) * pipe(8);
+                + T(0.09843750) * pipe(5)
+                + T(0.10390625) * pipe(6)
+                + T(0.04977679) * pipe(7)
+                + T(0.01061663) * pipe(8);
+    });
+}
+
+template <typename T>
+void diffBuffer_SpectralCosine(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 11;
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return - T(0.00259818) * pipe(0)
+               + T(0.00513274) * pipe(1)
+               - T(0.01247255) * pipe(2)
+               + T(0.04527074) * pipe(3)
+               - T(0.56588424) * pipe(4)
+
+               + T(0.56588424) * pipe(6)
+               - T(0.04527074) * pipe(7)
+               + T(0.01247255) * pipe(8)
+               - T(0.00513274) * pipe(9)
+               + T(0.00259818) * pipe(10);
     });
 }
 
@@ -386,6 +406,8 @@ PtrToFilterFct<T> selectFilterFct(int m)
         return &diffBuffer_SpectralGauss7;
     case DiffMethod::SpectralGauss9:
         return &diffBuffer_SpectralGauss9;
+    case SpectralCosine:
+        return &diffBuffer_SpectralCosine;
 
     // Generic Filters
     case FiltMethod::Gauss3:
@@ -721,31 +743,38 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
 /*! \var DiffMethod::SpectralGauss3
  * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
  * a Gaussian kernel of size three: 1/4 * [1 2 1], i.e. with a standard deviation `sigma=0.7071`.
- * The filter is truncated to a size of 15, which covers 99.11% of the full filter size (in terms of
- * the sum of absolute values).
+ * The filter in the spatial domain is truncated to a size of 15, which covers 99.11% of the full
+ * filter size (in terms of the sum of absolute values).
  */
 
 /*! \var DiffMethod::SpectralGauss5
  * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
  * a Gaussian kernel of size five: 1/16 * [1 4 6 4 1], i.e. with a standard deviation `sigma=1.000`.
- * The filter is truncated to a size of 7, which covers 99.12% of the full filter size (in terms of
- * the sum of absolute values).
+ * The filter in the spatial domain is truncated to a size of 7, which covers 99.12% of the full
+ * filter size (in terms of the sum of absolute values).
  */
 
 /*! \var DiffMethod::SpectralGauss7
  * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
  * a Gaussian kernel of size seven: 1/64 * [1 6 15 20 15 6 1], i.e. with a standard deviation
  * `sigma=1.225`.
- * The filter is truncated to a size of 7, which covers 99.13% of the full filter size (in terms of
- * the sum of absolute values).
+ * The filter in the spatial domain is truncated to a size of 7, which covers 99.13% of the full
+ * filter size (in terms of the sum of absolute values).
  */
 
 /*! \var DiffMethod::SpectralGauss9
  * This computes the derivative using a spectral derivative (Fourier-based) after a convolution with
  * a Gaussian kernel of size nine: 1/256 * [1 8 28 56 70 56 28 8 1], i.e. with a standard deviation
  * `sigma=1.414`.
- * The filter is truncated to a size of 9, which covers 99.81% of the full filter size (in terms of
- * the sum of absolute values).
+ * The filter in the spatial domain is truncated to a size of 9, which covers 99.81% of the full
+ * filter size (in terms of the sum of absolute values).
+ */
+
+/*! \var DiffMethod::SpectralCosine
+ * This computes the derivative using a spectral derivative (Fourier-based) after appying a
+ * cosine-window in Fourier space (`cos(pi*f)` with `0.5 1/Pixel` as Nyquist frequency).
+ * The filter in the spatial domain is truncated to a size of 11, which covers 99.17% of the full
+ * filter size (in terms of the sum of absolute values).
  */
 
 /*!
