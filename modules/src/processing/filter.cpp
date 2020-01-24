@@ -2,6 +2,7 @@
 #include "filter.h"
 #include "img/chunk2d.h"
 #include "img/voxelvolume.h"
+#include "mat/pi.h"
 #include <array>
 #include <cmath>
 
@@ -325,54 +326,25 @@ void filterBuffer_MaxAbs3(const std::vector<T*>& buffer)
 }
 
 template <typename T>
-void filterBuffer_RamLak43(const std::vector<T*>& buffer)
+void filterBuffer_RamLak(const std::vector<T*>& buffer)
 {
-    constexpr uint filterSize = 43;
+    constexpr uint filterSize = 255;
     meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
-        return - T(0.0002297532508897) * pipe(0)
+#ifdef _MSC_VER
+        constexpr uint filterSize = 255;
+#endif
+        constexpr uint halfFilterSize = filterSize / 2;
+        auto sum = T(0.25) * pipe(halfFilterSize);
 
-               - T(0.0002806680987322) * pipe(2)
+        for(uint n = 1; n <= halfFilterSize; n += 2)
+        {
+            const auto filterElement = T(-1) / std::pow(T(n) * T(PI), 2);
+            sum += filterElement * pipe(halfFilterSize + n) +
+                   filterElement * pipe(halfFilterSize - n);
+        }
 
-               - T(0.0003505923309423) * pipe(4)
-
-               - T(0.0004503163717437) * pipe(6)
-
-               - T(0.0005995336310198) * pipe(8)
-
-               - T(0.0008373651540689) * pipe(10)
-
-               - T(0.0012508788103992) * pipe(12)
-
-               - T(0.0020677792580069) * pipe(14)
-
-               - T(0.0040528473456935) * pipe(16)
-
-               - T(0.0112579092935931) * pipe(18)
-
-               - T(0.1013211836423378) * pipe(20)
-               + T(0.2500000000000000) * pipe(21)
-               - T(0.1013211836423378) * pipe(22)
-
-               - T(0.0112579092935931) * pipe(24)
-
-               - T(0.0040528473456935) * pipe(26)
-
-               - T(0.0020677792580069) * pipe(28)
-
-               - T(0.0012508788103992) * pipe(30)
-
-               - T(0.0008373651540689) * pipe(32)
-
-               - T(0.0005995336310198) * pipe(34)
-
-               - T(0.0004503163717437) * pipe(36)
-
-               - T(0.0003505923309423) * pipe(38)
-
-               - T(0.0002806680987322) * pipe(40)
-
-               - T(0.0002297532508897) * pipe(42);
+        return sum;
     });
 }
 
@@ -420,8 +392,8 @@ PtrToFilterFct<T> selectFilterFct(int m)
         return &filterBuffer_MedianAbs3;
     case FiltMethod::MaxAbs3:
         return &filterBuffer_MaxAbs3;
-    case FiltMethod::RamLak43:
-        return &filterBuffer_RamLak43;
+    case FiltMethod::RamLak:
+        return &filterBuffer_RamLak;
     }
     return &filterBuffer_null;
 }
@@ -788,9 +760,9 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  * the filtering, i.e. within the half filter size.
  */
 
-/*! \var FiltMethod::RamLak43
+/*! \var FiltMethod::RamLak
  * This computes the truncated RamLak filter (discretization of the ramp filter) using only the
- * central 43 filter elements. This covers 99.08% of the full filter size in terms of the sum of
+ * central 255 filter elements. This covers 99.84% of the full filter size in terms of the sum of
  * absolute values.
  * The elements are defined as
  *
