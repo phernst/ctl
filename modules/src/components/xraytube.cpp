@@ -57,7 +57,7 @@ XrayTube::XrayTube(double tubeVoltage, double mAs, const QString &name)
  * time-product (used for a single X-ray shot) to 1.0 mAs.
  */
 XrayTube::XrayTube(const QString &name)
-    : XrayTube(QSizeF(0.0,0.0), Vector3x1(0.0), 100.0f, 1.0f, name)
+    : XrayTube(QSizeF(0.0,0.0), Vector3x1(0.0), 100.0, 1.0, name)
 {
 }
 
@@ -193,7 +193,8 @@ void XrayTube::setSpectrumModel(AbstractXraySpectrumModel*)
 
 uint XrayTube::spectrumDiscretizationHint() const
 {
-    return std::max({ int(std::ceil(energyRange().width() / DEFAULT_SPECTRUM_BIN_WIDTH)), 1 });
+    const auto ret = int(std::ceil(energyRange().width() / DEFAULT_SPECTRUM_BIN_WIDTH));
+    return static_cast<uint>(std::max(ret, 1));
 }
 
 } // namespace CTL

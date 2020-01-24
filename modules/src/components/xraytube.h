@@ -47,8 +47,8 @@ public:
     static QString defaultName();
 
 protected:
-    double _tubeVoltage       = 100.0f;
-    double _mAs               = 10.0f;
+    double _tubeVoltage       = 100.0;
+    double _mAs               = 10.0;
     double _intensityConstant = 3.2e8; // Default intensity constant [PHOTONS / (mAs * cm^2)]
 
 private:
