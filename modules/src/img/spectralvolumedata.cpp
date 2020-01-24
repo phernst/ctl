@@ -4,6 +4,8 @@
 
 namespace CTL {
 
+static void grindBall(VoxelVolume<float>& volume, float radius);
+
 SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues)
     : VoxelVolume<float> (std::move(muValues))
     , _isMu(true)
@@ -143,6 +145,20 @@ float SpectralVolumeData::referenceMassAttenuationCoeff() const
     return _refMassAttenuationCoeff;
 }
 
+SpectralVolumeData SpectralVolumeData::createBall(float radius, float voxelSize, float muValue)
+{
+    const auto nbVox = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+
+    const SpectralVolumeData::Dimensions volDim{ nbVox, nbVox, nbVox };
+    const SpectralVolumeData::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    SpectralVolumeData ret{ { volDim, voxSize } };
+    ret.fill(muValue);
+
+    grindBall(ret, radius);
+
+    return ret;
+}
+
 SpectralVolumeData
 SpectralVolumeData::createBall(float radius,
                                float voxelSize,
@@ -150,30 +166,15 @@ SpectralVolumeData::createBall(float radius,
                                std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
 {
     const auto nbVox = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
-    const auto center = float(nbVox - 1) / 2.0f;
 
     const SpectralVolumeData::Dimensions volDim{ nbVox, nbVox, nbVox };
     const SpectralVolumeData::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
-    SpectralVolumeData volume{ { volDim, voxSize }, std::move(absorptionModel) };
-    volume.fill(density);
+    SpectralVolumeData ret{ { volDim, voxSize }, std::move(absorptionModel) };
+    ret.fill(density);
 
-    auto dist2Center = [center](float x, float y, float z)
-    {
-        const auto dx = x - center;
-        const auto dy = y - center;
-        const auto dz = z - center;
-        return dx * dx + dy * dy + dz * dz;
-    };
-    const auto rSquaredInVoxel = (radius / voxelSize) * (radius / voxelSize);
+    grindBall(ret, radius);
 
-    // erase exterior space
-    for(auto x = 0u; x < nbVox; ++x)
-        for(auto y = 0u; y < nbVox; ++y)
-            for(auto z = 0u; z < nbVox; ++z)
-                if(dist2Center(x, y, z) > rSquaredInVoxel)
-                    volume(x, y, z) = 0.0f;
-
-    return volume;
+    return ret;
 }
 
 void SpectralVolumeData::replaceAbsorptionModel(AbstractIntegrableDataModel* absorptionModel)
@@ -308,6 +309,30 @@ void SpectralVolumeData::transformToDensity()
     (*this) /= _refMassAttenuationCoeff * cm2mm;
 
     _isMu = false;
+}
+
+void grindBall(VoxelVolume<float>& volume, float radius)
+{
+    const auto nbVox = volume.dimensions().x;
+    const auto center = float(nbVox - 1) / 2.0f;
+
+    auto dist2Center = [center](float x, float y, float z)
+    {
+        const auto dx = x - center;
+        const auto dy = y - center;
+        const auto dz = z - center;
+        return dx * dx + dy * dy + dz * dz;
+    };
+
+    const auto voxSize = volume.voxelSize().x;
+    const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+
+    // erase exterior space
+    for(auto x = 0u; x < nbVox; ++x)
+        for(auto y = 0u; y < nbVox; ++y)
+            for(auto z = 0u; z < nbVox; ++z)
+                if(dist2Center(x, y, z) > rSquaredInVoxel)
+                    volume(x, y, z) = 0.0f;
 }
 
 } // namespace CTL
