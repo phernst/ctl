@@ -540,8 +540,9 @@ Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>
     static_assert(toCol < Cols, "`toCol` exceeds matrix dimension.");
 
     Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)> ret;
-    constexpr auto rowInc = toRow >= fromRow ? 1u : -1u;
-    constexpr auto colInc = toCol >= fromCol ? 1u : -1u;
+    // use numeric_limits<uint>::max() for representing "-1"
+    constexpr auto rowInc = toRow >= fromRow ? 1u : std::numeric_limits<uint>::max();
+    constexpr auto colInc = toCol >= fromCol ? 1u : std::numeric_limits<uint>::max();
 
     for(auto row = fromRow, endRow = toRow + rowInc, subRow = 0u;
         row != endRow;
@@ -570,7 +571,8 @@ auto Matrix<Rows, Cols>::subMat() const -> Matrix<vecRowDim(from, to), vecColDim
     static_assert(to < nbElem, "`to` exceeds vector dimension.");
 
     Matrix<vecRowDim(from, to), vecColDim(from, to)> ret;
-    constexpr auto inc = to >= from ? 1u : -1u;
+    // use numeric_limits<uint>::max() for representing "-1"
+    constexpr auto inc = to >= from ? 1u : std::numeric_limits<uint>::max();
 
     for(auto el = from, endEl = to + inc, sub = 0u;
         el != endEl;
