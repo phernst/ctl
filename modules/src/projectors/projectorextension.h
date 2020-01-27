@@ -247,6 +247,7 @@ inline void ProjectorExtension::use(std::unique_ptr<AbstractProjector> other)
 }
 
 // pipe operators
+// u_ptr, u_ptr
 template<class ProjectorExtensionType>
 auto operator|(std::unique_ptr<AbstractProjector> lhs,
                std::unique_ptr<ProjectorExtensionType> rhs) ->
@@ -257,6 +258,7 @@ typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorEx
     return rhs;
 }
 
+// u_ptr, raw_ptr
 template<class ProjectorExtensionType>
 auto operator|(std::unique_ptr<AbstractProjector> lhs,
                ProjectorExtensionType* rhs) ->
@@ -267,6 +269,7 @@ typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorEx
     return std::unique_ptr<ProjectorExtensionType>{ rhs };
 }
 
+// raw_ptr, u_ptr
 template<class ProjectorExtensionType>
 auto operator|(AbstractProjector* lhs,
                std::unique_ptr<ProjectorExtensionType> rhs) ->
@@ -277,6 +280,8 @@ typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorEx
     return rhs;
 }
 
+// pipe-assignment operators
+// u_ptr, u_ptr
 inline std::unique_ptr<AbstractProjector>& operator|=(std::unique_ptr<AbstractProjector>& lhs,
                                                       std::unique_ptr<ProjectorExtension> rhs)
 {
@@ -284,6 +289,14 @@ inline std::unique_ptr<AbstractProjector>& operator|=(std::unique_ptr<AbstractPr
     return lhs;
 }
 
+inline std::unique_ptr<ProjectorExtension>& operator|=(std::unique_ptr<ProjectorExtension>& lhs,
+                                                      std::unique_ptr<ProjectorExtension> rhs)
+{
+    lhs = std::move(lhs) | std::move(rhs);
+    return lhs;
+}
+
+// u_ptr, raw_ptr
 inline std::unique_ptr<AbstractProjector>& operator|=(std::unique_ptr<AbstractProjector>& lhs,
                                                       ProjectorExtension* rhs)
 {
@@ -291,10 +304,40 @@ inline std::unique_ptr<AbstractProjector>& operator|=(std::unique_ptr<AbstractPr
     return lhs;
 }
 
+inline std::unique_ptr<ProjectorExtension>& operator|=(std::unique_ptr<ProjectorExtension>& lhs,
+                                                      ProjectorExtension* rhs)
+{
+    lhs = std::move(lhs) | rhs;
+    return lhs;
+}
+
+// raw_ptr, u_ptr
 inline AbstractProjector*& operator|=(AbstractProjector*& lhs,
                                       std::unique_ptr<ProjectorExtension> rhs)
 {
     lhs = (lhs | std::move(rhs)).release();
+    return lhs;
+}
+
+inline ProjectorExtension*& operator|=(ProjectorExtension*& lhs,
+                                      std::unique_ptr<ProjectorExtension> rhs)
+{
+    lhs = (lhs | std::move(rhs)).release();
+    return lhs;
+}
+
+// raw_ptr, raw_ptr
+inline AbstractProjector*& pipe(AbstractProjector*& lhs, ProjectorExtension* rhs)
+{
+    rhs->use(lhs);
+    lhs = rhs;
+    return lhs;
+}
+
+inline ProjectorExtension*& pipe(ProjectorExtension*& lhs, ProjectorExtension* rhs)
+{
+    rhs->use(lhs);
+    lhs = rhs;
     return lhs;
 }
 
