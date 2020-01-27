@@ -22,7 +22,7 @@ VolumeResampler::VolumeResampler(const VoxelVolume<float>& volume,
     , _rangeDim3(rangeDim3)
     , _q(OpenCLConfig::instance().context(), OpenCLConfig::instance().devices()[oclDeviceNb])
     , _volImage3D(OpenCLConfig::instance().context(),
-                  CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
+                  CL_MEM_READ_ONLY,
                   cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
                   volume.dimensions().x,
                   volume.dimensions().y,
