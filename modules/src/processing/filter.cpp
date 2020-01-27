@@ -80,10 +80,10 @@ void meta_filt(const std::vector<T*>& inputOutput, ResValFromPipeBuf<T, filterSi
     }
 
     // fill pipe with zeros for computing the remaining elements
-    for(auto i = 0u; i < nbRightFilterEl; ++i)
+    for(auto i = firstUndefEl; i < inputOutputSize; ++i)
     {
         pipe.addValue(T(0));
-        *inputOutput[firstUndefEl + i] = f(pipe);
+        *inputOutput[i] = f(pipe);
     }
 }
 
