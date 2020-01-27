@@ -25,17 +25,23 @@ template <typename T, uint N>
 class PipeBuffer
 {
 public:
-    void addValue(const T& val)
+
+    void shift(uint n = 1u)
+    {
+        _startPos += n;
+        _startPos %= N;
+    }
+
+    void addValue(T val)
     {
         _buf[_startPos] = val;
-        ++_startPos;
-        _startPos %= N;
+        shift();
     }
 
     const T& operator() (uint i) const { return _buf[(_startPos + i) % N]; }
 
 private:
-    std::array<T, N> _buf; //!< ring buffer
+    std::array<T, N> _buf{ }; //!< zero-initialized ring buffer
     uint _startPos{ 0u }; //!< current '0-position' in ring buffer
 };
 
@@ -44,38 +50,40 @@ template <typename T, uint filterSize>
 using ResValFromPipeBuf = T (*)(const PipeBuffer<T, filterSize>&);
 
 template <typename T, uint filterSize>
-void meta_filt(const std::vector<T*>& buffer, ResValFromPipeBuf<T, filterSize> f)
+void meta_filt(const std::vector<T*>& inputOutput, ResValFromPipeBuf<T, filterSize> f)
 {
     PipeBuffer<T, filterSize> pipe;
 
     // number of filter elements on the left and right hand side (equal for odd filter size)
     const auto nbRightFilterEl = filterSize / 2;
     const auto nbLeftFilterEl = (filterSize - 1) / 2;
-    const auto firstUndefEl = uint(buffer.size()) - nbRightFilterEl;
-    if(static_cast<int>(firstUndefEl) < 0)
-        throw std::range_error("meta_filt (from `diff` or `filter`): the dimension of the buffer "
-                               "to be filtered is smaller than the half filter size of the used "
-                               "filter, which is not supported yet.");
+    const auto inputOutputSize = inputOutput.size();
+    const auto firstUndefEl = inputOutputSize < nbRightFilterEl
+                              ? 0u
+                              : uint(inputOutput.size() - nbRightFilterEl);
 
     // initiate pipe with filterSize-1 values:
     // [ 0 0 ... centralElement centralElement+1 ... secondLastElement ]
-    for(auto i = 0u; i < nbLeftFilterEl; ++i)
-        pipe.addValue(T(0));
+    pipe.shift(nbLeftFilterEl);
+
     for(auto i = 0u; i < nbRightFilterEl; ++i)
-        pipe.addValue(*buffer[i]);
+        if(i < inputOutputSize)
+            pipe.addValue(*inputOutput[i]);
+        else
+            pipe.shift();
 
     // start computation
     for(auto i = 0u; i < firstUndefEl; ++i)
     {
-        pipe.addValue(*buffer[i + nbRightFilterEl]);
-        *buffer[i] = f(pipe);
+        pipe.addValue(*inputOutput[i + nbRightFilterEl]);
+        *inputOutput[i] = f(pipe);
     }
 
     // fill pipe with zeros for computing the remaining elements
     for(auto i = 0u; i < nbRightFilterEl; ++i)
     {
         pipe.addValue(T(0));
-        *buffer[firstUndefEl + i] = f(pipe);
+        *inputOutput[firstUndefEl + i] = f(pipe);
     }
 }
 
