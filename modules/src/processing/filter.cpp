@@ -25,14 +25,6 @@ template <typename T, uint N>
 class PipeBuffer
 {
 public:
-    explicit PipeBuffer(const std::vector<T*>& init)
-    {
-        // initialize N-1 elements with init by using an offset of 1 in the array, i.e.
-        // array = { 0, *init[0], *init[1], *init[2], ... }
-        for(uint n = 0; n < N - 1; ++n)
-            _buf[n + 1] = *init[n];
-    }
-
     void addValue(const T& val)
     {
         _buf[_startPos] = val;
@@ -43,8 +35,8 @@ public:
     const T& operator() (uint i) const { return _buf[(_startPos + i) % N]; }
 
 private:
-    uint _startPos = 0;
-    std::array<T, N> _buf;
+    std::array<T, N> _buf; //!< ring buffer
+    uint _startPos{ 0u }; //!< current '0-position' in ring buffer
 };
 
 // ## Generic function for numerical derivate using a certain function f on a PipeBuffer ###
@@ -54,26 +46,37 @@ using ResValFromPipeBuf = T (*)(const PipeBuffer<T, filterSize>&);
 template <typename T, uint filterSize>
 void meta_filt(const std::vector<T*>& buffer, ResValFromPipeBuf<T, filterSize> f)
 {
-    Q_ASSERT(buffer.size() >= filterSize - 1);
-
-    PipeBuffer<T, filterSize> pipe(buffer);
+    PipeBuffer<T, filterSize> pipe;
 
     // number of filter elements on the left and right hand side (equal for odd filter size)
     const auto nbRightFilterEl = filterSize / 2;
     const auto nbLeftFilterEl = (filterSize - 1) / 2;
-    const auto firstUndefEl = uint(buffer.size() - nbRightFilterEl);
+    const auto firstUndefEl = uint(buffer.size()) - nbRightFilterEl;
+    if(static_cast<int>(firstUndefEl) < 0)
+        throw std::range_error("meta_filt (from `diff` or `filter`): the dimension of the buffer "
+                               "to be filtered is smaller than the half filter size of the used "
+                               "filter, which is not supported yet.");
 
-    for(uint el = nbLeftFilterEl; el < firstUndefEl; ++el)
+    // initiate pipe with filterSize-1 values:
+    // [ 0 0 ... centralElement centralElement+1 ... secondLastElement ]
+    for(auto i = 0u; i < nbLeftFilterEl; ++i)
+        pipe.addValue(T(0));
+    for(auto i = 0u; i < nbRightFilterEl; ++i)
+        pipe.addValue(*buffer[i]);
+
+    // start computation
+    for(auto i = 0u; i < firstUndefEl; ++i)
     {
-        pipe.addValue(*buffer[el + nbRightFilterEl]);
-        *buffer[el] = f(pipe);
+        pipe.addValue(*buffer[i + nbRightFilterEl]);
+        *buffer[i] = f(pipe);
     }
 
-    // set boundaries to zero
-    for(uint b = 0; b < nbLeftFilterEl; ++b)
-        *buffer[b] = T(0);
-    for(uint b = 0; b < nbRightFilterEl; ++b)
-        *buffer[firstUndefEl + b] = T(0);
+    // fill pipe with zeros for computing the remaining elements
+    for(auto i = 0u; i < nbRightFilterEl; ++i)
+    {
+        pipe.addValue(T(0));
+        *buffer[firstUndefEl + i] = f(pipe);
+    }
 }
 
 // ## Derivative/Filter methods ##
