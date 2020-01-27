@@ -643,8 +643,9 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  * To incorporate a new differentiation method, add a value to this enumeration (in diff.h) and
  * provide the corresponding implementation of the method (see filter.cpp file for more information).
  *
- * In general, values on the borders will be set to zero, where no valid values are available for
- * the differentiation, i.e. within the half size of the differential operator.
+ * In general, values on the borders will be computed by extrapolating with zeros outside, where no
+ * valid values are available for the differentiation, i.e. within the half size of the differential
+ * operator.
  */
 
 /*! \var DiffMethod::CentralDifference
@@ -665,8 +666,8 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  */
 
 /*! \var DiffMethod::DifferenceToNext
- * This computes the difference to the next value. The border value (last index) will be set to
- * zero to preserve input dimension.
+ * This computes the difference to the next value. The border value (last index) will be computed
+ * by extrapolation with a zero value.
  *
  * Assuming the dimension along which the difference is computed has (valid) indices
  * \f$ n=0,...,N-1 \f$.
@@ -759,8 +760,8 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  * To incorporate a new filter method, add a value to this enumeration (in filter.h) and provide the
  * corresponding implementation of the method (see filter.cpp file for more information).
  *
- * In general, values on the borders will be set to zero, where no valid values are available for
- * the filtering, i.e. within the half filter size.
+ * In general, values on the borders will be computed by extrapolating with zeros outside, where no
+ * valid values are available for the filtering, i.e. within the half filter size.
  */
 
 /*! \var FiltMethod::RamLak
