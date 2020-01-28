@@ -339,11 +339,11 @@ void filterBuffer_MaxAbs3(const std::vector<T*>& buffer)
 template <typename T>
 void filterBuffer_RamLak(const std::vector<T*>& buffer)
 {
-    constexpr uint filterSize = 255;
+    constexpr uint filterSize = 1407;
     meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
     {
 #ifdef _MSC_VER
-        constexpr uint filterSize = 255;
+        constexpr uint filterSize = 1407;
 #endif
         constexpr uint halfFilterSize = filterSize / 2;
         auto sum = T(0.25) * pipe(halfFilterSize);
@@ -774,7 +774,7 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
 
 /*! \var FiltMethod::RamLak
  * This computes the truncated RamLak filter (discretization of the ramp filter) using only the
- * central 255 filter elements. This covers 99.84% of the full filter size in terms of the sum of
+ * central 1407 filter elements. This covers 99.97% of the full filter size in terms of the sum of
  * absolute values.
  * The elements are defined as
  *

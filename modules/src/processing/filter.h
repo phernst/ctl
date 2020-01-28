@@ -18,7 +18,7 @@ enum FiltMethod {
     Median3,    // filter size: 3
     MedianAbs3, // filter size: 3
     MaxAbs3,    // filter size: 3
-    RamLak,     // filter size: 255
+    RamLak,     // filter size: 1407
 };
 
 // one-dimensional filter
