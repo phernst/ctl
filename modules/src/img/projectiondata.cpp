@@ -1,7 +1,7 @@
 #include "projectiondata.h"
 #include <thread>
 
-static const uint OPTIMAL_NB_THREADS = std::max(1u, std::thread::hardware_concurrency());
+static const uint OPTIMAL_NB_THREADS = std::max({ 1u, std::thread::hardware_concurrency() });
 
 namespace CTL
 {

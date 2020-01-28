@@ -28,7 +28,7 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
         _rng.seed(rd());
     }
 
-    uint seed = _rng();
+    auto const seed = static_cast<uint>(_rng());
 
     // add noise
     std::launch launchMode = std::launch::deferred;
