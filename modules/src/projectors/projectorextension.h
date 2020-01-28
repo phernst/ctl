@@ -44,7 +44,7 @@ public:
     ~ProjectorExtension() override;
 
     // virtual methods
-    void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
     ProjectionData projectComposite(const CompositeVolume& volume) override;
     bool isLinear() const override;
@@ -138,14 +138,13 @@ inline ProjectorExtension::~ProjectorExtension() { delete _projector; }
  *
  * Throws std::runtime_error if the nested projector object is unset.
  */
-inline void ProjectorExtension::configure(const AcquisitionSetup& setup,
-                                     const AbstractProjectorConfig& config)
+inline void ProjectorExtension::configure(const AcquisitionSetup& setup)
 {
     Q_ASSERT(_projector);
     if(!_projector)
         throw std::runtime_error("ProjectorExtension::configure(): no nested projector set.");
 
-    _projector->configure(setup, config);
+    _projector->configure(setup);
 }
 
 /*!

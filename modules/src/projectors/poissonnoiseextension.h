@@ -15,7 +15,7 @@ public:
     using ProjectorExtension::ProjectorExtension;
 
     // ProjectorExtension interface
-    void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     bool isLinear() const override;
 
     void setFixedSeed(uint seed);
@@ -31,7 +31,6 @@ private:
     std::mt19937 _rng;
 
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
-    std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
 
     static void processViewCompact(SingleViewData& view, const std::vector<float>& i_0, uint seed);
 };

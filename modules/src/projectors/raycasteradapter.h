@@ -20,9 +20,10 @@ public:
         AbstractProjectorConfig* clone() const override;
     };
 
-    void configure(const AcquisitionSetup& setup,
-                   const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
+
+    void applyRayCasterConfig(const Config& rcConfig);
 
 protected:
     RayCaster _rayCaster;
@@ -30,7 +31,6 @@ protected:
     QVector<ProjectionMatrix> _pMatsVectorized;
     SingleViewData::Dimensions _viewDim;
 
-    void applyRayCasterConfig(const Config& rcConfig);
 };
 
 } // namespace OCL

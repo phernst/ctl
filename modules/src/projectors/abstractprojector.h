@@ -70,8 +70,7 @@ signals:
 class AbstractProjector
 {
     // abstract interface
-    public:virtual void configure(const AcquisitionSetup& setup,
-                                  const AbstractProjectorConfig& config) = 0;
+    public:virtual void configure(const AcquisitionSetup& setup) = 0;
     public:virtual ProjectionData project(const VolumeData& volume) = 0;
 
 public:

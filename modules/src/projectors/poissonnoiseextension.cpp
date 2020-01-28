@@ -8,13 +8,11 @@
 
 namespace CTL {
 
-void PoissonNoiseExtension::configure(const AcquisitionSetup& setup,
-                                      const AbstractProjectorConfig& config)
+void PoissonNoiseExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
-    _config.reset(config.clone());
 
-    ProjectorExtension::configure(setup, config);
+    ProjectorExtension::configure(setup);
 }
 
 ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& nestedProjector)

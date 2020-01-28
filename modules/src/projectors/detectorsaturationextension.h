@@ -12,7 +12,7 @@ public:
     using ProjectorExtension::ProjectorExtension;
 
     // ProjectorExtension interface
-    void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     bool isLinear() const override;
     void setIntensitySampling(uint nbSamples);
 

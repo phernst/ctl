@@ -12,11 +12,9 @@ namespace CTL {
  * and the AbstractProjectorConfig. The actual configure() method of the nested projector is
  * called within project(). Use setDiscretization() to change the level of discretization.
  */
-void ArealFocalSpotExtension::configure(const AcquisitionSetup& setup,
-                                        const AbstractProjectorConfig& config)
+void ArealFocalSpotExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
-    _config.reset(config.clone());
 }
 
 /*!
@@ -107,7 +105,7 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
         }
 
         // re-configure projector
-        ProjectorExtension::configure(tmpSetup, *_config);
+        ProjectorExtension::configure(tmpSetup);
 
         // projecting volume
         if(first)

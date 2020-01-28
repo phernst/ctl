@@ -7,8 +7,7 @@
 namespace CTL {
 namespace OCL {
 
-void RayCasterAdapter::configure(const AcquisitionSetup &setup,
-                                 const AbstractProjectorConfig& config)
+void RayCasterAdapter::configure(const AcquisitionSetup &setup)
 {
     // get projection matrices
     FullGeometry pMats = GeometryEncoder::encodeFullGeometry(setup);
@@ -16,10 +15,6 @@ void RayCasterAdapter::configure(const AcquisitionSetup &setup,
     for(const auto& viewPMats : pMats)
         for(const auto& modPMats : viewPMats)
             _pMatsVectorized.append(modPMats);
-
-    // prepare RayCaster
-    Q_ASSERT(dynamic_cast<const Config*>(&config));
-    applyRayCasterConfig(dynamic_cast<const Config&>(config));
 
     auto detectorPixels = setup.system()->detector()->nbPixelPerModule();
     _rayCaster.setDetectorSize(detectorPixels.height(), detectorPixels.width());

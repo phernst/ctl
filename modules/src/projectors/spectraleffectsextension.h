@@ -14,7 +14,7 @@ public:
     SpectralEffectsExtension() = default;
     explicit SpectralEffectsExtension(float energyBinWidth);
 
-    void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
 
     ProjectionData projectComposite(const CompositeVolume& volume) override;
@@ -34,7 +34,6 @@ private:
     };
 
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
-    std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
     SpectralInformation _spectralInfo;
     float _deltaE = 0.0f;   
 

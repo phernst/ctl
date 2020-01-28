@@ -11,8 +11,7 @@ public:
     using ProjectorPtr = std::unique_ptr<AbstractProjector>;
     using ExtensionPtr = std::unique_ptr<ProjectorExtension>;
 
-    void configure(const AcquisitionSetup& setup,
-                   const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
     bool isLinear() const override;
 

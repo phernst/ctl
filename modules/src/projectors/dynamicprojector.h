@@ -13,7 +13,7 @@ public:
     explicit DynamicProjector(AbstractProjector* projector);
     explicit DynamicProjector(std::unique_ptr<AbstractProjector> projector);
 
-    void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
 
     // using _projector view by view (reconfigure _projector for each view)
@@ -21,7 +21,6 @@ public:
 
 private:
     std::unique_ptr<AbstractProjector> _projector; //!< used static projector
-    std::unique_ptr<AbstractProjectorConfig> _projectorConfig; //!< config of the static projector
     AcquisitionSetup _setup; //!< used acquisition setup
 };
 

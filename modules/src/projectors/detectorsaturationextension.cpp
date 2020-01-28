@@ -7,15 +7,14 @@
 
 namespace CTL {
 
-void DetectorSaturationExtension::configure(const AcquisitionSetup& setup,
-                                            const AbstractProjectorConfig& config)
+void DetectorSaturationExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
 
     if(_nbSamples == 0)
         _nbSamples = _setup.system()->source()->spectrumDiscretizationHint();
 
-    ProjectorExtension::configure(setup, config);
+    ProjectorExtension::configure(setup);
 }
 
 bool DetectorSaturationExtension::isLinear() const { return false; }

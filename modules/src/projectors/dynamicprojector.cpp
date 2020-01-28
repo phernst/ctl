@@ -17,11 +17,9 @@ DynamicProjector::DynamicProjector(std::unique_ptr<AbstractProjector> projector)
 {
 }
 
-void DynamicProjector::configure(const AcquisitionSetup& setup,
-                                 const AbstractProjectorConfig& config)
+void DynamicProjector::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
-    _projectorConfig.reset(config.clone());
 }
 
 ProjectionData DynamicProjector::project(const VolumeData& volume)
@@ -30,7 +28,7 @@ ProjectionData DynamicProjector::project(const VolumeData& volume)
         = QObject::connect(_projector->notifier(), &ProjectorNotifier::projectionFinished,
                            this->notifier(), &ProjectorNotifier::projectionFinished);
 
-    _projector->configure(_setup, *_projectorConfig);
+    _projector->configure(_setup);
     auto ret = _projector->project(volume);
 
     QObject::disconnect(notfierConnection);
@@ -46,7 +44,7 @@ ProjectionData DynamicProjector::project(AbstractDynamicVoxelVolume& volume)
         volume.setTime(_setup.view(view).timeStamp());
         _setup.prepareView(view);
 
-        _projector->configure({ *_setup.system(), 1 }, *_projectorConfig);
+        _projector->configure({ *_setup.system(), 1 });
         ret.append(_projector->project(volume).view(0));
 
         emit notifier()->projectionFinished(view);

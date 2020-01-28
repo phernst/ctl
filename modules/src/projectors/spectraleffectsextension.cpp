@@ -13,15 +13,13 @@ SpectralEffectsExtension::SpectralEffectsExtension(float energyBinWidth)
 {
 }
 
-void SpectralEffectsExtension::configure(const AcquisitionSetup& setup,
-                                           const AbstractProjectorConfig& config)
+void SpectralEffectsExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
-    _config.reset(config.clone());
 
     updateSpectralInformation();
 
-    ProjectorExtension::configure(setup, config);
+    ProjectorExtension::configure(setup);
 }
 
 /*!
@@ -136,7 +134,7 @@ ProjectionData SpectralEffectsExtension::projectComposite(const CompositeVolume&
                 _setup.view(view).replacePrepareStep(sourcePrep);
             }
 
-            ProjectorExtension::configure(_setup, *_config);
+            ProjectorExtension::configure(_setup);
 
             // project all material densities
             std::vector<ProjectionData> materialProjs;

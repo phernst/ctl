@@ -111,12 +111,12 @@ uint StandardPipeline::posSpectral() const
     return uint(_arealFSEnabled);
 }
 
-void StandardPipeline::configure(const AcquisitionSetup &setup, const AbstractProjectorConfig &config)
+void StandardPipeline::configure(const AcquisitionSetup& setup)
 {
-    _pipeline.configure(setup, config);
+    _pipeline.configure(setup);
 }
 
-ProjectionData StandardPipeline::project(const VolumeData &volume)
+ProjectionData StandardPipeline::project(const VolumeData& volume)
 {
     return _pipeline.project(volume);
 }

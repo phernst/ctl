@@ -68,7 +68,7 @@ class ArealFocalSpotExtension : public ProjectorExtension
 public:
     using ProjectorExtension::ProjectorExtension;
 
-    void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     void setDiscretization(const QSize& discretization);
 
 protected:
@@ -76,7 +76,6 @@ protected:
 
     QSize _discretizationSteps = { 1, 1 }; //!< Requested number of discretization steps in both dimensions.
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
-    std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
 
     QVector<QPointF> discretizationGrid() const;
 };

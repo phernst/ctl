@@ -2,9 +2,9 @@
 
 namespace CTL {
 
-void ProjectionPipeline::configure(const AcquisitionSetup &setup, const AbstractProjectorConfig &config)
+void ProjectionPipeline::configure(const AcquisitionSetup &setup)
 {
-    _finalProjector->configure(setup, config);
+    _finalProjector->configure(setup);
 }
 
 ProjectionData ProjectionPipeline::project(const VolumeData &volume)
