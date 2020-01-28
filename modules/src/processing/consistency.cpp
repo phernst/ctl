@@ -293,7 +293,8 @@ const std::vector<Radon3DCoord>& IntermedGen2D3D::lastSampling() const { return 
 IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
                                                      const mat::ProjectionMatrix& P,
                                                      const VoxelVolume<float>& volume,
-                                                     float plusMinusH_mm)
+                                                     float plusMinusH_mm,
+                                                     imgproc::DiffMethod derivativeMethodProj)
 {
     mat::Matrix<2, 1> projSize(proj.width(), proj.height());
     auto imgDiag = static_cast<float>(projSize.norm());
@@ -308,8 +309,8 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
 
     // compute intermediate function from projections
     IntermediateProj intermedFctOfProj(proj, P.intrinsicMatK());
-    intermedFctOfProj.setDerivativeMethod(_derivativeMethod);
-    auto intermProj = intermedFctOfProj.sampled(muRange, nbMu, sRange, nbS).data();
+    auto intermProj = intermedFctOfProj.sampled(muRange, nbMu, sRange, nbS,
+                                                derivativeMethodProj).data();
 
     // compute intermediate function from volume
     if(_useSubsampling)
@@ -335,7 +336,17 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
 
 IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
                                                      const mat::ProjectionMatrix& P,
-                                                     const OCL::VolumeResampler& radon3dSampler)
+                                                     const OCL::VolumeResampler& radon3dSampler,
+                                                     imgproc::DiffMethod derivativeMethodProj)
+{
+    return intermedFctPair(proj, P, radon3dSampler,
+                           static_cast<imgproc::FiltMethod>(derivativeMethodProj));
+}
+
+IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
+                                                     const mat::ProjectionMatrix& P,
+                                                     const VolumeResampler& radon3dSampler,
+                                                     imgproc::FiltMethod filterMethodProj)
 {
     mat::Matrix<2, 1> projSize(proj.width(), proj.height());
     auto imgDiag = static_cast<float>(projSize.norm());
@@ -348,8 +359,8 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
 
     // compute intermediate function from projections
     IntermediateProj intermedFctOfProj(proj, P.intrinsicMatK());
-    intermedFctOfProj.setDerivativeMethod(_derivativeMethod);
-    auto intermProj = intermedFctOfProj.sampled(muRange, nbMu, sRange, nbS).data();
+    auto intermProj = intermedFctOfProj.sampled(muRange, nbMu, sRange, nbS,
+                                                filterMethodProj).data();
 
     // compute intermediate function from volume
     if(_useSubsampling)
@@ -410,16 +421,6 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const OCL::ImageResampler& 
 
     return IntermediateFctPair(std::move(intermProj), std::move(intermVol),
                                IntermediateFctPair::VolumeDomain);
-}
-
-imgproc::DiffMethod IntermedGen2D3D::derivativeMethodInProjectionDomain() const
-{
-    return _derivativeMethod;
-}
-
-void IntermedGen2D3D::setDerivativeMethodInProjectionDomain(const imgproc::DiffMethod& derivativeMethod)
-{
-    _derivativeMethod = derivativeMethod;
 }
 
 float IntermedGen2D3D::subsampleLevel() const
@@ -513,16 +514,34 @@ IntermediateProj::IntermediateProj(const Chunk2D<float> &proj) // Aichert approx
 }
 
 OCL::ImageResampler IntermediateProj::sampler(const SamplingRange& angleRange, uint nbAngles,
-                                              const SamplingRange& distRange, uint nbDist) const
+                                              const SamplingRange& distRange, uint nbDist,
+                                              imgproc::DiffMethod derivativeMethod) const
 {
-    auto intermedFct = sampled(angleRange, nbAngles, distRange, nbDist);
+    const auto intermedFct = sampled(angleRange, nbAngles, distRange, nbDist, derivativeMethod);
+    // construct and return resampler
+    return OCL::ImageResampler(intermedFct, angleRange, distRange);
+}
 
+ImageResampler IntermediateProj::sampler(const SamplingRange& angleRange, uint nbAngles,
+                                         const SamplingRange& distRange, uint nbDist,
+                                         imgproc::FiltMethod filterMethod) const
+{
+    const auto intermedFct = sampled(angleRange, nbAngles, distRange, nbDist, filterMethod);
     // construct and return resampler
     return OCL::ImageResampler(intermedFct, angleRange, distRange);
 }
 
 Chunk2D<float> IntermediateProj::sampled(const SamplingRange& angleRange, uint nbAngles,
-                                         const SamplingRange& distRange, uint nbDist) const
+                                         const SamplingRange& distRange, uint nbDist,
+                                         imgproc::DiffMethod derivativeMethod) const
+{
+    return sampled(angleRange, nbAngles, distRange, nbDist,
+                   static_cast<imgproc::FiltMethod>(derivativeMethod));
+}
+
+Chunk2D<float> IntermediateProj::sampled(const SamplingRange &angleRange, uint nbAngles,
+                                         const SamplingRange &distRange, uint nbDist,
+                                         imgproc::FiltMethod filterMethod) const
 {
     if(nbDist < 2)
         throw std::runtime_error("IntermediateProj::sampler: nbDist must be greater than 1.");
@@ -533,8 +552,8 @@ Chunk2D<float> IntermediateProj::sampled(const SamplingRange& angleRange, uint n
     // compute 2D Radon transform
     auto radonTransf = _radon2D->sampleTransform(angleSamples, distSamples);
 
-    // compute (partial) derivative along distance dimension
-    imgproc::diff<1>(radonTransf, _derivativeMethod);
+    // compute filter (or partial derivative) along distance dimension
+    imgproc::filter<1>(radonTransf, filterMethod);
     radonTransf /= (distSamples[1] - distSamples[0]);
 
     // perform post-weighting
@@ -635,8 +654,6 @@ double IntermediateProj::cosineOfPlaneAngle(const mat::Matrix<2, 1>& x, const Ma
     return d.get<2>() / d.norm();
 }
 
-void IntermediateProj::setDerivativeMethod(imgproc::DiffMethod method) { _derivativeMethod = method; }
-
 void IntermediateProj::setOrigin(float x, float y)
 {
     _radon2D->setOrigin(x, y);
@@ -659,7 +676,7 @@ IntermediateVol::IntermediateVol(const VoxelVolume<float> &vol)
 OCL::VolumeResampler IntermediateVol::sampler(const SamplingRange& phiRange, uint nbPhi,
                                               const SamplingRange& thetaRange, uint nbTheta,
                                               const SamplingRange& distRange, uint nbDist,
-                                              imgproc::DiffMethod method) const
+                                              imgproc::DiffMethod derivativeMethod) const
 {
     // compute 3D Radon transform
     auto radonTransf = _radon3D.sampleTransform(phiRange.linspace(nbPhi),
@@ -667,7 +684,24 @@ OCL::VolumeResampler IntermediateVol::sampler(const SamplingRange& phiRange, uin
                                                 distRange.linspace(nbDist));
 
     // compute (partial) derivative along distance dimension
-    imgproc::diff<2>(radonTransf, method);
+    imgproc::diff<2>(radonTransf, derivativeMethod);
+
+    // construct and return resampler
+    return OCL::VolumeResampler(radonTransf, phiRange, thetaRange, distRange);
+}
+
+VolumeResampler IntermediateVol::sampler(const SamplingRange& phiRange, uint nbPhi,
+                                         const SamplingRange& thetaRange, uint nbTheta,
+                                         const SamplingRange& distRange, uint nbDist,
+                                         imgproc::FiltMethod filterMethod) const
+{
+    // compute 3D Radon transform
+    auto radonTransf = _radon3D.sampleTransform(phiRange.linspace(nbPhi),
+                                                thetaRange.linspace(nbTheta),
+                                                distRange.linspace(nbDist));
+
+    // compute (partial) derivative along distance dimension
+    imgproc::filter<2>(radonTransf, filterMethod);
 
     // construct and return resampler
     return OCL::VolumeResampler(radonTransf, phiRange, thetaRange, distRange);

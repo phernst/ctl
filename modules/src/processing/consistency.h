@@ -101,14 +101,16 @@ public:
     void setSubsampleLevel(float subsampleLevel);
     void toggleSubsampling(bool enabled);
 
-    // on the fly (using central difference with `plusMinusH`)
+    // # on the fly (using central difference with `plusMinusH`)
+    // Grangeat version
     IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj1,
                                         const mat::ProjectionMatrix& P1,
                                         const Chunk2D<float>& proj2,
                                         const mat::ProjectionMatrix& P2,
                                         float plusMinusH = 1.0f) const;
 
-    // precomputed (origin must be the default origin: [(X-1)/2, (Y-1)/2])
+    // # precomputed (origin must be the default origin: [(X-1)/2, (Y-1)/2])
+    // fully generic
     IntermediateFctPair intermedFctPair(const OCL::ImageResampler& radon2dSampler1,
                                         const mat::ProjectionMatrix& P1,
                                         const OCL::ImageResampler& radon2dSampler2,
@@ -144,22 +146,32 @@ public:
     float subsampleLevel() const;
     void setSubsampleLevel(float subsampleLevel);
     void toggleSubsampling(bool enabled);
-    imgproc::DiffMethod derivativeMethodInProjectionDomain() const;
-    void setDerivativeMethodInProjectionDomain(const imgproc::DiffMethod& method);
 
     const std::vector<Radon3DCoord>& lastSampling() const;
 
-    // fully on the fly (using central difference with `plusMinusH_mm`)
+    // # fully on the fly (using central difference with `plusMinusH_mm`)
+    // Grangeat version
     IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj,
                                         const mat::ProjectionMatrix& P,
                                         const VoxelVolume<float>& volume,
-                                        float plusMinusH_mm);
-    // projection on the fly
+                                        float plusMinusH_mm,
+                                        imgproc::DiffMethod derivativeMethodProj
+                                        = imgproc::CentralDifference);
+    // # projection on the fly
+    // Grangeat version
     IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj,
                                         const mat::ProjectionMatrix& P,
-                                        const OCL::VolumeResampler& radon3dSampler);
+                                        const OCL::VolumeResampler& radon3dSampler,
+                                        imgproc::DiffMethod derivativeMethodProj
+                                        = imgproc::CentralDifference);
+    // generic or Smith version
+    IntermediateFctPair intermedFctPair(const Chunk2D<float>& proj,
+                                        const mat::ProjectionMatrix& P,
+                                        const OCL::VolumeResampler& radon3dSampler,
+                                        imgproc::FiltMethod filterMethodProj);
 
-    // fully precomputed (origin must be the default origin: [(X-1)/2, (Y-1)/2])
+    // # fully precomputed (origin must be the default origin: [(X-1)/2, (Y-1)/2])
+    // fully generic
     IntermediateFctPair intermedFctPair(const OCL::ImageResampler& radon2dSampler,
                                         const mat::ProjectionMatrix& P,
                                         const Chunk2D<float>::Dimensions& projSize,
@@ -167,10 +179,9 @@ public:
 
 private:
     std::vector<Radon3DCoord> _lastSampling;
-    float _accuracy = 1.0f;
+    float _accuracy = 1.0f; //!< `1/s`, i.e. density of sampled lines on the detector
     float _subsampleLevel = 1.0f;
     bool _useSubsampling = false;
-    imgproc::DiffMethod _derivativeMethod = imgproc::CentralDifference;
 
     std::vector<Radon3DCoord> intersectionPlanesWCS(const std::vector<float>& mu,
                                                     const std::vector<float>& dist,
@@ -184,23 +195,35 @@ public:
     IntermediateProj(const Chunk2D<float>& proj, const mat::Matrix<3,3>& K, bool useWeighting = true);
     explicit IntermediateProj(const Chunk2D<float>& proj);
 
-    void setDerivativeMethod(imgproc::DiffMethod method);
     void setOrigin(float x, float y);
 
     mat::Matrix<2, 1> origin() const;
 
+    // Grangeat version
     OCL::ImageResampler sampler(const SamplingRange& angleRange, uint nbAngles,
-                                const SamplingRange& distRange, uint nbDist) const;
+                                const SamplingRange& distRange, uint nbDist,
+                                imgproc::DiffMethod derivativeMethod
+                                = imgproc::CentralDifference) const;
+    // generic or Smith version
+    OCL::ImageResampler sampler(const SamplingRange& angleRange, uint nbAngles,
+                                const SamplingRange& distRange, uint nbDist,
+                                imgproc::FiltMethod filterMethod) const;
 
+    // Grangeat version
     Chunk2D<float> sampled(const SamplingRange& angleRange, uint nbAngles,
-                           const SamplingRange& distRange, uint nbDist) const;
+                           const SamplingRange& distRange, uint nbDist,
+                           imgproc::DiffMethod derivativeMethod = imgproc::CentralDifference) const;
+    // generic or Smith version
+    Chunk2D<float> sampled(const SamplingRange& angleRange, uint nbAngles,
+                           const SamplingRange& distRange, uint nbDist,
+                           imgproc::FiltMethod filterMethod) const;
+    // Grangeat version
     std::vector<float> sampled(const std::vector<Radon2DCoord>& samplingPts,
                                float plusMinusH = 1.0f) const;
 
 private:
     mat::Matrix<3, 3> _intrinsicK;
     std::unique_ptr<OCL::RadonTransform2D> _radon2D;
-    imgproc::DiffMethod _derivativeMethod = imgproc::CentralDifference;
     bool _useWeighting;
 
     void postWeighting(Chunk2D<float>& radonTransDerivative,
@@ -217,12 +240,21 @@ class IntermediateVol
 public:
     explicit IntermediateVol(const VoxelVolume<float>& vol);
 
+    // Grangeat version
     OCL::VolumeResampler sampler(const SamplingRange& phiRange, uint nbPhi,
                                  const SamplingRange& thetaRange, uint nbTheta,
                                  const SamplingRange& distRange, uint nbDist,
-                                 imgproc::DiffMethod method = imgproc::CentralDifference) const;
+                                 imgproc::DiffMethod derivativeMethod
+                                 = imgproc::CentralDifference) const;
+    // generic or Smith version
+    OCL::VolumeResampler sampler(const SamplingRange& phiRange, uint nbPhi,
+                                 const SamplingRange& thetaRange, uint nbTheta,
+                                 const SamplingRange& distRange, uint nbDist,
+                                 imgproc::FiltMethod filterMethod) const;
 
-    std::vector<float> sampled(const std::vector<Radon3DCoord>& samplingPointsWCS, float plusMinusH_mm) const;
+    // Grangeat version
+    std::vector<float> sampled(const std::vector<Radon3DCoord>& samplingPointsWCS,
+                               float plusMinusH_mm) const;
 
 
 private:
