@@ -31,7 +31,7 @@ mat::Homography3D GrangeatRegistration2D3D::optimize(const Chunk2D<float>& proje
 
     // initialize IntermedGen2D3D
     OCL::IntermedGen2D3D gen;
-    gen.setAccuracy(1.0f / deltaS);
+    gen.setLineDistance(deltaS);
     if(_subSamplingLevel != 1.0f)
         gen.setSubsampleLevel(_subSamplingLevel);
 

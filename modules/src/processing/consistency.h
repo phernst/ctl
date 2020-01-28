@@ -141,8 +141,8 @@ private:
 class IntermedGen2D3D
 {
 public:
-    float accuracy() const;
-    void setAccuracy(float accuracy);
+    float lineDistance() const;
+    void setLineDistance(float lineDistance);
     float subsampleLevel() const;
     void setSubsampleLevel(float subsampleLevel);
     void toggleSubsampling(bool enabled);
@@ -179,7 +179,7 @@ public:
 
 private:
     std::vector<Radon3DCoord> _lastSampling;
-    float _accuracy = 1.0f; //!< `1/s`, i.e. density of sampled lines on the detector
+    float _lineDistance = 1.0f; //!< distance of sampled lines on the detector in Pixel
     float _subsampleLevel = 1.0f;
     bool _useSubsampling = false;
 

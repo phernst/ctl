@@ -284,9 +284,19 @@ Radon2DCoord IntermedGen2D2D::plueckerTo2DRadon(const mat::Matrix<3, 3>& L,
 // #### IntermedGen2D3D ####
 // -----------------------------
 
-float IntermedGen2D3D::accuracy() const { return _accuracy; }
+float IntermedGen2D3D::lineDistance() const { return _lineDistance; }
 
-void IntermedGen2D3D::setAccuracy(float accuracy) { _accuracy = accuracy; }
+void IntermedGen2D3D::setLineDistance(float lineDistance)
+{
+    if(qFuzzyIsNull(lineDistance))
+        throw std::domain_error("IntermedGen2D3D::setLineDistance: line distance is close to zero");
+    if(std::abs(lineDistance) < 1.0f)
+        qWarning("Line distance below 1 is not meaningful, due to underlying linear interpolation");
+    if(lineDistance < 0.0f)
+        qWarning("Negative sign of the line distance is ignored");
+
+    _lineDistance = std::abs(lineDistance);
+}
 
 const std::vector<Radon3DCoord>& IntermedGen2D3D::lastSampling() const { return _lastSampling; }
 
@@ -299,7 +309,7 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
     mat::Matrix<2, 1> projSize(proj.width(), proj.height());
     auto imgDiag = static_cast<float>(projSize.norm());
 
-    const auto nbS  = uint(ceil(imgDiag * _accuracy));
+    const auto nbS  = uint(ceil(imgDiag / _lineDistance));
     const auto nbMu = uint(ceil(double(nbS) * PI_2));
 
     SamplingRange sRange{ -0.5f * imgDiag, 0.5f * imgDiag };
@@ -351,7 +361,7 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const Chunk2D<float>& proj,
     mat::Matrix<2, 1> projSize(proj.width(), proj.height());
     auto imgDiag = static_cast<float>(projSize.norm());
 
-    const auto nbS  = uint(ceil(imgDiag * _accuracy));
+    const auto nbS  = uint(ceil(imgDiag / _lineDistance));
     const auto nbMu = uint(ceil(double(nbS) * PI_2));
 
     SamplingRange sRange{ -0.5f * imgDiag, 0.5f * imgDiag };
@@ -391,7 +401,7 @@ IntermediateFctPair IntermedGen2D3D::intermedFctPair(const OCL::ImageResampler& 
                                                      const OCL::VolumeResampler& radon3dSampler)
 {
     const auto imgDiag = mat::Matrix<2, 1>(projSize.width, projSize.height).norm();
-    const auto nbS  = uint(ceil(imgDiag * _accuracy));
+    const auto nbS  = uint(ceil(imgDiag / _lineDistance));
     const auto nbMu = uint(ceil(double(nbS) * PI_2));
     const mat::Matrix<2, 1> orig{ (projSize.width - 1) * 0.5, (projSize.height - 1) * 0.5 };
     const SamplingRange sRange{ -0.5f * float(imgDiag), 0.5f * float(imgDiag) };
@@ -431,9 +441,9 @@ float IntermedGen2D3D::subsampleLevel() const
 void IntermedGen2D3D::setSubsampleLevel(float subsampleLevel)
 {
     if(subsampleLevel <= 0.0f)
-        qWarning("New subsampling level ignored, since it is negative or zero.");
+        qCritical("New subsampling level ignored, since it is negative or zero.");
     else if(subsampleLevel > 1.0f)
-        qWarning("New subsampling level ignored, since it is greater than one.");
+        qCritical("New subsampling level ignored, since it is greater than one.");
     else
     {
         _subsampleLevel = subsampleLevel;
