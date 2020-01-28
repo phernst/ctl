@@ -7,6 +7,48 @@
 
 static const uint OPTIMAL_NB_THREADS = std::max({ 1u, std::thread::hardware_concurrency() });
 
+namespace  {
+class ThreadPool
+{
+public:
+    ThreadPool(size_t nbThreads = std::thread::hardware_concurrency())
+        : _pool(nbThreads == 0 ? 1 : nbThreads)
+        , _curThread(_pool.begin())
+    {
+    }
+
+    ~ThreadPool()
+    {
+        std::for_each(_pool.begin(), _pool.end(), [](std::thread& t){ if(t.joinable()) t.join(); });
+    }
+
+    // delete copy
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool& operator= (const ThreadPool&) = default;
+    // default move
+    ThreadPool(ThreadPool&&) = default;
+    ThreadPool& operator= (ThreadPool&&) = default;
+
+    template <class Function, class... Args>
+    void enqueueThread(Function&& f, Args&&... args)
+    {
+        if(_curThread->joinable())
+            _curThread->join();
+
+        *_curThread = std::thread(std::forward<Function>(f),
+                                  std::forward<Args>(args)...);
+
+        ++_curThread;
+        if(_curThread == _pool.end())
+            _curThread = _pool.begin();
+    }
+
+private:
+    std::vector<std::thread> _pool;
+    std::vector<std::thread>::iterator _curThread;
+};
+} // unnamed namespace
+
 namespace CTL {
 
 void DetectorSaturationExtension::configure(const AcquisitionSetup& setup,
@@ -74,28 +116,14 @@ void DetectorSaturationExtension::processCounts(ProjectionData& projections)
     };
 
     const auto nbThreads = std::min({ _setup.nbViews(), OPTIMAL_NB_THREADS });
-    std::vector<std::thread> threads(nbThreads);
-    auto curThreadIdx = 0u;
-
-    auto prepCurThread = [&threads, &curThreadIdx, nbThreads]() -> std::thread&
-    {
-        auto& curThread = threads[curThreadIdx];
-        if(curThread.joinable())
-            curThread.join();
-        ++curThreadIdx;
-        curThreadIdx = curThreadIdx % nbThreads;
-        return curThread;
-    };
+    ThreadPool tp(nbThreads);
 
     auto v = 0u;
     for(auto& view : projections.data())
     {
         _setup.prepareView(v++);
-        prepCurThread() = std::thread(processView, &view, _setup.system()->photonsPerPixel());
+        tp.enqueueThread(processView, &view, _setup.system()->photonsPerPixel());
     }
-
-    // wait for finished
-    std::for_each(threads.begin(), threads.end(), [](std::thread& t){ if(t.joinable()) t.join(); });
 }
 
 void DetectorSaturationExtension::processExtinctions(ProjectionData& projections)
@@ -110,28 +138,14 @@ void DetectorSaturationExtension::processExtinctions(ProjectionData& projections
     };
 
     const auto nbThreads = std::min({ _setup.nbViews(), OPTIMAL_NB_THREADS });
-    std::vector<std::thread> threads(nbThreads);
-    auto curThreadIdx = 0u;
-
-    auto prepCurThread = [&threads, &curThreadIdx, nbThreads]() -> std::thread&
-    {
-        auto& curThread = threads[curThreadIdx];
-        if(curThread.joinable())
-            curThread.join();
-        ++curThreadIdx;
-        curThreadIdx = curThreadIdx % nbThreads;
-        return curThread;
-    };
+    ThreadPool tp(nbThreads);
 
     auto v = 0u;
     for(auto& view : projections.data())
     {
         _setup.prepareView(v++); // only required if saturation model is volatile
-        prepCurThread() = std::thread(processView, &view);
+        tp.enqueueThread(processView, &view);
     }
-
-    // wait for finished
-    std::for_each(threads.begin(), threads.end(), [](std::thread& t) { t.join(); });
 }
 
 void DetectorSaturationExtension::processIntensities(ProjectionData& projections)
@@ -158,18 +172,7 @@ void DetectorSaturationExtension::processIntensities(ProjectionData& projections
     };
 
     const auto nbThreads = std::min({ _setup.nbViews(), OPTIMAL_NB_THREADS });
-    std::vector<std::thread> threads(nbThreads);
-    auto curThreadIdx = 0u;
-
-    auto prepCurThread = [&threads, &curThreadIdx, nbThreads]() -> std::thread&
-    {
-        auto& curThread = threads[curThreadIdx];
-        if(curThread.joinable())
-            curThread.join();
-        ++curThreadIdx;
-        curThreadIdx = curThreadIdx % nbThreads;
-        return curThread;
-    };
+    ThreadPool tp(nbThreads);
 
     uint v = 0;
     std::vector<float> i0(detectorPtr->nbDetectorModules());
@@ -183,11 +186,8 @@ void DetectorSaturationExtension::processIntensities(ProjectionData& projections
         std::transform(n0.begin(), n0.end(), i0.begin(),
                        [meanEnergy](float count) { return count * meanEnergy; });
 
-        prepCurThread() = std::thread(processView, &view, i0);
+        tp.enqueueThread(processView, &view, i0);
     }
-
-    // wait for finished
-    std::for_each(threads.begin(), threads.end(), [](std::thread& t) { t.join(); });
 }
 
 } // namespace CTL
