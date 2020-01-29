@@ -2,6 +2,8 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(ProjectionPipeline)
+
 void ProjectionPipeline::configure(const AcquisitionSetup &setup)
 {
     _finalProjector->configure(setup);
@@ -16,6 +18,42 @@ bool ProjectionPipeline::isLinear() const
 {
     return _finalProjector->isLinear();
 }
+
+void ProjectionPipeline::fromVariant(const QVariant& variant)
+{
+    AbstractProjector::fromVariant(variant);
+
+    QVariantMap map = variant.toMap();
+
+    QVariant projVar = map.value("projector");
+    setProjector(projVar.isNull() ? nullptr : SerializationHelper::parseProjector(projVar));
+
+    QVariantList extList = map.value("extensions").toList();
+    for(const auto& ext : extList)
+    {
+        if(!ext.isNull())
+            appendExtension(static_cast<ProjectorExtension*>(SerializationHelper::parseProjector(ext)));
+    }
+}
+
+QVariant ProjectionPipeline::toVariant() const
+{
+    QVariantMap ret = AbstractProjector::toVariant().toMap();
+
+    ret.insert("#", "ProjectionPipeline");
+    ret.insert("projector",
+               _projector ? _projector->toVariant() : QVariant());
+
+
+    QVariantList extensionList;
+    for(const auto& ext : _extensions)
+        extensionList.append(ext ? ext->toVariant() : QVariant());
+
+    ret.insert("extensions", extensionList);
+
+    return ret;
+}
+
 
 ProjectionPipeline::ProjectionPipeline()
     : _finalProjector(makeExtension<ProjectorExtension>())

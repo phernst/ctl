@@ -7,6 +7,8 @@ namespace CTL {
 
 class ProjectionPipeline : public AbstractProjector
 {
+    CTL_TYPE_ID(200)
+
 public:
     using ProjectorPtr = std::unique_ptr<AbstractProjector>;
     using ExtensionPtr = std::unique_ptr<ProjectorExtension>;
@@ -14,6 +16,10 @@ public:
     void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
     bool isLinear() const override;
+
+    // SerializationInterface interface
+    void fromVariant(const QVariant &variant) override;
+    QVariant toVariant() const override;
 
     ProjectionPipeline();
 
