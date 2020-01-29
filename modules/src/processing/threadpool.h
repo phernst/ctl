@@ -47,7 +47,7 @@ namespace CTL {
 class ThreadPool
 {
 public:
-    ThreadPool(size_t nbThreads = std::thread::hardware_concurrency());
+    ThreadPool(size_t nbThreads = 0);
 
     ~ThreadPool();
 
@@ -70,13 +70,13 @@ private:
 
 /*!
  * Constructs an instance of `ThreadPool` consisting of \a nbThreads threads.
- * If no number is provided by the client (calling the default constructor), the number of threads
- * defaults to `std::thread::hardware_concurrency()`.
- * Setting the number of threads \a nbThreads to zero is equal to not providing any number (calling
- * the default constructor).
+ * If no number is provided by the client (calling the default constructor) or \a nbThreads is zero,
+ * the number of threads defaults to `std::thread::hardware_concurrency()`. If this function is not
+ * able to compute the supported number of threads (in this case it returns zero), the number of
+ * threads is set to one.
  */
 inline ThreadPool::ThreadPool(size_t nbThreads)
-    : _pool(nbThreads == 0 ? std::thread::hardware_concurrency() : nbThreads)
+    : _pool(nbThreads == 0 ? std::max({ 1u, std::thread::hardware_concurrency() }) : nbThreads)
     , _curThread(_pool.begin())
 {
 }
