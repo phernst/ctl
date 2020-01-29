@@ -18,6 +18,8 @@ const std::string CL_PROGRAM_NAME_NO_INTERP = "rayCaster_noInterp"; //!< OCL pro
 namespace CTL {
 namespace OCL {
 
+DECLARE_SERIALIZABLE_TYPE(RayCasterProjector)
+
 namespace {
 // helper functions
 cl_double16 decomposeM(const Matrix3x3& M);
@@ -51,6 +53,37 @@ struct PtrWrapper
 RayCasterProjector::RayCasterProjector()
 {
     initOpenCL();
+}
+
+// Use SerializationInterface::fromVariant() documentation.
+void RayCasterProjector::fromVariant(const QVariant& variant)
+{
+    QVariantMap map = variant.toMap();
+
+    QVariantList raysPerPix = map.value("rays per pixel", QVariantList{1u, 1u}).toList();
+    _settings.raysPerPixel[0] = raysPerPix.at(0).toUInt();
+    _settings.raysPerPixel[1] = raysPerPix.at(1).toUInt();
+    _settings.raySampling = map.value("ray sampling", 0.3f).toFloat();
+    _settings.volumeUpSampling = map.value("volume upsampling", 1u).toUInt();
+    _settings.interpolate = map.value("interpolate", true).toBool();
+}
+
+// Use SerializationInterface::toVariant() documentation.
+QVariant RayCasterProjector::toVariant() const
+{
+    QVariantMap ret = SerializationInterface::toVariant().toMap();
+
+    QVariantList raysPerPix;
+    raysPerPix.append(_settings.raysPerPixel[0]);
+    raysPerPix.append(_settings.raysPerPixel[1]);
+
+    ret.insert("#", "RayCasterProjector");
+    ret.insert("rays per pixel", raysPerPix);
+    ret.insert("ray sampling", _settings.raySampling);
+    ret.insert("volume upsampling", _settings.volumeUpSampling);
+    ret.insert("interpolate", _settings.interpolate);
+
+    return ret;
 }
 
 /*!

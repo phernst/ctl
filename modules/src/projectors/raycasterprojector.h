@@ -21,7 +21,9 @@ namespace OCL {
  */
 class RayCasterProjector : public AbstractProjector
 {
-public:
+    CTL_TYPE_ID(1)
+
+public:    
     RayCasterProjector();
 
     class Settings
@@ -38,6 +40,10 @@ public:
 
     void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
+
+    // SerializationInterface interface
+    void fromVariant(const QVariant &variant) override;
+    QVariant toVariant() const override;
 
     Settings& settings();
 
