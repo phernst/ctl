@@ -160,7 +160,8 @@ SOURCES += \
     $$PWD/../src/models/abstractxrayspectrummodel.cpp \
     $$PWD/../src/acquisition/radiationencoder.cpp \
     $$PWD/../src/projectors/spectraleffectsextension.cpp \
-    $$PWD/../src/projectors/projectionpipeline.cpp
+    $$PWD/../src/projectors/projectionpipeline.cpp \
+    $$PWD/../src/projectors/projectorextension.cpp
 
 # Qt-free headers and sources
 HEADERS += \
