@@ -9,6 +9,7 @@ namespace CTL {
 
 class AbstractDataModel;
 class AbstractPrepareStep;
+class AbstractProjector;
 class SystemComponent;
 class SerializationInterface;
 
@@ -37,6 +38,7 @@ public:
     const FactoryMap& componentFactories() const;
     const FactoryMap& modelFactories() const;
     const FactoryMap& prepareStepFactories() const;
+    const FactoryMap& projectorFactories() const;
     const FactoryMap& miscFactories() const;
 
     // functions that parse the QVariant in order to create a concrete system component, data
@@ -44,6 +46,7 @@ public:
     static AbstractDataModel* parseDataModel(const QVariant& variant);
     static SystemComponent* parseComponent(const QVariant& variant);
     static AbstractPrepareStep* parsePrepareStep(const QVariant& variant);
+    static AbstractProjector* parseProjector(const QVariant& variant);
     static SerializationInterface* parseMiscObject(const QVariant& variant);
 
 private:
@@ -60,6 +63,7 @@ private:
     FactoryMap _modelFactories;
     FactoryMap _prepareStepFactories;
     FactoryMap _miscFactories;
+    FactoryMap _projectorFactories;
 };
 
 template<class SerializableType>
@@ -75,9 +79,10 @@ SerializationHelper::RegisterWithSerializationHelper<SerializableType>::Register
     constexpr bool sysComponent = std::is_convertible<SerializableType*, SystemComponent*>::value;
     constexpr bool dataModel = std::is_convertible<SerializableType*, AbstractDataModel*>::value;
     constexpr bool prepStep = std::is_convertible<SerializableType*, AbstractPrepareStep*>::value;
+    constexpr bool projector = std::is_convertible<SerializableType*, AbstractProjector*>::value;
     constexpr bool misc = std::is_convertible<SerializableType*, SerializationInterface*>::value;
 
-    static_assert(sysComponent || dataModel || prepStep || misc,
+    static_assert(sysComponent || dataModel || prepStep || projector || misc,
                   "RegisterWithSerializationHelper fails: tried a registration of an unknown type");
 
     auto& serializer = SerializationHelper::instance();
@@ -95,6 +100,11 @@ SerializationHelper::RegisterWithSerializationHelper<SerializableType>::Register
     {
         Q_ASSERT(!serializer._prepareStepFactories.contains(SerializableType::Type));
         serializer._prepareStepFactories.insert(SerializableType::Type, factoryFunction);
+    }
+    else if(projector)
+    {
+        Q_ASSERT(!serializer._projectorFactories.contains(SerializableType::Type));
+        serializer._projectorFactories.insert(SerializableType::Type, factoryFunction);
     }
     else if(misc)
     {

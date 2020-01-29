@@ -3,6 +3,7 @@
 #include "acquisition/abstractpreparestep.h"
 #include "components/systemcomponent.h"
 #include "models/abstractdatamodel.h"
+#include "projectors/abstractprojector.h"
 
 namespace CTL {
 
@@ -28,6 +29,12 @@ const QMap<int, SerializationHelper::SerializableFactoryFunction>&
 SerializationHelper::prepareStepFactories() const
 {
     return _prepareStepFactories;
+}
+
+const QMap<int, SerializationHelper::SerializableFactoryFunction>&
+SerializationHelper::projectorFactories() const
+{
+    return _projectorFactories;
 }
 
 const QMap<int, SerializationHelper::SerializableFactoryFunction>&
@@ -58,6 +65,15 @@ AbstractPrepareStep* SerializationHelper::parsePrepareStep(const QVariant& varia
 {
     auto ptr = parse(variant, instance().prepareStepFactories());
     auto castedPtr = dynamic_cast<AbstractPrepareStep*>(ptr);
+    if(castedPtr == nullptr) // conversion not successful
+        delete ptr;
+    return castedPtr;
+}
+
+AbstractProjector* SerializationHelper::parseProjector(const QVariant& variant)
+{
+    auto ptr = parse(variant, instance().projectorFactories());
+    auto castedPtr = dynamic_cast<AbstractProjector*>(ptr);
     if(castedPtr == nullptr) // conversion not successful
         delete ptr;
     return castedPtr;
