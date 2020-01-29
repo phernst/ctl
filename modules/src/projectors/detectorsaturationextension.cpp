@@ -2,52 +2,9 @@
 #include "acquisition/radiationencoder.h"
 #include "components/abstractdetector.h"
 #include "components/abstractsource.h"
+#include "processing/threadpool.h"
 
 #include <thread>
-
-static const uint OPTIMAL_NB_THREADS = std::max({ 1u, std::thread::hardware_concurrency() });
-
-namespace  {
-class ThreadPool
-{
-public:
-    ThreadPool(size_t nbThreads = std::thread::hardware_concurrency())
-        : _pool(nbThreads == 0 ? 1 : nbThreads)
-        , _curThread(_pool.begin())
-    {
-    }
-
-    ~ThreadPool()
-    {
-        std::for_each(_pool.begin(), _pool.end(), [](std::thread& t){ if(t.joinable()) t.join(); });
-    }
-
-    // delete copy
-    ThreadPool(const ThreadPool&) = delete;
-    ThreadPool& operator= (const ThreadPool&) = default;
-    // default move
-    ThreadPool(ThreadPool&&) = default;
-    ThreadPool& operator= (ThreadPool&&) = default;
-
-    template <class Function, class... Args>
-    void enqueueThread(Function&& f, Args&&... args)
-    {
-        if(_curThread->joinable())
-            _curThread->join();
-
-        *_curThread = std::thread(std::forward<Function>(f),
-                                  std::forward<Args>(args)...);
-
-        ++_curThread;
-        if(_curThread == _pool.end())
-            _curThread = _pool.begin();
-    }
-
-private:
-    std::vector<std::thread> _pool;
-    std::vector<std::thread>::iterator _curThread;
-};
-} // unnamed namespace
 
 namespace CTL {
 
@@ -115,8 +72,7 @@ void DetectorSaturationExtension::processCounts(ProjectionData& projections)
         }
     };
 
-    const auto nbThreads = std::min({ _setup.nbViews(), OPTIMAL_NB_THREADS });
-    ThreadPool tp(nbThreads);
+    ThreadPool tp;
 
     auto v = 0u;
     for(auto& view : projections.data())
@@ -137,8 +93,7 @@ void DetectorSaturationExtension::processExtinctions(ProjectionData& projections
                 pix = saturationModel->valueAt(pix);
     };
 
-    const auto nbThreads = std::min({ _setup.nbViews(), OPTIMAL_NB_THREADS });
-    ThreadPool tp(nbThreads);
+    ThreadPool tp;
 
     auto v = 0u;
     for(auto& view : projections.data())
@@ -171,8 +126,7 @@ void DetectorSaturationExtension::processIntensities(ProjectionData& projections
         }
     };
 
-    const auto nbThreads = std::min({ _setup.nbViews(), OPTIMAL_NB_THREADS });
-    ThreadPool tp(nbThreads);
+    ThreadPool tp;
 
     uint v = 0;
     std::vector<float> i0(detectorPtr->nbDetectorModules());
