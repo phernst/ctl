@@ -7,12 +7,11 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(DetectorSaturationExtension)
+
 void DetectorSaturationExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
-
-    if(_nbSamples == 0)
-        _nbSamples = _setup.system()->source()->spectrumDiscretizationHint();
 
     ProjectorExtension::configure(setup);
 }
@@ -21,11 +20,33 @@ bool DetectorSaturationExtension::isLinear() const { return false; }
 
 void DetectorSaturationExtension::setIntensitySampling(uint nbSamples) { _nbSamples = nbSamples; }
 
+// Use SerializationInterface::fromVariant() documentation.
+void DetectorSaturationExtension::fromVariant(const QVariant& variant)
+{
+    ProjectorExtension::fromVariant(variant);
+
+    _nbSamples = variant.toMap().value("intensity sampling points", 0u).toUInt();
+}
+
+// Use SerializationInterface::toVariant() documentation.
+QVariant DetectorSaturationExtension::toVariant() const
+{
+    QVariantMap ret = ProjectorExtension::toVariant().toMap();
+
+    ret.insert("#", "DetectorSaturationExtension");
+    ret.insert("intensity sampling points", _nbSamples);
+
+    return ret;
+}
+
 ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector& nestedProjector)
 {
     auto ret = nestedProjector.project();
 
     auto saturationModelType = _setup.system()->detector()->saturationModelType();
+
+    if(_nbSamples == 0)
+        _nbSamples = _setup.system()->source()->spectrumDiscretizationHint();
 
     switch(saturationModelType)
     {

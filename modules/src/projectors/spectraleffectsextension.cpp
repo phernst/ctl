@@ -8,6 +8,8 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(SpectralEffectsExtension)
+
 SpectralEffectsExtension::SpectralEffectsExtension(float energyBinWidth)
     : _deltaE(energyBinWidth)
 {
@@ -159,9 +161,32 @@ ProjectionData SpectralEffectsExtension::projectComposite(const CompositeVolume&
 
 bool SpectralEffectsExtension::isLinear() const { return false; }
 
+// Use SerializationInterface::fromVariant() documentation.
+void SpectralEffectsExtension::fromVariant(const QVariant& variant)
+{
+    ProjectorExtension::fromVariant(variant);
+
+    auto deltaE = variant.toMap().value("spectral sampling resolution", 0.0f).toFloat();
+    setSpectralSamplingResolution(deltaE);
+}
+
+// Use SerializationInterface::toVariant() documentation.
+QVariant SpectralEffectsExtension::toVariant() const
+{
+    QVariantMap ret = ProjectorExtension::toVariant().toMap();
+
+    ret.insert("#", "SpectralEffectsExtension");
+    ret.insert("spectral sampling resolution", _deltaE);
+
+    return ret;
+}
+
 void SpectralEffectsExtension::setSpectralSamplingResolution(float energyBinWidth)
 {
     _deltaE = energyBinWidth;
+
+    if(_setup.isValid())
+        updateSpectralInformation();
 }
 
 void SpectralEffectsExtension::updateSpectralInformation()

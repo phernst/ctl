@@ -8,6 +8,8 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(PoissonNoiseExtension)
+
 void PoissonNoiseExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
@@ -23,7 +25,8 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
     if(!_useFixedSeed)
     {
         std::random_device rd;
-        _rng.seed(rd());
+        _seed = rd();
+        _rng.seed(_seed);
     }
 
     uint seed = _rng();
@@ -51,9 +54,37 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
 
 bool PoissonNoiseExtension::isLinear() const { return false; }
 
+// Use SerializationInterface::fromVariant() documentation.
+void PoissonNoiseExtension::fromVariant(const QVariant& variant)
+{
+    ProjectorExtension::fromVariant(variant);
+
+    QVariantMap map = variant.toMap();
+    _useFixedSeed = map.value("use fixed seed", false).toBool();
+    _useParallelization = map.value("use parallelization", true).toBool();
+    _seed = map.value("seed", 0).toUInt();
+
+    if(_useFixedSeed)
+        setFixedSeed(_seed);
+}
+
+// Use SerializationInterface::toVariant() documentation.
+QVariant PoissonNoiseExtension::toVariant() const
+{
+    QVariantMap ret = ProjectorExtension::toVariant().toMap();
+
+    ret.insert("#", "PoissonNoiseExtension");
+    ret.insert("use fixed seed", _useFixedSeed);
+    ret.insert("use parallelization", _useParallelization);
+    ret.insert("seed", _seed);
+
+    return ret;
+}
+
 void PoissonNoiseExtension::setFixedSeed(uint seed)
 {
     _useFixedSeed = true;
+    _seed = seed;
     _rng.seed(seed);
 }
 

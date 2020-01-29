@@ -7,6 +7,8 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(ArealFocalSpotExtension)
+
 /*!
  * Re-implementation of the configuration step. This takes copies of the AcquisitionSetup
  * and the AbstractProjectorConfig. The actual configure() method of the nested projector is
@@ -141,6 +143,32 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
 void ArealFocalSpotExtension::setDiscretization(const QSize& discretization)
 {
     _discretizationSteps = discretization;
+}
+
+// Use SerializationInterface::fromVariant() documentation.
+void ArealFocalSpotExtension::fromVariant(const QVariant& variant)
+{
+    ProjectorExtension::fromVariant(variant);
+
+    QVariantMap map = variant.toMap();
+    QVariantList discretization = map.value("discretization steps", QVariantList{1, 1}).toList();
+    _discretizationSteps.setWidth(discretization.at(0).toInt());
+    _discretizationSteps.setHeight(discretization.at(1).toInt());
+}
+
+// Use SerializationInterface::toVariant() documentation.
+QVariant ArealFocalSpotExtension::toVariant() const
+{
+    QVariantMap ret = ProjectorExtension::toVariant().toMap();
+
+    QVariantList discretization;
+    discretization.append(_discretizationSteps.width());
+    discretization.append(_discretizationSteps.height());
+
+    ret.insert("#", "ArealFocalSpotExtension");
+    ret.insert("discretization steps", discretization);
+
+    return ret;
 }
 
 /*!

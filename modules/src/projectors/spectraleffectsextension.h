@@ -9,6 +9,8 @@ namespace CTL {
 
 class SpectralEffectsExtension : public ProjectorExtension
 {
+    CTL_TYPE_ID(104)
+
 public:
     using ProjectorExtension::ProjectorExtension;
     SpectralEffectsExtension() = default;
@@ -19,6 +21,10 @@ public:
 
     ProjectionData projectComposite(const CompositeVolume& volume) override;
     bool isLinear() const override;
+
+    // SerializationInterface interface
+    void fromVariant(const QVariant &variant) override;
+    QVariant toVariant() const override;
 
     void setSpectralSamplingResolution(float energyBinWidth);
 

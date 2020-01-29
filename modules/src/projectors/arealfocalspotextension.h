@@ -65,11 +65,17 @@ namespace CTL {
  */
 class ArealFocalSpotExtension : public ProjectorExtension
 {
+    CTL_TYPE_ID(101)
+
 public:
     using ProjectorExtension::ProjectorExtension;
 
     void configure(const AcquisitionSetup& setup) override;
     void setDiscretization(const QSize& discretization);
+
+    // SerializationInterface interface
+    void fromVariant(const QVariant &variant) override;
+    QVariant toVariant() const override;
 
 protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
