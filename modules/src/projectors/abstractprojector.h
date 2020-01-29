@@ -4,6 +4,7 @@
 #include "img/compositevolume.h"
 #include "img/projectiondata.h"
 #include "img/voxelvolume.h"
+#include "io/serializationinterface.h"
 
 #include <QObject>
 #include <memory>
@@ -67,8 +68,10 @@ signals:
     void projectionFinished(int viewNb);
 };
 
-class AbstractProjector
+class AbstractProjector : public SerializationInterface
 {
+    CTL_TYPE_ID(0)
+
     // abstract interface
     public:virtual void configure(const AcquisitionSetup& setup) = 0;
     public:virtual ProjectionData project(const VolumeData& volume) = 0;
