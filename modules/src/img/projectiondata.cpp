@@ -1,7 +1,5 @@
 #include "projectiondata.h"
-#include <thread>
-
-static const uint OPTIMAL_NB_THREADS = std::max({ 1u, std::thread::hardware_concurrency() });
+#include "processing/threadpool.h"
 
 namespace CTL
 {
@@ -245,10 +243,9 @@ void ProjectionData::transformToExtinction(double i0)
     if(totalViews == 0u)
         return;
 
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    ThreadPool tp;
+    const auto nbThreads = tp.nbThreads();
     const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::thread> threads;
-    threads.reserve(nbThreads);
 
     auto threadTask = [this, i0] (uint begin, uint end)
     {
@@ -258,12 +255,9 @@ void ProjectionData::transformToExtinction(double i0)
 
     uint t = 0;
     for(; t < nbThreads-1; ++t)
-        threads.emplace_back(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
     // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    threads.emplace_back(threadTask, t * viewsPerThread, totalViews);
-
-    // wait for finished
-    std::for_each(threads.begin(), threads.end(), [](std::thread& t) { t.join(); });
+    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
 }
 
 /*!
@@ -280,10 +274,9 @@ void ProjectionData::transformToExtinction(const std::vector<double>& viewDepend
     if(totalViews == 0u)
         return;
 
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    ThreadPool tp;
+    const auto nbThreads = tp.nbThreads();
     const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::thread> threads;
-    threads.reserve(nbThreads);
 
     auto threadTask = [this, &viewDependentI0] (uint begin, uint end)
     {
@@ -293,12 +286,9 @@ void ProjectionData::transformToExtinction(const std::vector<double>& viewDepend
 
     uint t = 0;
     for(; t < nbThreads-1; ++t)
-        threads.emplace_back(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
     // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    threads.emplace_back(threadTask, t * viewsPerThread, totalViews);
-
-    // wait for finished
-    std::for_each(threads.begin(), threads.end(), [](std::thread& t) { t.join(); });
+    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
 }
 
 /*!
@@ -328,10 +318,9 @@ void ProjectionData::transformToCounts(double n0)
     if(totalViews == 0u)
         return;
 
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    ThreadPool tp;
+    const auto nbThreads = tp.nbThreads();
     const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::thread> threads;
-    threads.reserve(nbThreads);
 
     auto threadTask = [this, n0] (uint begin, uint end)
     {
@@ -341,12 +330,9 @@ void ProjectionData::transformToCounts(double n0)
 
     uint t = 0;
     for(; t < nbThreads-1; ++t)
-        threads.emplace_back(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
     // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    threads.emplace_back(threadTask, t * viewsPerThread, totalViews);
-
-    // wait for finished
-    std::for_each(threads.begin(), threads.end(), [](std::thread& t) { t.join(); });
+    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
 }
 
 /*!
@@ -376,10 +362,9 @@ void ProjectionData::transformToCounts(const std::vector<double>& viewDependentN
     if(totalViews == 0u)
         return;
 
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    ThreadPool tp;
+    const auto nbThreads = tp.nbThreads();
     const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::thread> threads;
-    threads.reserve(nbThreads);
 
     auto threadTask = [this, &viewDependentN0] (uint begin, uint end)
     {
@@ -389,12 +374,9 @@ void ProjectionData::transformToCounts(const std::vector<double>& viewDependentN
 
     uint t = 0;
     for(; t < nbThreads-1; ++t)
-        threads.emplace_back(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
     // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    threads.emplace_back(threadTask, t * viewsPerThread, totalViews);
-
-    // wait for finished
-    std::for_each(threads.begin(), threads.end(), [](std::thread& t) { t.join(); });
+    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
 }
 
 bool ProjectionData::operator==(const ProjectionData &other) const
@@ -475,10 +457,9 @@ ProjectionData& ProjectionData::operator += (const ProjectionData& other)
     if(totalViews == 0u)
         return *this;
 
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    ThreadPool tp;
+    const auto nbThreads = tp.nbThreads();
     const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::thread> threads;
-    threads.reserve(nbThreads);
 
     auto threadTask = [this, &other] (uint begin, uint end)
     {
@@ -488,12 +469,9 @@ ProjectionData& ProjectionData::operator += (const ProjectionData& other)
 
     uint t = 0;
     for(; t < nbThreads-1; ++t)
-        threads.emplace_back(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
     // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    threads.emplace_back(threadTask, t * viewsPerThread, totalViews);
-
-    // wait for finished
-    std::for_each(threads.begin(), threads.end(), [](std::thread& t) { t.join(); });
+    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
 
     return *this;
 }
@@ -512,10 +490,9 @@ ProjectionData& ProjectionData::operator -= (const ProjectionData& other)
     if(totalViews == 0u)
         return *this;
 
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
+    ThreadPool tp;
+    const auto nbThreads = tp.nbThreads();
     const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::thread> threads;
-    threads.reserve(nbThreads);
 
     auto threadTask = [this, &other] (uint begin, uint end)
     {
@@ -525,12 +502,9 @@ ProjectionData& ProjectionData::operator -= (const ProjectionData& other)
 
     uint t = 0;
     for(; t < nbThreads-1; ++t)
-        threads.emplace_back(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
+        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
     // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    threads.emplace_back(threadTask, t * viewsPerThread, totalViews);
-
-    // wait for finished
-    std::for_each(threads.begin(), threads.end(), [](std::thread& t) { t.join(); });
+    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
 
     return *this;
 }
