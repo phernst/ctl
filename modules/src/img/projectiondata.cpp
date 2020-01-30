@@ -87,7 +87,7 @@ float ProjectionData::max() const
     if(nbViews() == 0)
         return 0.0f;
 
-    float tmpMax = view(0).max();
+    auto tmpMax = view(0).max();
 
     float locMax;
     for(auto vi = 1u, total = nbViews(); vi < total; ++vi)
@@ -110,7 +110,7 @@ float ProjectionData::min() const
     if(nbViews() == 0)
         return 0.0f;
 
-    float tmpMin = view(0).min();
+    auto tmpMin = view(0).min();
 
     float locMin;
     for(auto vi = 1u, total = nbViews(); vi < total; ++vi)
@@ -177,7 +177,7 @@ ProjectionData ProjectionData::combined(const ModuleLayout& layout) const
                                                       _viewDim.nbRows * layout.rows() };
     ProjectionData ret(moduleDim.width, moduleDim.height, 1);
 
-    for(uint view = 0, nbViews = this->nbViews(); view < nbViews; ++view)
+    for(auto view = 0u, nbViews = this->nbViews(); view < nbViews; ++view)
     {
         SingleViewData viewData(moduleDim);
         viewData.append(_data[view].combined(layout));
@@ -244,7 +244,7 @@ void ProjectionData::transformToExtinction(double i0)
 
     auto threadTask = [this, i0] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view].transformToExtinction(i0);
     };
 
@@ -266,7 +266,7 @@ void ProjectionData::transformToExtinction(const std::vector<double>& viewDepend
 
     auto threadTask = [this, &viewDependentI0] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view].transformToExtinction(viewDependentI0[view]);
     };
 
@@ -301,7 +301,7 @@ void ProjectionData::transformToCounts(double n0)
 
     auto threadTask = [this, n0] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view].transformToCounts(n0);
     };
 
@@ -336,7 +336,7 @@ void ProjectionData::transformToCounts(const std::vector<double>& viewDependentN
 
     auto threadTask = [this, &viewDependentN0] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view].transformToCounts(viewDependentN0[view]);
     };
 
@@ -348,7 +348,7 @@ bool ProjectionData::operator==(const ProjectionData &other) const
     if(dimensions() != other.dimensions())
         return false;
 
-    for(uint v = 0; v < nbViews(); ++v)
+    for(auto v = 0u; v < nbViews(); ++v)
         if(view(v) != other.view(v))
             return false;
 
@@ -360,7 +360,7 @@ bool ProjectionData::operator!=(const ProjectionData &other) const
     if(dimensions() != other.dimensions())
         return true;
 
-    for(uint v = 0; v < nbViews(); ++v)
+    for(auto v = 0u; v < nbViews(); ++v)
         if(view(v) != other.view(v))
             return true;
 
@@ -422,7 +422,7 @@ ProjectionData& ProjectionData::operator += (const ProjectionData& other)
 
     auto threadTask = [this, &other] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view] += other._data[view];
     };
 
@@ -446,7 +446,7 @@ ProjectionData& ProjectionData::operator -= (const ProjectionData& other)
 
     auto threadTask = [this, &other] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view] -= other._data[view];
     };
 
@@ -639,11 +639,11 @@ void ProjectionData::parallelExecution(const Function& f) const
     ThreadPool tp;
     const auto nbThreads = tp.nbThreads();
     const auto totalViews = nbViews();
-    const uint viewsPerThread = totalViews / nbThreads;
+    const auto viewsPerThread = static_cast<uint>(totalViews / nbThreads);
 
     auto t = 0u;
-    for(; t < nbThreads-1; ++t)
-        tp.enqueueThread(f, t * viewsPerThread, (t+1) * viewsPerThread);
+    for(; t < nbThreads - 1; ++t)
+        tp.enqueueThread(f, t * viewsPerThread, (t + 1) * viewsPerThread);
     // last thread does the rest (viewsPerThread + x, with x < nbThreads)
     tp.enqueueThread(f, t * viewsPerThread, totalViews);
 }
