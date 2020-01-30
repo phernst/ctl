@@ -131,7 +131,6 @@ bool StandardPipeline::isLinear() const
 
 void StandardPipeline::fromVariant(const QVariant& variant)
 {
-
     AbstractProjector::fromVariant(variant);
 
     QVariantMap map = variant.toMap();
@@ -141,17 +140,12 @@ void StandardPipeline::fromVariant(const QVariant& variant)
     enablePoissonNoise(false);
     enableSpectralEffects(false);
 
-    delete _extAFS;
-    delete _extDetSat;
-    delete _extPoisson;
-    delete _extSpectral;
-
     _pipeline.setProjector(SerializationHelper::parseProjector(map.value("projector")));
 
-    _extAFS      = static_cast<ArealFocalSpotExtension*>(SerializationHelper::parseProjector(map.value("ext AFS")));
-    _extDetSat   = static_cast<DetectorSaturationExtension*>(SerializationHelper::parseProjector(map.value("ext DetSat")));
-    _extPoisson  = static_cast<PoissonNoiseExtension*>(SerializationHelper::parseProjector(map.value("ext Poisson")));
-    _extSpectral = static_cast<SpectralEffectsExtension*>(SerializationHelper::parseProjector(map.value("ext spectral")));
+    _extAFS->fromVariant(map.value("ext AFS"));
+    _extDetSat->fromVariant(map.value("ext DetSat"));
+    _extPoisson->fromVariant(map.value("ext Poisson"));
+    _extSpectral->fromVariant(map.value("ext spectral"));
 
     enableArealFocalSpot(map.value("use areal focal spot").toBool());
     enableDetectorSaturation(map.value("use detector saturation").toBool());
