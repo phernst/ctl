@@ -47,7 +47,7 @@ void StandardPipeline::enableDetectorSaturation(bool enable)
     if(enable) // insert det. sat. into pipeline (last position)
         _pipeline.appendExtension(_extDetSat);
     else // remove det. sat. from pipeline (last position)
-        _pipeline.releaseExtension(_pipeline.nbExtensions());
+        _pipeline.releaseExtension(_pipeline.nbExtensions() - 1u);
 
     _detSatEnabled = enable;
 }
