@@ -134,9 +134,10 @@ std::vector<float> SingleViewData::toVector() const
  */
 void SingleViewData::transformToExtinction(double i0orN0)
 {
+    const auto i0orN0f = static_cast<float>(i0orN0);
     for(auto& chunk : _data)
         for(auto& pix : chunk.data())
-            pix = std::log(i0orN0/pix);
+            pix = std::log(i0orN0f/pix);
 }
 
 /*!
@@ -149,9 +150,10 @@ void SingleViewData::transformToExtinction(double i0orN0)
  */
 void SingleViewData::transformToIntensity(double i0)
 {
+    const auto i0f = static_cast<float>(i0);
     for(auto& chunk : _data)
         for(auto& pix : chunk.data())
-            pix = i0 * std::exp(-pix);
+            pix = i0f * std::exp(-pix);
 }
 
 /*!
@@ -164,9 +166,10 @@ void SingleViewData::transformToIntensity(double i0)
  */
 void SingleViewData::transformToCounts(double n0)
 {
+    const auto n0f = static_cast<float>(n0);
     for(auto& chunk : _data)
         for(auto& pix : chunk.data())
-            pix = n0 * std::exp(-pix);
+            pix = n0f * std::exp(-pix);
 }
 
 bool SingleViewData::operator==(const SingleViewData &other) const
@@ -316,10 +319,10 @@ float SingleViewData::max() const
     if(nbModules() == 0)
         return 0.0f;
 
-    float tmpMax = module(0).max();
+    auto tmpMax = module(0).max();
 
     float locMax;
-    for(int mod = 1, total = nbModules(); mod < total; ++mod)
+    for(auto mod = 1u, total = nbModules(); mod < total; ++mod)
     {
         locMax = module(mod).max();
         if(locMax > tmpMax)
@@ -339,10 +342,10 @@ float SingleViewData::min() const
     if(nbModules() == 0)
         return 0.0f;
 
-    float tmpMin = module(0).min();
+    auto tmpMin = module(0).min();
 
     float locMin;
-    for(int mod = 1, total = nbModules(); mod < total; ++mod)
+    for(auto mod = 1u, total = nbModules(); mod < total; ++mod)
     {
         locMin = module(mod).min();
         if(locMin < tmpMin)
