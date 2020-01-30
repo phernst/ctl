@@ -239,13 +239,8 @@ std::vector<float> ProjectionData::toVector() const
  */
 void ProjectionData::transformToExtinction(double i0)
 {
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return;
-
-    ThreadPool tp;
-    const auto nbThreads = tp.nbThreads();
-    const uint viewsPerThread = totalViews / nbThreads;
 
     auto threadTask = [this, i0] (uint begin, uint end)
     {
@@ -253,11 +248,7 @@ void ProjectionData::transformToExtinction(double i0)
             _data[view].transformToExtinction(i0);
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 }
 
 /*!
@@ -270,13 +261,8 @@ void ProjectionData::transformToExtinction(double i0)
  */
 void ProjectionData::transformToExtinction(const std::vector<double>& viewDependentI0)
 {
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return;
-
-    ThreadPool tp;
-    const auto nbThreads = tp.nbThreads();
-    const uint viewsPerThread = totalViews / nbThreads;
 
     auto threadTask = [this, &viewDependentI0] (uint begin, uint end)
     {
@@ -284,11 +270,7 @@ void ProjectionData::transformToExtinction(const std::vector<double>& viewDepend
             _data[view].transformToExtinction(viewDependentI0[view]);
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 }
 
 /*!
@@ -314,13 +296,8 @@ void ProjectionData::transformToIntensity(double i0)
  */
 void ProjectionData::transformToCounts(double n0)
 {   
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return;
-
-    ThreadPool tp;
-    const auto nbThreads = tp.nbThreads();
-    const uint viewsPerThread = totalViews / nbThreads;
 
     auto threadTask = [this, n0] (uint begin, uint end)
     {
@@ -328,11 +305,7 @@ void ProjectionData::transformToCounts(double n0)
             _data[view].transformToCounts(n0);
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 }
 
 /*!
@@ -358,13 +331,8 @@ void ProjectionData::transformToIntensity(const std::vector<double>& viewDepende
  */
 void ProjectionData::transformToCounts(const std::vector<double>& viewDependentN0)
 {
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return;
-
-    ThreadPool tp;
-    const auto nbThreads = tp.nbThreads();
-    const uint viewsPerThread = totalViews / nbThreads;
 
     auto threadTask = [this, &viewDependentN0] (uint begin, uint end)
     {
@@ -372,11 +340,7 @@ void ProjectionData::transformToCounts(const std::vector<double>& viewDependentN
             _data[view].transformToCounts(viewDependentN0[view]);
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 }
 
 bool ProjectionData::operator==(const ProjectionData &other) const
@@ -453,13 +417,8 @@ ProjectionData& ProjectionData::operator += (const ProjectionData& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("ProjectionData requires same dimensions for '+' operation:\n" +
                                 dimensions().info() + " += " + other.dimensions().info());
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return *this;
-
-    ThreadPool tp;
-    const auto nbThreads = tp.nbThreads();
-    const uint viewsPerThread = totalViews / nbThreads;
 
     auto threadTask = [this, &other] (uint begin, uint end)
     {
@@ -467,11 +426,7 @@ ProjectionData& ProjectionData::operator += (const ProjectionData& other)
             _data[view] += other._data[view];
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -486,13 +441,8 @@ ProjectionData& ProjectionData::operator -= (const ProjectionData& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("ProjectionData requires same dimensions for '-' operation:\n" +
                                 dimensions().info() + " -= " + other.dimensions().info());
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return *this;
-
-    ThreadPool tp;
-    const auto nbThreads = tp.nbThreads();
-    const uint viewsPerThread = totalViews / nbThreads;
 
     auto threadTask = [this, &other] (uint begin, uint end)
     {
@@ -500,11 +450,7 @@ ProjectionData& ProjectionData::operator -= (const ProjectionData& other)
             _data[view] -= other._data[view];
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        tp.enqueueThread(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    tp.enqueueThread(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -685,6 +631,21 @@ const SingleViewData& ProjectionData::view(uint i) const
 SingleViewData::Dimensions ProjectionData::viewDimensions() const
 {
     return _viewDim;
+}
+
+template<class Function>
+void ProjectionData::parallelExecution(const Function& f) const
+{
+    ThreadPool tp;
+    const auto nbThreads = tp.nbThreads();
+    const auto totalViews = nbViews();
+    const uint viewsPerThread = totalViews / nbThreads;
+
+    auto t = 0u;
+    for(; t < nbThreads-1; ++t)
+        tp.enqueueThread(f, t * viewsPerThread, (t+1) * viewsPerThread);
+    // last thread does the rest (viewsPerThread + x, with x < nbThreads)
+    tp.enqueueThread(f, t * viewsPerThread, totalViews);
 }
 
 } // namespace CTL

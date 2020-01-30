@@ -89,6 +89,8 @@ protected:
 
 private:
     bool hasEqualSizeAs(const SingleViewData& other) const;
+    template <class Function>
+    void parallelExecution(const Function& f) const;
 };
 
 /*!
