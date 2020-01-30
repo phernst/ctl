@@ -8,14 +8,17 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(StandardPipeline)
+
 StandardPipeline::StandardPipeline()
 {
-    _pipeline.setProjector(makeProjector<OCL::RayCasterProjector>());
-
     _extAFS      = new ArealFocalSpotExtension;
     _extDetSat   = new DetectorSaturationExtension;
     _extPoisson  = new PoissonNoiseExtension;
     _extSpectral = new SpectralEffectsExtension;
+
+    _projector   = new OCL::RayCasterProjector;
+    _pipeline.setProjector(_projector);
 }
 
 StandardPipeline::~StandardPipeline()
@@ -124,6 +127,55 @@ ProjectionData StandardPipeline::project(const VolumeData& volume)
 bool StandardPipeline::isLinear() const
 {
     return _pipeline.isLinear();
+}
+
+void StandardPipeline::fromVariant(const QVariant& variant)
+{
+
+    AbstractProjector::fromVariant(variant);
+
+    QVariantMap map = variant.toMap();
+
+    enableArealFocalSpot(false);
+    enableDetectorSaturation(false);
+    enablePoissonNoise(false);
+    enableSpectralEffects(false);
+
+    delete _extAFS;
+    delete _extDetSat;
+    delete _extPoisson;
+    delete _extSpectral;
+
+    _pipeline.setProjector(SerializationHelper::parseProjector(map.value("projector")));
+
+    _extAFS      = static_cast<ArealFocalSpotExtension*>(SerializationHelper::parseProjector(map.value("ext AFS")));
+    _extDetSat   = static_cast<DetectorSaturationExtension*>(SerializationHelper::parseProjector(map.value("ext DetSat")));
+    _extPoisson  = static_cast<PoissonNoiseExtension*>(SerializationHelper::parseProjector(map.value("ext Poisson")));
+    _extSpectral = static_cast<SpectralEffectsExtension*>(SerializationHelper::parseProjector(map.value("ext spectral")));
+
+    enableArealFocalSpot(map.value("use areal focal spot").toBool());
+    enableDetectorSaturation(map.value("use detector saturation").toBool());
+    enablePoissonNoise(map.value("use poisson noise").toBool());
+    enableSpectralEffects(map.value("use spectral effects").toBool());
+}
+
+QVariant StandardPipeline::toVariant() const
+{
+    QVariantMap ret = AbstractProjector::toVariant().toMap();
+
+    ret.insert("#", "StandardPipeline");
+    ret.insert("use areal focal spot", _arealFSEnabled);
+    ret.insert("use detector saturation", _detSatEnabled);
+    ret.insert("use poisson noise", _poissonEnabled);
+    ret.insert("use spectral effects", _spectralEffEnabled);
+
+    ret.insert("projector", _projector->toVariant());
+    ret.insert("ext AFS", _extAFS->toVariant());
+    ret.insert("ext DetSat", _extDetSat->toVariant());
+    ret.insert("ext Poisson", _extPoisson->toVariant());
+    ret.insert("ext spectral", _extSpectral->toVariant());
+
+    return ret;
 }
 
 
