@@ -172,5 +172,4 @@ QVariant StandardPipeline::toVariant() const
     return ret;
 }
 
-
-}
+} // namespace CTL
