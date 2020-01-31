@@ -46,6 +46,8 @@ public:
     ProjectionData project(const VolumeData& volume) override;
     ProjectionData projectComposite(const CompositeVolume& volume) override;
     bool isLinear() const override;
+    virtual void use(AbstractProjector* other);
+    virtual void use(std::unique_ptr<AbstractProjector> other);
 
     // SerializationInterface interface
     void fromVariant(const QVariant &variant) override;
@@ -54,8 +56,6 @@ public:
     // other methods
     AbstractProjector* release();
     void reset();
-    void use(AbstractProjector* other);
-    void use(std::unique_ptr<AbstractProjector> other);
 
 protected:
     virtual ProjectionData extendedProject(const MetaProjector& nestedProjector);
