@@ -28,7 +28,7 @@ void ProjectionPipeline::fromVariant(const QVariant& variant)
     QVariant projVar = map.value("projector");
     setProjector(projVar.isNull() ? nullptr : SerializationHelper::parseProjector(projVar));
 
-    QVariantList extList = map.value("extensions").toList();
+    const QVariantList extList = map.value("extensions").toList();
     for(const auto& ext : extList)
     {
         if(!ext.isNull())
@@ -62,84 +62,79 @@ ProjectionPipeline::ProjectionPipeline()
 
 void ProjectionPipeline::appendExtension(ProjectorExtension *extension)
 {
-    // add pointer to extension list
-    _extensions.push_back(extension);
+    try {
+        // extend projector with new extension
+        _finalProjector |= extension;
 
-    // extend projector with new extension
-    _finalProjector |= extension;
+        // add pointer to extension list
+        _extensions.push_back(extension);
+    } catch (...) {
+        delete extension;
+        qCritical() << "Appending extension failed. Deleted extension object.";
+        throw;
+    }
 }
 
 void ProjectionPipeline::insertExtension(uint pos, ProjectorExtension* extension)
 {
     qDebug() << "ProjectionPipeline::insertExtension at pos " << pos;
 
-    uint oldNbExt = nbExtensions();
-    // append case
-    if(pos >= oldNbExt)
-        pos = oldNbExt; // end position
+    const auto oldNbExt = nbExtensions();
 
-    ProjectorExtension* tmpProj = _finalProjector.release();
+    if(pos >= oldNbExt) // append case
+    {
+        appendExtension(extension);
+        return;
+    }
 
-    // temporarily remove all extensions up to position 'pos'
-    for(uint ext = 0; ext < oldNbExt - pos; ++ext)
-        tmpProj = static_cast<ProjectorExtension*>(tmpProj->release());
+    // temporarily remove all extensions (from the back) up to position 'pos'
+    stashExtensions(oldNbExt - pos);
 
     // insert new extension
-    _extensions.insert(_extensions.begin() + pos, extension);
-    pipe(tmpProj, extension);
+    try {
+        _finalProjector |= extension;
+        _extensions.insert(_extensions.begin() + pos, extension);
+    } catch (...) {
+        delete extension;
+        restoreExtensions(oldNbExt - pos);
+        qCritical() << "Insertion of extension failed. Deleted extension object.";
+        throw;
+    }
 
-    // reinstantiate all extensions
-    for(uint ext = pos + 1; ext < nbExtensions(); ++ext)
-        pipe(tmpProj, _extensions[ext]);
-
-    // set final projector to finished object
-    _finalProjector.reset(tmpProj);
+    // restore all extensions
+    restoreExtensions(oldNbExt - pos);
 }
 
 void ProjectionPipeline::setProjector(AbstractProjector* projector)
 {
     qDebug() << "ProjectionPipeline::setProjector";
 
-    ProjectorExtension* tmpProj = _finalProjector.get();
-
-    // temporarily remove all extensions
-    for(uint ext = 0; ext < nbExtensions(); ++ext)
-        tmpProj = static_cast<ProjectorExtension*>(tmpProj->release());
+    const auto nbExt = nbExtensions();
+    stashExtensions(nbExt);
 
     // replace projector step
     _projector = projector;
-    tmpProj->use(projector);
+    _finalProjector->use(projector);
 
-    // reinstantiate all extensions
-    for(uint ext = 0; ext < nbExtensions(); ++ext)
-        pipe(tmpProj, _extensions[ext]);
+    restoreExtensions(nbExt);
 }
 
 ProjectorExtension* ProjectionPipeline::releaseExtension(uint pos)
 {
     qDebug() << "ProjectionPipeline::releaseExtension at pos " << pos;
 
-    uint oldNbExt = nbExtensions();
+    const auto oldNbExt = nbExtensions();
     if(pos >= oldNbExt)
         throw std::domain_error("ProjectionPipeline::releaseExtension: Trying to release extension "
                                 "at an out-of-range position.");
 
-    ProjectorExtension* tmpProj = _finalProjector.release();
-
-    // temporarily remove all extensions up to position 'pos'
-    for(uint ext = 0; ext < oldNbExt - pos; ++ext)
-        tmpProj = static_cast<ProjectorExtension*>(tmpProj->release());
+    stashExtensions(oldNbExt - pos);
 
     // catch released extension pointer and remove extension from list
     ProjectorExtension* ret = _extensions[pos];
     _extensions.erase(_extensions.begin() + pos);
 
-    // reinstantiate all remaining extensions
-    for(uint ext = pos; ext < _extensions.size(); ++ext)
-        pipe(tmpProj, _extensions[ext]);
-
-    // set final projector to finished object
-    _finalProjector.reset(tmpProj);
+    restoreExtensions(oldNbExt - pos - 1);
 
     return ret;
 }
@@ -181,4 +176,31 @@ uint ProjectionPipeline::nbExtensions() const
     return _extensions.size();
 }
 
+void ProjectionPipeline::stashExtensions(uint nbExt)
+{
+    ProjectorExtension* tmpProj = _finalProjector.release();
+
+    // stash all extensions up to position 'pos'
+    const auto fullNbExt = nbExtensions();
+    for(auto i = 0u; i < nbExt; ++i)
+        tmpProj = static_cast<ProjectorExtension*>(tmpProj->release());
+
+    // set final projector to finished object
+    _finalProjector.reset(tmpProj);
 }
+
+void ProjectionPipeline::restoreExtensions(uint nbExt)
+{
+    ProjectorExtension* tmpProj = _finalProjector.release();
+
+    // restore 'nbExt' extensions
+    const auto fullNbExt = nbExtensions();
+    const auto startPos = fullNbExt - nbExt;
+    for(auto ext = startPos; ext < fullNbExt; ++ext)
+        pipe(tmpProj, _extensions[ext]);
+
+    // set final projector to finished object
+    _finalProjector.reset(tmpProj);
+}
+
+} // namespace CTL

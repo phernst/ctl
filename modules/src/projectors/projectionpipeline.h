@@ -41,6 +41,8 @@ private:
     AbstractProjector* _projector;
     std::vector<ProjectorExtension*> _extensions;
 
+    void stashExtensions(uint nbExt);
+    void restoreExtensions(uint nbExt);
 };
 
 }
