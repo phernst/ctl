@@ -7,7 +7,6 @@ DEFINES += QT_NO_DEBUG_OUTPUT
 
 SOURCES += main.cpp
 
+# CTL modules
 include(../../modules/ctl.pri)
-include(../../modules/nrrd_file_io.pri)
-include(../../modules/ocl_config.pri)
-include(../../modules/ocl_projectors.pri)
+include(../../modules/ctl_ocl.pri)

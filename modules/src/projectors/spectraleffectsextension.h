@@ -1,5 +1,5 @@
-#ifndef SPECTRALPROJECTOREXTENSION_H
-#define SPECTRALPROJECTOREXTENSION_H
+#ifndef SPECTRALEFFECTSEXTENSION_H
+#define SPECTRALEFFECTSEXTENSION_H
 
 #include "projectorextension.h"
 #include "abstractprojectorconfig.h"
@@ -7,12 +7,12 @@
 
 namespace CTL {
 
-class SpectralProjectorExtension : public ProjectorExtension
+class SpectralEffectsExtension : public ProjectorExtension
 {
 public:
     using ProjectorExtension::ProjectorExtension;
-    SpectralProjectorExtension() = default;
-    explicit SpectralProjectorExtension(float energyBinWidth);
+    SpectralEffectsExtension() = default;
+    explicit SpectralEffectsExtension(float energyBinWidth);
 
     void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
     ProjectionData project(const VolumeData& volume) override;
@@ -29,8 +29,8 @@ private:
         std::vector<std::vector<double>> adjustedFluxMods;
         std::vector<double> totalIntensities;
         std::vector<float> energyBins;
-        float binWidth;
-        uint nbSamples = 0;
+        float binWidth{};
+        uint nbSamples{};
     };
 
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
@@ -39,9 +39,10 @@ private:
     float _deltaE = 0.0f;   
 
     void updateSpectralInformation();
+    void applyDetectorResponse(ProjectionData& intensity, float energy) const;
 };
 
 
 } // namespace CTL
 
-#endif // SPECTRALPROJECTOREXTENSION_H
+#endif // SPECTRALEFFECTSEXTENSION_H

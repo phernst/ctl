@@ -86,7 +86,7 @@ class CTsystem : public SerializationInterface
 public:
     typedef std::unique_ptr<SystemComponent> ComponentPtr; //!< Alias for unique pointer to SystemComponent
 
-    CTsystem(const QString& name = defaultName());
+    CTsystem(QString name = defaultName());
     CTsystem(const CTsystem& other);
     CTsystem(CTsystem&& other) = default;
     CTsystem& operator=(CTsystem&& other) = default;

@@ -8,41 +8,18 @@
 namespace CTL {
 namespace mat {
 
-// # converter and maker functions
-
 // conversion of the Matrix content to a QVector
 template <uint Rows, uint Cols>
 QVector<double> toQVector(const Matrix<Rows, Cols>& matrix);
 
-// rotation matrix
+// rotation matrix and related
 Matrix3x3 rotationMatrix(double angle, Qt::Axis axis);
+Matrix3x3 rotationMatrix(double angle, const Vector3x1& axis);
+Matrix3x3 rotationMatrix(const Vector3x1& axis) noexcept;
+Vector3x1 rotationAxis(const Matrix3x3& rotMat, bool lengthEqualsAngle = true);
+double rotationAngle(const Matrix3x3& rotMat);
 
-// diagonal squared matrix
-template <uint N>
-Matrix<N, N> diag(const Matrix<N, 1>& diagElements);
-
-// NxN identity matrix
-template <uint N>
-Matrix<N, N> eye();
-
-// cross product
-Vector3x1 cross(const Vector3x1& l, const Vector3x1& r);
-
-// concatenation
-template <uint Rows, uint Cols1, uint Cols2>
-Matrix<Rows, Cols1 + Cols2> horzcat(const Matrix<Rows, Cols1>& m1, const Matrix<Rows, Cols2>& m2);
-
-template <uint Rows1, uint Rows2, uint Cols>
-Matrix<Rows1 + Rows2, Cols> vertcat(const Matrix<Rows1, Cols>& m1, const Matrix<Rows2, Cols>& m2);
-
-// # structs
-
-struct PairMat3x3
-{
-    Matrix3x3 Q;
-    Matrix3x3 R;
-};
-
+// # CTL helper struct
 struct Location
 {
     Vector3x1 position = Vector3x1(0.0);

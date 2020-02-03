@@ -2,7 +2,7 @@
 #define DETECTORSATURATIONMODELS_H
 
 #include "abstractdatamodel.h"
-#include <float.h>
+#include <cfloat>
 
 namespace CTL {
 

@@ -16,13 +16,14 @@ Chunk2D<T>::Chunk2D(const Dimensions& dimensions)
 }
 
 /*!
- * Constructs a Chunk2D with dimensions of \a dimensions and fills it with \a fillValue.
+ * Constructs a Chunk2D with dimensions of \a dimensions and fills it with \a initValue.
  *
  * This constructor allocates memory for all elements.
  */
 template <typename T>
-Chunk2D<T>::Chunk2D(const Dimensions& dimensions, const T& fillValue)
-    : Chunk2D(dimensions, std::vector<T>(size_t(dimensions.height) * dimensions.width, fillValue))
+Chunk2D<T>::Chunk2D(const Dimensions& dimensions, const T& initValue)
+    : _dim(dimensions)
+    , _data(size_t(dimensions.height) * dimensions.width, initValue)
 {
 }
 
@@ -68,13 +69,14 @@ Chunk2D<T>::Chunk2D(uint width, uint height)
 }
 
 /*!
- * Constructs a Chunk2D with dimensions of (\a width x \a height) and fills it with \a fillValue.
+ * Constructs a Chunk2D with dimensions of (\a width x \a height) and fills it with \a initValue.
  *
  * This constructor allocates memory for all elements.
  */
 template <typename T>
-Chunk2D<T>::Chunk2D(uint width, uint height, const T& fillValue)
-    : Chunk2D(width, height, std::vector<T>(size_t(height) * width, fillValue))
+Chunk2D<T>::Chunk2D(uint width, uint height, const T& initValue)
+    : _dim({ width, height })
+    , _data(size_t(height) * width, initValue)
 {
 }
 
@@ -462,12 +464,24 @@ void Chunk2D<T>::fill(const T& fillValue)
     std::fill(_data.begin(), _data.end(), fillValue);
 }
 
+/*
+ * Deletes the data of the chunk.
+ *
+ * \sa allocateMemory()
+ */
+template<typename T>
+void Chunk2D<T>::freeMemory()
+{
+    _data.clear();
+    _data.shrink_to_fit();
+}
+
 /*!
  * Returns a reference to the element at position (\a x, \a y) or (column, row).
  * Does not perform boundary checks!
  */
 template <typename T>
-T& Chunk2D<T>::operator()(uint x, uint y)
+typename std::vector<T>::reference Chunk2D<T>::operator()(uint x, uint y)
 {
     Q_ASSERT((y * _dim.width + x) < allocatedElements());
     return _data[y * _dim.width + x];
@@ -478,7 +492,7 @@ T& Chunk2D<T>::operator()(uint x, uint y)
  * Does not perform boundary checks!
  */
 template <typename T>
-const T& Chunk2D<T>::operator()(uint x, uint y) const
+typename std::vector<T>::const_reference Chunk2D<T>::operator()(uint x, uint y) const
 {
     Q_ASSERT((y * _dim.width + x) < allocatedElements());
     return _data[y * _dim.width + x];
@@ -513,6 +527,18 @@ template <typename T>
 void Chunk2D<T>::allocateMemory()
 {
     _data.resize(nbElements());
+}
+
+/*!
+ * Enforces memory allocation and if the current number of allocated elements is less than the
+ * number of elements in the chunk, additional copies of \a initValue are appended.
+ *
+ * \sa allocatedElements(), allocateMemory(), fill().
+ */
+template <typename T>
+void Chunk2D<T>::allocateMemory(const T& initValue)
+{
+    _data.resize(nbElements(), initValue);
 }
 
 } // namespace CTL

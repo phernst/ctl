@@ -497,7 +497,7 @@ ProjectionData::Dimensions BaseTypeIO<FileIOImplementer>::dimensionsFromMetaInfo
 
         // check if nb. projs is multiple of nbModules
         if(totalBlocks % nbModules)
-            throw std::runtime_error("Aborted loading: Number of projections in file is not a"
+            throw std::runtime_error("Aborted loading: Number of projections in file is not a "
                                      "multiple of the specified number of modules!");
 
         nbViews = totalBlocks / nbModules;

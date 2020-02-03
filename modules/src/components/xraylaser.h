@@ -5,7 +5,7 @@
 
 namespace CTL {
 
-const double ELEC_VOLT = 1.6021766208e-19; // in Joule (=Ws)
+constexpr double ELEC_VOLT = 1.6021766208e-19; // in Joule (=Ws)
 
 /*!
  * \brief The XrayLaser class represents source components that emit monoenergetic radiation.
@@ -15,16 +15,16 @@ class XrayLaser : public AbstractSource
     CTL_TYPE_ID(310)
 
     // implementation of abstract interface
-    public:virtual EnergyRange energyRange() const override;
-    protected:virtual double nominalPhotonFlux() const override;
+    public: EnergyRange nominalEnergyRange() const override;
+    protected: double nominalPhotonFlux() const override;
 
 public:
     XrayLaser(const QString& name);
     XrayLaser(double energy, double output, const QString &name = defaultName());
     XrayLaser(const QSizeF &focalSpotSize = QSizeF(0.0, 0.0),
-              const Vector3x1& focalSpotPosition = Vector3x1(0.0f),
-              double energy = 100.0f,
-              double output = 1.0f,
+              const Vector3x1& focalSpotPosition = Vector3x1(0.0),
+              double energy = 100.0,
+              double output = 1.0,
               const QString &name = defaultName());
 
     // virtual methods

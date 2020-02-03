@@ -57,11 +57,6 @@ class SystemComponent : public SerializationInterface
 public:
     // ctors etc.
     SystemComponent(const QString& name = defaultName());
-    SystemComponent(const SystemComponent&) = default;
-    SystemComponent(SystemComponent&&) = default;
-    SystemComponent& operator=(const SystemComponent&) = default;
-    SystemComponent& operator=(SystemComponent&&) = default;
-    virtual ~SystemComponent() = default;
 
     // virtual methods
     virtual int elementalType() const;

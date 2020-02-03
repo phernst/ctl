@@ -1,5 +1,6 @@
 #include "simplectsystem.h"
 #include "acquisition/geometryencoder.h"
+#include "acquisition/radiationencoder.h"
 #include "components/allgenerictypes.h"
 
 namespace CTL {
@@ -143,6 +144,17 @@ void SimpleCTsystem::replaceDetector(AbstractDetector* newDetector)
 }
 
 /*!
+ * Replaces the detector component of this instance by \a newDetector. The old detector object is
+ * destroyed. This instance takes ownership of \a newDetector.
+ *
+ * Does nothing if a nullptr is passed.
+ */
+void SimpleCTsystem::replaceDetector(std::unique_ptr<AbstractDetector> newDetector)
+{
+    replaceDetector(newDetector.release());
+}
+
+/*!
  * Replaces the gantry component of this instance by \a newGantry. The old gantry object is
  * destroyed. This instance takes ownership of \a newGantry.
  *
@@ -156,6 +168,17 @@ void SimpleCTsystem::replaceGantry(AbstractGantry* newGantry)
         removeComponent(gantry());
         addComponent(newGantry);
     }
+}
+
+/*!
+ * Replaces the gantry component of this instance by \a newGantry. The old gantry object is
+ * destroyed. This instance takes ownership of \a newGantry.
+ *
+ * Does nothing if a nullptr is passed.
+ */
+void SimpleCTsystem::replaceGantry(std::unique_ptr<AbstractGantry> newGantry)
+{
+    replaceGantry(newGantry.release());
 }
 
 /*!
@@ -175,6 +198,17 @@ void SimpleCTsystem::replaceSource(AbstractSource* newSource)
 }
 
 /*!
+ * Replaces the source component of this instance by \a newSource. The old source object is
+ * destroyed. This instance takes ownership of \a newSource.
+ *
+ * Does nothing if a nullptr is passed.
+ */
+void SimpleCTsystem::replaceSource(std::unique_ptr<AbstractSource> newSource)
+{
+    replaceSource(newSource.release());
+}
+
+/*!
  * Adds the AbstractBeamModifier \a modifier to the system. This instance takes ownership of
  * \a modifier.
  */
@@ -189,13 +223,12 @@ void SimpleCTsystem::addBeamModifier(std::unique_ptr<AbstractBeamModifier> modif
 }
 
 /*!
- * Returns the number of photons that incide on a detector pixel avergared over all detector
+ * Returns the number of photons that incide on a detector pixel averaged over all detector
  * modules.
  */
 float SimpleCTsystem::photonsPerPixelMean() const
 {
-    const auto& counts = photonsPerPixel();
-    return std::accumulate(counts.begin(), counts.end(), 0.0f);
+    return RadiationEncoder(this).photonsPerPixelMean();
 }
 
 /*!
@@ -203,8 +236,7 @@ float SimpleCTsystem::photonsPerPixelMean() const
  */
 float SimpleCTsystem::photonsPerPixel(uint module) const
 {
-    return this->source()->photonFlux() * 1.0e-4 *
-            GeometryEncoder::effectivePixelArea(*this, module);
+    return RadiationEncoder(this).photonsPerPixel(module);
 }
 
 /*!
@@ -212,12 +244,7 @@ float SimpleCTsystem::photonsPerPixel(uint module) const
  */
 std::vector<float> SimpleCTsystem::photonsPerPixel() const
 {
-    auto nbMod = this->detector()->nbDetectorModules();
-    std::vector<float> ret(nbMod);
-    for(uint mod = 0; mod < nbMod; ++mod)
-        ret[mod] = photonsPerPixel(mod);
-
-    return ret;
+    return RadiationEncoder(this).photonsPerPixel();
 }
 
 // use documentation of CTsystem::clone()

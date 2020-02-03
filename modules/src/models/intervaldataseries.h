@@ -3,16 +3,18 @@
 
 #include "pointseriesbase.h"
 #include "abstractdatamodel.h"
+#include "processing/coordinates.h"
 
 namespace CTL {
 
 class IntervalDataSeries : public PointSeriesBase
 {
 public:
-    IntervalDataSeries();
+    IntervalDataSeries() = default;
 
     // factory methods
-    static IntervalDataSeries sampledFromModel(const AbstractIntegrableDataModel& dataModel, float from, float to, uint nbSamples);
+    static IntervalDataSeries sampledFromModel(const AbstractIntegrableDataModel& dataModel,
+                                               float from, float to, uint nbSamples);
 
     // other methods
     float integral() const;
@@ -21,9 +23,11 @@ public:
     IntervalDataSeries normalizedByIntegral() const;
     float binWidth() const;
     float centroid() const;
+    SamplingRange samplingRange() const;
+    void clampToRange(const SamplingRange& range);
 
 private:
-    float _binWidth;
+    float _binWidth{};
 };
 
 }

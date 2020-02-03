@@ -15,7 +15,7 @@ namespace OCL {
  *
  * OpenCL C source code needs to be available at runtime. Therefore, it will be collected in
  * .cl files within the "cl_src" directory, which is located in the path of the executable
- * (or inside the "ocl" folder of the repository).
+ * (copied from the "ocl" folder of the repository by the qmake build system; see "ocl_config.pri").
  * The ClFileLoader provides the method loadSourceCode() that loads a file from the "cl_src" folder
  * and return the content as a std::string. The file name of a .cl file is passed by the constructor
  * or the setFileName() method as a relative path wrt the "cl_src" folder, e.g.
@@ -41,15 +41,18 @@ namespace OCL {
  * This requires that the *current directory* (from where the program was started) is equal to the
  * directory of the executable. Should this not be the case, the CLFileLoader is not able to locate
  * the .cl files, i.e. isValid() will return `false` and loadSourceCode() will return an empty
- * string.
+ * string. Alternatively, the path to the "cl_src" folder can be set during run time using the
+ * static method setOpenCLSourceDir().
  */
 class ClFileLoader
 {
+    static QString _oclSourceDir;
+
 public:
-    ClFileLoader() = default;
-    ClFileLoader(const char* fileName);
-    ClFileLoader(std::string fileName);
-    ClFileLoader(const QString& fileName);
+    explicit ClFileLoader() = default;
+    explicit ClFileLoader(const char* fileName);
+    explicit ClFileLoader(std::string fileName);
+    explicit ClFileLoader(const QString& fileName);
 
     void setFileName(const char* fileName);
     void setFileName(std::string fileName);
@@ -59,10 +62,18 @@ public:
     bool isValid() const;
     std::string loadSourceCode() const;
 
+    // static methods for adjusting the path of the OpenCL source files
+    static void setOpenCLSourceDir(const char* path);
+    static void setOpenCLSourceDir(const QString& path);
+    static void setOpenCLSourceDir(QString&& path);
+    static void setOpenCLSourceDir(const std::string& path);
+
+    static const QString& openCLSourceDir();
+
 private:
     std::string _fn;
 
-    const QString& absoluteOpenCLSourceDir() const;
+    static const QString& absoluteOpenCLSourceDir();
 };
 
 } // namespace OCL

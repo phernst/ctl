@@ -1,7 +1,5 @@
 #include "projectiondata.h"
-#include <future>
-
-static const uint OPTIMAL_NB_THREADS = std::max(1u, std::thread::hardware_concurrency());
+#include "processing/threadpool.h"
 
 namespace CTL
 {
@@ -89,10 +87,10 @@ float ProjectionData::max() const
     if(nbViews() == 0)
         return 0.0f;
 
-    float tmpMax = view(0).max();
+    auto tmpMax = view(0).max();
 
     float locMax;
-    for(int vi = 1, total = nbViews(); vi < total; ++vi)
+    for(auto vi = 1u, total = nbViews(); vi < total; ++vi)
     {
         locMax = view(vi).max();
         if(locMax > tmpMax)
@@ -112,10 +110,10 @@ float ProjectionData::min() const
     if(nbViews() == 0)
         return 0.0f;
 
-    float tmpMin = view(0).min();
+    auto tmpMin = view(0).min();
 
     float locMin;
-    for(int vi = 1, total = nbViews(); vi < total; ++vi)
+    for(auto vi = 1u, total = nbViews(); vi < total; ++vi)
     {
         locMin = view(vi).min();
         if(locMin < tmpMin)
@@ -179,7 +177,7 @@ ProjectionData ProjectionData::combined(const ModuleLayout& layout) const
                                                       _viewDim.nbRows * layout.rows() };
     ProjectionData ret(moduleDim.width, moduleDim.height, 1);
 
-    for(uint view = 0, nbViews = this->nbViews(); view < nbViews; ++view)
+    for(auto view = 0u, nbViews = this->nbViews(); view < nbViews; ++view)
     {
         SingleViewData viewData(moduleDim);
         viewData.append(_data[view].combined(layout));
@@ -199,6 +197,15 @@ void ProjectionData::fill(float fillValue)
 }
 
 /*!
+ * Removes all views from the projection data and deletes the image data.
+ */
+void ProjectionData::freeMemory()
+{
+    _data.clear();
+    _data.shrink_to_fit();
+}
+
+/*!
  * Concatenates the projection data from all views and returns it as a one-dimensional vector.
  */
 std::vector<float> ProjectionData::toVector() const
@@ -211,7 +218,7 @@ std::vector<float> ProjectionData::toVector() const
 
     auto destIt = ret.begin();
 
-    for(size_t view=0; view<dim.nbViews; ++view)
+    for(size_t view = 0; view < dim.nbViews; ++view)
     {
         auto viewVectorized = _data[view].toVector();
         auto srcIt = viewVectorized.cbegin();
@@ -232,25 +239,16 @@ std::vector<float> ProjectionData::toVector() const
  */
 void ProjectionData::transformToExtinction(double i0)
 {
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return;
-
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
-    const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::future<void>> futures(nbThreads);
 
     auto threadTask = [this, i0] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view].transformToExtinction(i0);
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 }
 
 /*!
@@ -263,25 +261,16 @@ void ProjectionData::transformToExtinction(double i0)
  */
 void ProjectionData::transformToExtinction(const std::vector<double>& viewDependentI0)
 {
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return;
-
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
-    const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::future<void>> futures(nbThreads);
 
     auto threadTask = [this, &viewDependentI0] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view].transformToExtinction(viewDependentI0[view]);
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 }
 
 /*!
@@ -307,25 +296,16 @@ void ProjectionData::transformToIntensity(double i0)
  */
 void ProjectionData::transformToCounts(double n0)
 {   
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return;
-
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
-    const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::future<void>> futures(nbThreads);
 
     auto threadTask = [this, n0] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view].transformToCounts(n0);
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 }
 
 /*!
@@ -351,25 +331,16 @@ void ProjectionData::transformToIntensity(const std::vector<double>& viewDepende
  */
 void ProjectionData::transformToCounts(const std::vector<double>& viewDependentN0)
 {
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return;
-
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
-    const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::future<void>> futures(nbThreads);
 
     auto threadTask = [this, &viewDependentN0] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view].transformToCounts(viewDependentN0[view]);
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 }
 
 bool ProjectionData::operator==(const ProjectionData &other) const
@@ -377,7 +348,7 @@ bool ProjectionData::operator==(const ProjectionData &other) const
     if(dimensions() != other.dimensions())
         return false;
 
-    for(uint v = 0; v < nbViews(); ++v)
+    for(auto v = 0u; v < nbViews(); ++v)
         if(view(v) != other.view(v))
             return false;
 
@@ -389,7 +360,7 @@ bool ProjectionData::operator!=(const ProjectionData &other) const
     if(dimensions() != other.dimensions())
         return true;
 
-    for(uint v = 0; v < nbViews(); ++v)
+    for(auto v = 0u; v < nbViews(); ++v)
         if(view(v) != other.view(v))
             return true;
 
@@ -409,25 +380,31 @@ bool ProjectionData::hasEqualSizeAs(const SingleViewData &other) const
  * Enforces memory allocation and allocates memory for \a nbViews views.
  * As a result, the number of views is equal to \a nbViews.
  *
- * \sa SingleViewData::allocateMemory().
+ * Note that if the current number of views is less than \a nbViews the additionally allocated
+ * views remain uninitialized, i.e. they contain undefined values.
+ *
+ * \sa allocateMemory(uint nbViews, float initValue), SingleViewData::allocateMemory().
  */
 void ProjectionData::allocateMemory(uint nbViews)
 {
-    _data.resize(nbViews, SingleViewData(_viewDim.nbChannels,_viewDim.nbRows));
+    _data.resize(nbViews, SingleViewData(_viewDim.nbChannels, _viewDim.nbRows));
 
     for(auto& view : _data)
         view.allocateMemory(_viewDim.nbModules);
 }
 
 /*!
- * Enforces memory allocation and initializes all values with \a initValue.
+ * Enforces memory allocation and if the current number of views is less than \a nbViews,
+ * the additionally appended views are initialized with \a initValue.
  *
- * \sa allocateMemory(uint), fill().
+ * \sa allocateMemory(uint nbViews), fill().
  */
 void ProjectionData::allocateMemory(uint nbViews, float initValue)
 {
-    allocateMemory(nbViews);
-    fill(initValue);
+    auto oldNbViews = this->nbViews();
+    _data.resize(nbViews, SingleViewData(_viewDim.nbChannels, _viewDim.nbRows));
+    for(auto view = oldNbViews; view < nbViews; ++view)
+        _data[view].allocateMemory(_viewDim.nbModules, initValue);
 }
 
 /*!
@@ -440,25 +417,16 @@ ProjectionData& ProjectionData::operator += (const ProjectionData& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("ProjectionData requires same dimensions for '+' operation:\n" +
                                 dimensions().info() + " += " + other.dimensions().info());
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return *this;
-
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
-    const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::future<void>> futures(nbThreads);
 
     auto threadTask = [this, &other] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view] += other._data[view];
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -473,25 +441,16 @@ ProjectionData& ProjectionData::operator -= (const ProjectionData& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("ProjectionData requires same dimensions for '-' operation:\n" +
                                 dimensions().info() + " -= " + other.dimensions().info());
-    const uint totalViews = nbViews();
-    if(totalViews == 0u)
+    if(nbViews() == 0u)
         return *this;
-
-    const uint nbThreads = std::min(totalViews, OPTIMAL_NB_THREADS);
-    const uint viewsPerThread = totalViews / nbThreads;
-    std::vector<std::future<void>> futures(nbThreads);
 
     auto threadTask = [this, &other] (uint begin, uint end)
     {
-        for(uint view = begin; view < end; ++view)
+        for(auto view = begin; view < end; ++view)
             _data[view] -= other._data[view];
     };
 
-    uint t = 0;
-    for(; t < nbThreads-1; ++t)
-        futures[t] = std::async(threadTask, t * viewsPerThread, (t+1) * viewsPerThread);
-    // last thread does the rest (viewsPerThread + x, x < nbThreads)
-    futures[t] = std::async(threadTask, t * viewsPerThread, totalViews);
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -627,6 +586,22 @@ ProjectionData::Dimensions ProjectionData::dimensions() const
 }
 
 /*!
+ * Same as `view(0)`.
+ */
+const SingleViewData& ProjectionData::first() const
+{
+    return this->view(0);
+}
+
+/*!
+ * Same as `view(0)`.
+ */
+SingleViewData &ProjectionData::first()
+{
+    return this->view(0);
+}
+
+/*!
  * Returns the number of views in the data.
  */
 uint ProjectionData::nbViews() const { return static_cast<uint>(_data.size()); }
@@ -656,6 +631,21 @@ const SingleViewData& ProjectionData::view(uint i) const
 SingleViewData::Dimensions ProjectionData::viewDimensions() const
 {
     return _viewDim;
+}
+
+template<class Function>
+void ProjectionData::parallelExecution(const Function& f) const
+{
+    ThreadPool tp;
+    const auto nbThreads = tp.nbThreads();
+    const auto totalViews = nbViews();
+    const auto viewsPerThread = static_cast<uint>(totalViews / nbThreads);
+
+    auto t = 0u;
+    for(; t < nbThreads - 1; ++t)
+        tp.enqueueThread(f, t * viewsPerThread, (t + 1) * viewsPerThread);
+    // last thread does the rest (viewsPerThread + x, with x < nbThreads)
+    tp.enqueueThread(f, t * viewsPerThread, totalViews);
 }
 
 } // namespace CTL

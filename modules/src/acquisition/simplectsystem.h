@@ -118,8 +118,11 @@ public:
 
     // replacer
     void replaceDetector(AbstractDetector* newDetector);
+    void replaceDetector(std::unique_ptr<AbstractDetector> newDetector);
     void replaceGantry(AbstractGantry* newGantry);
+    void replaceGantry(std::unique_ptr<AbstractGantry> newGantry);
     void replaceSource(AbstractSource* newSource);
+    void replaceSource(std::unique_ptr<AbstractSource> newSource);
 
     // other
     void addBeamModifier(AbstractBeamModifier* modifier);

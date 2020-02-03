@@ -5,9 +5,12 @@
 #include <QString>
 
 static QString determineOpenCLSourceDir();
+static void ensureProperEnding(QString& path);
 
 namespace CTL {
 namespace OCL {
+
+QString ClFileLoader::_oclSourceDir;
 
 // constructors
 /*!
@@ -87,12 +90,80 @@ std::string ClFileLoader::loadSourceCode() const
 }
 
 /*!
- * Returns the absolute path to the "ocl_src" directory in a platform-independent way.
+ * Sets the path of the OpenCL source directory to \a path. The filename of an OpenCL C file (.cl)
+ * is a relative path w.r.t. this directory. If this function is never called or called with an
+ * empty string, a default directory is used, which is the folder "cl_src" in the directory of the
+ * current application (the executable).
+ *
+ * \sa setFileName(const char* path)
  */
-const QString& ClFileLoader::absoluteOpenCLSourceDir() const
+void ClFileLoader::setOpenCLSourceDir(const char* path)
 {
-    static const QString ret = determineOpenCLSourceDir();
-    return ret;
+    setOpenCLSourceDir(QString(path));
+}
+
+/*!
+ * Sets the path of the OpenCL source directory to \a path. The filename of an OpenCL C file (.cl)
+ * is a relative path w.r.t. this directory. If this function is never called or called with an
+ * empty string, a default directory is used, which is the folder "cl_src" in the directory of the
+ * current application (the executable).
+ *
+ * \sa setFileName(const QString& path)
+ */
+void ClFileLoader::setOpenCLSourceDir(const QString& path)
+{
+    _oclSourceDir = path;
+    ensureProperEnding(_oclSourceDir);
+}
+
+/*!
+ * Sets the path of the OpenCL source directory to \a path. The filename of an OpenCL C file (.cl)
+ * is a relative path w.r.t. this directory. If this function is never called or called with an
+ * empty string, a default directory is used, which is the folder "cl_src" in the directory of the
+ * current application (the executable).
+ *
+ * \sa setFileName(const QString& path)
+ */
+void ClFileLoader::setOpenCLSourceDir(QString&& path)
+{
+    _oclSourceDir = std::move(path);
+    ensureProperEnding(_oclSourceDir);
+}
+
+/*!
+ * Sets the path of the OpenCL source directory to \a path. The filename of an OpenCL C file (.cl)
+ * is a relative path w.r.t. this directory. If this function is never called or called with an
+ * empty string, a default directory is used, which is the folder "cl_src" in the directory of the
+ * current application (the executable).
+ *
+ * \sa setFileName(std::string path)
+ */
+void ClFileLoader::setOpenCLSourceDir(const std::string& path)
+{
+    setOpenCLSourceDir(QString::fromStdString(path));
+}
+
+/*!
+ * Returns the path to the OpenCL directory, where OpenCL C kernel files are stored.
+ * This could be the default path ("cl_src" next to the executable) or the path that has been set
+ * by setOpenCLSourceDir().
+ */
+const QString& ClFileLoader::openCLSourceDir()
+{
+    return absoluteOpenCLSourceDir();
+}
+
+/*!
+ * Returns the absolute path to the "ocl_src" directory. If no OpenCL source directory has been set,
+ * it determines the absolute path "<executable's directory>/cl_src" in a platform-independent way
+ * provided that `QCoreApplication` has been instatiated in the main() of the application.
+ */
+const QString& ClFileLoader::absoluteOpenCLSourceDir()
+{
+    if(_oclSourceDir.isEmpty())
+        _oclSourceDir = determineOpenCLSourceDir();
+
+    return _oclSourceDir;
 }
 
 } // namespace OCL
@@ -101,10 +172,15 @@ const QString& ClFileLoader::absoluteOpenCLSourceDir() const
 QString determineOpenCLSourceDir()
 {
     QString ret = QCoreApplication::applicationDirPath();
-    if(!ret.isEmpty() &&
-       !ret.endsWith(QStringLiteral("/")) &&
-       !ret.endsWith(QStringLiteral("\\")))
-        ret += QStringLiteral("/");
+    ensureProperEnding(ret);
     ret += QStringLiteral("cl_src/");
     return ret;
+}
+
+static void ensureProperEnding(QString& path)
+{
+    if(!path.isEmpty() &&
+       !path.endsWith(QStringLiteral("/")) &&
+       !path.endsWith(QStringLiteral("\\")))
+        path += QStringLiteral("/");
 }

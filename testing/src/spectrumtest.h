@@ -3,7 +3,13 @@
 
 #include <QObject>
 #include <QtTest>
-#include "components/xraytube.h"
+
+namespace CTL
+{
+class XrayTube;
+class XraySpectrumTabulatedModel;
+class IntervalDataSeries;
+}
 
 class SpectrumTest : public QObject
 {
@@ -16,6 +22,7 @@ private Q_SLOTS:
     void testXrayLaserSpectrum();
     void testSpectrumSampling();
     void cleanupTestCase();
+    void testAttenuationFilter();
 
 private:
     CTL::XrayTube* _tube;

@@ -2,7 +2,7 @@
 #define ABSTRACTSOURCE_H
 #include "mat/matrix_types.h"
 #include "models/intervaldataseries.h"
-#include "models/xrayspectrummodels.h"
+#include "models/abstractxrayspectrummodel.h"
 #include "systemcomponent.h"
 #include <QJsonArray>
 #include <QSizeF>
@@ -60,6 +60,9 @@ namespace CTL {
  * of the new class can then be de-/serialized with any of the serializer classes (see also
  * AbstractSerializer).
  */
+
+typedef Range<float> EnergyRange;
+
 class AbstractSource : public SystemComponent
 {
     CTL_TYPE_ID(300)
@@ -68,29 +71,11 @@ class AbstractSource : public SystemComponent
 public:
     static const uint DEFAULT_SPECTRUM_RESOLUTION_HINT = 10;
 
-    struct EnergyRange
-    {
-        float from;
-        float to;
-
-        float width() const { return to - from; }
-    };
-
     // abstract interface
-    public:virtual EnergyRange energyRange() const = 0;
+    public:virtual EnergyRange nominalEnergyRange() const = 0;
     protected:virtual double nominalPhotonFlux() const = 0;
 
 public:
-    AbstractSource(const QString& name);
-    AbstractSource(const QSizeF& focalSpotSize, const QString& name);
-    AbstractSource(const QSizeF& focalSpotSize,
-                   const Vector3x1& focalSpotPosition,
-                   const QString& name);
-    AbstractSource(const QSizeF& focalSpotSize,
-                   const Vector3x1& focalSpotPosition,
-                   AbstractXraySpectrumModel* spectumModel,
-                   const QString& name);
-
     // virtual methods  
     virtual IntervalDataSeries spectrum(uint nbSamples) const;
     virtual uint spectrumDiscretizationHint() const;
@@ -100,6 +85,7 @@ public:
     QVariant toVariant() const override; // serialization
 
     // getter methods
+    EnergyRange energyRange() const;
     double photonFlux() const;
     double fluxModifier() const;
     const QSizeF& focalSpotSize() const;
@@ -112,19 +98,39 @@ public:
     void setFocalSpotSize(double width, double height); // convenience alternative
     void setFocalSpotPosition(const Vector3x1& position);
     void setFocalSpotPosition(double x, double y, double z); // convenience alternative
+    void setEnergyRangeRestriction(const EnergyRange& window);
 
     // other methods
     IntervalDataSeries spectrum(EnergyRange range, uint nbSamples) const;
     bool hasSpectrumModel() const;
     void setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model);
 
+    ~AbstractSource() override = default;
+
 protected:
+    AbstractSource() = default;
+    AbstractSource(const QString& name);
+    AbstractSource(const QSizeF& focalSpotSize, const QString& name);
+    AbstractSource(const QSizeF& focalSpotSize,
+                   const Vector3x1& focalSpotPosition,
+                   const QString& name);
+    AbstractSource(const QSizeF& focalSpotSize,
+                   const Vector3x1& focalSpotPosition,
+                   AbstractXraySpectrumModel* spectumModel,
+                   const QString& name);
+
+    AbstractSource(const AbstractSource&) = default;
+    AbstractSource(AbstractSource&&) = default;
+    AbstractSource& operator=(const AbstractSource&) = default;
+    AbstractSource& operator=(AbstractSource&&) = default;
 
     QSizeF _focalSpotSize = QSizeF(0.0, 0.0); //!< Size of the focal spot (in mm).
     Vector3x1 _focalSpotPosition = Vector3x1(0.0); //!< Position of the focal spot (relative to source center).
     double _fluxModifier = 1.0; //!< Global (multiplicative) modifier for the photon flux.
 
-    DataModelPtr _spectrumModel; //!< Data model for the emitted radiation spectrum.
+    DataModelPtr<AbstractXraySpectrumModel> _spectrumModel; //!< Data model for the emitted radiation spectrum.
+    EnergyRange _restrictedEnergyWindow = { 0.0f, 0.0f }; //!< Windowed energy range.
+    bool _hasRestrictedEnergyWindow = false;
 };
 
 /*!
@@ -195,7 +201,7 @@ inline AbstractSource::AbstractSource(const QSizeF& focalSpotSize,
     : SystemComponent(name)
     , _focalSpotSize(focalSpotSize)
     , _focalSpotPosition(focalSpotPosition)
-    , _spectrumModel(std::unique_ptr<AbstractDataModel>(spectumModel))
+    , _spectrumModel(spectumModel)
 {
 }
 
@@ -220,8 +226,26 @@ inline IntervalDataSeries AbstractSource::spectrum(uint nbSamples) const
     if(!hasSpectrumModel())
         throw std::runtime_error("No spectrum model set.");
 
-    auto spec = IntervalDataSeries::sampledFromModel(static_cast<const AbstractIntegrableDataModel&>(*_spectrumModel),
-                                                     energyRange().from, energyRange().to, nbSamples);
+    const auto eRange = energyRange();
+    auto spec = IntervalDataSeries::sampledFromModel(*_spectrumModel,
+                                                     eRange.start(), eRange.end(), nbSamples);
+
+    spec.normalizeByIntegral();
+
+    return spec;
+}
+
+
+inline IntervalDataSeries AbstractSource::spectrum(EnergyRange range, uint nbSamples) const
+{
+    if(!hasSpectrumModel())
+        throw std::runtime_error("No spectrum model set.");
+
+    auto spec = IntervalDataSeries::sampledFromModel(*_spectrumModel,
+                                                     range.start(), range.end(), nbSamples);
+    if(_hasRestrictedEnergyWindow)
+        spec.clampToRange({ _restrictedEnergyWindow.start(), _restrictedEnergyWindow.end() });
+
     spec.normalizeByIntegral();
 
     return spec;
@@ -255,9 +279,9 @@ inline const Vector3x1& AbstractSource::focalSpotPosition() const { return _foca
 /*!
  * Returns a pointer to the spectrum model of this instance.
  */
-inline const AbstractXraySpectrumModel *AbstractSource::spectrumModel() const
+inline const AbstractXraySpectrumModel* AbstractSource::spectrumModel() const
 {
-    return static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get());
+    return _spectrumModel.get();
 }
 
 /*!
@@ -298,16 +322,10 @@ inline void AbstractSource::setFocalSpotPosition(double x, double y, double z)
     _focalSpotPosition = Vector3x1({ x, y, z });
 }
 
-inline IntervalDataSeries AbstractSource::spectrum(EnergyRange range, uint nbSamples) const
+inline void AbstractSource::setEnergyRangeRestriction(const EnergyRange& window)
 {
-    if(!hasSpectrumModel())
-        throw std::runtime_error("No spectrum model set.");
-
-    auto spec = IntervalDataSeries::sampledFromModel(static_cast<const AbstractIntegrableDataModel&>(*_spectrumModel),
-                                                     range.from, range.to, nbSamples);
-    spec.normalizeByIntegral();
-
-    return spec;
+    _restrictedEnergyWindow = window;
+    _hasRestrictedEnergyWindow = true;
 }
 
 /*!
@@ -315,7 +333,7 @@ inline IntervalDataSeries AbstractSource::spectrum(EnergyRange range, uint nbSam
  *
  * \sa setSpectrumModel().
  */
-inline bool AbstractSource::hasSpectrumModel() const { return (_spectrumModel.ptr != nullptr); }
+inline bool AbstractSource::hasSpectrumModel() const { return static_cast<bool>(_spectrumModel); }
 
 /*!
  * Returns a formatted string with information about the object.
@@ -328,8 +346,8 @@ inline QString AbstractSource::info() const
     QString ret(SystemComponent::info());
 
     ret += typeInfoString(typeid(this))
-        + "\tEnergy range: [" + QString::number(energyRange().from) + "," +
-            QString::number(energyRange().to) + "] keV\n"
+        + "\tEnergy range: [" + QString::number(energyRange().start()) + "," +
+            QString::number(energyRange().end()) + "] keV\n"
         + "\tNominal photon flux: " + QString::number(nominalPhotonFlux())
             + "photons / cm^2 @ 1m\n"
         + "\tFlux modifier: "
@@ -362,7 +380,7 @@ inline void AbstractSource::setSpectrumModel(AbstractXraySpectrumModel* model)
  */
 inline void AbstractSource::setSpectrumModel(std::unique_ptr<AbstractXraySpectrumModel> model)
 {
-    _spectrumModel.ptr = std::move(model);
+    _spectrumModel = std::move(model);
 }
 
 // Use SerializationInterface::fromVariant() documentation.
@@ -383,7 +401,8 @@ inline void AbstractSource::fromVariant(const QVariant& variant)
 
     _focalSpotSize = fsQSize;
     _focalSpotPosition = fsPosVec;
-    _spectrumModel.ptr.reset(SerializationHelper::parseDataModel(specMod));
+    _spectrumModel.reset(static_cast<AbstractXraySpectrumModel*>(
+                             SerializationHelper::parseDataModel(specMod)));
 }
 
 // Use SerializationInterface::toVariant() documentation.
@@ -400,13 +419,23 @@ inline QVariant AbstractSource::toVariant() const
     fsSize.insert("width", _focalSpotSize.width());
     fsSize.insert("height", _focalSpotSize.height());
 
-    QVariant specMod = _spectrumModel.ptr ? _spectrumModel->toVariant() : QVariant();
+    QVariant specMod = _spectrumModel ? _spectrumModel->toVariant() : QVariant();
 
     ret.insert("focal spot position", fsPos);
     ret.insert("focal spot size", fsSize);
     ret.insert("spectrum model", specMod);
 
     return ret;
+}
+
+inline EnergyRange AbstractSource::energyRange() const
+{
+    const auto nomRange = nominalEnergyRange();
+    if(!_hasRestrictedEnergyWindow)
+        return nomRange;
+
+    return { std::max(nomRange.start(), _restrictedEnergyWindow.start()),
+             std::min(nomRange.end(), _restrictedEnergyWindow.end()) };
 }
 
 /*!

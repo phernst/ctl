@@ -1,20 +1,10 @@
 #ifndef XRAYSPECTRUMMODELS_H
 #define XRAYSPECTRUMMODELS_H
 
-#include "abstractdatamodel.h"
+#include "abstractxrayspectrummodel.h"
 #include "tabulateddatamodel.h"
 
 namespace CTL {
-
-class AbstractXraySpectrumModel : public AbstractIntegrableDataModel
-{
-public:
-    void setParameter(const QVariant& parameter) override;
-    QVariant parameter() const override;
-
-protected:
-    float _energy = 0.0f; //!< Control parameter of device setting (usually tube voltage).
-};
 
 class XraySpectrumTabulatedModel : public AbstractXraySpectrumModel
 {
@@ -84,6 +74,26 @@ class HeuristicCubicSpectrumModel : public AbstractXraySpectrumModel
     public: float valueAt(float position) const override;
     public: float binIntegral(float position, float binWidth) const override;
     public: AbstractDataModel* clone() const override;
+};
+
+class TASMIPSpectrumModel : public AbstractXraySpectrumModel
+{
+    CTL_TYPE_ID(43)
+
+    // abstract interfaces
+    public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
+    public: AbstractDataModel* clone() const override;
+
+    void setParameter(const QVariant& parameter) override;
+
+public:
+    TASMIPSpectrumModel();
+
+private:
+    DataModelPtr<XraySpectrumTabulatedModel> _tasmipData;
+
+    void initializeModelData();
 };
 
 } // namespace CTL

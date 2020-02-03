@@ -1,8 +1,10 @@
 #include "detectorsaturationextension.h"
+#include "acquisition/radiationencoder.h"
 #include "components/abstractdetector.h"
 #include "components/abstractsource.h"
+#include "processing/threadpool.h"
 
-#include <future>
+#include <thread>
 
 namespace CTL {
 
@@ -48,9 +50,10 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
 
 void DetectorSaturationExtension::processCounts(ProjectionData& projections)
 {
-    auto saturationModel = _setup.system()->detector()->saturationModel();
+    auto detectorPtr = _setup.system()->detector();
 
-    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& n0) {
+    auto processView = [detectorPtr](SingleViewData* view, std::vector<float> n0) {
+        const auto saturationModel = detectorPtr->saturationModel();
         float count;
         uint mod = 0;
         for(auto& module : view->data())
@@ -58,48 +61,54 @@ void DetectorSaturationExtension::processCounts(ProjectionData& projections)
             for(auto& pix : module.data())
             {
                 // transform extinction to photon count
-                count = n0[mod] * exp(-pix);
+                count = n0[mod] * std::exp(-pix);
                 // pass intensity through saturation model
                 count = saturationModel->valueAt(count);
                 // back-transform to extinction and overwrite projection pixel value
-                pix = log(n0[mod] / count);
+                pix = std::log(n0[mod] / count);
+
             }
+            ++mod;
         }
     };
 
-    std::vector<std::future<void>> futures;
-    futures.reserve(_setup.nbViews());
-    int v = 0;
+    ThreadPool tp;
 
+    auto v = 0u;
     for(auto& view : projections.data())
     {
         _setup.prepareView(v++);
-        futures.push_back(std::async(processView, &view, _setup.system()->photonsPerPixel()));
+        tp.enqueueThread(processView, &view, _setup.system()->photonsPerPixel());
     }
 }
 
 void DetectorSaturationExtension::processExtinctions(ProjectionData& projections)
 {
-    auto saturationModel = _setup.system()->detector()->saturationModel();
+    auto detectorPtr = _setup.system()->detector();
 
-    auto processView = [saturationModel](SingleViewData* view) {
+    auto processView = [detectorPtr](SingleViewData* view) {
+        const auto saturationModel = detectorPtr->saturationModel();
         for(auto& module : view->data())
             for(auto& pix : module.data())
                 pix = saturationModel->valueAt(pix);
     };
 
-    std::vector<std::future<void>> futures;
-    futures.reserve(_setup.nbViews());
+    ThreadPool tp;
+
+    auto v = 0u;
     for(auto& view : projections.data())
-        futures.push_back(std::async(processView, &view));
+    {
+        _setup.prepareView(v++); // only required if saturation model is volatile
+        tp.enqueueThread(processView, &view);
+    }
 }
 
 void DetectorSaturationExtension::processIntensities(ProjectionData& projections)
 {
-    auto saturationModel = _setup.system()->detector()->saturationModel();
-    auto sourcePtr = _setup.system()->source();
+    auto detectorPtr = _setup.system()->detector();
 
-    auto processView = [saturationModel](SingleViewData* view, const std::vector<float>& i0) {
+    auto processView = [detectorPtr](SingleViewData* view, std::vector<float> i0) {
+        const auto saturationModel = detectorPtr->saturationModel();
         float intensity;
         uint mod = 0;
         for(auto& module : view->data())
@@ -107,29 +116,31 @@ void DetectorSaturationExtension::processIntensities(ProjectionData& projections
             for(auto& pix : module.data())
             {
                 // transform extinction to intensity
-                intensity = i0[mod] * exp(-pix);
+                intensity = i0[mod] * std::exp(-pix);
                 // pass intensity through saturation model
                 intensity = saturationModel->valueAt(intensity);
                 // back-transform to extinction and overwrite projection pixel value
-                pix = log(i0[mod] / intensity);
+                pix = std::log(i0[mod] / intensity);
             }
+            ++mod;
         }
     };
 
-    std::vector<std::future<void>> futures;
-    futures.reserve(_setup.nbViews());
-    int v = 0;
-    std::vector<float> i0(_setup.system()->detector()->nbDetectorModules());
+    ThreadPool tp;
+
+    uint v = 0;
+    std::vector<float> i0(detectorPtr->nbDetectorModules());
+    RadiationEncoder enc(_setup.system());
 
     for(auto& view : projections.data())
     {
         _setup.prepareView(v++);
-        auto n0 = _setup.system()->photonsPerPixel();
-        auto meanEnergy = sourcePtr->spectrum(_nbSamples).centroid();
+        const auto n0 = enc.photonsPerPixel();
+        const auto meanEnergy = enc.finalSpectrum(_nbSamples).centroid();
         std::transform(n0.begin(), n0.end(), i0.begin(),
                        [meanEnergy](float count) { return count * meanEnergy; });
 
-        futures.push_back(std::async(processView, &view, i0));
+        tp.enqueueThread(processView, &view, i0);
     }
 }
 

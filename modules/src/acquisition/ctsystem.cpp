@@ -21,8 +21,8 @@ namespace CTL {
 /*!
  * Constructs a CTsystem object named \a name.
  */
-CTsystem::CTsystem(const QString& name)
-    : _name(name)
+CTsystem::CTsystem(QString name)
+    : _name(std::move(name))
 {
 }
 
@@ -209,7 +209,7 @@ void CTsystem::fromVariant(const QVariant &variant)
     // fill in components
     this->clear();
     QVariantList componentVariantList = varMap.value("components").toList();
-    for(const auto& comp : componentVariantList)
+    for(const auto& comp : qAsConst(componentVariantList))
         this->addComponent(SerializationHelper::parseComponent(comp));
 }
 

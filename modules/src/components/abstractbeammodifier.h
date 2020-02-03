@@ -9,6 +9,12 @@
  */
 
 namespace CTL {
+
+// future releases: spatial dependency
+// * To describe angular dependency of the modification, angles \a theta and \a phi can be
+// * passed as optional parameters. These stick to the conventional angle definitions in spherical
+// * coordinates (\a phi - azimuthal angle, \a theta - polar angle).
+
 /*!
  * \class AbstractBeamModifier
  * \brief Base class for components that modify the X-ray beam.
@@ -17,11 +23,12 @@ namespace CTL {
  * are radiation filters or collimator systems.
  *
  * Sub-classes of AbstractBeamModifier can be created to define all kinds of individual modifiers. A
- * sub-class needs to implement the modify() method, which takes a (constant) reference to the
- * incident radiation spectrum and returns the radition's spectrum afted it passed the beam modifier
- * component. To describe angular dependency of the modification, angles \a theta and \a phi can be
- * passed as optional parameters. These stick to the conventional angle definitions in spherical
- * coordinates (\a phi - azimuthal angle, \a theta - polar angle).
+ * sub-class needs to implement the two methods that describe the modification of the spectrum and
+ * flux:
+ * The modifiedSpectrum() method takes a (constant) reference to the incident radiation spectrum
+ * and must return the spectrum afted the radiation passed the beam modifier component.
+ * The modifiedFlux() method takes the input flux and a (constant) reference to the incident
+ * radiation spectrum and must return the remaining flux behind the beam modifier component.
  *
  * When creating a sub-class of AbstractBeamModifier, make sure to register the new component in the
  * enumeration using the #CTL_TYPE_ID(newIndex) macro. It is required to specify a value
@@ -41,18 +48,27 @@ class AbstractBeamModifier : public SystemComponent
     DECLARE_ELEMENTAL_TYPE
 
     // abstract interface
-    public:virtual IntervalDataSeries modify(const IntervalDataSeries& inputSpectrum,
-                                            double theta = 0.0,
-                                            double phi = 0.0) = 0;
+    public:virtual IntervalDataSeries modifiedSpectrum(const IntervalDataSeries& inputSpectrum) = 0;
+    public:virtual double modifiedFlux(double inputFlux,
+                                       const IntervalDataSeries& inputSpectrum) = 0;
 
 public:
-    AbstractBeamModifier(const QString& name = defaultName());
-
     // virtual methods
     QString info() const override;
 
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
+
+    ~AbstractBeamModifier() override = default;
+
+protected:
+    AbstractBeamModifier() = default;
+    AbstractBeamModifier(const QString& name);
+
+    AbstractBeamModifier(const AbstractBeamModifier&) = default;
+    AbstractBeamModifier(AbstractBeamModifier&&) = default;
+    AbstractBeamModifier& operator=(const AbstractBeamModifier&) = default;
+    AbstractBeamModifier& operator=(AbstractBeamModifier&&) = default;
 };
 
 /*!

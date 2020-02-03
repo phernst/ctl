@@ -280,6 +280,8 @@ void SourceParam::prepare(SimpleCTsystem& system) const
     auto sourcePtr = system.source();
 
     qDebug() << "PrepareAbstractSource --- preparing source\n"
+             << "- energy range\t" << _energyRangeRestr.first
+             << _energyRangeRestr.second.start() << "," << _energyRangeRestr.second.end() << "\n"
              << "- flux mod\t" << _newFluxModifier << "\n"
              << "- focal spot size\t" << _newFocalSpotSize << "\n"
              << "- focal spot pos\t" << _newSpotPosition.first;
@@ -291,6 +293,8 @@ void SourceParam::prepare(SimpleCTsystem& system) const
         sourcePtr->setFocalSpotSize(_newFocalSpotSize.second);
     if(_newSpotPosition.first)
         sourcePtr->setFocalSpotPosition(_newSpotPosition.second);
+    if(_energyRangeRestr.first)
+        sourcePtr->setEnergyRangeRestriction(_energyRangeRestr.second);
 }
 
 bool SourceParam::isApplicableTo(const CTsystem& system) const
@@ -474,14 +478,14 @@ void GenericDetectorParam::fromVariant(const QVariant &variant)
         QVariantList moduleList = varMap.value("module locations").toList();
         QVector<mat::Location> modLocs;
         modLocs.reserve(moduleList.size());
-        for(const auto& mod : moduleList)
+        for(const auto& mod : qAsConst(moduleList))
         {
             mat::Location loc;
             loc.fromVariant(mod);
             modLocs.append(loc);
         }
 
-        _newModuleLocations = { true, std::move(modLocs) };
+        _newModuleLocations = { true, modLocs };
     }
     if(varMap.contains("pixel size"))
     {

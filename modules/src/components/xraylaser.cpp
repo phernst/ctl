@@ -57,7 +57,7 @@ double XrayLaser::nominalPhotonFlux() const { return _output / (ELEC_VOLT * phot
  *
  * This is [photonEnergy, photonEnergy].
  */
-AbstractSource::EnergyRange XrayLaser::energyRange() const
+EnergyRange XrayLaser::nominalEnergyRange() const
 {
     return { float(_energy), float(_energy) };
 }
@@ -119,7 +119,7 @@ QVariant XrayLaser::toVariant() const
  */
 QString XrayLaser::defaultName()
 {
-    static const QString defName(QStringLiteral("X-ray laser"));
+    const QString defName(QStringLiteral("X-ray laser"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

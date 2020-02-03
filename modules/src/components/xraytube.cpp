@@ -1,10 +1,11 @@
 #include "xraytube.h"
+#include "models/xrayspectrummodels.h"
 
 namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(XrayTube)
 
-const float DEFAULT_SPECTRUM_BIN_WIDTH = 10;
+constexpr float DEFAULT_SPECTRUM_BIN_WIDTH = 10;
 
 /*!
  * Constructs an XrayTube with a focal spot size of \a focalSpotSize and its focal spot positioned
@@ -17,7 +18,7 @@ XrayTube::XrayTube(const QSizeF &focalSpotSize,
                    double tubeVoltage,
                    double mAs,
                    const QString &name)
-    : AbstractSource(focalSpotSize, focalSpotPosition, new KramersLawSpectrumModel, name)
+    : AbstractSource(focalSpotSize, focalSpotPosition, new TASMIPSpectrumModel, name)
     , _mAs(mAs)
 {
     setTubeVoltage(tubeVoltage);
@@ -56,7 +57,7 @@ XrayTube::XrayTube(double tubeVoltage, double mAs, const QString &name)
  * time-product (used for a single X-ray shot) to 1.0 mAs.
  */
 XrayTube::XrayTube(const QString &name)
-    : XrayTube(QSizeF(0.0,0.0), Vector3x1(0.0), 100.0f, 1.0f, name)
+    : XrayTube(QSizeF(0.0,0.0), Vector3x1(0.0), 100.0, 1.0, name)
 {
 }
 
@@ -72,7 +73,7 @@ double XrayTube::nominalPhotonFlux() const { return _mAs * _intensityConstant; }
  *
  * This is [0 keV, e * tubeVoltage].
  */
-AbstractSource::EnergyRange XrayTube::energyRange() const { return { 0.0f, float(_tubeVoltage) };
+EnergyRange XrayTube::nominalEnergyRange() const { return { 0.0f, float(_tubeVoltage) };
 }
 
 /*!
@@ -104,9 +105,21 @@ SystemComponent* XrayTube::clone() const { return new XrayTube(*this); }
  */
 QString XrayTube::defaultName()
 {
-    static const QString defName(QStringLiteral("X-ray tube"));
+    const QString defName(QStringLiteral("X-ray tube"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
+}
+
+void XrayTube::updateIntensityConstant()
+{
+    constexpr double perMM2toCM2 = 100.0;
+    const auto nbSpectralBins = std::max({ qRound(nominalEnergyRange().width()), 1 });
+    _intensityConstant = IntervalDataSeries::sampledFromModel(*_spectrumModel,
+                                                              nominalEnergyRange().start(), nominalEnergyRange().end(),
+                                                              nbSpectralBins).integral()
+                                                               * perMM2toCM2;
+
+    qDebug("New intensity constant: %f",_intensityConstant);
 }
 
 /*!
@@ -126,8 +139,12 @@ void XrayTube::setTubeVoltage(double voltage)
 {
     _tubeVoltage = voltage;
 
-    if(hasSpectrumModel())
-        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+    // now ensured to have spectrum model
+//    if(hasSpectrumModel())
+//        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+
+    _spectrumModel->setParameter(_tubeVoltage);
+    updateIntensityConstant();
 }
 
 /*!
@@ -135,10 +152,12 @@ void XrayTube::setTubeVoltage(double voltage)
  */
 void XrayTube::setMilliampereSeconds(double mAs) { _mAs = mAs; }
 
-/*!
- * Sets the intensity constant to \a value (in PHOTONS / (mAs * cm^2)).
- */
-void XrayTube::setIntensityConstant(double value) { _intensityConstant = value; }
+
+// deprecated, intensity constant derived from TASMIPSpectralModel
+//  /*!
+//   * Sets the intensity constant to \a value (in PHOTONS / (mAs * cm^2)).
+//   */
+//  void XrayTube::setIntensityConstant(double value) { _intensityConstant = value; }
 
 // Use SystemComponent::fromVariant() documentation.
 void XrayTube::fromVariant(const QVariant& variant)
@@ -161,17 +180,21 @@ QVariant XrayTube::toVariant() const
     return ret;
 }
 
-void XrayTube::setSpectrumModel(AbstractXraySpectrumModel* model)
+void XrayTube::setSpectrumModel(AbstractXraySpectrumModel*)
 {
-    AbstractSource::setSpectrumModel(model);
+// deprecated, XrayTube now fixed to TASMIPSpectrumModel
+//    AbstractSource::setSpectrumModel(model);
 
-    if(model)
-        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+//    if(model)
+//        static_cast<AbstractXraySpectrumModel*>(_spectrumModel.get())->setParameter(_tubeVoltage);
+
+    qWarning("Setting spectrum model in XrayTube deprecated, XrayTube now fixed to TASMIPSpectrumModel.");
 }
 
 uint XrayTube::spectrumDiscretizationHint() const
 {
-    return std::max(uint(std::ceil(energyRange().width() / DEFAULT_SPECTRUM_BIN_WIDTH)), 1u);
+    const auto ret = int(std::ceil(energyRange().width() / DEFAULT_SPECTRUM_BIN_WIDTH));
+    return static_cast<uint>(std::max(ret, 1));
 }
 
 } // namespace CTL

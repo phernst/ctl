@@ -1,7 +1,6 @@
 #include "geometrydecoder.h"
-
-#include "components/allgenerictypes.h"
 #include "acquisition/preparesteps.h"
+#include "components/allgenerictypes.h"
 
 namespace CTL {
 
@@ -76,7 +75,7 @@ Matrix3x3 GeometryDecoder::computeSourceRotation(const QVector<mat::Location>& m
 
     // vector from source to detector centroid
     Vector3x1 src2centroid = centroid - sourcePosition;
-    src2centroid /= src2centroid.norm();
+    src2centroid.normalize();
 
     // construct a rotation matrix that rotates the z-axis to `src2centroid` vector, i.e. it needs
     // to have the form
@@ -84,8 +83,8 @@ Matrix3x3 GeometryDecoder::computeSourceRotation(const QVector<mat::Location>& m
     // with r1 and r2 perpendicular to src2centroid
 
     // find axis that is as most as perpendicular to this vector
-    uint axis = fabs(src2centroid.get<0>()) < fabs(src2centroid.get<1>()) ? 0 : 1;
-    axis = fabs(src2centroid(axis)) < fabs(src2centroid.get<2>()) ? axis : 2;
+    uint axis = std::fabs(src2centroid.get<0>()) < std::fabs(src2centroid.get<1>()) ? 0 : 1;
+    axis = std::fabs(src2centroid(axis)) < std::fabs(src2centroid.get<2>()) ? axis : 2;
 
     // init 1st vector with this axis
     Vector3x1 r1(0.0);

@@ -14,18 +14,18 @@ class AbstractCTsystemBlueprint
     public:virtual AbstractSource* source() const = 0;
 
 public:
-    AbstractCTsystemBlueprint() = default;
-
-    // default copy/move behavior with virtual destructor
-    AbstractCTsystemBlueprint(const AbstractCTsystemBlueprint&) = default;
-    AbstractCTsystemBlueprint(AbstractCTsystemBlueprint&&) = default;
-    AbstractCTsystemBlueprint& operator=(const AbstractCTsystemBlueprint&) = default;
-    AbstractCTsystemBlueprint& operator=(AbstractCTsystemBlueprint&&) = default;
     virtual ~AbstractCTsystemBlueprint() = default;
 
     // optionally reimplementable
     virtual QString systemName() const { return QStringLiteral("Blueprinted system"); }
-    virtual std::vector<GenericBeamModifier*> modifiers() const { return {}; }
+    virtual std::vector<GenericBeamModifier*> modifiers() const { return { }; }
+
+protected:
+    AbstractCTsystemBlueprint() = default;
+    AbstractCTsystemBlueprint(const AbstractCTsystemBlueprint&) = default;
+    AbstractCTsystemBlueprint(AbstractCTsystemBlueprint&&) = default;
+    AbstractCTsystemBlueprint& operator=(const AbstractCTsystemBlueprint&) = default;
+    AbstractCTsystemBlueprint& operator=(AbstractCTsystemBlueprint&&) = default;
 };
 
 class CTsystemBuilder

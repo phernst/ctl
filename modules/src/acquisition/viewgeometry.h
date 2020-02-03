@@ -9,7 +9,8 @@ namespace CTL {
 /*!
  * \class SingleViewGeometry
  *
- * \brief Alias name for a vector of projection matrices.
+ * \brief Holds a list of projection matrices corresponding to the detector modules of a single
+ * view.
  * \relates GeometryEncoder
  * \relates GeometryDecoder
  *
@@ -55,7 +56,8 @@ private:
 /*!  
  * \class FullGeometry
  *
- * \brief Alias name for a vector of SingleViewGeometry elements.
+ * \brief Holds a list of SingleViewGeometry instances to represent the acquisition geometry of a
+ * full CT scan.
  * \relates GeometryEncoder
  * \relates GeometryDecoder
  *

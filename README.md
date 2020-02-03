@@ -51,7 +51,7 @@ project.
     ```
     
 2. Qt3D (optional, for
-[GUI widgets](https://gitlab.com/tpfeiffe/ctl/blob/master/modules/gui-widgets.pri))
+[3D GUI widgets](https://gitlab.com/tpfeiffe/ctl/blob/master/modules/submodules/gui_widgets_3d.pri))
     
     ```console
     sudo apt install qt3d5-dev
@@ -65,9 +65,7 @@ Install OpenCL 1.1/1.2
 This is an example how to set up
 [OpenCL](https://github.khronos.org/OpenCL-CLHPP/) for a NVIDIA GPU. OpenCL and
 its C++-API is required for the
-[OCL config](https://gitlab.com/tpfeiffe/ctl/blob/master/modules/ocl_config.pri)
-and
-[OCL projectors](https://gitlab.com/tpfeiffe/ctl/blob/master/modules/ocl_projectors.pri)
+[CTL OCL](https://gitlab.com/tpfeiffe/ctl/blob/master/modules/ctl_ocl.pri)
 module.
 
 1. install official NVIDIA driver using Driver Manager
@@ -161,13 +159,11 @@ subset of modules. Each module has a corresponding .pri file that you can
 include into your qmake project (.pro file) using the syntax
 `include(example_module.pri)` (see also the *examples* or *testing* folder).
 
-So far, the following modules are available:
- * ctl.pri: the core library
- * den_file_io.pri: .den file handling
- * nrrd_file_io.pri: .nrrd file handling
- * ocl_config.pri: uniform OpenCL environment/configuration
- * ocl_projectors.pri: OpenCL based projectors
- * gui-widgets.pri: widgets for visualization purposes
+The following modules are available:
+ * ctl.pri: the core library and file IO
+ * ctl_ocl.pri: OpenCL routines and OpenCL environment
+ * ctl_qtgui.pri: widgets for visualization purposes
+ * ctl_nlopt.pri: NLopt-dependent submodules; currently, Grangeat-based 2D/3D registration
 
 
 Compile a project
@@ -198,6 +194,7 @@ include further geometric/physical/measuring effects.
 #include "io/nrrd/nrrdfileio.h"
 #include "projectors/raycasterprojector.h"
 #include <QCoreApplication>
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
@@ -250,9 +247,7 @@ int main(int argc, char* argv[])
  * able to compile this example program:
  *
  *  include(path/to/ctl.pri)
- *  include(path/to/nrrd_file_io.pri)
- *  include(path/to/ocl_config.pri)
- *  include(path/to/ocl_projectors.pri)
+ *  include(path/to/ctl_ocl.pri)
  */
  ```
  A corresponding qmake project for this example can be found in
@@ -260,6 +255,7 @@ int main(int argc, char* argv[])
 
 --------------
 
+Statistics on the master branch:  
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=code)
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=comments)
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=blanks)

@@ -21,9 +21,9 @@ class GenericBeamModifier : public AbstractBeamModifier
     CTL_TYPE_ID(401)
 
     // implementation of abstract interface
-    public: IntervalDataSeries modify(const IntervalDataSeries& inputSpectrum,
-                                     double theta = 0.0,
-                                     double phi = 0.0) override;
+    public: IntervalDataSeries modifiedSpectrum(const IntervalDataSeries& inputSpectrum) override;
+    public: double modifiedFlux(double inputFlux,
+                                const IntervalDataSeries& inputSpectrum) override;
 
 public:
     GenericBeamModifier(const QString& name = defaultName());

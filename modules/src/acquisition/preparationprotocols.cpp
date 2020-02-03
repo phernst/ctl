@@ -1,8 +1,7 @@
-#include <QDebug>
-
 #include "preparationprotocols.h"
-#include "preparesteps.h"
 #include "acquisitionsetup.h"
+#include "preparesteps.h"
+#include <QDebug>
 
 namespace CTL {
 namespace protocols {
@@ -13,8 +12,8 @@ FlyingFocalSpot::FlyingFocalSpot(std::vector<Vector3x1> positions, bool alternat
 {
 }
 
-FlyingFocalSpot FlyingFocalSpot::twoAlternatingSpots(const Vector3x1 &position1,
-                                                     const Vector3x1 &position2)
+FlyingFocalSpot FlyingFocalSpot::twoAlternatingSpots(const Vector3x1& position1,
+                                                     const Vector3x1& position2)
 {
     FlyingFocalSpot ret;
     ret._alternating = true;
@@ -24,10 +23,10 @@ FlyingFocalSpot FlyingFocalSpot::twoAlternatingSpots(const Vector3x1 &position1,
     return ret;
 }
 
-FlyingFocalSpot FlyingFocalSpot::fourAlternatingSpots(const Vector3x1 &position1,
-                                                      const Vector3x1 &position2,
-                                                      const Vector3x1 &position3,
-                                                      const Vector3x1 &position4)
+FlyingFocalSpot FlyingFocalSpot::fourAlternatingSpots(const Vector3x1& position1,
+                                                      const Vector3x1& position2,
+                                                      const Vector3x1& position3,
+                                                      const Vector3x1& position4)
 {
     FlyingFocalSpot ret;
     ret._alternating = true;

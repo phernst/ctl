@@ -1,8 +1,6 @@
 #ifndef PROJECTIONDATA_H
 #define PROJECTIONDATA_H
 
-#include <iostream>
-
 #include "singleviewdata.h"
 
 namespace CTL {
@@ -44,6 +42,8 @@ public:
     const std::vector<SingleViewData>& data() const;
     std::vector<SingleViewData>& data();
     Dimensions dimensions() const;
+    const SingleViewData& first() const;
+    SingleViewData& first();
     uint nbViews() const;
     SingleViewData& view(uint i);
     const SingleViewData& view(uint i) const;
@@ -56,6 +56,7 @@ public:
     void append(const SingleViewData& singleView);
     ProjectionData combined(const ModuleLayout& layout = ModuleLayout()) const;
     void fill(float fillValue);
+    void freeMemory();
     float max() const;
     float min() const;
     void setDataFromVector(const std::vector<float>& dataVector);
@@ -88,6 +89,8 @@ protected:
 
 private:
     bool hasEqualSizeAs(const SingleViewData& other) const;
+    template <class Function>
+    void parallelExecution(const Function& f) const;
 };
 
 /*!

@@ -15,6 +15,13 @@ class AbstractMetaInfoReader
 
 public:
     virtual ~AbstractMetaInfoReader() = default;
+
+protected:
+    AbstractMetaInfoReader() = default;
+    AbstractMetaInfoReader(const AbstractMetaInfoReader&) = default;
+    AbstractMetaInfoReader(AbstractMetaInfoReader&&) = default;
+    AbstractMetaInfoReader& operator=(const AbstractMetaInfoReader&) = default;
+    AbstractMetaInfoReader& operator=(AbstractMetaInfoReader&&) = default;
 };
 
 template<typename T>
@@ -26,6 +33,16 @@ class AbstractVolumeIO : public AbstractMetaInfoReader
                               QVariantMap supplementaryMetaInfo = {}) const = 0;
     public:virtual bool write(const Chunk2D<T>& slice, const QString& fileName,
                               QVariantMap supplementaryMetaInfo = {}) const = 0;
+
+public:
+    ~AbstractVolumeIO() override = default;
+
+protected:
+    AbstractVolumeIO() = default;
+    AbstractVolumeIO(const AbstractVolumeIO&) = default;
+    AbstractVolumeIO(AbstractVolumeIO&&) = default;
+    AbstractVolumeIO& operator=(const AbstractVolumeIO&) = default;
+    AbstractVolumeIO& operator=(AbstractVolumeIO&&) = default;
 };
 
 class AbstractProjectionDataIO : public AbstractMetaInfoReader
@@ -38,6 +55,16 @@ class AbstractProjectionDataIO : public AbstractMetaInfoReader
                               QVariantMap supplementaryMetaInfo = {}) const = 0;
     public:virtual bool write(const SingleViewData& data, const QString& fileName,
                               QVariantMap supplementaryMetaInfo = {}) const = 0;
+
+public:
+    ~AbstractProjectionDataIO() override = default;
+
+protected:
+    AbstractProjectionDataIO() = default;
+    AbstractProjectionDataIO(const AbstractProjectionDataIO&) = default;
+    AbstractProjectionDataIO(AbstractProjectionDataIO&&) = default;
+    AbstractProjectionDataIO& operator=(const AbstractProjectionDataIO&) = default;
+    AbstractProjectionDataIO& operator=(AbstractProjectionDataIO&&) = default;
 };
 
 class AbstractProjectionMatrixIO : public AbstractMetaInfoReader
@@ -50,6 +77,16 @@ class AbstractProjectionMatrixIO : public AbstractMetaInfoReader
                               QVariantMap supplementaryMetaInfo = {}) const = 0;
     public:virtual bool write(const SingleViewGeometry& data, const QString& fileName,
                               QVariantMap supplementaryMetaInfo = {}) const = 0;
+
+public:
+    ~AbstractProjectionMatrixIO() override = default;
+
+protected:
+    AbstractProjectionMatrixIO() = default;
+    AbstractProjectionMatrixIO(const AbstractProjectionMatrixIO&) = default;
+    AbstractProjectionMatrixIO(AbstractProjectionMatrixIO&&) = default;
+    AbstractProjectionMatrixIO& operator=(const AbstractProjectionMatrixIO&) = default;
+    AbstractProjectionMatrixIO& operator=(AbstractProjectionMatrixIO&&) = default;
 };
 
 } // namespace io

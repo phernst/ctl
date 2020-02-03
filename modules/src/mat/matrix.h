@@ -1,6 +1,6 @@
 /******************************************************************************
 ** 'Matrix' template class for basic matrix calculations
-** by Robert Frysch | Feb 04, 2019
+** by Robert Frysch | Jan 12, 2020
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
@@ -10,7 +10,9 @@
 #define MATRIX_H
 
 #include <algorithm>
-#include <cmath> // required for sqrt() in 'MatrixBase::norm()'
+#include <cmath>
+#include <numeric>
+#include <stdexcept>
 #include <string>
 
 typedef unsigned int uint;
@@ -18,7 +20,24 @@ typedef unsigned int uint;
 namespace CTL {
 namespace mat {
 
-// uniform interface and ressource
+/*!
+ * \class MatrixBase
+ *
+ * \brief Helper base class that provides an access interface to the Matrix template class and its
+ * scalar specialization.
+ */
+
+/*!
+ * \class Matrix
+ *
+ * \brief This template class is an abstraction of a small matrix with a size known at compile time.
+ *
+ * Basic algebraic operations are provided and dimension checks are carried out during compilation.
+ * No heap allocation is performed.
+ * Elements are stored in row major order.
+ */
+
+// Base class for uniform interface and ressource
 template <uint Rows, uint Cols>
 class MatrixBase
 {
@@ -26,19 +45,21 @@ public:
     // construction
     MatrixBase() = default;
     explicit MatrixBase(double fillValue);
-    MatrixBase(const double (&initArray)[Rows * Cols]);
+    explicit MatrixBase(const double (&initArray)[Rows * Cols]);
+    template <typename... Doubles>
+    MatrixBase(double firstElement, Doubles... matrixElements);
 
     // select row
-    double* operator[](uint row) { return _m + row * Cols; }
-    const double* operator[](uint row) const { return _m + row * Cols; }
+    double* operator[](uint row);
+    const double* operator[](uint row) const;
 
     // individual element access with 2 indizes
     // -> standard access (without boundary check)
-    double& operator()(uint row, uint column) { return (*this)[row][column]; }
-    double operator()(uint row, uint column) const { return (*this)[row][column]; }
+    double& operator()(uint row, uint column);
+    double operator()(uint row, uint column) const;
     // -> run time boundary check (throws out_of_range)
-    double& at(uint row, uint column);
-    double at(uint row, uint column) const;
+    double& at(uint row, uint column) noexcept(false);
+    double at(uint row, uint column) const noexcept(false);
     // -> compile time boundary check (never fails)
     template <uint row, uint column>
     double& get() noexcept;
@@ -47,8 +68,8 @@ public:
 
     // individual element access with 1 index
     // -> standard access (without boundary check)
-    double& operator()(uint n) { return _m[n]; }
-    double operator()(uint n) const { return _m[n]; }
+    double& operator()(uint n);
+    double operator()(uint n) const;
     // -> run time boundary check (throws out_of_range)
     double& at(uint n);
     double at(uint n) const;
@@ -59,15 +80,18 @@ public:
     double get() const noexcept;
 
     // pointer access to array (row-major order)
-    double* data() { return _m; } // optional, for convenience
-    const double* data() const { return _m; } // optional, for convenience
-    const double* constData() const { return _m; } // optional, for convenience
-    double* begin() { return _m; }
-    const double* begin() const { return _m; }
-    const double* constBegin() const { return _m; }
-    double* end() { return std::end(_m); }
-    const double* end() const { return std::end(_m); }
-    const double* constEnd() const { return std::end(_m); }
+    double* data();
+    const double* data() const;
+    const double* constData() const;
+    double* begin();
+    const double* begin() const;
+    const double* constBegin() const;
+    double* end();
+    const double* end() const;
+    const double* constEnd() const;
+
+    // size
+    constexpr size_t size() const;
 
     // convert content to string
     static const char SEPARATOR_CHARACTER_FOR_INFO_STRING = '_';
@@ -77,24 +101,30 @@ public:
     double norm() const;
 
     // equality operator
-    bool operator==(const MatrixBase<Rows, Cols>& other) const;
-    bool operator!=(const MatrixBase<Rows, Cols>& other) const;
+    bool operator==(const MatrixBase<Rows, Cols>& rhs) const;
+    bool operator!=(const MatrixBase<Rows, Cols>& rhs) const;
 
 private:
     // the data
     double _m[Rows * Cols];
 };
 
-// actual Matrix class for matrices and vectors
+// Actual Matrix class for matrices and vectors
 template <uint Rows, uint Cols>
 class Matrix : public MatrixBase<Rows, Cols>
 {
+    // helper function for `subMat()`
+    static constexpr uint rangeDim(uint from, uint to);
+    // helper function for vectors' `subMat()`
+    static constexpr uint vecRowDim(uint from, uint to);
+    static constexpr uint vecColDim(uint from, uint to);
+
 public:
     Matrix() = default;
     explicit Matrix(double fillValue);
-    Matrix(const double (&initArray)[Rows * Cols]);
-    template<typename... Doubles,
-             typename = typename std::enable_if<sizeof...(Doubles) + 1u == Rows * Cols>::type>
+    explicit Matrix(const double (&initArray)[Rows * Cols]);
+    template <typename... Doubles,
+              typename = typename std::enable_if<sizeof...(Doubles) + 1u == Rows * Cols>::type>
     Matrix(double firstElement, Doubles... matrixElements);
 
     // factory function that copies (+ cast if necessary) the 'NthMat' matrix from
@@ -103,20 +133,29 @@ public:
     static Matrix<Rows, Cols>
     fromContainer(const Container& vector, size_t NthMat, bool* ok = nullptr);
 
+    // sub-matrix extraction
+    template <uint fromRow, uint toRow, uint fromCol, uint toCol>
+    auto subMat() const -> Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>;
+    // sub-vector extraction
+    template <uint from, uint to>
+    auto subMat() const -> Matrix<vecRowDim(from, to), vecColDim(from, to)>;
+
     // single vector extraction
     template <uint i>
     Matrix<1, Cols> row() const;
     template <uint j>
     Matrix<Rows, 1> column() const;
 
-    // unary operators
+    // unary operators etc.
+    void normalize();
+    Matrix<Rows, Cols> normalized() const;
     Matrix<Cols, Rows> transposed() const;
     Matrix<Rows, Cols> operator-() const;
     // compound assignment
     Matrix<Rows, Cols>& operator*=(double scalar);
     Matrix<Rows, Cols>& operator/=(double scalar);
-    Matrix<Rows, Cols>& operator+=(const Matrix<Rows, Cols>& other);
-    Matrix<Rows, Cols>& operator-=(const Matrix<Rows, Cols>& other);
+    Matrix<Rows, Cols>& operator+=(const Matrix<Rows, Cols>& rhs);
+    Matrix<Rows, Cols>& operator-=(const Matrix<Rows, Cols>& rhs);
     // binary operators
     Matrix<Rows, Cols> operator*(double scalar) const;
     Matrix<Rows, Cols> operator/(double scalar) const;
@@ -126,59 +165,51 @@ public:
     Matrix<Rows, Cols2> operator*(const Matrix<Cols, Cols2>& rhs) const;
 };
 
-// scalar specialization
+// Scalar specialization
 template <>
 class Matrix<1, 1> : public MatrixBase<1, 1>
 {
 public:
     Matrix() = default;
-    Matrix(double value)
-        : MatrixBase<1, 1>(value)
-    {
-    }
+    Matrix(double value);
 
     // dedicated access to scalar value
-    double value() const { return *begin(); }
-    double& ref() { return *begin(); }
-    const double& ref() const { return *begin(); }
+    double value() const;
+    double& ref();
+    const double& ref() const;
 
     // implicit conversion to 'double'
-    operator double() const { return *begin(); }
+    operator double() const;
 
     // operations
-    Matrix<1, 1> transposed() const { return *this; }
-    Matrix<1, 1> operator-() const { return { -ref() }; }
-    Matrix<1, 1>& operator*=(double scalar)
-    {
-        ref() *= scalar;
-        return *this;
-    }
-    Matrix<1, 1>& operator/=(double scalar)
-    {
-        ref() /= scalar;
-        return *this;
-    }
-    Matrix<1, 1>& operator+=(double scalar)
-    {
-        ref() += scalar;
-        return *this;
-    }
-    Matrix<1, 1>& operator-=(double scalar)
-    {
-        ref() -= scalar;
-        return *this;
-    }
+    Matrix<1, 1>& operator*=(double scalar);
+    Matrix<1, 1>& operator/=(double scalar);
+    Matrix<1, 1>& operator+=(double scalar);
+    Matrix<1, 1>& operator-=(double scalar);
 };
+
+// Free operators
+template <uint Rows, uint Cols>
+CTL::mat::Matrix<Rows, Cols> operator*(double scalar, const CTL::mat::Matrix<Rows, Cols>& rhs);
+
+// Free functions
+// diagonal squared matrix
+template <uint N>
+Matrix<N, N> diag(const Matrix<N, 1>& diagElements);
+
+// NxN identity matrix
+template <uint N>
+Matrix<N, N> eye();
+
+// concatenation
+template <uint Rows, uint Cols1, uint Cols2>
+Matrix<Rows, Cols1 + Cols2> horzcat(const Matrix<Rows, Cols1>& m1, const Matrix<Rows, Cols2>& m2);
+
+template <uint Rows1, uint Rows2, uint Cols>
+Matrix<Rows1 + Rows2, Cols> vertcat(const Matrix<Rows1, Cols>& m1, const Matrix<Rows2, Cols>& m2);
 
 } // namespace mat
 } // namespace CTL
-
-// global operators
-template <uint Rows, uint Cols>
-CTL::mat::Matrix<Rows, Cols> operator*(double scalar, const CTL::mat::Matrix<Rows, Cols>& rhs)
-{
-    return rhs * scalar;
-}
 
 #include "matrix.tpp"
 

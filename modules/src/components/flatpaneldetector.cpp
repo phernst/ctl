@@ -35,7 +35,7 @@ QString FlatPanelDetector::info() const
  */
 QString FlatPanelDetector::defaultName()
 {
-    static const QString defName(QStringLiteral("Flat panel detector"));
+    const QString defName(QStringLiteral("Flat panel detector"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
@@ -81,7 +81,7 @@ const QSize& FlatPanelDetector::nbPixels() const { return _nbPixelPerModule; }
 /*!
  * Returns the physical dimensions of the flat panel module (i.e. [width, height] in mm).
  */
-const QSizeF FlatPanelDetector::panelDimensions() const
+QSizeF FlatPanelDetector::panelDimensions() const
 {
     return QSizeF(double(_nbPixelPerModule.width())*_pixelDimensions.width(),
                   double(_nbPixelPerModule.height())*_pixelDimensions.height());

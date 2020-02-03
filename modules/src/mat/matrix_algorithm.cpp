@@ -8,7 +8,10 @@ static bool qrdcmp(Matrix3x3 &a, double *d);
 static Matrix3x3 mirror(const Matrix3x3 &a);
 static void positiveDiag4RQ(PairMat3x3 *qr);
 
-PairMat3x3 QRdecomposition(const Matrix3x3 &A)
+/*!
+ * Returns the QR decomposition of \a A.
+ */
+PairMat3x3 QRdecomposition(const Matrix3x3& A)
 {
     Vector3x1 d;
     Matrix3x3 Q,Q1,Q2;
@@ -24,8 +27,8 @@ PairMat3x3 QRdecomposition(const Matrix3x3 &A)
 
     Vector3x1 u1{ B.get<0,0>(), B.get<0,1>(), B.get<0,2>() };
     Vector3x1 u2{          0.0, B.get<1,1>(), B.get<1,2>() };
-    u1 /= u1.norm();
-    u2 /= u2.norm();
+    u1.normalize();
+    u2.normalize();
     Q1 = eye<3>() - 2.0*u1*u1.transposed();
     Q2 = eye<3>() - 2.0*u2*u2.transposed();
     Q = Q1*Q2;
@@ -33,28 +36,35 @@ PairMat3x3 QRdecomposition(const Matrix3x3 &A)
     return {Q,R};
 }
 
-/*
-* Apply QR to FA'F. Transform result again with Q->FQ'F and R->FR'F.
-* Moreover enforce uniqueness with C, so that diagonal of R is positive.
-*
-* Finally, the total decomposition FA'F = QR w.r.t. A is
-*
-* A = (F R' F C) (C F Q' F)
-*   =    ^R_final     ^Q_final
-*
-* with F=F', C=C' and FF=CC=1:
-*
-* F = 0 0 1  ,   C = ±1  0  0
-*     0 1 0           0 ±1  0
-*     1 0 0           0  0 ±1  .
-*
-* When setting unique = normalize = true, one obtains the classical pinhole
-* camera decomposition with the nomenclature R->K and Q->R (P=K[R|t]) with
-* K = fx  s px
-*      0 fy py
-*      0  0  1
-*/
-PairMat3x3 RQdecomposition(const Matrix3x3 &A, bool unique, bool normalize)
+/*!
+ * Returns the RQ decomposition of \a A.
+ * Apply QR to FA'F. Transform result again with Q->FQ'F and R->FR'F.
+ * Moreover enforce uniqueness with C, so that diagonal of R is positive.
+ *
+ * Finally, the total decomposition FA'F = QR w.r.t. A is
+ *
+ * \code
+ * A = (F R' F C) (C F Q' F)
+ *   =    ^R_final     ^Q_final
+ * \endcode
+ *
+ * with F=F', C=C' and FF=CC=1:
+ *
+ * \code
+ * F = 0 0 1  ,   C = ±1  0  0
+ *     0 1 0           0 ±1  0
+ *     1 0 0           0  0 ±1  .
+ * \endcode
+ *
+ * When setting unique = normalize = true, one obtains the classical pinhole
+ * camera decomposition with the nomenclature R->K and Q->R (P=K[R|t]) with
+ * \code
+ * K = fx  s px
+ *      0 fy py
+ *      0  0  1
+ * \endcode
+ */
+PairMat3x3 RQdecomposition(const Matrix3x3& A, bool unique, bool normalize)
 {
     auto ret = QRdecomposition( mirror(A) );
     ret = { mirror(ret.Q), mirror(ret.R) };
@@ -76,7 +86,20 @@ PairMat3x3 RQdecomposition(const Matrix3x3 &A, bool unique, bool normalize)
     return ret;
 }
 
-double det(const Matrix3x3 & m)
+/*!
+ * Returns the a 3x1 vector resulting from the cross product \a l X \a r.
+ */
+Vector3x1 cross(const Vector3x1& l, const Vector3x1& r)
+{
+    return { l.get<1>() * r.get<2>() - l.get<2>() * r.get<1>(),
+             l.get<2>() * r.get<0>() - l.get<0>() * r.get<2>(),
+             l.get<0>() * r.get<1>() - l.get<1>() * r.get<0>() };
+}
+
+/*!
+ * Returns the determinant of the 3x3 matrix \a m.
+ */
+double det(const Matrix3x3& m)
 {
     return
         m[0][0]*(m[1][1]*m[2][2] - m[2][1]*m[1][2]) -
@@ -84,6 +107,18 @@ double det(const Matrix3x3 & m)
         m[0][2]*(m[1][0]*m[2][1] - m[2][0]*m[1][1]) ;
 }
 
+/*!
+ * Returns a normalized vector that is orthogonal to \a v.
+ */
+mat::Matrix<3, 1> orthonormalTo(const mat::Matrix<3, 1>& v)
+{
+    const auto smallestDim = uint(std::min_element(v.begin(), v.end()) - v.begin());
+    auto ret = mat::Matrix<3, 1>(0.0);
+    ret(smallestDim) = 1.0;
+    ret = mat::cross(v, ret);
+    ret.normalize();
+    return ret;
+}
 
 // # static functions
 
@@ -94,12 +129,12 @@ bool qrdcmp(Matrix3x3 & a, double *d)
     double scale, sigma, sum, tau;
     double c[n-1];
     bool sing = false;
-    for(uint k=0; k<n-1; k++)
+    for(uint k = 0; k < n - 1; k++)
     {
         scale = 0.0;
-        for(i=k; i<n; i++)
-            if(scale<fabs(a[i][k]))
-                scale=fabs(a[i][k]);
+        for(i = k; i < n; i++)
+            if(scale < std::fabs(a[i][k]))
+                scale = std::fabs(a[i][k]);
         if(qFuzzyIsNull(scale))
         {
             sing = true;
@@ -108,24 +143,24 @@ bool qrdcmp(Matrix3x3 & a, double *d)
         }
         else
         {
-            for(i=k; i<n; i++)
+            for(i = k; i < n; i++)
                 a[i][k] /= scale;
-            for(sum=0.0, i=k; i<n; i++)
-                sum += a[i][k]*a[i][k];
+            for(sum = 0.0, i = k; i < n; i++)
+                sum += a[i][k] * a[i][k];
 
-            sigma = std::copysign(sqrt(sum), a[k][k]);
+            sigma = std::copysign(std::sqrt(sum), a[k][k]);
             a[k][k] += sigma;
-            c[k] = sigma*a[k][k];
-            d[k] = -scale*sigma;
+            c[k] = sigma * a[k][k];
+            d[k] = -scale * sigma;
 
-            for(j=k+1; j<n; j++)
+            for(j = k+1; j < n; j++)
             {
-                for(sum=0.0, i=k; i<n; i++)
-                    sum += a[i][k]*a[i][j];
+                for(sum = 0.0, i = k; i < n; i++)
+                    sum += a[i][k] * a[i][j];
 
-                tau = sum/c[k];
-                for(i=k; i<n; i++)
-                    a[i][j] -= tau*a[i][k];
+                tau = sum / c[k];
+                for(i = k; i < n; i++)
+                    a[i][j] -= tau * a[i][k];
             }
         }
     }

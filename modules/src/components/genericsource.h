@@ -13,7 +13,7 @@ class GenericSource : public AbstractSource
     CTL_TYPE_ID(301)
 
     // implementation of abstract interface
-    public:virtual EnergyRange energyRange() const override;
+    public:virtual EnergyRange nominalEnergyRange() const override;
     protected:virtual double nominalPhotonFlux() const override;
 
 public:
@@ -21,10 +21,10 @@ public:
     GenericSource(const IntervalDataSeries& spectrum,
                   double photonFlux = -1.0,
                   const QSizeF& focalSpotSize = QSizeF(0.0, 0.0),
-                  const Vector3x1& focalSpotPosition = Vector3x1(0.0f),
+                  const Vector3x1& focalSpotPosition = Vector3x1(0.0),
                   const QString& name = defaultName());
     GenericSource(const QSizeF& focalSpotSize = QSizeF(0.0, 0.0),
-                  const Vector3x1& focalSpotPosition = Vector3x1(0.0f),
+                  const Vector3x1& focalSpotPosition = Vector3x1(0.0),
                   const QString& name = defaultName());
 
     // virtual methods
@@ -46,7 +46,7 @@ public:
 protected:
     EnergyRange _energyRange = { 0.0f, 0.0f }; //!< Energy range of the emitted radiation.
     uint _samplingHint = 0; //!< Number of samples from last set spectrum.
-    double _totalFlux = 0.0f; //!< Total photon flux (photons/cm² in 1m distance).
+    double _totalFlux = 0.0; //!< Total photon flux (photons/cm² in 1m distance).
 
 };
 

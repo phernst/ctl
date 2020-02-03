@@ -55,7 +55,14 @@ public:
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
-    virtual ~AbstractPrepareStep() = default;
+    ~AbstractPrepareStep() override = default;
+
+protected:
+    AbstractPrepareStep() = default;
+    AbstractPrepareStep(const AbstractPrepareStep&) = default;
+    AbstractPrepareStep(AbstractPrepareStep&&) = default;
+    AbstractPrepareStep& operator=(const AbstractPrepareStep&) = default;
+    AbstractPrepareStep& operator=(AbstractPrepareStep&&) = default;
 };
 
 /*!
@@ -83,6 +90,13 @@ class AbstractPreparationProtocol
 public:
     virtual bool isApplicableTo(const AcquisitionSetup& setup) const;
     virtual ~AbstractPreparationProtocol() = default;
+
+protected:
+    AbstractPreparationProtocol() = default;
+    AbstractPreparationProtocol(const AbstractPreparationProtocol&) = default;
+    AbstractPreparationProtocol(AbstractPreparationProtocol&&) = default;
+    AbstractPreparationProtocol& operator=(const AbstractPreparationProtocol&) = default;
+    AbstractPreparationProtocol& operator=(AbstractPreparationProtocol&&) = default;
 };
 
 // placeholder, implement meaningfully in sub-classes

@@ -18,14 +18,14 @@ class AbstractProjectorConfig
     public:virtual AbstractProjectorConfig* clone() const = 0;
 
 public:
-    AbstractProjectorConfig() = default;
+    virtual ~AbstractProjectorConfig() = default;
 
+protected:
+    AbstractProjectorConfig() = default;
     AbstractProjectorConfig(const AbstractProjectorConfig&) = default;
     AbstractProjectorConfig(AbstractProjectorConfig&&) = default;
     AbstractProjectorConfig& operator=(const AbstractProjectorConfig&) = default;
     AbstractProjectorConfig& operator=(AbstractProjectorConfig&&) = default;
-
-    virtual ~AbstractProjectorConfig() = default;
 };
 
 /*!

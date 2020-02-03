@@ -317,7 +317,7 @@ Matrix3x3 GeometryEncoder::intrinsicParameterMatrix(const Vector3x1CTS& principa
     Q_ASSERT(pixelDimensions.height() != 0.0);
 
     // extract z component for focal length
-    auto focalLengthMM = fabs(principalPointDeviation.get<2>());
+    auto focalLengthMM = std::fabs(principalPointDeviation.get<2>());
     // convert mm in pixel
     auto fX = focalLengthMM / pixelDimensions.width();
     auto fY = focalLengthMM / pixelDimensions.height();

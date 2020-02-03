@@ -1,15 +1,18 @@
 #ifndef MAT_H
 #define MAT_H
 
-// This header includes everything from the `CTL::mat` namespace.
-// Plus, it defines a user-defined floating-point literal for conversion from radian to degree.
+/*
+ * This is a wrapping header, which includes everything from the `CTL::mat` namespace.
+ * Plus it defines a user-defined floating-point literal `deg` for conversion from degree to radian.
+ *
+ * The following types will be directly defined within the `CTL` namespace (see matrix_types.h),
+ * i.e. not encapsulated in `CTL::mat`:
+ * `ProjectionMatrix`, `Homography2D`, `Homography3D`, `Matrix3x3`, `Vector3x1`.
+ */
 
 #include "matrix_algorithm.h"
+#include "matrix_utils.h"
 #include "pmatcomparator.h"
-
-constexpr long double operator"" _deg(long double deg)
-{
-    return deg * 3.141592653589793238462643383279502884l / 180.0l;
-}
+#include "deg.h"
 
 #endif // MAT_H

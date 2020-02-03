@@ -48,7 +48,7 @@ typedef SpectralVolumeData VolumeData;
  *
  * Two structurally different ways of how such an implementation can be realized are given by
  * the examples RayCasterInterface and RayCasterProjector, which can be found in the OpenCL module
- * (ocl_projectors.pri).
+ * (ocl_routines.pri).
  */
 
 /*!
@@ -83,6 +83,13 @@ public:
 
 private:
     ProjectorNotifier _notifier; //!< The notifier object used for signal emission.
+
+protected:
+    AbstractProjector() = default;
+    AbstractProjector(const AbstractProjector&) = delete;
+    AbstractProjector(AbstractProjector&&) = delete;
+    AbstractProjector& operator=(const AbstractProjector&) = delete;
+    AbstractProjector& operator=(AbstractProjector&&) = delete;
 };
 
 inline bool AbstractProjector::isLinear() const { return true; }

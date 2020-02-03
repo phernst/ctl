@@ -91,8 +91,8 @@ PMatComparator::Eval PMatComparator::operator()(const ProjectionMatrix& P1,
                 p2_homo = p2_homoY + P2Column2 * r.get<2>();
 
                 // convert to cartesian coord (divide by w, where p_homo = [x y w])
-                p1 = { { p1_homo.get<0>(), p1_homo.get<1>() } };
-                p2 = { { p2_homo.get<0>(), p2_homo.get<1>() } };
+                p1 = { p1_homo.get<0>(), p1_homo.get<1>() };
+                p2 = { p2_homo.get<0>(), p2_homo.get<1>() };
                 p1 /= p1_homo.get<2>();
                 p2 /= p2_homo.get<2>();
 
@@ -152,9 +152,9 @@ void PMatComparator::setTotalVolumeSize(double totVolumeSizeX,
                                         double totVolumeSizeY,
                                         double totVolumeSizeZ)
 {
-    _voxelSize = { { totVolumeSizeX / _nbVoxels[0],
-                     totVolumeSizeY / _nbVoxels[1],
-                     totVolumeSizeZ / _nbVoxels[2] } };
+    _voxelSize = { totVolumeSizeX / _nbVoxels[0],
+                   totVolumeSizeY / _nbVoxels[1],
+                   totVolumeSizeZ / _nbVoxels[2] };
 }
 
 void PMatComparator::setAccuracy(double accuracy)
@@ -164,9 +164,9 @@ void PMatComparator::setAccuracy(double accuracy)
     _nbVoxels[0] = nbVoxels;
     _nbVoxels[1] = nbVoxels;
     _nbVoxels[2] = nbVoxels;
-    _voxelSize = { { totVolSize.get<0>() / nbVoxels,
-                     totVolSize.get<1>() / nbVoxels,
-                     totVolSize.get<2>() / nbVoxels } };
+    _voxelSize = { totVolSize.get<0>() / nbVoxels,
+                   totVolSize.get<1>() / nbVoxels,
+                   totVolSize.get<2>() / nbVoxels };
 }
 
 void PMatComparator::setVolumeGridSpacing(const Vector3x1& voxelSize)
@@ -183,7 +183,7 @@ void PMatComparator::setVolumeGridSpacing(double voxelSizeX, double voxelSizeY, 
     _nbVoxels[0] = uint(qRound(totVolSize.get<0>() / voxelSizeX));
     _nbVoxels[1] = uint(qRound(totVolSize.get<1>() / voxelSizeY));
     _nbVoxels[2] = uint(qRound(totVolSize.get<2>() / voxelSizeZ));
-    _voxelSize = { { voxelSizeX, voxelSizeY, voxelSizeZ } };
+    _voxelSize = { voxelSizeX, voxelSizeY, voxelSizeZ };
 }
 
 void PMatComparator::setVolumeOffSet(const Vector3x1& offSet)
@@ -210,9 +210,9 @@ const Vector3x1 &PMatComparator::volumeGridSpacing() const
 
 Vector3x1 PMatComparator::totalVolumeSize() const
 {
-    return { { _voxelSize.get<0>() * _nbVoxels[0],
-               _voxelSize.get<1>() * _nbVoxels[1],
-               _voxelSize.get<2>() * _nbVoxels[2] } };
+    return { _voxelSize.get<0>() * _nbVoxels[0],
+             _voxelSize.get<1>() * _nbVoxels[1],
+             _voxelSize.get<2>() * _nbVoxels[2] };
 }
 
 const Vector3x1& PMatComparator::volumeOffset() const

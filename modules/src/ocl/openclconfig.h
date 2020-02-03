@@ -38,6 +38,13 @@ const std::string OCL_CORE_PROGRAM = "ctl_core";
 class OpenCLConfig
 {
 public:
+    // non-copyable
+    OpenCLConfig(const OpenCLConfig&) = delete;
+    OpenCLConfig(OpenCLConfig&&) = delete;
+    OpenCLConfig& operator=(const OpenCLConfig&) = delete;
+    OpenCLConfig& operator=(OpenCLConfig&&) = delete;
+    ~OpenCLConfig() = default;
+
     // access to the singleton instance
     static OpenCLConfig& instance(bool autoSetDevicesForFirstCall = true);
 
@@ -90,9 +97,6 @@ public:
 private:
     // private constructor. can initialize with default devices (tries first GPU, then CPU)
     OpenCLConfig(bool initialize);
-    // non-copyable
-    OpenCLConfig(const OpenCLConfig&) = delete;
-    OpenCLConfig& operator=(const OpenCLConfig&) = delete;
 
     // kernel sources and cl-kernel object
     struct KernelRessource

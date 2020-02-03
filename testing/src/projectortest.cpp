@@ -7,7 +7,7 @@
 #include "projectors/arealfocalspotextension.h"
 #include "projectors/poissonnoiseextension.h"
 #include "projectors/raycasterprojector.h"
-#include "projectors/spectralprojectorextension.h"
+#include "projectors/spectraleffectsextension.h"
 
 #include "io/ctldatabase.h"
 
@@ -45,7 +45,7 @@ void ProjectorTest::testSpectralExtension()
     auto tube = makeComponent<XrayTube>(QSizeF(1.0, 1.0), 80.0, 100000.0, "X-ray tube");
     auto tubeGantry = makeComponent<CarmGantry>(1200.0);
 
-    tube->setSpectrumModel(new HeuristicCubicSpectrumModel());
+    //tube->setSpectrumModel(new HeuristicCubicSpectrumModel());
 
     CTsystem system;
     system.addComponent(std::move(flatPanel));
@@ -53,9 +53,9 @@ void ProjectorTest::testSpectralExtension()
     system.addComponent(std::move(tubeGantry));
 
     auto volume = SpectralVolumeData::createBall(40.0f, 0.5f, 1.0f,
-                                                 database::attenuationModel(database::composite::Water));
+                                                 database::attenuationModel(database::Composite::Water));
     auto volume2 = SpectralVolumeData::createBall(30.0f, 0.5f, 0.3f,
-                                                  database::attenuationModel(database::composite::Bone_Cortical));
+                                                  database::attenuationModel(database::Composite::Bone_Cortical));
 
     CompositeVolume compVol;
     compVol.addMaterialVolume(volume);
@@ -86,7 +86,7 @@ void ProjectorTest::testSpectralExtension()
     noiseExt->setFixedSeed(1337u);
     noiseExt->use(myProjector);
 
-    SpectralProjectorExtension* spectralExt = new SpectralProjectorExtension;
+    SpectralEffectsExtension* spectralExt = new SpectralEffectsExtension;
     spectralExt->setSpectralSamplingResolution(15.0f);
     //spectralExt->setSpectralRange(0,150);
     spectralExt->use(noiseExt);
@@ -96,7 +96,7 @@ void ProjectorTest::testSpectralExtension()
     io::BaseTypeIO<io::DenFileIO> io;
     // Non-linear composite
     auto proj = spectralExt->projectComposite(compVol);
-    io.write(proj, "testData/spectralExt_nonlin_projectComposite.den");
+    //io.write(proj, "testData/spectral_nonlin_composite.den");
     auto groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_composite.den");
     auto diff = proj-groundTruth;
     auto mean = projectionMean(diff);
@@ -107,6 +107,7 @@ void ProjectorTest::testSpectralExtension()
 
     // Non-linear simple
     proj = spectralExt->project(volume);
+    //io.write(proj, "testData/spectral_nonlin_simple.den");
     groundTruth = io.readProjections("testData/spectralExtension/spectral_nonlin_simple.den");
     diff = proj-groundTruth;
     mean = projectionMean(diff);
@@ -123,6 +124,7 @@ void ProjectorTest::testSpectralExtension()
 
     // Linear composite
     proj = spectralExt->projectComposite(compVol);
+    //io.write(proj, "testData/spectral_lin_composite.den");
     groundTruth = io.readProjections("testData/spectralExtension/spectral_lin_composite.den");
     diff = proj-groundTruth;
     mean = projectionMean(diff);
@@ -133,6 +135,7 @@ void ProjectorTest::testSpectralExtension()
 
     // Linear simple
     proj = spectralExt->project(volume);
+    //io.write(proj, "testData/spectral_lin_simple.den");
     groundTruth = io.readProjections("testData/spectralExtension/spectral_lin_simple.den");
     diff = proj-groundTruth;
     mean = projectionMean(diff);
@@ -178,16 +181,15 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
         for(const auto& prep : firstView.prepareSteps())
             view.addPrepareStep(prep);
 
-    auto poissonExt = makeExtension<PoissonNoiseExtension>(std::move(projector));
-    poissonExt->setParallelizationEnabled(true);
-    // poissonExt->configurate(setup, rcConfig);
+    auto compoundProjector = std::move(projector) |
+                             makeExtension<PoissonNoiseExtension>() |
+                             makeExtension<ArealFocalSpotExtension>();
 
-    auto focalSpotExt = makeExtension<ArealFocalSpotExtension>(std::move(poissonExt));
-    focalSpotExt->setDiscretization(QSize(2, 2));
-    focalSpotExt->configure(setup, rcConfig);
+    compoundProjector->setDiscretization(QSize(2, 2));
+    compoundProjector->configure(setup, rcConfig);
 
     // repeatedly compute noisy projections
-    auto projsWithNoise = focalSpotExt->project(_testVolume);
+    auto projsWithNoise = compoundProjector->project(_testVolume);
 
     // ### evaluate results ###
     evaluatePoissonSimulation(projsWithNoise, projectionsClean, setup.system()->photonsPerPixelMean());

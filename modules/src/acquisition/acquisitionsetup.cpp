@@ -219,7 +219,7 @@ void AcquisitionSetup::View::fromVariant(const QVariant& variant)
     QVariantList prepareStepVarList = varMap.value("prepare steps").toList();
     std::vector<PrepareStep> prepSteps;
     prepSteps.reserve(prepareStepVarList.size());
-    for(const auto& prep : prepareStepVarList)
+    for(const auto& prep : qAsConst(prepareStepVarList))
         this->addPrepareStep(PrepareStep(SerializationHelper::parsePrepareStep(prep)));
 
     this->setTimeStamp(varMap.value("time stamp").toDouble());
@@ -322,8 +322,8 @@ void AcquisitionSetup::applyPreparationProtocol(const AbstractPreparationProtoco
             _views[view].addPrepareStep(std::move(step));
     }
 
-    qDebug() << "AcquisitionSetup --- addPreparationProtocol";
-    qDebug() << "-nbViews: " << _views.size();
+    qDebug() << "AcquisitionSetup --- addPreparationProtocol\n"
+             << "- nbViews: " << _views.size();
 }
 
 /*!
@@ -357,7 +357,7 @@ void AcquisitionSetup::prepareView(uint viewNb)
         return;
 
     for(const auto& step : _views[viewNb].prepareSteps())
-        step->prepare(*_system.get());
+        step->prepare(*_system);
 }
 
 /*!
@@ -522,7 +522,7 @@ void AcquisitionSetup::fromVariant(const QVariant &variant)
     this->resetSystem(std::move(system));
 
     QVariantList viewVarList = varMap.value("views").toList();
-    for(const auto& v : viewVarList)
+    for(const auto& v : qAsConst(viewVarList))
     {
         AcquisitionSetup::View view;
         view.fromVariant(v);

@@ -15,6 +15,6 @@ FORMS += mainwindow.ui
 
 RESOURCES += data.qrc
 
+# CTL modules
 include(../../modules/ctl.pri)
-include(../../modules/gui-widgets.pri)
-include(../../modules/den_file_io.pri)
+include(../../modules/ctl_qtgui.pri)

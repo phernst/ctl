@@ -43,19 +43,35 @@ void CTLDatabaseHandler::setDataBaseRoot(const QString &path)
     makeFileMap();
 }
 
-std::shared_ptr<AbstractIntegrableDataModel> CTLDatabaseHandler::loadAttenuationModel(database::composite composite)
+std::shared_ptr<AbstractIntegrableDataModel> CTLDatabaseHandler::loadAttenuationModel(database::Composite composite)
 {
     return _serializer.deserialize<AbstractIntegrableDataModel>(_fileMap.value(int(composite)));
 }
 
-std::shared_ptr<AbstractIntegrableDataModel> CTLDatabaseHandler::loadAttenuationModel(database::element element)
+std::shared_ptr<AbstractIntegrableDataModel> CTLDatabaseHandler::loadAttenuationModel(database::Element element)
 {
     return _serializer.deserialize<AbstractIntegrableDataModel>(_fileMap.value(int(element)));
 }
 
-std::shared_ptr<TabulatedDataModel> CTLDatabaseHandler::loadXRaySpectrum(database::spectrum spectrum)
+std::shared_ptr<TabulatedDataModel> CTLDatabaseHandler::loadXRaySpectrum(database::Spectrum spectrum)
 {
     return _serializer.deserialize<TabulatedDataModel>(_fileMap.value(int(spectrum)));
+}
+
+float CTLDatabaseHandler::loadDensity(database::Composite composite)
+{
+    return JsonSerializer::variantFromJsonFile(_fileMap.value(int(composite)))
+        .toMap()
+        .value("density", -1.0f)
+        .toFloat();
+}
+
+float CTLDatabaseHandler::loadDensity(database::Element element)
+{
+    return JsonSerializer::variantFromJsonFile(_fileMap.value(int(element)))
+        .toMap()
+        .value("density", -1.0f)
+        .toFloat();
 }
 
 void CTLDatabaseHandler::makeFileMap()
@@ -230,19 +246,31 @@ void CTLDatabaseHandler::makeFileMap()
     }
 }
 
-std::shared_ptr<AbstractIntegrableDataModel> database::attenuationModel(database::element element)
+std::shared_ptr<AbstractIntegrableDataModel> database::attenuationModel(database::Element element)
 {
     return CTLDatabaseHandler::instance().loadAttenuationModel(element);
 }
 
-std::shared_ptr<AbstractIntegrableDataModel> database::attenuationModel(database::composite composite)
+std::shared_ptr<AbstractIntegrableDataModel> database::attenuationModel(database::Composite composite)
 {
     return CTLDatabaseHandler::instance().loadAttenuationModel(composite);
 }
 
-std::shared_ptr<TabulatedDataModel> database::xRaySpectrum(database::spectrum spectrum)
+std::shared_ptr<TabulatedDataModel> database::xRaySpectrum(database::Spectrum spectrum)
 {
     return CTLDatabaseHandler::instance().loadXRaySpectrum(spectrum);
 }
 
+float database::density(database::Composite composite)
+{
+    return CTLDatabaseHandler::instance().loadDensity(composite);
 }
+
+
+float database::density(database::Element element)
+{
+    return CTLDatabaseHandler::instance().loadDensity(element);
+}
+
+}
+

@@ -22,7 +22,7 @@ SingleViewData::SingleViewData(const ModuleData::Dimensions &moduleDimensions)
  * do so, use allocateMemory().
  */
 SingleViewData::SingleViewData(uint channelsPerModule, uint rowsPerModule)
-    : _moduleDim({channelsPerModule, rowsPerModule})
+    : _moduleDim({ channelsPerModule, rowsPerModule })
 {
 
 }
@@ -134,9 +134,10 @@ std::vector<float> SingleViewData::toVector() const
  */
 void SingleViewData::transformToExtinction(double i0orN0)
 {
+    const auto i0orN0f = static_cast<float>(i0orN0);
     for(auto& chunk : _data)
         for(auto& pix : chunk.data())
-            pix = std::log(i0orN0/pix);
+            pix = std::log(i0orN0f/pix);
 }
 
 /*!
@@ -149,9 +150,10 @@ void SingleViewData::transformToExtinction(double i0orN0)
  */
 void SingleViewData::transformToIntensity(double i0)
 {
+    const auto i0f = static_cast<float>(i0);
     for(auto& chunk : _data)
         for(auto& pix : chunk.data())
-            pix = i0 * std::exp(-pix);
+            pix = i0f * std::exp(-pix);
 }
 
 /*!
@@ -164,9 +166,10 @@ void SingleViewData::transformToIntensity(double i0)
  */
 void SingleViewData::transformToCounts(double n0)
 {
+    const auto n0f = static_cast<float>(n0);
     for(auto& chunk : _data)
         for(auto& pix : chunk.data())
-            pix = n0 * std::exp(-pix);
+            pix = n0f * std::exp(-pix);
 }
 
 bool SingleViewData::operator==(const SingleViewData &other) const
@@ -298,6 +301,15 @@ void SingleViewData::fill(float fillValue)
 }
 
 /*!
+ * Removes all modules from the view and deletes the image data.
+ */
+void SingleViewData::freeMemory()
+{
+    _data.clear();
+    _data.shrink_to_fit();
+}
+
+/*!
  * Returns the maximum value in this instance.
  *
  * Returns zero if this data is empty.
@@ -307,10 +319,10 @@ float SingleViewData::max() const
     if(nbModules() == 0)
         return 0.0f;
 
-    float tmpMax = module(0).max();
+    auto tmpMax = module(0).max();
 
     float locMax;
-    for(int mod = 1, total = nbModules(); mod < total; ++mod)
+    for(auto mod = 1u, total = nbModules(); mod < total; ++mod)
     {
         locMax = module(mod).max();
         if(locMax > tmpMax)
@@ -330,10 +342,10 @@ float SingleViewData::min() const
     if(nbModules() == 0)
         return 0.0f;
 
-    float tmpMin = module(0).min();
+    auto tmpMin = module(0).min();
 
     float locMin;
-    for(int mod = 1, total = nbModules(); mod < total; ++mod)
+    for(auto mod = 1u, total = nbModules(); mod < total; ++mod)
     {
         locMin = module(mod).min();
         if(locMin < tmpMin)
@@ -366,6 +378,11 @@ bool SingleViewData::hasEqualSizeAs(const std::vector<float> &other) const
  * Enforces memory allocation. This resizes the internal std::vector to the required number of
  * modules and requests memory allocation for each of the modules.
  * As a result, the number of modules is equal to \a nbModules.
+ *
+ * Note that if the current number of modules is less than \a nbModules the additionally allocated
+ * modules remain uninitialized, i.e. they contain undefined values.
+ *
+ * \sa allocateMemory(uint nbModules, float initValue)
  */
 void SingleViewData::allocateMemory(uint nbModules)
 {
@@ -376,14 +393,14 @@ void SingleViewData::allocateMemory(uint nbModules)
 }
 
 /*!
- * Enforces memory allocation and initializes all values with \a initValue.
+ * Enforces memory allocation and if the current number of modules is less than \a nbModules,
+ * the additionally appended modules are initialized with \a initValue.
  *
- * \sa allocateMemory(uint), fill().
+ * \sa allocateMemory(uint nbModules), fill().
  */
 void SingleViewData::allocateMemory(uint nbModules, float initValue)
 {
-    allocateMemory(nbModules);
-    fill(initValue);
+    _data.resize(nbModules, ModuleData(_moduleDim, initValue));
 }
 
 /*!
@@ -552,6 +569,22 @@ SingleViewData::Dimensions SingleViewData::dimensions() const
 uint SingleViewData::elementsPerModule() const
 {
     return _moduleDim.width * _moduleDim.height;
+}
+
+/*!
+ * Same as `module(0)`.
+ */
+const SingleViewData::ModuleData &SingleViewData::first() const
+{
+    return this->module(0);
+}
+
+/*!
+ * Same as `module(0)`.
+ */
+SingleViewData::ModuleData &SingleViewData::first()
+{
+    return this->module(0);
 }
 
 /*!

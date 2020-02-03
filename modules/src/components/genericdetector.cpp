@@ -71,7 +71,7 @@ QString GenericDetector::info() const
  */
 QString GenericDetector::defaultName()
 {
-    static const QString defName(QStringLiteral("Generic detector"));
+    const QString defName(QStringLiteral("Generic detector"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
@@ -84,7 +84,7 @@ void GenericDetector::fromVariant(const QVariant& variant)
     _moduleLocations.clear();
     QVariantMap varMap = variant.toMap();
     auto locations = varMap.value("module locations").toList();
-    for(const auto& var : locations)
+    for(const auto& var : qAsConst(locations))
     {
         mat::Location loc;
         loc.fromVariant(var);

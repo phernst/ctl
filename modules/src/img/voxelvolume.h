@@ -1,7 +1,7 @@
 #ifndef VOXELVOLUME_H
 #define VOXELVOLUME_H
 
-#include <img/chunk2d.h>
+#include "chunk2d.h"
 
 namespace CTL {
 /*!
@@ -47,7 +47,7 @@ public:
     };
 
     // ctors (no data set)
-    VoxelVolume(const Dimensions& nbVoxels);
+    explicit VoxelVolume(const Dimensions& nbVoxels);
     VoxelVolume(const Dimensions& nbVoxels, const VoxelSize& voxelSize);
     VoxelVolume(uint nbVoxelX, uint nbVoxelY, uint nbVoxelZ);
     VoxelVolume(uint nbVoxelX, uint nbVoxelY, uint nbVoxelZ, float xSize, float ySize, float zSize);
@@ -94,6 +94,7 @@ public:
     void allocateMemory();
     void allocateMemory(const T& initValue);
     void fill(const T& fillValue);
+    void freeMemory();
     T max() const;
     T min() const;
     VoxelVolume<T> reslicedByX(bool reverse = false) const;
@@ -104,8 +105,8 @@ public:
     Chunk2D<T> sliceZ(uint slice) const;
     float smallestVoxelSize() const;
 
-    T& operator()(uint x, uint y, uint z);
-    const T& operator()(uint x, uint y, uint z) const;
+    typename std::vector<T>::reference operator()(uint x, uint y, uint z);
+    typename std::vector<T>::const_reference operator()(uint x, uint y, uint z) const;
 
     VoxelVolume<T>& operator+=(const VoxelVolume<T>& other);
     VoxelVolume<T>& operator-=(const VoxelVolume<T>& other);
@@ -195,15 +196,15 @@ void VoxelVolume<T>::allocateMemory()
 }
 
 /*!
- * Enforces memory allocation and initilizes all elements with \a initValue.
+ * Enforces memory allocation and if the current number of allocated elements is less than the
+ * number of elements in the chunk, additional copies of \a initValue are appended.
  *
- * \sa allocateMemory(), fill().
+ * \sa allocatedElements(), allocateMemory(), fill().
  */
 template<typename T>
 void VoxelVolume<T>::allocateMemory(const T& initValue)
 {
-    allocateMemory();
-    fill(initValue);
+    _data.resize(totalVoxelCount(), initValue);
 }
 
 /*!

@@ -1,4 +1,5 @@
 {
+    "density": 2.300e+00,
     "name": "Concrete, Ordinary",
     "type-id": 30,
     "parameters": {

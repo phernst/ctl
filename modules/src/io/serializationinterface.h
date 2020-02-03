@@ -22,12 +22,14 @@ public:
     virtual void fromVariant(const QVariant& variant); // de-serialization
     virtual QVariant toVariant() const; // serialization
 
+    virtual ~SerializationInterface() = default;
+
+protected:
     SerializationInterface() = default;
     SerializationInterface(const SerializationInterface&) = default;
     SerializationInterface(SerializationInterface&&) = default;
-    SerializationInterface& operator= (const SerializationInterface&) = default;
-    SerializationInterface& operator= (SerializationInterface&&) = default;
-    virtual ~SerializationInterface() = default;
+    SerializationInterface& operator=(const SerializationInterface&) = default;
+    SerializationInterface& operator=(SerializationInterface&&) = default;
 };
 
 /*!
@@ -184,7 +186,7 @@ inline QVariant SerializationInterface::toVariant() const
  */
 #define CTL_TYPE_ID(newIndex)                                                                      \
 public:                                                                                            \
-    enum { Type = newIndex };                                                                      \
+    enum { Type = (newIndex) };                                                                    \
     int type() const override { return Type; }                                                     \
                                                                                                    \
 private:                                                                                           \

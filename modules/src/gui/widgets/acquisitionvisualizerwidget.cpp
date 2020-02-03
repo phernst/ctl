@@ -1,8 +1,6 @@
 #include "acquisitionvisualizerwidget.h"
 #include "acquisition/acquisitionsetup.h"
-
 #include <QTimer>
-#include <QDebug>
 
 AcquisitionVisualizerWidget::AcquisitionVisualizerWidget(QWidget* parent)
     : SystemVisualizerWidget(parent)

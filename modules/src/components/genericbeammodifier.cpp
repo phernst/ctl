@@ -12,9 +12,14 @@ GenericBeamModifier::GenericBeamModifier(const QString& name)
 {
 }
 
-IntervalDataSeries GenericBeamModifier::modify(const IntervalDataSeries &inputSpectrum, double, double)
+IntervalDataSeries GenericBeamModifier::modifiedSpectrum(const IntervalDataSeries& inputSpectrum)
 {
     return inputSpectrum;
+}
+
+double GenericBeamModifier::modifiedFlux(double inputFlux, const IntervalDataSeries&)
+{
+    return inputFlux;
 }
 
 /*!
@@ -40,7 +45,7 @@ QString GenericBeamModifier::info() const
  */
 QString GenericBeamModifier::defaultName()
 {
-    static const QString defName(QStringLiteral("Generic beam modifier"));
+    const QString defName(QStringLiteral("Generic beam modifier"));
     static uint counter = 0;
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }

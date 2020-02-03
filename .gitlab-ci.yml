@@ -1,33 +1,51 @@
 image: frysch/ubuntu:ocl-intel
 
+
 # compile examples
 
-build-setupVisualizer:
+build-2D3DRegistration:
   stage: build
   script:
-    - cd examples/setupVisualizer
+    - git clone https://github.com/stevengj/nlopt.git
+    - cd nlopt
+    - cmake . && make && make install
+    - cd ../examples/regist2d3d
     - qmake
+    - make
+build-2D3DRegistration-clang:
+  stage: build
+  script:
+    - git clone https://github.com/stevengj/nlopt.git
+    - cd nlopt
+    - cmake . && make && make install
+    - cd ../examples/regist2d3d
+    - qmake -spec linux-clang
     - make
 
-build-simTool:
+build-3DRadonTransform:
   stage: build
   script:
-    - cd examples/simTool
+    - cd examples/radon3d
     - qmake
     - make
-    
-build-simTool-Debug:
+build-3DRadonTransform-clang:
   stage: build
   script:
-    - cd examples/simTool
-    - qmake CONFIG+=debug
+    - cd examples/radon3d
+    - qmake -spec linux-clang
     - make
 
-build-readmeTeaser:
+build-meanProjectionDistance:
   stage: build
   script:
-    - cd examples/readme-example
+    - cd examples/mpd
     - qmake
+    - make
+build-meanProjectionDistance-clang:
+  stage: build
+  script:
+    - cd examples/mpd
+    - qmake -spec linux-clang
     - make
 
 build-projectionMatrices:
@@ -36,6 +54,63 @@ build-projectionMatrices:
     - cd examples/using-projection-matrices
     - qmake
     - make
+build-projectionMatrices-clang:
+  stage: build
+  script:
+    - cd examples/using-projection-matrices
+    - qmake -spec linux-clang
+    - make
+
+build-readmeTeaser:
+  stage: build
+  script:
+    - cd examples/readme-example
+    - qmake
+    - make
+build-readmeTeaser-clang:
+  stage: build
+  script:
+    - cd examples/readme-example
+    - qmake -spec linux-clang
+    - make
+
+build-setupVisualizer:
+  stage: build
+  script:
+    - cd examples/setupVisualizer
+    - qmake
+    - make
+build-setupVisualizer-clang:
+  stage: build
+  script:
+    - cd examples/setupVisualizer
+    - qmake -spec linux-clang
+    - make
+
+build-simTool:
+  stage: build
+  script:
+    - cd examples/simTool
+    - qmake
+    - make
+build-simTool-clang:
+  stage: build
+  script:
+    - cd examples/simTool
+    - qmake -spec linux-clang
+    - make
+build-simTool-Debug:
+  stage: build
+  script:
+    - cd examples/simTool
+    - qmake CONFIG+=debug
+    - make
+build-simTool-Debug-clang:
+  stage: build
+  script:
+    - cd examples/simTool
+    - qmake -spec linux-clang CONFIG+=debug
+    - make
 
 
 # unit testing
@@ -43,17 +118,33 @@ build-projectionMatrices:
 build-unitTests:
   stage: build
   script:
-    - cd testing/src
-    - qmake
+    - mkdir testing/src/gcc
+    - cd testing/src/gcc
+    - qmake ..
     - make
   artifacts:
     paths:
-      - testing/src/bin/
+      - testing/src/gcc/bin/
+build-unitTests-clang:
+  stage: build
+  script:
+    - mkdir testing/src/clang
+    - cd testing/src/clang
+    - qmake -spec linux-clang ..
+    - make
+  artifacts:
+    paths:
+      - testing/src/clang/bin/
 
 run-unitTests:
   stage: test
   script:
-    - cd testing/src/bin
+    - cd testing/src/gcc/bin
+    - ./unitTesting
+run-unitTests-clang:
+  stage: test
+  script:
+    - cd testing/src/clang/bin
     - ./unitTesting
 
 
@@ -62,7 +153,5 @@ run-unitTests:
 run-doxygen:
   stage: build
   script:
-    - apt-get update
-    - apt-get install -y lynx
     - wget -q -O start-doxy $INITIATE_DOXY_SCRIPT
     - lynx -cmd_script=start-doxy $DOXY_LOGIN_PAGE > /dev/null
