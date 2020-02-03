@@ -106,6 +106,19 @@ void PoissonNoiseExtension::processViewCompact(SingleViewData& view,
     }
 
     std::mt19937_64 gen(seed);
+    constexpr float gaussianThreshold = 1.0e6; // threshold for switch to normal distribution
+
+    auto randomizedPoisson = [&gen] (float count) // Poisson distributed count
+    {
+        std::poisson_distribution<ulong> d(count);
+        return float(d(gen));
+    };
+
+    auto randomizedGaussian = [&gen] (float count) // Normally distributed count
+    {
+        std::normal_distribution<float> d(count, std::sqrt(count));
+        return d(gen);
+    };
 
     float origCount, noisyCount;
     uint mod = 0u;
@@ -113,10 +126,15 @@ void PoissonNoiseExtension::processViewCompact(SingleViewData& view,
     {
         for(auto& pix : module.data())
         {
-            origCount = i_0[mod] * expf(-pix); // mean
-            std::poisson_distribution<ulong> d(origCount);
-            noisyCount = d(gen); // Poisson distributed random number
-            pix = logf(i_0[mod] / noisyCount);
+            origCount = i_0[mod] * std::exp(-pix); // mean
+
+            // randomize counts
+            if(origCount < gaussianThreshold)
+                noisyCount = randomizedPoisson(origCount);
+            else // good approximation for large counts
+                noisyCount = randomizedGaussian(origCount);
+
+            pix = std::log(i_0[mod] / noisyCount);
         }
         ++mod;
     }
