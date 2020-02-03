@@ -4,6 +4,7 @@
 #include "projectorextension.h"
 #include "abstractprojectorconfig.h"
 #include "acquisition/acquisitionsetup.h"
+#include "processing/coordinates.h" // Range<T>
 
 namespace CTL {
 
@@ -29,14 +30,24 @@ public:
     void setSpectralSamplingResolution(float energyBinWidth);
 
 private:
+    struct BinInformation
+    {
+        std::vector<double> intensities;        // for each view
+        std::vector<double> adjustedFluxMods;   // for each view
+        float energy;
+    };
+
     struct SpectralInformation
     {
-        std::vector<std::vector<double>> intensities;
-        std::vector<std::vector<double>> adjustedFluxMods;
-        std::vector<double> totalIntensities;
-        std::vector<float> energyBins;
+        std::vector<BinInformation> bins;       // for each bin
+        std::vector<double> totalIntensities;   // for each view
         float binWidth{};
         uint nbSamples{};
+
+        Range<float> fullCoverage = { std::numeric_limits<float>::max(), 0.0f };
+        float highestResolution = std::numeric_limits<float>::max();
+
+        void reserveMemory(uint nbViews);
     };
 
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
@@ -44,7 +55,21 @@ private:
     float _deltaE = 0.0f;   
 
     void updateSpectralInformation();
+    void determineSampling();
+    void extractViewSpectrum(uint view);
     void applyDetectorResponse(ProjectionData& intensity, float energy) const;
+
+    ProjectionData projectLinear(const CompositeVolume& volume);
+    ProjectionData singleBinIntensityLinear(const std::vector<ProjectionData>& materialProjs,
+                                            const std::vector<float>& mu,
+                                            const BinInformation& binInfo);
+    ProjectionData singleBinIntensityNonLinear(const CompositeVolume& volume,
+                                               const BinInformation& binInfo);
+    ProjectionData projectNonLinear(const CompositeVolume& volume);
+
+    void addDummyPrepareSteps();
+    void removeDummyPrepareSteps();
+    void replaceDummyPrepareSteps(const BinInformation& binInfo, float binWidth);
 };
 
 
