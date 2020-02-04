@@ -54,6 +54,12 @@ ProjectionData SpectralEffectsExtension::project(const VolumeData& volume)
  */
 ProjectionData SpectralEffectsExtension::projectComposite(const CompositeVolume& volume)
 {
+    if(canBypassExtension(volume))
+    {
+        qDebug() << "Bypassing SpectralEffectsExtension.";
+        return ProjectorExtension::projectComposite(volume);
+    }
+
     if(ProjectorExtension::isLinear())
         return projectLinear(volume);
     else // ProjectorExtension::isLinear() == false
@@ -93,79 +99,30 @@ void SpectralEffectsExtension::setSpectralSamplingResolution(float energyBinWidt
 void SpectralEffectsExtension::updateSpectralInformation()
 {
     _spectralInfo = RadiationEncoder::spectralInformation(_setup, _deltaE);
-//    if(_deltaE < 0.0f)
-//        throw std::runtime_error("SpectralProjectorExtension::updateSpectralInformation():"
-//                                 " Requested negative energy resolution!");
-
-//    const uint nbViews = _setup.nbViews();
-
-//    determineSampling();
-//    _spectralInfo.reserveMemory(nbViews); // reserve memory
-
-//    // get (view-dependent) spectra
-//    for(uint view = 0; view < nbViews; ++view)
-//        extractViewSpectrum(view);
 }
 
-//void SpectralEffectsExtension::determineSampling()
-//{
-//    const auto srcPtr = _setup.system()->source();
-//    const uint nbViews = _setup.nbViews();
+bool SpectralEffectsExtension::canBypassExtension(const CompositeVolume& volume) const
+{
+    const auto spectralResp = _setup.system()->detector()->hasSpectralResponseModel();
+    bool allVolumesSpectral = true;
+    bool noVolumeSpectral = true;
 
-//    // find highest resolution and determine energy interval covering spectra of all views
-//    float highestResolution = std::numeric_limits<float>::max();
-//    EnergyRange fullCoverageInterval{ std::numeric_limits<float>::max(), 0.0f };
+    for(uint v = 0; v < volume.nbMaterials(); ++v)
+    {
+        if(volume.materialVolume(v).hasSpectralInformation())
+            noVolumeSpectral = false;
+        else
+            allVolumesSpectral = false;
+    }
 
-//    for(uint view = 0; view < nbViews; ++view)
-//    {
-//        _setup.prepareView(view);
-//        auto viewEnergyRange = srcPtr->energyRange();
-//        auto viewReso = viewEnergyRange.width() / float(srcPtr->spectrumDiscretizationHint());
-//        highestResolution = std::min(highestResolution, viewReso);
-//        fullCoverageInterval.start() = std::min(fullCoverageInterval.start(), viewEnergyRange.start());
-//        fullCoverageInterval.end()   = std::max(fullCoverageInterval.end(), viewEnergyRange.end());
-//    }
+    if(spectralResp && !allVolumesSpectral)
+        throw std::runtime_error("SpectralEffectsExtension: Cannot simulate combination of spectral "
+                                 "detector response and volume data without spectral information!");
 
-//    qDebug() << "highestResolution: " << highestResolution;
-//    qDebug() << "fullCoverageInterval: [" << fullCoverageInterval.start() << " , "
-//                                          << fullCoverageInterval.end() << "]";
+    if(!spectralResp && noVolumeSpectral) return true; // no spectral effects to be considered
 
-//    // energy resolution is unset --> use highest resolution found in all views
-//    if(_deltaE == 0.0f)
-//        _deltaE = std::max(highestResolution, 0.1f); // minimum (automatic) bin width: 0.1 keV
-
-//    // set required number of samples with a minimum of one sample and update coverage interval
-//    uint nbEnergyBins = std::max({ uint(std::ceil(fullCoverageInterval.width() / _deltaE)), 1u });
-//    fullCoverageInterval.end() = fullCoverageInterval.start() + nbEnergyBins * _deltaE;
-
-//    // store results
-//    _spectralInfo.nbSamples = nbEnergyBins;
-//    _spectralInfo.fullCoverage = fullCoverageInterval;
-//    _spectralInfo.highestResolution = highestResolution;
-//}
-
-//void SpectralEffectsExtension::extractViewSpectrum(uint view)
-//{
-//    RadiationEncoder radiationEnc(_setup.system());
-//    static const auto constModel = makeDataModel<ConstantModel>();
-
-//    _setup.prepareView(view);
-//    IntervalDataSeries spectrum = radiationEnc.finalSpectrum(_spectralInfo.fullCoverage, _spectralInfo.nbSamples);
-//    auto globalFluxMod = _setup.system()->source()->fluxModifier();
-//    auto spectralResponse = _setup.system()->detector()->hasSpectralResponseModel()
-//            ? _setup.system()->detector()->spectralResponseModel()
-//            : constModel.get();
-//    for(uint bin = 0; bin < _spectralInfo.nbSamples; ++bin)
-//    {
-//        auto E = spectrum.samplingPoint(bin);
-//        _spectralInfo.bins[bin].adjustedFluxMods[view] = globalFluxMod * spectrum.value(bin) * spectralResponse->valueAt(E);
-//        _spectralInfo.bins[bin].intensities[view] = spectrum.value(bin) * E;
-//        _spectralInfo.bins[bin].energy = E;
-//        _spectralInfo.totalIntensities[view] += (_spectralInfo.bins[bin].intensities[view] * spectralResponse->valueAt(E));
-//    }
-
-//    _spectralInfo.binWidth = spectrum.binWidth();
-//}
+    return false; // regular execution of SpectralEffectsExtension
+}
 
 void SpectralEffectsExtension::applyDetectorResponse(ProjectionData& intensity, float energy) const
 {
@@ -307,14 +264,5 @@ void SpectralEffectsExtension::replaceDummyPrepareSteps(const BinInformation& bi
         _setup.view(view).replacePrepareStep(sourcePrep);
     }
 }
-
-//void SpectralEffectsExtension::SpectralInformation::reserveMemory(uint nbViews)
-//{
-//    BinInformation defaultBin;
-//    defaultBin.adjustedFluxMods = std::vector<double>(nbViews);
-//    defaultBin.intensities = std::vector<double>(nbViews);
-//    bins = std::vector<BinInformation>(nbSamples, defaultBin);
-//    totalIntensities = std::vector<double>(nbViews, 0.0);
-//}
 
 } // namespace CTL
