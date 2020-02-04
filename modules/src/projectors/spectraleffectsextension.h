@@ -5,6 +5,7 @@
 #include "abstractprojectorconfig.h"
 #include "acquisition/acquisitionsetup.h"
 #include "processing/coordinates.h" // Range<T>
+#include "acquisition/radiationencoder.h"
 
 namespace CTL {
 
@@ -30,34 +31,36 @@ public:
     void setSpectralSamplingResolution(float energyBinWidth);
 
 private:
-    struct BinInformation
-    {
-        std::vector<double> intensities;        // for each view
-        std::vector<double> adjustedFluxMods;   // for each view
-        float energy;
-    };
+//    struct BinInformation
+//    {
+//        std::vector<double> intensities;        // for each view
+//        std::vector<double> adjustedFluxMods;   // for each view
+//        float energy;
+//    };
 
-    struct SpectralInformation
-    {
-        std::vector<BinInformation> bins;       // for each bin
-        std::vector<double> totalIntensities;   // for each view
-        float binWidth{};
-        uint nbSamples{};
+//    struct SpectralInformation
+//    {
+//        std::vector<BinInformation> bins;       // for each bin
+//        std::vector<double> totalIntensities;   // for each view
+//        float binWidth{};
+//        uint nbSamples{};
 
-        Range<float> fullCoverage = { std::numeric_limits<float>::max(), 0.0f };
-        float highestResolution = std::numeric_limits<float>::max();
+//        Range<float> fullCoverage = { std::numeric_limits<float>::max(), 0.0f };
+//        float highestResolution = std::numeric_limits<float>::max();
 
-        void reserveMemory(uint nbViews);
-    };
+//        void reserveMemory(uint nbViews);
+//    };
 
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
     SpectralInformation _spectralInfo;
     float _deltaE = 0.0f;   
 
     void updateSpectralInformation();
-    void determineSampling();
-    void extractViewSpectrum(uint view);
+//    void determineSampling();
+//    void extractViewSpectrum(uint view);
     void applyDetectorResponse(ProjectionData& intensity, float energy) const;
+
+    using BinInformation = SpectralInformation::BinInformation;
 
     ProjectionData projectLinear(const CompositeVolume& volume);
     ProjectionData singleBinIntensityLinear(const std::vector<ProjectionData>& materialProjs,
