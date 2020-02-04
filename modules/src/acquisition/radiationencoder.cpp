@@ -2,6 +2,7 @@
 #include "components/abstractbeammodifier.h"
 #include "components/abstractdetector.h"
 #include "geometryencoder.h"
+#include "models/stepfunctionmodels.h"
 #include "models/xydataseries.h"
 
 namespace CTL {
@@ -147,6 +148,122 @@ float RadiationEncoder::detectiveMeanEnergy() const
     }
 
     return ret;
+}
+
+const SimpleCTsystem* RadiationEncoder::system() const
+{
+    return _system;
+}
+
+SpectralInformation RadiationEncoder::spectralInformation(AcquisitionSetup setup, float energyResolution)
+{
+    if(energyResolution < 0.0f)
+        throw std::runtime_error("RadiationEncoder::spectralInformation():"
+                                 " Requested negative energy resolution!");
+
+    SpectralInformation ret;
+
+    const uint nbViews = setup.nbViews();
+    const auto srcPtr = setup.system()->source();
+
+    // find highest resolution and determine energy interval covering spectra of all views
+    for(uint view = 0; view < nbViews; ++view)
+    {
+        setup.prepareView(view);
+        auto viewEnergyRange = srcPtr->energyRange();
+        auto viewReso = viewEnergyRange.width() / float(srcPtr->spectrumDiscretizationHint());
+        ret._bestReso = std::min(ret._bestReso, viewReso);
+        ret._fullCoverage.start() = std::min(ret._fullCoverage.start(), viewEnergyRange.start());
+        ret._fullCoverage.end()   = std::max(ret._fullCoverage.end(), viewEnergyRange.end());
+    }
+
+    qDebug() << "highestResolution: " << ret._bestReso;
+    qDebug() << "fullCoverageInterval: [" << ret._fullCoverage.start() << " , "
+                                          << ret._fullCoverage.end() << "]";
+
+
+    ret._binWidth = energyResolution;
+    if(qFuzzyIsNull(ret._binWidth)) // energy resolution is unset --> use highest resolution found in all views
+        ret._binWidth = std::max(ret._bestReso, 0.1f); // minimum (automatic) bin width: 0.1 keV
+
+    // set required number of samples (minimum of one sample) and update coverage interval
+    uint nbEnergyBins = std::max({ uint(std::ceil(ret._fullCoverage.width() / ret._binWidth)), 1u });
+    ret._fullCoverage.end() = ret._fullCoverage.start() + nbEnergyBins * ret._binWidth;
+
+    ret.reserveMemory(nbEnergyBins, nbViews); // reserve memory
+
+    RadiationEncoder radiationEnc(setup.system());
+
+    // get (view-dependent) spectra
+    for(uint view = 0; view < nbViews; ++view)
+    {
+        setup.prepareView(view);
+        ret.extractViewSpectrum(&radiationEnc, view);
+    }
+
+    return ret;
+}
+
+uint SpectralInformation::nbEnergyBins() const
+{
+    return _bins.size();
+}
+
+float SpectralInformation::binWidth() const
+{
+    return _binWidth;
+}
+
+const SpectralInformation::BinInformation& SpectralInformation::bin(uint binIdx) const
+{
+    return _bins[binIdx];
+}
+
+const std::vector<double>& SpectralInformation::totalIntensity() const
+{
+    return _totalIntensities;
+}
+
+const Range<float>& SpectralInformation::fullCoverageRange() const
+{
+    return _fullCoverage;
+}
+
+float SpectralInformation::highestReso() const
+{
+    return _bestReso;
+}
+
+void SpectralInformation::reserveMemory(uint nbBins, uint nbViews)
+{
+    BinInformation defaultBin;
+    defaultBin.adjustedFluxMods = std::vector<double>(nbViews);
+    defaultBin.intensities = std::vector<double>(nbViews);
+    _bins = std::vector<BinInformation>(nbBins, defaultBin);
+    _totalIntensities = std::vector<double>(nbViews, 0.0);
+}
+
+void SpectralInformation::extractViewSpectrum(const RadiationEncoder* encoder, uint viewIdx)
+{
+    static const auto constModel = makeDataModel<ConstantModel>();
+    const auto system = encoder->system();
+
+    const IntervalDataSeries spectrum = encoder->finalSpectrum(_fullCoverage, nbEnergyBins());
+    const auto globalFluxMod = system->source()->fluxModifier();
+    const auto spectralResponse = system->detector()->hasSpectralResponseModel()
+                                  ? system->detector()->spectralResponseModel()
+                                  : constModel.get();
+
+    for(uint bin = 0; bin < nbEnergyBins(); ++bin)
+    {
+        auto E = spectrum.samplingPoint(bin);
+        _bins[bin].adjustedFluxMods[viewIdx] = globalFluxMod * spectrum.value(bin) * spectralResponse->valueAt(E);
+        _bins[bin].intensities[viewIdx] = spectrum.value(bin) * E;
+        _bins[bin].energy = E;
+        _totalIntensities[viewIdx] += (_bins[bin].intensities[viewIdx] * spectralResponse->valueAt(E));
+    }
+
+    _binWidth = spectrum.binWidth();
 }
 
 } // namespace CTL
