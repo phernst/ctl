@@ -34,6 +34,9 @@ protected:
         const CompositeVolume* _compositeVolume;
     };
 
+    // abstract interface
+    public: void configure(const AcquisitionSetup& setup) override;
+    public: ProjectionData project(const VolumeData& volume) override;
 
 public:
     explicit ProjectorExtension(AbstractProjector* projector = nullptr);
@@ -42,8 +45,6 @@ public:
     ~ProjectorExtension() override;
 
     // virtual methods
-    void configure(const AcquisitionSetup& setup) override;
-    ProjectionData project(const VolumeData& volume) override;
     ProjectionData projectComposite(const CompositeVolume& volume) override;
     bool isLinear() const override;
     virtual void use(AbstractProjector* other);

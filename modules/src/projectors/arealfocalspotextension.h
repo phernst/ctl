@@ -67,10 +67,12 @@ class ArealFocalSpotExtension : public ProjectorExtension
 {
     CTL_TYPE_ID(101)
 
+    // abstract interface
+    public: void configure(const AcquisitionSetup& setup) override;
+
 public:
     using ProjectorExtension::ProjectorExtension;
 
-    void configure(const AcquisitionSetup& setup) override;
     void setDiscretization(const QSize& discretization);
 
     // SerializationInterface interface

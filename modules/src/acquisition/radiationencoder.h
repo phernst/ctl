@@ -14,8 +14,8 @@ class SpectralInformation
 public:
     struct BinInformation
     {
-        std::vector<double> intensities;        // for each view
-        std::vector<double> adjustedFluxMods;   // for each view
+        std::vector<double> intensities;      // for each view
+        std::vector<double> adjustedFluxMods; // for each view
         float energy;
     };
 
@@ -33,7 +33,7 @@ private:
     std::vector<BinInformation> _bins;       // for each bin
     std::vector<double> _totalIntensities;   // for each view
     Range<float> _fullCoverage = { std::numeric_limits<float>::max(), 0.0f };
-    float _bestReso   = std::numeric_limits<float>::max();
+    float _bestReso = std::numeric_limits<float>::max();
 
     void extractViewSpectrum(const RadiationEncoder* encoder, uint viewIdx);
 

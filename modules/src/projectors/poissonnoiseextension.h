@@ -13,11 +13,13 @@ class PoissonNoiseExtension : public ProjectorExtension
 {
     CTL_TYPE_ID(103)
 
+    // abstract interface
+    public: void configure(const AcquisitionSetup& setup) override;
+
 public:
     using ProjectorExtension::ProjectorExtension;
 
     // ProjectorExtension interface
-    void configure(const AcquisitionSetup& setup) override;
     bool isLinear() const override;
 
     // SerializationInterface interface

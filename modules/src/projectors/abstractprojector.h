@@ -77,7 +77,7 @@ class AbstractProjector : public SerializationInterface
     public:virtual ProjectionData project(const VolumeData& volume) = 0;
 
 public:
-    virtual ~AbstractProjector() = default;
+    virtual ~AbstractProjector() override = default;
 
     virtual bool isLinear() const;
     virtual ProjectionData projectComposite(const CompositeVolume& volume);

@@ -231,7 +231,8 @@ ProjectionData SpectralEffectsExtension::singleBinIntensityNonLinear(const Compo
     // project all material densities
     std::vector<ProjectionData> materialProjs;
     for(uint material = 0; material < volume.nbMaterials(); ++material)
-        binProj += ProjectorExtension::project(volume.muVolume(material, binInfo.energy, _spectralInfo.binWidth()));
+        binProj += ProjectorExtension::project(volume.muVolume(material, binInfo.energy,
+                                                               _spectralInfo.binWidth()));
 
     binProj.transformToIntensity(binInfo.intensities);
     applyDetectorResponse(binProj, binInfo.energy);
@@ -260,7 +261,8 @@ void SpectralEffectsExtension::replaceDummyPrepareSteps(const BinInformation& bi
     {
         auto sourcePrep = std::make_shared<prepare::SourceParam>();
         sourcePrep->setFluxModifier(binInfo.adjustedFluxMods[view]);
-        sourcePrep->setEnergyRangeRestriction({ binInfo.energy - binWidth/2.0, binInfo.energy + binWidth/2.0 });
+        sourcePrep->setEnergyRangeRestriction({ binInfo.energy - binWidth * 0.5f,
+                                                binInfo.energy + binWidth * 0.5f });
         _setup.view(view).replacePrepareStep(sourcePrep);
     }
 }

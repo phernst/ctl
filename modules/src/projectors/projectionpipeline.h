@@ -9,12 +9,14 @@ class ProjectionPipeline : public AbstractProjector
 {
     CTL_TYPE_ID(200)
 
+    // abstract interface
+    public: void configure(const AcquisitionSetup& setup) override;
+    public: ProjectionData project(const VolumeData& volume) override;
+
 public:
     using ProjectorPtr = std::unique_ptr<AbstractProjector>;
     using ExtensionPtr = std::unique_ptr<ProjectorExtension>;
 
-    void configure(const AcquisitionSetup& setup) override;
-    ProjectionData project(const VolumeData& volume) override;
     ProjectionData projectComposite(const CompositeVolume &volume) override;
     bool isLinear() const override;
 

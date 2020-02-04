@@ -13,13 +13,14 @@ class SpectralEffectsExtension : public ProjectorExtension
 {
     CTL_TYPE_ID(104)
 
+    // abstract interface
+    public: void configure(const AcquisitionSetup& setup) override;
+    public: ProjectionData project(const VolumeData& volume) override;
+
 public:
     using ProjectorExtension::ProjectorExtension;
     SpectralEffectsExtension() = default;
     explicit SpectralEffectsExtension(float energyBinWidth);
-
-    void configure(const AcquisitionSetup& setup) override;
-    ProjectionData project(const VolumeData& volume) override;
 
     ProjectionData projectComposite(const CompositeVolume& volume) override;
     bool isLinear() const override;
