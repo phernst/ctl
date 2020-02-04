@@ -32,11 +32,12 @@ private:
     StepDirection _stepDirection;
 };
 
-class ConstantModel : public AbstractDataModel
+class ConstantModel : public AbstractIntegrableDataModel
 {
     CTL_TYPE_ID(51)
 
     public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
     public: AbstractDataModel* clone() const override;
 
 public:
