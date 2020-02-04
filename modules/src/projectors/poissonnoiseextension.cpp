@@ -106,7 +106,7 @@ void PoissonNoiseExtension::processViewCompact(SingleViewData& view,
     }
 
     std::mt19937_64 gen(seed);
-    constexpr float gaussianThreshold = 1.0e6; // threshold for switch to normal distribution
+    constexpr float gaussianThreshold = 1.0e4; // threshold for switch to normal distribution
 
     auto randomizedPoisson = [&gen] (float count) // Poisson distributed count
     {
