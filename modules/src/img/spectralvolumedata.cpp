@@ -1,5 +1,6 @@
 #include "spectralvolumedata.h"
 #include "io/ctldatabase.h"
+#include "models/stepfunctionmodels.h"
 #include <cmath>
 
 namespace CTL {
@@ -8,7 +9,10 @@ static void grindBall(VoxelVolume<float>& volume, float radius);
 
 SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues)
     : VoxelVolume<float> (std::move(muValues))
+    , _absorptionModel(new ConstantModel())
     , _isMu(true)
+    , _refEnergy(42.0f)
+    , _refMassAttenuationCoeff(1.0f)
 
 {
 }
@@ -26,6 +30,7 @@ SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues,
         throw std::runtime_error("SpectralVolumeData::SpectralVolumeData: Invalid absorption model (nullptr)!");
 
     _absorptionModel = std::move(absorptionModel);
+    _hasNonDefaultAbsModel = true;
     _materialName = materialName.isEmpty() ? _absorptionModel->name() : materialName;
     _isMu = true;
     _refEnergy = referenceEnergy;
@@ -41,6 +46,7 @@ SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> materialDensity,
         throw std::runtime_error("SpectralVolumeData::SpectralVolumeData: Invalid absorption model (nullptr)!");
 
     _absorptionModel = std::move(absorptionModel);
+    _hasNonDefaultAbsModel = true;
     _materialName = materialName.isEmpty() ? _absorptionModel->name() : materialName;
 }
 
@@ -76,7 +82,7 @@ SpectralVolumeData SpectralVolumeData::densityVolume() const
 
 bool SpectralVolumeData::hasSpectralInformation() const
 {
-    if(!_absorptionModel) // always requires attenuation model
+    if(!_hasNonDefaultAbsModel) // requires attenuation model
         return false;
 
     if(isMuVolume()) // also requires reference energy and att. coeff information

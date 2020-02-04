@@ -55,6 +55,7 @@ private:
     std::shared_ptr<AbstractIntegrableDataModel> _absorptionModel;
     QString _materialName;
 
+    bool _hasNonDefaultAbsModel = false; //!< True if absorption model has been set explicitely.
     bool _isMu = false;         //!< True if voxel data represents absorption coefficents.
     float _refEnergy = -1.0f;   //!< Reference energy corresponding to mu values.
     float _refMassAttenuationCoeff{-1.0f}; //!< Reference attenuation coeff. corresponding to mu values.
