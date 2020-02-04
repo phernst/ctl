@@ -16,6 +16,7 @@ class CopyableUniquePtr : private std::unique_ptr<T>
 public:
     // ctors
     CopyableUniquePtr() = default;
+    CopyableUniquePtr(std::unique_ptr<T> uniquePtr) noexcept;
     using std::unique_ptr<T>::unique_ptr;
     // copy
     CopyableUniquePtr(const CopyableUniquePtr<T>& other);
@@ -41,6 +42,15 @@ public:
     std::unique_ptr<T>& wrapped() noexcept;
     const std::unique_ptr<T>& wrapped() const noexcept;
 };
+
+/*!
+ * Constructs a new instance by wrapping an `std::unique_ptr`.
+ */
+template <class T>
+CopyableUniquePtr<T>::CopyableUniquePtr(std::unique_ptr<T> uniquePtr) noexcept
+    : std::unique_ptr<T>(std::move(uniquePtr))
+{
+}
 
 /*!
  * Constructs a new instance by calling the `clone` method of \a other or, if \a other is a
