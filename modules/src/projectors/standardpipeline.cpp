@@ -124,6 +124,11 @@ ProjectionData StandardPipeline::project(const VolumeData& volume)
     return _pipeline.project(volume);
 }
 
+ProjectionData StandardPipeline::projectComposite(const CompositeVolume& volume)
+{
+    return _pipeline.projectComposite(volume);
+}
+
 bool StandardPipeline::isLinear() const
 {
     return _pipeline.isLinear();

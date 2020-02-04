@@ -14,6 +14,11 @@ ProjectionData ProjectionPipeline::project(const VolumeData &volume)
     return _finalProjector->project(volume);
 }
 
+ProjectionData ProjectionPipeline::projectComposite(const CompositeVolume& volume)
+{
+    return _finalProjector->projectComposite(volume);
+}
+
 bool ProjectionPipeline::isLinear() const
 {
     return _finalProjector->isLinear();

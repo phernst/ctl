@@ -15,6 +15,7 @@ public:
 
     void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
+    ProjectionData projectComposite(const CompositeVolume &volume) override;
     bool isLinear() const override;
 
     // SerializationInterface interface
