@@ -178,7 +178,7 @@ ProjectorExtension* ProjectionPipeline::extension(uint pos) const
 
 uint ProjectionPipeline::nbExtensions() const
 {
-    return _extensions.size();
+    return static_cast<uint>(_extensions.size());
 }
 
 void ProjectionPipeline::stashExtensions(uint nbExt)
@@ -186,7 +186,6 @@ void ProjectionPipeline::stashExtensions(uint nbExt)
     ProjectorExtension* tmpProj = _finalProjector.release();
 
     // stash all extensions up to position 'pos'
-    const auto fullNbExt = nbExtensions();
     for(auto i = 0u; i < nbExt; ++i)
         tmpProj = static_cast<ProjectorExtension*>(tmpProj->release());
 

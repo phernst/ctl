@@ -38,6 +38,7 @@ public:
 
     ProjectorExtension* extension(uint pos) const;
     uint nbExtensions() const;
+
 private:
     ExtensionPtr _finalProjector;
 
