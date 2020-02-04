@@ -23,7 +23,7 @@ IntervalDataSeries RadiationEncoder::finalSpectrum(uint nbSamples) const
 {
     auto spectrum = _system->source()->spectrum(nbSamples);
 
-    foreach(const auto& modifier, _system->modifiers())
+    for(const auto& modifier : _system->modifiers())
         spectrum = modifier->modifiedSpectrum(spectrum);
 
     return spectrum;
@@ -40,7 +40,7 @@ IntervalDataSeries RadiationEncoder::finalSpectrum(EnergyRange range, uint nbSam
 {
     auto spectrum = _system->source()->spectrum(range, nbSamples);
 
-    foreach(const auto& modifier, _system->modifiers())
+    for(const auto& modifier : _system->modifiers())
         spectrum = modifier->modifiedSpectrum(spectrum);
 
     return spectrum;

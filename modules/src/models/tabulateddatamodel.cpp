@@ -51,7 +51,7 @@ void TabulatedDataModel::setData(const QVector<float>& keys, const QVector<float
         throw std::domain_error("TabulatedDataModel::setData(): keys and values have different size.");
 
     _data.clear();
-    for(int k = 0; k < keys.length(); ++k)
+    for(auto k = 0; k < keys.length(); ++k)
         _data.insert(keys.at(k), values.at(k));
 }
 
@@ -67,9 +67,9 @@ QVariantList TabulatedDataModel::dataAsVariantList() const
     QVariantList list;
 
     auto i = _data.constBegin();
-    while (i != _data.constEnd())
+    while(i != _data.constEnd())
     {
-        list.append(QVariant(QVariantList{i.key(),i.value()}));
+        list.append(QVariant(QVariantList{ i.key(), i.value() }));
         ++i;
     }
 
@@ -79,9 +79,9 @@ QVariantList TabulatedDataModel::dataAsVariantList() const
 void TabulatedDataModel::setDataFromVariantList(const QVariantList& list)
 {
     _data.clear();
-    foreach(const QVariant& var, list)
+    for(const auto& var : list)
     {
-        auto dataPoint = var.toList();
+        const auto dataPoint = var.toList();
         if(dataPoint.size() < 2)
             continue;
         _data.insert(dataPoint.at(0).toFloat(), dataPoint.at(1).toFloat());
@@ -105,10 +105,10 @@ void TabulatedDataModel::setDataFromVariantList(const QVariantList& list)
  */
 float TabulatedDataModel::binIntegral(float position, float binWidth) const
 {
-    float from = position - 0.5f * binWidth;
-    float to = position + 0.5f * binWidth;
+    const auto from = position - 0.5f * binWidth;
+    const auto to = position + 0.5f * binWidth;
 
-    float ret = 0.0;
+    auto ret = 0.0f;
 
     const auto lowerEndPosition = _data.lowerBound(from);
     const auto upperEndPosition = _data.lowerBound(to);
@@ -123,9 +123,9 @@ float TabulatedDataModel::binIntegral(float position, float binWidth) const
 
     // if function reaches this point, multiple segments need to be integrated
     // compute contribution of lower end
-    float lowerEndValue = valueAt(from);
-    float lowerEndContr
-        = 0.5f * (lowerEndValue + lowerEndPosition.value()) * (lowerEndPosition.key() - from);
+    const auto lowerEndValue = valueAt(from);
+    const auto lowerEndContr = 0.5f * (lowerEndValue + lowerEndPosition.value()) *
+                                      (lowerEndPosition.key() - from);
 
     ret += lowerEndContr;
 
@@ -159,8 +159,8 @@ float TabulatedDataModel::binIntegral(float position, float binWidth) const
 
     // compute contribution of upper end
     const auto lastSample = (upperEndPosition - 1);
-    float upperEndValue = valueAt(to);
-    float upperEndContr = 0.5f * (lastSample.value() + upperEndValue) * (to - lastSample.key());
+    const auto upperEndValue = valueAt(to);
+    const auto upperEndContr = 0.5f * (lastSample.value() + upperEndValue) * (to - lastSample.key());
 
     ret += upperEndContr;
 
@@ -185,17 +185,17 @@ float TabulatedDataModel::valueAt(float pos) const
         return _data.value(pos);
 
     // find position of next tabulated entry in data with key > pos
-    auto nextValidDataPt = _data.lowerBound(pos);
+    const auto nextValidDataPt = _data.lowerBound(pos);
 
     // check if value is outside of tabulated data --> return 0
     if(nextValidDataPt == _data.begin() || nextValidDataPt == _data.end())
         return 0.0f;
 
     // now it is assured that pos is contained in range of keys of data
-    float weight
-        = (nextValidDataPt.key() - pos) / (nextValidDataPt.key() - (nextValidDataPt - 1).key());
-    float contribLower = (nextValidDataPt - 1).value() * weight;
-    float contribUpper = (nextValidDataPt).value() * (1.0f - weight);
+    const auto weight = (nextValidDataPt.key() - pos) /
+                        (nextValidDataPt.key() - (nextValidDataPt - 1).key());
+    const auto contribLower = (nextValidDataPt - 1).value() * weight;
+    const auto contribUpper = (nextValidDataPt).value() * (1.0f - weight);
 
     return contribLower + contribUpper;
 }

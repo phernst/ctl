@@ -71,8 +71,8 @@ void DenFileIOtest::testPmatReader()
     auto geo = GeometryEncoder::encodeFullGeometry(mySetup);
 
     QVector<double> vectorizedPmats;
-    foreach (const SingleViewGeometry& sViewGeo, geo)
-        foreach (const ProjectionMatrix& pmat, sViewGeo)
+    for(const SingleViewGeometry& sViewGeo : geo)
+        for(const ProjectionMatrix& pmat : sViewGeo)
             vectorizedPmats.append(mat::toQVector(pmat));
 
     const QString fName("testData/geometryConv.den");
