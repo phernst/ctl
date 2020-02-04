@@ -23,8 +23,6 @@ namespace {
 cl_double16 decomposeM(const Matrix3x3& M);
 cl_float3 determineSource(const ProjectionMatrix& P);
 cl_float3 volumeCorner(const cl::size_t<3>& volDim, const cl_float3& voxelSize, const cl_float3& volOffset);
-std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, size_t memSize, const void* hostPtr,
-                                              const std::vector<cl::CommandQueue>& queues);
 
 // helper classes
 struct VolumeSpecs
