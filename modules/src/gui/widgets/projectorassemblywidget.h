@@ -3,13 +3,14 @@
 
 #include <QListWidget>
 #include <QWidget>
+#include <QGridLayout>
 #include <array>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ProjectorAssemblyWidget; }
 QT_END_NAMESPACE
 
-
+class ExtensionConfigWidget;
 
 class ProjectorAssemblyWidget : public QWidget
 {
@@ -50,11 +51,35 @@ public:
 private slots:
     void on_extensionList_itemDoubleClicked(QListWidgetItem* item);
     void on_pipelineList_itemDoubleClicked(QListWidgetItem* item);
-    void on_pushButton_clicked();
+    void updateViewer();
 
 private:
     Ui::ProjectorAssemblyWidget* ui;
 
-    void updateViewer();
+    void initExtensionList();
 };
+
+class ExtensionConfigWidget : public QWidget
+{
+    Q_OBJECT
+
+public:
+    ExtensionConfigWidget(QWidget* parent = nullptr);
+
+
+public slots:
+    void updateInterface(QListWidgetItem* item);
+
+private:
+    QListWidgetItem* _currentItem;
+    QGridLayout* _layout;
+
+    void clearLayout();
+    static QVariant parsedInputWidget(QWidget* widget);
+    void setExtensionObject(QListWidgetItem* item);
+
+private slots:
+    void somethingChanged();
+};
+
 #endif // PROJECTORASSEMBLYWIDGET_H
