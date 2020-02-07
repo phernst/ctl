@@ -1,9 +1,7 @@
 #ifndef PROJECTORASSEMBLYWIDGET_H
 #define PROJECTORASSEMBLYWIDGET_H
 
-#include <QListWidget>
 #include <QWidget>
-#include <QGridLayout>
 #include <array>
 
 QT_BEGIN_NAMESPACE
@@ -11,6 +9,7 @@ namespace Ui { class ProjectorAssemblyWidget; }
 QT_END_NAMESPACE
 
 class ExtensionConfigWidget;
+class QListWidgetItem;
 
 class ProjectorAssemblyWidget : public QWidget
 {
@@ -47,6 +46,13 @@ public:
     static CompatibilityReport reportPhysicalCompatibility(const std::vector<Extension>& extensions);
     static QString compatibilityReport2String(const std::vector<Extension>& extensions,
                                               const CompatibilityReport& report);
+    QString codeString();
+
+    void setExtensionPrototypes(const QVector<QListWidgetItem*>& prototypes);
+    QVector<QListWidgetItem*> extensions();
+
+signals:
+    void extensionItemClicked(QListWidgetItem* item);
 
 private slots:
     void on_extensionList_itemDoubleClicked(QListWidgetItem* item);
@@ -57,29 +63,6 @@ private:
     Ui::ProjectorAssemblyWidget* ui;
 
     void initExtensionList();
-};
-
-class ExtensionConfigWidget : public QWidget
-{
-    Q_OBJECT
-
-public:
-    ExtensionConfigWidget(QWidget* parent = nullptr);
-
-
-public slots:
-    void updateInterface(QListWidgetItem* item);
-
-private:
-    QListWidgetItem* _currentItem;
-    QGridLayout* _layout;
-
-    void clearLayout();
-    static QVariant parsedInputWidget(QWidget* widget);
-    void setExtensionObject(QListWidgetItem* item);
-
-private slots:
-    void somethingChanged();
 };
 
 #endif // PROJECTORASSEMBLYWIDGET_H

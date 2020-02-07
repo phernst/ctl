@@ -1,9 +1,5 @@
 #include "projectorassemblywidget.h"
 #include "ui_projectorassemblywidget.h"
-#include <QDebug>
-#include <QDoubleSpinBox>
-#include <QSpinBox>
-#include <QCheckBox>
 
 static QString firstLine()
 {
@@ -15,7 +11,6 @@ ProjectorAssemblyWidget::ProjectorAssemblyWidget(QWidget* parent)
     , ui(new Ui::ProjectorAssemblyWidget)
 {
     ui->setupUi(this);
-    ui->pipelineList->setDragDropMode(QAbstractItemView::DragDropMode::InternalMove);
 
     initExtensionList();
 
@@ -25,7 +20,7 @@ ProjectorAssemblyWidget::ProjectorAssemblyWidget(QWidget* parent)
     connect(ui->pipelineList->model(), SIGNAL(rowsRemoved(const QModelIndex&, int, int)), SLOT(updateViewer()));
     connect(ui->pipelineList->model(), &QAbstractItemModel::rowsMoved, this, &ProjectorAssemblyWidget::updateViewer);
 
-    connect(ui->pipelineList, &QListWidget::itemClicked, ui->widget, &ExtensionConfigWidget::updateInterface);
+    connect(ui->pipelineList, &QListWidget::itemClicked, this, &ProjectorAssemblyWidget::extensionItemClicked);
 
 }
 
@@ -109,13 +104,47 @@ QString ProjectorAssemblyWidget::compatibilityReport2String(
     return ret;
 }
 
+QString ProjectorAssemblyWidget::codeString()
+{
+    QString theCode = firstLine();
+
+    for(auto row = 0, count = ui->pipelineList->count(); row < count; ++row)
+    {
+        const auto item = ui->pipelineList->item(row);
+        theCode += " |\n                   "
+                   "CTL::makeExtension<CTL::" + item->text() + ">()";
+    }
+    theCode += ";\n\n-----------\n\n";
+
+    return theCode;
+}
+
+void ProjectorAssemblyWidget::setExtensionPrototypes(const QVector<QListWidgetItem*>& prototypes)
+{
+    ui->extensionList->clear();
+    uint row = 0;
+    for(const auto item : prototypes)
+        ui->extensionList->insertItem(row++, item);
+}
+
+QVector<QListWidgetItem*> ProjectorAssemblyWidget::extensions()
+{
+    const auto nbItems = ui->pipelineList->count();
+    QVector<QListWidgetItem*> ret(nbItems);
+
+    for(auto row = 0; row < nbItems; ++row)
+        ret[row] = (ui->pipelineList->item(row));
+
+    return ret;
+}
+
 void ProjectorAssemblyWidget::on_pipelineList_itemDoubleClicked(QListWidgetItem* item)
 {
     delete item;
     if(!ui->pipelineList->selectedItems().isEmpty())
-        ui->widget->updateInterface(ui->pipelineList->selectedItems().first());
+        emit extensionItemClicked(ui->pipelineList->selectedItems().first());
     else
-        ui->widget->updateInterface(nullptr);
+        emit extensionItemClicked(nullptr);
 }
 
 void ProjectorAssemblyWidget::on_extensionList_itemDoubleClicked(QListWidgetItem* item)
@@ -126,22 +155,16 @@ void ProjectorAssemblyWidget::on_extensionList_itemDoubleClicked(QListWidgetItem
 
 void ProjectorAssemblyWidget::updateViewer()
 {
-    QString theCode = firstLine();
+    QString text = codeString();
     std::vector<Extension> extensions;
 
     for(auto row = 0, count = ui->pipelineList->count(); row < count; ++row)
-    {
-        const auto item = ui->pipelineList->item(row);
-        theCode += " |\n                   "
-                   "CTL::makeExtension<CTL::" + item->text() + ">()";
-        extensions.push_back(static_cast<Extension>(item->type() - QListWidgetItem::UserType));
-    }
-    theCode += ";\n\n-----------\n\n";
+        extensions.push_back(static_cast<Extension>(ui->pipelineList->item(row)->type() - QListWidgetItem::UserType));
 
     const auto report = reportPhysicalCompatibility(extensions);
-    theCode += compatibilityReport2String(extensions, report);
+    text += compatibilityReport2String(extensions, report);
 
-    ui->codeViewer->setText(theCode);
+    ui->codeViewer->setText(text);
 }
 
 void ProjectorAssemblyWidget::initExtensionList()
@@ -172,107 +195,6 @@ void ProjectorAssemblyWidget::initExtensionList()
 
         newItem->setData(Qt::UserRole, initialData);
     }
-}
-
-ExtensionConfigWidget::ExtensionConfigWidget(QWidget* parent)
-    : QWidget(parent)
-    , _layout(new QGridLayout)
-{
-    this->setLayout(_layout);
-}
-
-void ExtensionConfigWidget::setExtensionObject(QListWidgetItem *item)
-{
-    _currentItem = item;
-}
-
-void ExtensionConfigWidget::updateInterface(QListWidgetItem* item)
-{
-    clearLayout();
-    if(!item) return;
-
-    setExtensionObject(item);
-    qInfo() << "update";
-
-    QVariantMap dataMap = _currentItem->data(Qt::UserRole).toMap();
-
-    int row = 0;
-    QVariantMap::const_iterator i = dataMap.constBegin();
-    while (i != dataMap.constEnd())
-    {
-        _layout->addWidget(new QLabel(i.key()), row, 0);
-        if(i.value().type() == QVariant::Bool)
-        {
-            auto widget = new QCheckBox("enable");
-            widget->setChecked(i.value().toBool());
-            _layout->addWidget(widget, row, 1);
-            connect(widget, SIGNAL(toggled(bool)), this, SLOT(somethingChanged()));
-        }
-        else if(i.value().type() == QVariant::Int)
-        {
-            auto widget = new QSpinBox;
-            widget->setValue(i.value().toInt());
-            _layout->addWidget(widget, row, 1);
-            connect(widget, SIGNAL(valueChanged(int)), this, SLOT(somethingChanged()));
-        }
-        else if(i.value().type() == QVariant::Double)
-        {
-            auto widget = new QDoubleSpinBox;
-            widget->setValue(i.value().toDouble());
-            _layout->addWidget(widget, row, 1);
-            connect(widget, SIGNAL(valueChanged(double)), this, SLOT(somethingChanged()));
-        }
-
-        ++row;
-        ++i;
-    }
-
-}
-
-void ExtensionConfigWidget::clearLayout()
-{
-    const auto nbItems = _layout->count();
-    const auto nbRows = _layout->rowCount();
-    qInfo() << "clear" << nbRows << nbItems;
-    for(int item = nbItems-1; item >=0 ; --item)
-    {
-        qInfo() << "clear item " << item;
-        QWidget* w = _layout->itemAt(item)->widget();
-        if(w != NULL)
-        {
-            _layout->removeWidget(w);
-            delete w;
-        }
-    }
-}
-
-void ExtensionConfigWidget::somethingChanged()
-{
-    const auto nbItems = _layout->count();
-    const auto nbRows = nbItems / 2;
-
-    QVariantMap map;
-    for (int row = 0; row < nbRows; ++row)
-    {
-        auto name = static_cast<QLabel*>(_layout->itemAtPosition(row, 0)->widget())->text();
-        map.insert(name, parsedInputWidget(_layout->itemAtPosition(row, 1)->widget()));
-    }
-
-    _currentItem->setData(Qt::UserRole, map);
-}
-
-QVariant ExtensionConfigWidget::parsedInputWidget(QWidget *widget)
-{
-    QVariant ret;
-
-    if(dynamic_cast<QCheckBox*>(widget))
-        ret = dynamic_cast<QCheckBox*>(widget)->isChecked();
-    else if(dynamic_cast<QSpinBox*>(widget))
-        ret = dynamic_cast<QSpinBox*>(widget)->value();
-    else if(dynamic_cast<QDoubleSpinBox*>(widget))
-        ret = dynamic_cast<QDoubleSpinBox*>(widget)->value();
-
-    return ret;
 }
 
 

@@ -14,7 +14,7 @@
    <string>ProjectorAssemblyWidget</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" rowspan="2">
+   <item row="0" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Available Extensions</string>
@@ -24,14 +24,11 @@
    <item row="0" column="1">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Pipeline</string>
+      <string>Selected extensions</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="2" rowspan="3">
-    <widget class="ExtensionConfigWidget" name="widget" native="true"/>
-   </item>
-   <item row="2" column="0" rowspan="2">
+   <item row="1" column="0">
     <widget class="QListWidget" name="extensionList">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -41,33 +38,23 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
-    <widget class="QListWidget" name="pipelineList_2">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>35</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
+   <item row="1" column="1">
     <widget class="QListWidget" name="pipelineList">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="dragDropMode">
+      <enum>QAbstractItemView::InternalMove</enum>
+     </property>
+     <property name="defaultDropAction">
+      <enum>Qt::MoveAction</enum>
+     </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="3">
+   <item row="2" column="0" colspan="2">
     <widget class="QTextBrowser" name="codeViewer">
      <property name="font">
       <font>
@@ -78,14 +65,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>ExtensionConfigWidget</class>
-   <extends>QWidget</extends>
-   <header>gui/widgets/projectorassemblywidget.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
  <slots>
