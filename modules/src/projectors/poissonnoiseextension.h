@@ -23,8 +23,9 @@ public:
     bool isLinear() const override;
 
     // SerializationInterface interface
-    void fromVariant(const QVariant &variant) override;
     QVariant toVariant() const override;
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
 
     void setFixedSeed(uint seed);
     void setRandomSeedMode();

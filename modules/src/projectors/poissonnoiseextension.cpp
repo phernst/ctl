@@ -54,31 +54,39 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
 
 bool PoissonNoiseExtension::isLinear() const { return false; }
 
-// Use SerializationInterface::fromVariant() documentation.
-void PoissonNoiseExtension::fromVariant(const QVariant& variant)
-{
-    ProjectorExtension::fromVariant(variant);
-
-    QVariantMap map = variant.toMap();
-    _useFixedSeed = map.value("use fixed seed", false).toBool();
-    _useParallelization = map.value("use parallelization", true).toBool();
-    _seed = map.value("seed", 0).toUInt();
-
-    if(_useFixedSeed)
-        setFixedSeed(_seed);
-}
-
 // Use SerializationInterface::toVariant() documentation.
 QVariant PoissonNoiseExtension::toVariant() const
 {
     QVariantMap ret = ProjectorExtension::toVariant().toMap();
 
     ret.insert("#", "PoissonNoiseExtension");
-    ret.insert("use fixed seed", _useFixedSeed);
-    ret.insert("use parallelization", _useParallelization);
-    ret.insert("seed", _seed);
 
     return ret;
+}
+
+QVariant PoissonNoiseExtension::parameter() const
+{
+    QVariantMap ret = ProjectorExtension::parameter().toMap();
+
+    qInfo() << _seed;
+
+    ret.insert("Use fixed seed", _useFixedSeed);
+    ret.insert("Use parallelization", _useParallelization);
+    ret.insert("Seed", _seed);
+
+    return ret;
+}
+
+void PoissonNoiseExtension::setParameter(const QVariant& parameter)
+{
+    qInfo() << "set parameter";
+
+    ProjectorExtension::setParameter(parameter);
+
+    QVariantMap map = parameter.toMap();
+    _useFixedSeed = map.value("Use fixed seed", false).toBool();
+    _useParallelization = map.value("Use parallelization", true).toBool();
+    _seed = map.value("Seed", 0).toUInt();
 }
 
 void PoissonNoiseExtension::setFixedSeed(uint seed)

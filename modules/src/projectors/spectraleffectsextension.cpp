@@ -68,24 +68,31 @@ ProjectionData SpectralEffectsExtension::projectComposite(const CompositeVolume&
 
 bool SpectralEffectsExtension::isLinear() const { return false; }
 
-// Use SerializationInterface::fromVariant() documentation.
-void SpectralEffectsExtension::fromVariant(const QVariant& variant)
-{
-    ProjectorExtension::fromVariant(variant);
-
-    auto deltaE = variant.toMap().value("spectral sampling resolution", 0.0f).toFloat();
-    setSpectralSamplingResolution(deltaE);
-}
-
 // Use SerializationInterface::toVariant() documentation.
 QVariant SpectralEffectsExtension::toVariant() const
 {
     QVariantMap ret = ProjectorExtension::toVariant().toMap();
 
     ret.insert("#", "SpectralEffectsExtension");
-    ret.insert("spectral sampling resolution", _deltaE);
 
     return ret;
+}
+
+QVariant SpectralEffectsExtension::parameter() const
+{
+    QVariantMap ret = ProjectorExtension::parameter().toMap();
+
+    ret.insert("Sampling resolution", _deltaE);
+
+    return ret;
+}
+
+void SpectralEffectsExtension::setParameter(const QVariant& parameter)
+{
+    ProjectorExtension::setParameter(parameter);
+
+    auto deltaE = parameter.toMap().value("Sampling resolution", 0.0f).toFloat();
+    setSpectralSamplingResolution(deltaE);
 }
 
 void SpectralEffectsExtension::setSpectralSamplingResolution(float energyBinWidth)

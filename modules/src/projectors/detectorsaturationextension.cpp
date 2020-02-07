@@ -20,23 +20,32 @@ bool DetectorSaturationExtension::isLinear() const { return false; }
 
 void DetectorSaturationExtension::setIntensitySampling(uint nbSamples) { _nbSamples = nbSamples; }
 
-// Use SerializationInterface::fromVariant() documentation.
-void DetectorSaturationExtension::fromVariant(const QVariant& variant)
-{
-    ProjectorExtension::fromVariant(variant);
-
-    _nbSamples = variant.toMap().value("intensity sampling points", 0u).toUInt();
-}
-
 // Use SerializationInterface::toVariant() documentation.
 QVariant DetectorSaturationExtension::toVariant() const
 {
     QVariantMap ret = ProjectorExtension::toVariant().toMap();
 
     ret.insert("#", "DetectorSaturationExtension");
-    ret.insert("intensity sampling points", _nbSamples);
 
     return ret;
+}
+
+QVariant DetectorSaturationExtension::parameter() const
+{
+    QVariantMap ret = ProjectorExtension::parameter().toMap();
+
+    ret.insert("Intensity sampling points", _nbSamples);
+
+    return ret;
+}
+
+void DetectorSaturationExtension::setParameter(const QVariant& parameter)
+{
+    ProjectorExtension::setParameter(parameter);
+
+    QVariantMap map = parameter.toMap();
+
+    _nbSamples = map.value("Intensity sampling points", 0u).toUInt();
 }
 
 ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector& nestedProjector)

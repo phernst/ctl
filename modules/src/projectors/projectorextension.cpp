@@ -134,7 +134,10 @@ bool ProjectorExtension::isLinear() const
 // Use SerializationInterface::fromVariant() documentation.
 void ProjectorExtension::fromVariant(const QVariant& variant)
 {
+    AbstractProjector::fromVariant(variant);
+
     QVariantMap map = variant.toMap();
+
     if(!map.value("nested projector").isNull())
         use(SerializationHelper::parseProjector(map.value("nested projector")));
 }
@@ -142,7 +145,7 @@ void ProjectorExtension::fromVariant(const QVariant& variant)
 // Use SerializationInterface::toVariant() documentation.
 QVariant ProjectorExtension::toVariant() const
 {
-    QVariantMap ret = SerializationInterface::toVariant().toMap();
+    QVariantMap ret = AbstractProjector::toVariant().toMap();
 
     ret.insert("nested projector",
                _projector ? _projector->toVariant() : QVariant());

@@ -55,35 +55,38 @@ RayCasterProjector::RayCasterProjector()
     initOpenCL();
 }
 
-// Use SerializationInterface::fromVariant() documentation.
-void RayCasterProjector::fromVariant(const QVariant& variant)
-{
-    QVariantMap map = variant.toMap();
-
-    QVariantList raysPerPix = map.value("rays per pixel", QVariantList{1u, 1u}).toList();
-    _settings.raysPerPixel[0] = raysPerPix.at(0).toUInt();
-    _settings.raysPerPixel[1] = raysPerPix.at(1).toUInt();
-    _settings.raySampling = map.value("ray sampling", 0.3f).toFloat();
-    _settings.volumeUpSampling = map.value("volume upsampling", 1u).toUInt();
-    _settings.interpolate = map.value("interpolate", true).toBool();
-}
-
 // Use SerializationInterface::toVariant() documentation.
 QVariant RayCasterProjector::toVariant() const
 {
     QVariantMap ret = SerializationInterface::toVariant().toMap();
 
-    QVariantList raysPerPix;
-    raysPerPix.append(_settings.raysPerPixel[0]);
-    raysPerPix.append(_settings.raysPerPixel[1]);
-
     ret.insert("#", "RayCasterProjector");
-    ret.insert("rays per pixel", raysPerPix);
-    ret.insert("ray sampling", _settings.raySampling);
-    ret.insert("volume upsampling", _settings.volumeUpSampling);
-    ret.insert("interpolate", _settings.interpolate);
 
     return ret;
+}
+
+QVariant RayCasterProjector::parameter() const
+{
+    QVariantMap ret = AbstractProjector::parameter().toMap();
+
+    ret.insert("Rays per pixel X", _settings.raysPerPixel[0]);
+    ret.insert("Rays per pixel Y", _settings.raysPerPixel[1]);
+    ret.insert("Ray sampling step length", _settings.raySampling);
+    ret.insert("Volume upsampling factor", _settings.volumeUpSampling);
+    ret.insert("Interpolate", _settings.interpolate);
+
+    return ret;
+}
+
+void RayCasterProjector::setParameter(const QVariant& parameter)
+{
+    QVariantMap map = parameter.toMap();
+
+    _settings.raysPerPixel[0] = map.value("Rays per pixel X", 1u).toUInt();
+    _settings.raysPerPixel[1] = map.value("Rays per pixel Y", 1u).toUInt();
+    _settings.raySampling = map.value("Ray sampling step length", 0.3f).toFloat();
+    _settings.volumeUpSampling = map.value("Volume upsampling factor", 1u).toUInt();
+    _settings.interpolate = map.value("Interpolate", true).toBool();
 }
 
 /*!

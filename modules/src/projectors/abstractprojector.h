@@ -81,6 +81,12 @@ public:
 
     virtual bool isLinear() const;
     virtual ProjectionData projectComposite(const CompositeVolume& volume);
+
+    void fromVariant(const QVariant& variant) override;
+    QVariant toVariant() const override;
+    virtual QVariant parameter() const;
+    virtual void setParameter(const QVariant& parameter);
+
     ProjectorNotifier* notifier();
 
 private:
@@ -106,6 +112,29 @@ inline ProjectionData AbstractProjector::projectComposite(const CompositeVolume 
     return ret;
 }
 
+inline QVariant AbstractProjector::parameter() const { return QVariant(); }
+
+inline void AbstractProjector::setParameter(const QVariant&) {}
+
+// Use SerializationInterface::toVariant() documentation.
+inline QVariant AbstractProjector::toVariant() const
+{
+    QVariantMap ret = SerializationInterface::toVariant().toMap();
+
+    ret.insert("parameters", parameter());
+
+    return ret;
+}
+
+// Use SerializationInterface::fromVariant() documentation.
+inline void AbstractProjector::fromVariant(const QVariant& variant)
+{
+    SerializationInterface::fromVariant(variant);
+
+    const auto map = variant.toMap();
+
+    setParameter(map.value("parameters").toMap());
+}
 
 // factory function `makeProjector`
 template <typename ProjectorType, typename... ConstructorArguments>

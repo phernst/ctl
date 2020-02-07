@@ -76,8 +76,9 @@ public:
     void setDiscretization(const QSize& discretization);
 
     // SerializationInterface interface
-    void fromVariant(const QVariant &variant) override;
     QVariant toVariant() const override;
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
 
 protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
