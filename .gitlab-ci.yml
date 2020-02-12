@@ -8,7 +8,8 @@ build-2D3DRegistration:
   script:
     - git clone https://github.com/stevengj/nlopt.git
     - cd nlopt
-    - cmake . && make install
+    - cmake .
+    - cmake --build . --target install
     - cd ../examples/regist2d3d
     - qmake
     - make
@@ -17,7 +18,8 @@ build-2D3DRegistration-clang:
   script:
     - git clone https://github.com/stevengj/nlopt.git
     - cd nlopt
-    - cmake . && make install
+    - cmake .
+    - cmake --build . --target install
     - cd ../examples/regist2d3d
     - qmake -spec linux-clang
     - make
