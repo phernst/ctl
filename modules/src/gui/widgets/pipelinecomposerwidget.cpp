@@ -26,7 +26,7 @@ PipelineComposerWidget::PipelineComposerWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->_w_extensions, &ProjectorAssemblyWidget::extensionItemClicked,
+    connect(ui->_w_extensions, &ExtensionChainWidget::extensionItemClicked,
             ui->_W_propertyManager, &ExtensionConfigWidget::updateInterface);
     connect(ui->_LW_selectedProjector, &QListWidget::itemClicked,
             ui->_W_propertyManager, &ExtensionConfigWidget::updateInterface);
@@ -154,16 +154,16 @@ std::unique_ptr<CTL::ProjectorExtension> PipelineComposerWidget::createExtension
     std::unique_ptr<CTL::ProjectorExtension> ret;
     switch (type)
     {
-    case ProjectorAssemblyWidget::ArealFocalSpotExtension:
+    case ExtensionChainWidget::ArealFocalSpotExtension:
         ret.reset(new CTL::ArealFocalSpotExtension);
         break;
-    case ProjectorAssemblyWidget::PoissonNoiseExtension:
+    case ExtensionChainWidget::PoissonNoiseExtension:
         ret.reset(new CTL::PoissonNoiseExtension);
         break;
-    case ProjectorAssemblyWidget::SpectralEffectsExtension:
+    case ExtensionChainWidget::SpectralEffectsExtension:
         ret.reset(new CTL::SpectralEffectsExtension);
         break;
-    case ProjectorAssemblyWidget::DetectorSaturationExtension:
+    case ExtensionChainWidget::DetectorSaturationExtension:
         ret.reset(new CTL::DetectorSaturationExtension);
         break;
     }

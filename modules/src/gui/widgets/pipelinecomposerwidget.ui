@@ -103,7 +103,7 @@
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="ProjectorAssemblyWidget" name="_w_extensions" native="true">
+    <widget class="ExtensionChainWidget" name="_w_extensions" native="true">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -154,9 +154,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ProjectorAssemblyWidget</class>
+   <class>ExtensionChainWidget</class>
    <extends>QWidget</extends>
-   <header>gui/widgets/projectorassemblywidget.h</header>
+   <header>gui/widgets/extensionchainwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

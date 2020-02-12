@@ -1,14 +1,14 @@
-#include "projectorassemblywidget.h"
-#include "ui_projectorassemblywidget.h"
+#include "extensionchainwidget.h"
+#include "ui_extensionchainwidget.h"
 
 static QString firstLine()
 {
     return QStringLiteral("auto myProjector = CTL::makeProjector<CTL::OCL::RayCasterProjector>()");
 }
 
-ProjectorAssemblyWidget::ProjectorAssemblyWidget(QWidget* parent)
+ExtensionChainWidget::ExtensionChainWidget(QWidget* parent)
     : QWidget(parent)
-    , ui(new Ui::ProjectorAssemblyWidget)
+    , ui(new Ui::ExtensionChainWidget)
 {
     ui->setupUi(this);
 
@@ -18,15 +18,15 @@ ProjectorAssemblyWidget::ProjectorAssemblyWidget(QWidget* parent)
 
     connect(ui->pipelineList->model(), SIGNAL(rowsInserted(const QModelIndex&, int, int)), SLOT(updateViewer()));
     connect(ui->pipelineList->model(), SIGNAL(rowsRemoved(const QModelIndex&, int, int)), SLOT(updateViewer()));
-    connect(ui->pipelineList->model(), &QAbstractItemModel::rowsMoved, this, &ProjectorAssemblyWidget::updateViewer);
+    connect(ui->pipelineList->model(), &QAbstractItemModel::rowsMoved, this, &ExtensionChainWidget::updateViewer);
 
-    connect(ui->pipelineList, &QListWidget::itemClicked, this, &ProjectorAssemblyWidget::extensionItemClicked);
+    connect(ui->pipelineList, &QListWidget::itemClicked, this, &ExtensionChainWidget::extensionItemClicked);
 
 }
 
-ProjectorAssemblyWidget::~ProjectorAssemblyWidget() { delete ui; }
+ExtensionChainWidget::~ExtensionChainWidget() { delete ui; }
 
-const ProjectorAssemblyWidget::ExtensionNames& ProjectorAssemblyWidget::extensionNames()
+const ExtensionChainWidget::ExtensionNames& ExtensionChainWidget::extensionNames()
 {
     static constexpr ExtensionNames ret{
         "ArealFocalSpotExtension",
@@ -37,7 +37,7 @@ const ProjectorAssemblyWidget::ExtensionNames& ProjectorAssemblyWidget::extensio
     return ret;
 }
 
-const ProjectorAssemblyWidget::CompatibilityMatrix& ProjectorAssemblyWidget::compatibilityMatrix()
+const ExtensionChainWidget::CompatibilityMatrix& ExtensionChainWidget::compatibilityMatrix()
 {
     using Physical = PhysicalCompatibility;
     static constexpr CompatibilityMatrix ret {
@@ -50,7 +50,7 @@ const ProjectorAssemblyWidget::CompatibilityMatrix& ProjectorAssemblyWidget::com
     return ret;
 }
 
-ProjectorAssemblyWidget::CompatibilityReport ProjectorAssemblyWidget::reportPhysicalCompatibility(
+ExtensionChainWidget::CompatibilityReport ExtensionChainWidget::reportPhysicalCompatibility(
     const std::vector<Extension>& extensions)
 {
     CompatibilityReport ret(extensions.size(), { Extension(0), PhysicalCompatibility::True });
@@ -69,9 +69,9 @@ ProjectorAssemblyWidget::CompatibilityReport ProjectorAssemblyWidget::reportPhys
     return ret;
 }
 
-QString ProjectorAssemblyWidget::compatibilityReport2String(
+QString ExtensionChainWidget::compatibilityReport2String(
     const std::vector<Extension>& extensions,
-    const ProjectorAssemblyWidget::CompatibilityReport& report)
+    const ExtensionChainWidget::CompatibilityReport& report)
 {
     QString ret = QStringLiteral("Physical evaluation:\n");
     const auto& nameLU = extensionNames();
@@ -104,7 +104,7 @@ QString ProjectorAssemblyWidget::compatibilityReport2String(
     return ret;
 }
 
-QString ProjectorAssemblyWidget::codeString()
+QString ExtensionChainWidget::codeString()
 {
     QString theCode = firstLine();
 
@@ -119,7 +119,7 @@ QString ProjectorAssemblyWidget::codeString()
     return theCode;
 }
 
-void ProjectorAssemblyWidget::setExtensionPrototypes(const QVector<QListWidgetItem*>& prototypes)
+void ExtensionChainWidget::setExtensionPrototypes(const QVector<QListWidgetItem*>& prototypes)
 {
     ui->extensionList->clear();
     uint row = 0;
@@ -127,7 +127,7 @@ void ProjectorAssemblyWidget::setExtensionPrototypes(const QVector<QListWidgetIt
         ui->extensionList->insertItem(row++, item);
 }
 
-QVector<QListWidgetItem*> ProjectorAssemblyWidget::extensions()
+QVector<QListWidgetItem*> ExtensionChainWidget::extensions()
 {
     const auto nbItems = ui->pipelineList->count();
     QVector<QListWidgetItem*> ret(nbItems);
@@ -138,7 +138,7 @@ QVector<QListWidgetItem*> ProjectorAssemblyWidget::extensions()
     return ret;
 }
 
-void ProjectorAssemblyWidget::on_pipelineList_itemDoubleClicked(QListWidgetItem* item)
+void ExtensionChainWidget::on_pipelineList_itemDoubleClicked(QListWidgetItem* item)
 {
     delete item;
     if(!ui->pipelineList->selectedItems().isEmpty())
@@ -147,13 +147,13 @@ void ProjectorAssemblyWidget::on_pipelineList_itemDoubleClicked(QListWidgetItem*
         emit extensionItemClicked(nullptr);
 }
 
-void ProjectorAssemblyWidget::on_extensionList_itemDoubleClicked(QListWidgetItem* item)
+void ExtensionChainWidget::on_extensionList_itemDoubleClicked(QListWidgetItem* item)
 {
     auto newItem = new QListWidgetItem(item->text(), ui->pipelineList, item->type());
     newItem->setData(Qt::UserRole, item->data(Qt::UserRole));
 }
 
-void ProjectorAssemblyWidget::updateViewer()
+void ExtensionChainWidget::updateViewer()
 {
     QString text = codeString();
     std::vector<Extension> extensions;
@@ -167,7 +167,7 @@ void ProjectorAssemblyWidget::updateViewer()
     ui->codeViewer->setText(text);
 }
 
-void ProjectorAssemblyWidget::initExtensionList()
+void ExtensionChainWidget::initExtensionList()
 {
     const auto nbExt = extensionNames().size();
 

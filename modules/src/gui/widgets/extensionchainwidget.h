@@ -1,23 +1,23 @@
-#ifndef PROJECTORASSEMBLYWIDGET_H
-#define PROJECTORASSEMBLYWIDGET_H
+#ifndef EXTENSIONCHAINWIDGET_H
+#define EXTENSIONCHAINWIDGET_H
 
 #include <QWidget>
 #include <array>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class ProjectorAssemblyWidget; }
+namespace Ui { class ExtensionChainWidget; }
 QT_END_NAMESPACE
 
 class ExtensionConfigWidget;
 class QListWidgetItem;
 
-class ProjectorAssemblyWidget : public QWidget
+class ExtensionChainWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    ProjectorAssemblyWidget(QWidget *parent = nullptr);
-    ~ProjectorAssemblyWidget();
+    ExtensionChainWidget(QWidget *parent = nullptr);
+    ~ExtensionChainWidget();
 
     enum Extension
     {
@@ -60,9 +60,9 @@ private slots:
     void updateViewer();
 
 private:
-    Ui::ProjectorAssemblyWidget* ui;
+    Ui::ExtensionChainWidget* ui;
 
     void initExtensionList();
 };
 
-#endif // PROJECTORASSEMBLYWIDGET_H
+#endif // EXTENSIONCHAINWIDGET_H
