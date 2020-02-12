@@ -19,11 +19,6 @@ namespace CTL {
 namespace OCL {
 
 namespace {
-// helper functions
-cl_double16 decomposeM(const Matrix3x3& M);
-cl_float3 determineSource(const ProjectionMatrix& P);
-cl_float3 volumeCorner(const cl::size_t<3>& volDim, const cl_float3& voxelSize, const cl_float3& volOffset);
-
 // helper classes
 struct VolumeSpecs
 {
