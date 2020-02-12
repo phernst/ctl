@@ -35,6 +35,9 @@ public:
 
         bool operator==(const Dimensions& other) const;
         bool operator!=(const Dimensions& other) const;
+
+        std::string info() const;
+        size_t totalNbElements() const;
     };
 
     struct VoxelSize
@@ -164,6 +167,24 @@ template<typename T>
 bool VoxelVolume<T>::Dimensions::operator!=(const Dimensions& other) const
 {
     return (x != other.x) || (y != other.y) || (z != other.z);
+}
+
+/*!
+ * Returns a string that contains the dimensions joined with " x ".
+ */
+template<typename T>
+std::string VoxelVolume<T>::Dimensions::info() const
+{
+    return std::to_string(x) + " x " + std::to_string(y) + " x " + std::to_string(z);
+}
+
+/*!
+ * Returns the total number of voxels in the volume.
+ */
+template <typename T>
+size_t VoxelVolume<T>::Dimensions::totalNbElements() const
+{
+    return size_t(x) * size_t(y) * size_t(z);
 }
 
 /*!
@@ -413,7 +434,6 @@ bool VoxelVolume<T>::hasEqualSizeAs(const std::vector<T>& other) const
     Q_ASSERT(totalVoxelCount() == other.size());
     return totalVoxelCount() == other.size();
 }
-
 
 } // namespace CTL
 

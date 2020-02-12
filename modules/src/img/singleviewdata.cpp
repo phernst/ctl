@@ -534,6 +534,11 @@ std::string SingleViewData::Dimensions::info() const
             + std::to_string(nbModules);
 }
 
+size_t SingleViewData::Dimensions::totalNbElements() const
+{
+    return size_t(nbChannels) * size_t(nbRows) * size_t(nbModules);
+}
+
 /*!
  * Returns a constant reference to the stored data vector.
  */

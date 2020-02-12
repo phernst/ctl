@@ -35,7 +35,9 @@ public:
 
         bool operator==(const Dimensions& other) const;
         bool operator!=(const Dimensions& other) const;
+
         std::string info() const;
+        size_t totalNbElements() const;
     };
 
     explicit Chunk2D(const Dimensions& dimensions);

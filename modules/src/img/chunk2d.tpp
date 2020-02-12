@@ -342,6 +342,15 @@ std::string Chunk2D<T>::Dimensions::info() const
 }
 
 /*!
+ * Returns the total number of pixels in the chunk.
+ */
+template <typename T>
+size_t Chunk2D<T>::Dimensions::totalNbElements() const
+{
+    return size_t(width()) * size_t(height());
+}
+
+/*!
  * Returns the number of elements for which memory has been allocated. This is either zero if no
  * memory has been allocated (after instantiation with a non-allocating constructor) or equal to the
  * number of elements.

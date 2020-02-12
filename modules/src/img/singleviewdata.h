@@ -29,7 +29,9 @@ public:
 
         bool operator==(const Dimensions& other) const;
         bool operator!=(const Dimensions& other) const;
+
         std::string info() const;
+        size_t totalNbElements() const;
     };
 
     explicit SingleViewData(const ModuleData::Dimensions& moduleDimensions);
