@@ -150,7 +150,7 @@
   <customwidget>
    <class>ExtensionConfigWidget</class>
    <extends>QWidget</extends>
-   <header>gui/widgets/projectorassemblywidget.h</header>
+   <header>gui/widgets/pipelinecomposerwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
