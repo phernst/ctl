@@ -102,9 +102,8 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         qWarning() << "voxel size is zero or negative";
 
     // projection dimensions
-    const uint nbViews = _pMats.size();
-    const size_t pixelPerModule = size_t(_viewDim.nbRows) * _viewDim.nbChannels;
-    const size_t pixelPerView = size_t(_viewDim.nbModules) * pixelPerModule;
+    const auto nbViews = _pMats.size();
+    const auto pixelPerView = _viewDim.totalNbElements();
 
     // upsample volume (if volumeUpSampling > 1)
     const auto volumeSpecs = VolumeSpecs::upSampleVolume(volume, _config.volumeUpSampling);
@@ -145,7 +144,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         std::vector<cl::CommandQueue> queues;
         queues.reserve(nbUsedDevs);
         const auto& availDevices = oclConfig.devices();
-        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+        for(auto dev = 0u; dev < nbUsedDevs; ++dev)
             queues.emplace_back(context, availDevices[_config.deviceIDs[dev]]);
 
         // Prepare input data
@@ -158,7 +157,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         std::vector<PinnedBufHostWrite<cl_double16>> qrBufs;
         sourceBufs.reserve(nbUsedDevs);
         qrBufs.reserve(nbUsedDevs);
-        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+        for(auto dev = 0u; dev < nbUsedDevs; ++dev)
         {
             sourceBufs.emplace_back(1, queues[dev]);
             qrBufs.emplace_back(_viewDim.nbModules, queues[dev]);
@@ -180,13 +179,13 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         if(_config.interpolate) // volume is cl::Image3D
         {
             volumeImgs.reserve(nbUsedDevs);
-            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            for(auto dev = 0u; dev < nbUsedDevs; ++dev)
                 volumeImgs.emplace_back(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                                         cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
                                         volDim[0], volDim[1], volDim[2]);
             cl::size_t<3> zeroVecOrigin;
             zeroVecOrigin[0] = zeroVecOrigin[1] = zeroVecOrigin[2] = 0;
-            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            for(auto dev = 0u; dev < nbUsedDevs; ++dev)
                 queues[dev].enqueueWriteImage(volumeImgs[dev], CL_FALSE, zeroVecOrigin, volDim,
                                               0, 0, volumeDataPtr);
 
@@ -195,7 +194,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         {
             volumeBufs.reserve(nbUsedDevs);
             const auto memSize = sizeof(float) * volDim[0] * volDim[1] * volDim[2];
-            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            for(auto dev = 0u; dev < nbUsedDevs; ++dev)
             {
                 volumeBufs.emplace_back(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                                         memSize);
@@ -212,7 +211,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         // Allocate output buffer: pinned (page-locked) projection buffer for each device
         std::vector<PinnedBufHostRead<float>> projectionBuffers;
         projectionBuffers.reserve(nbUsedDevs);
-        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+        for(auto dev = 0u; dev < nbUsedDevs; ++dev)
             projectionBuffers.emplace_back(pixelPerView, queues[dev]);
 
         // Set kernel arguments
@@ -238,10 +237,15 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         };
 
         // Task for copy from pinned memory to "ret" object
-        auto cpyProjections = [&](uint view, const float* pinnedProjections, const cl::Event* event)
+        auto cpyProjections = [&ret](uint view, const float* pinnedProjections,
+                                     const cl::Event* event)
         {
+            const auto viewDim = ret.dimensions();
+            const auto pixelPerModule = viewDim.nbRows * viewDim.nbChannels;
+
             event->wait();
-            for(uint module = 0; module < _viewDim.nbModules; ++module)
+
+            for(auto module = 0u; module < viewDim.nbModules; ++module)
             {
                 std::copy_n(pinnedProjections, pixelPerModule,
                             ret.view(view).module(module).rawData());
@@ -253,14 +257,14 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         std::vector<cl::Event> readViewFinished(nbUsedDevs);
 
         // loop over all projections
-        uint device = 0;
-        for(uint view = 0; view < nbViews; ++view)
+        auto device = 0u;
+        for(auto view = 0u; view < nbViews; ++view)
         {
             const auto& currentViewPMats = _pMats.at(view);
             // all modules have same source position --> use first module PMat (arbitrary)
             auto sourcePosition = determineSource(currentViewPMats.first());
             // individual module geometry: QR is only determined by M, where P=[M|p4]
-            for(uint module = 0; module < _viewDim.nbModules; ++module)
+            for(auto module = 0u; module < _viewDim.nbModules; ++module)
                 QRs[module] = decomposeM(currentViewPMats.at(module).M());
 
             // wait for previous job of the device
@@ -292,7 +296,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
             emit notifier()->projectionFinished(int(view));
         }
         // wait for remaining devices
-        for(uint remainingDev = 0; remainingDev < nbUsedDevs; ++remainingDev)
+        for(auto remainingDev = 0u; remainingDev < nbUsedDevs; ++remainingDev)
             if(cpyThreads[remainingDev].joinable())
                 cpyThreads[remainingDev].join();
 
