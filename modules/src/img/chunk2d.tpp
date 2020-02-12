@@ -347,7 +347,7 @@ std::string Chunk2D<T>::Dimensions::info() const
 template <typename T>
 size_t Chunk2D<T>::Dimensions::totalNbElements() const
 {
-    return size_t(width()) * size_t(height());
+    return size_t(width) * size_t(height);
 }
 
 /*!
