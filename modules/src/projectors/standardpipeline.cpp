@@ -10,7 +10,7 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(StandardPipeline)
 
-StandardPipeline::StandardPipeline()
+StandardPipeline::StandardPipeline(SimulationPolicy policy)
 {
     _extAFS      = new ArealFocalSpotExtension;
     _extDetSat   = new DetectorSaturationExtension;
@@ -19,6 +19,9 @@ StandardPipeline::StandardPipeline()
 
     _projector   = new OCL::RayCasterProjector;
     _pipeline.setProjector(_projector);
+
+    if(policy == SimulationPolicy::Accurate)
+        _approxMode = false;
 }
 
 StandardPipeline::~StandardPipeline()
@@ -81,14 +84,60 @@ void StandardPipeline::enableSpectralEffects(bool enable)
     _spectralEffEnabled = enable;
 }
 
+void StandardPipeline::enableApproxmiationMode(bool enable)
+{
+    _approxMode = enable;
+}
+
 void StandardPipeline::setArealFocalSpotDiscretization(const QSize& discretization)
 {
     _extAFS->setDiscretization(discretization);
 }
 
+void StandardPipeline::setDetectorSaturationSampling(float energyBinWidth)
+{
+    _extDetSat->setIntensitySampling(energyBinWidth);
+}
+
 void StandardPipeline::setSpectralEffectsSampling(float energyBinWidth)
 {
     _extSpectral->setSpectralSamplingResolution(energyBinWidth);
+}
+
+void StandardPipeline::setPoissonFixedSeed(uint seed)
+{
+    _extPoisson->setFixedSeed(seed);
+}
+
+void StandardPipeline::setPoissonRandomSeedMode()
+{
+    _extPoisson->setRandomSeedMode();
+}
+
+void StandardPipeline::setPoissonParallelizationMode(bool enabled)
+{
+    _extPoisson->setParallelizationEnabled(enabled);
+}
+
+void StandardPipeline::setRayCasterInterpolation(bool enabled)
+{
+    _projector->settings().interpolate = enabled;
+}
+
+void StandardPipeline::setRayCasterRaysPerPixel(const QSize &sampling)
+{
+    _projector->settings().raysPerPixel[0] = sampling.width();
+    _projector->settings().raysPerPixel[1] = sampling.height();
+}
+
+void StandardPipeline::setRayCasterRaySampling(float sampling)
+{
+    _projector->settings().raySampling = sampling;
+}
+
+void StandardPipeline::setRayCasterVolumeUpSampling(uint upsamplingFactor)
+{
+    _projector->settings().volumeUpSampling = upsamplingFactor;
 }
 
 uint StandardPipeline::posAFS() const
@@ -105,13 +154,14 @@ uint StandardPipeline::posDetSat() const
 
 uint StandardPipeline::posPoisson() const
 {
-    return uint(_arealFSEnabled)
-            + uint(_spectralEffEnabled);
+    return _approxMode ? uint(_arealFSEnabled) + uint(_spectralEffEnabled)
+                       : uint(_arealFSEnabled);
 }
 
 uint StandardPipeline::posSpectral() const
 {
-    return uint(_arealFSEnabled);
+    return _approxMode ? uint(_arealFSEnabled)
+                       : uint(_arealFSEnabled) + uint(_spectralEffEnabled);
 }
 
 void StandardPipeline::configure(const AcquisitionSetup& setup)
@@ -175,6 +225,57 @@ QVariant StandardPipeline::toVariant() const
     ret.insert("ext spectral", _extSpectral->toVariant());
 
     return ret;
+}
+
+void StandardPipeline::SettingsPoissonNoise::setFixedSeed(uint seed)
+{
+    _ext->setFixedSeed(seed);
+}
+
+void StandardPipeline::SettingsPoissonNoise::setRandomSeedMode()
+{
+    _ext->setRandomSeedMode();
+}
+
+void StandardPipeline::SettingsPoissonNoise::setParallelizationMode(bool enabled)
+{
+    _ext->setParallelizationEnabled(enabled);
+}
+
+void StandardPipeline::SettingsAFS::setDiscretization(const QSize &discretization)
+{
+    _ext->setDiscretization(discretization);
+}
+
+void StandardPipeline::SettingsDetectorSaturation::setSamplingResolution(float energyBinWidth)
+{
+    _ext->setIntensitySampling(energyBinWidth);
+}
+
+void StandardPipeline::SettingsSpectralEffects::setSamplingResolution(float energyBinWidth)
+{
+    _ext->setSpectralSamplingResolution(energyBinWidth);
+}
+
+void StandardPipeline::SettingsRayCaster::setInterpolation(bool enabled)
+{
+    _proj->settings().interpolate = enabled;
+}
+
+void StandardPipeline::SettingsRayCaster::setRaysPerPixel(const QSize& sampling)
+{
+    _proj->settings().raysPerPixel[0] = sampling.width();
+    _proj->settings().raysPerPixel[1] = sampling.height();
+}
+
+void StandardPipeline::SettingsRayCaster::setRaySampling(float sampling)
+{
+    _proj->settings().raySampling = sampling;
+}
+
+void StandardPipeline::SettingsRayCaster::setVolumeUpSampling(uint upsamplingFactor)
+{
+    _proj->settings().volumeUpSampling = upsamplingFactor;
 }
 
 } // namespace CTL
