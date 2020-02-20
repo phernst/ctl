@@ -4,21 +4,41 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(ProjectionPipeline)
 
-void ProjectionPipeline::configure(const AcquisitionSetup &setup)
+/*!
+ * \brief Sets the acquisition setup for the simulation to \a setup.
+ *
+ * Sets the acquisition setup for the simulation to \a setup. This needs to be done prior to calling project().
+ */
+void ProjectionPipeline::configure(const AcquisitionSetup& setup)
 {
     _finalProjector->configure(setup);
 }
 
-ProjectionData ProjectionPipeline::project(const VolumeData &volume)
+/*!
+ * \brief Creates projection data from \a volume.
+ *
+ * Creates projection data from \a volume using the current processing pipeline configuration of
+ * this instance. Uses the last acquisition setup set by configure().
+ */
+ProjectionData ProjectionPipeline::project(const VolumeData& volume)
 {
     return _finalProjector->project(volume);
 }
 
+/*!
+ * \brief Creates projection data from the composite volume \a volume.
+ *
+ * Creates projection data from the composite volume \a volume using the current processing pipeline
+ * configuration of this instance. Uses the last acquisition setup set by configure().
+ */
 ProjectionData ProjectionPipeline::projectComposite(const CompositeVolume& volume)
 {
     return _finalProjector->projectComposite(volume);
 }
 
+/*!
+ * Returns true if the application of the full processing pipeline is linear.
+ */
 bool ProjectionPipeline::isLinear() const
 {
     return _finalProjector->isLinear();
@@ -59,13 +79,23 @@ QVariant ProjectionPipeline::toVariant() const
     return ret;
 }
 
-
-ProjectionPipeline::ProjectionPipeline()
+/*!
+ * Constructs a ProjectionPipeline object and sets the projector to \a projector.
+ *
+ * This object takes ownership of \a projector.
+ */
+ProjectionPipeline::ProjectionPipeline(AbstractProjector* projector)
     : _finalProjector(makeExtension<ProjectorExtension>())
 {
+    setProjector(projector);
 }
 
-void ProjectionPipeline::appendExtension(ProjectorExtension *extension)
+/*!
+ * Appends the extension \a extension to the end of the pipeline.
+ *
+ * This object takes ownership of \a extension.
+ */
+void ProjectionPipeline::appendExtension(ProjectorExtension* extension)
 {
     try {
         // extend projector with new extension
@@ -79,7 +109,15 @@ void ProjectionPipeline::appendExtension(ProjectorExtension *extension)
         throw;
     }
 }
-
+/*!
+ * Inserts the extension \a extension at position \a pos into the pipeline. If
+ * \a pos >= nbExtensions(), the extension is appended.
+ *
+ * Note that the position refers only to the extensions in the pipeline (i.e. the actual projector
+ * is not does not count towards the current number of extension).
+ *
+ * This object takes ownership of \a extension.
+ */
 void ProjectionPipeline::insertExtension(uint pos, ProjectorExtension* extension)
 {
     qDebug() << "ProjectionPipeline::insertExtension at pos " << pos;
@@ -110,6 +148,12 @@ void ProjectionPipeline::insertExtension(uint pos, ProjectorExtension* extension
     restoreExtensions(oldNbExt - pos);
 }
 
+/*!
+ * Sets the projector to \a projector. Destroys any previous projector object managed by this
+ * instance.
+ *
+ * This object takes ownership of \a projector.
+ */
 void ProjectionPipeline::setProjector(AbstractProjector* projector)
 {
     qDebug() << "ProjectionPipeline::setProjector";
@@ -124,6 +168,15 @@ void ProjectionPipeline::setProjector(AbstractProjector* projector)
     restoreExtensions(nbExt);
 }
 
+/*!
+ * Removes the extension at position \a pos from the pipeline. Throws an std::domain_error if
+ * \a pos >= nbExtensions().
+ *
+ * Note that the position refers only to the extensions in the pipeline (i.e. the actual projector
+ * is not does not count towards the current number of extension).
+ *
+ * The ownership of the released object is transfered to the caller.
+ */
 ProjectorExtension* ProjectionPipeline::releaseExtension(uint pos)
 {
     qDebug() << "ProjectionPipeline::releaseExtension at pos " << pos;
@@ -144,31 +197,73 @@ ProjectorExtension* ProjectionPipeline::releaseExtension(uint pos)
     return ret;
 }
 
+/*!
+ * Removes the extension at position \a pos from the pipeline. The extension object is wrapped into
+ * a unique pointer and returned to the caller.
+ * Throws an std::domain_error if \a pos >= nbExtensions().
+ *
+ * Note that the position refers only to the extensions in the pipeline (i.e. the actual projector
+ * is not does not count towards the current number of extension).
+ */
 ProjectionPipeline::ExtensionPtr ProjectionPipeline::takeExtension(uint pos)
 {
     return ExtensionPtr(releaseExtension(pos));
 }
 
+/*!
+ * Appends the extension \a extension to the end of the pipeline.
+ *
+ * This object takes ownership of \a extension.
+ */
 void ProjectionPipeline::appendExtension(ExtensionPtr extension)
 {
     appendExtension(extension.release());
 }
 
+/*!
+ * Inserts the extension \a extension at position \a pos into the pipeline. If
+ * \a pos >= nbExtensions(), the extension is appended.
+ *
+ * Note that the position refers only to the extensions in the pipeline (i.e. the actual projector
+ * is not does not count towards the current number of extension).
+ *
+ * This object takes ownership of \a extension.
+ */
 void ProjectionPipeline::insertExtension(uint pos, ExtensionPtr extension)
 {
     insertExtension(pos, extension.release());
 }
 
+/*!
+ * Removes the extension at position \a pos from the pipeline. Throws an std::domain_error if
+ * \a pos >= nbExtensions().
+ *
+ * The removed extension object is destroyed.
+ */
 void ProjectionPipeline::removeExtension(uint pos)
 {
     delete releaseExtension(pos);
 }
 
+/*!
+ * Sets the projector to \a projector. Destroys any previous projector object managed by this
+ * instance.
+ *
+ * This object takes ownership of \a projector.
+ */
 void ProjectionPipeline::setProjector(ProjectorPtr projector)
 {
     setProjector(projector.release());
 }
 
+/*!
+ * Returns a (base-class) pointer to the extension at position \a pos in the current pipeline.
+ *
+ * Note that the position refers only to the extensions in the pipeline (i.e. the actual projector
+ * is not does not count towards the current number of extension).
+ *
+ * Ownership remains at this instance.
+ */
 ProjectorExtension* ProjectionPipeline::extension(uint pos) const
 {
     if(pos >= nbExtensions())
@@ -176,11 +271,33 @@ ProjectorExtension* ProjectionPipeline::extension(uint pos) const
     return _extensions[pos];
 }
 
+/*!
+ * Returns a (base-class) pointer to the projector that is currently set in the pipeline.
+ *
+ * Ownership remains at this instance.
+ */
+AbstractProjector* ProjectionPipeline::projector() const
+{
+    return _projector;
+}
+
+/*!
+ * Returns the number of extensions in the pipeline.
+ *
+ * Note that the actual projector does not count towards the number of extensions, i.e. for a
+ * pipeline consisting solely of a projector, nbExtensions() is zero.
+ */
 uint ProjectionPipeline::nbExtensions() const
 {
     return static_cast<uint>(_extensions.size());
 }
 
+/*!
+ * Temporarily removes \a nbExt extensions from the end of the pipeline.
+ *
+ * The removed objects are not deleted and need to be restored later using restoreExtensions() to
+ * avoid memory leaks.
+ */
 void ProjectionPipeline::stashExtensions(uint nbExt)
 {
     ProjectorExtension* tmpProj = _finalProjector.release();
@@ -193,6 +310,11 @@ void ProjectionPipeline::stashExtensions(uint nbExt)
     _finalProjector.reset(tmpProj);
 }
 
+/*!
+ * Restores \a nbExt extensions at the end of the pipeline.
+ *
+ * Extensions must have been removed before by stashExtensions().
+ */
 void ProjectionPipeline::restoreExtensions(uint nbExt)
 {
     ProjectorExtension* tmpProj = _finalProjector.release();

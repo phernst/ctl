@@ -184,15 +184,13 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
  */
 
 /*!
- * \fn void AbstractProjector::configure(const AcquisitionSetup& setup, const
- * AbstractProjectorConfig& config)
+ * \fn void AbstractProjector::configure(const AcquisitionSetup& setup)
  *
  * \brief Configures the projector.
  *
  * This method should be used to gather all necessary information to prepare the actual forward
- * projection. This usually contains all geometry and system information (which can be retrieved
- * from \a setup) and implementation specific parameters from \a config. To do so, consider
- * sub-classing AbstractProjectorConfig for the particular purpose.
+ * projection. This usually contains all geometry and system information, which can be retrieved
+ * from \a setup.
  */
 
 /*!
@@ -203,6 +201,31 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
  * This method takes a voxelized dataset \a volume. It shall return the full set of forward
  * projections that have been requested by the AcquisitionSetup set in the configure() step.
  */
+
+/*!
+* \fn ProjectionData AbstractProjector::projectComposite(const CompositeVolume& volume)
+*
+* \brief Provides the functionality to forward project CompositeVolume data.
+*
+* This method takes a composite dataset \a volume and returns the full set of forward projections
+* according to the AcquisitionSetup set in the configure() step.
+*
+* By default, this method performs separate calls to project() for each individual voxel volume
+* stored in the composite \a volume. The final projection result is the sum of all these individual
+* projections (extinction domain).
+* Change this behavior in sub-classes, if this is not suitable for your desired purpose. This is
+* typically the case for non-linear operations.
+*/
+
+/*!
+* \fn bool AbstractProjector::isLinear() const
+*
+* \brief Returns true if the projection operation is linear.
+*
+* By default, this method returns true. Override this method to return false in case of sub-classing
+* that leads to non-linear operations. Overrides of this method should never return an unconditional
+* \c true (as this might outrule underlying non-linearity).
+*/
 
 } // namespace CTL
 
