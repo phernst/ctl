@@ -7,6 +7,15 @@ namespace CTL {
 
 static void grindBall(VoxelVolume<float>& volume, float radius);
 
+/*!
+ * \brief Constructs a SpectralVolumeData representing the attenuation coefficients \a muValues.
+ *
+ * This is a convenience constructor, mainly intended to allow for implicit casts of
+ * VoxelVolume<float> to SpectralVolumeData.
+ *
+ * No spectral information is available in the resulting object. It is strongly encouraged to use
+ * VoxelVolume<float> directly when managing non-spectral attenuation information.
+ */
 SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues)
     : VoxelVolume<float> (std::move(muValues))
     , _absorptionModel(new ConstantModel())
@@ -17,6 +26,11 @@ SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues)
 {
 }
 
+/*!
+ * \brief Constructs a SpectralVolumeData representing the attenuation coefficients \a muValues
+ * (in 1/mm) with respect to the given \a referenceEnergy (in keV) for a material described by
+ * \a absorptionModel.
+ */
 SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues,
                                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
                                        float referenceEnergy,
@@ -37,6 +51,12 @@ SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues,
     _refMassAttenuationCoeff = _absorptionModel->valueAt(referenceEnergy);
 }
 
+/*!
+ * \brief Constructs a SpectralVolumeData representing the density values \a materialDensity
+ * (in g/cm^-3) for a material described by \a absorptionModel.
+ *
+ *
+ */
 SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> materialDensity,
                                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
                                        const QString& materialName)
@@ -50,26 +70,45 @@ SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> materialDensity,
     _materialName = materialName.isEmpty() ? _absorptionModel->name() : materialName;
 }
 
+/*!
+ * Returns the absorption model of this instance.
+ *
+ * The absorption model represents a single material (either elemental or composite) and contains
+ * the spectral dependency of its mass attenuation coefficients (in cm^2/g).
+ */
 std::shared_ptr<AbstractIntegrableDataModel> SpectralVolumeData::absorptionModel() const
 {
     return _absorptionModel;
 }
 
+/*!
+ * Returns the mass attenuation coefficient of the material described by this instance averaged over
+ * the energy bin [\a centerEnergy - \a binWidth / 2, \a centerEnergy + \a binWidth / 2].
+ *
+ * Same as absorptionModel()->meanValue(centerEnergy, binWidth).
+ */
 float SpectralVolumeData::meanMassAttenuationCoeff(float centerEnergy, float binWidth) const
 {
     if(qFuzzyIsNull(binWidth))
     {
         qWarning("SpectralVolumeData::averageMassAttenuationFactor: Interval width is zero!"
                  "Delegating call to SpectralVolumeData::massAttenuationFactor.");
-        return massAttenuationCoeff(centerEnergy);
+        // return massAttenuationCoeff(centerEnergy); <-- not required, covered by meanValue()
     }
 
     if(!_absorptionModel)
         throw std::runtime_error("SpectralVolumeData::averageMassAttenuationFactor: No absorption model set!");
 
-    return _absorptionModel->binIntegral(centerEnergy, binWidth) / binWidth;
+    return _absorptionModel->meanValue(centerEnergy, binWidth);
 }
 
+/*!
+ * Returns the density representation of this instance.
+ *
+ * Note that this creates a copy of the data. In case this instance does already contain density
+ * data (check this via isDensityVolume()) it is discouraged to call this method because it would
+ * only create an unnecessary copy.
+ */
 SpectralVolumeData SpectralVolumeData::densityVolume() const
 {
     SpectralVolumeData ret(*this);
@@ -80,6 +119,17 @@ SpectralVolumeData SpectralVolumeData::densityVolume() const
     return ret;
 }
 
+/*!
+ * Returns true if this instance has full spectral information. This means the following conditions
+ * are fulfilled:
+ *
+ * - a data model describing the spectral dependency of the mass-attenuation coefficient for the
+ *   material represented by this volume has been set
+ * - one of the following conditions is fulfilled:
+ *      * numerical values in individual voxels represent material density (in g/cm^-3), or
+ *      * numerical values in individual voxels represent attenuation coefficiens (in 1/mm) and the
+ *        corresponding reference energy is specified.
+ */
 bool SpectralVolumeData::hasSpectralInformation() const
 {
     if(!_hasNonDefaultAbsModel) // requires attenuation model
@@ -89,6 +139,11 @@ bool SpectralVolumeData::hasSpectralInformation() const
         return (_refEnergy >= 0.0f) && (_refMassAttenuationCoeff >= 0.0f);
 
     return true;
+}
+
+bool SpectralVolumeData::isDensityVolume() const
+{
+    return !_isMu;
 }
 
 bool SpectralVolumeData::isMuVolume() const
