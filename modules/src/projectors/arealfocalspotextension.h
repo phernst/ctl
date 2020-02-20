@@ -79,6 +79,7 @@ public:
     QVariant toVariant() const override;
     QVariant parameter() const override;
     void setParameter(const QVariant& parameter) override;
+    bool isLinear() const override;
 
 protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;

@@ -219,4 +219,9 @@ QVector<QPointF> ArealFocalSpotExtension::discretizationGrid() const
     return ret;
 }
 
+bool ArealFocalSpotExtension::isLinear() const
+{
+    return false;
+}
+
 } // namespace CTL
