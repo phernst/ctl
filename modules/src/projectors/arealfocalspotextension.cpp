@@ -113,14 +113,20 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
         if(first)
         {
             ret = nestedProjector.project();
-            ret.transformToIntensity();
+            if(!_lowExtinctionApprox) // average in intensity domain required
+                ret.transformToIntensity();
         }
         else
         {
             auto proj = nestedProjector.project();
-            fut.wait();
-            nextProj = std::move(proj);
-            fut = std::async(processProj, &nextProj);
+            if(!_lowExtinctionApprox)
+            {
+                fut.wait();
+                nextProj = std::move(proj);
+                fut = std::async(processProj, &nextProj);
+            }
+            else // average in extinction domain
+                ret += proj;
         }
 
         first = false;
@@ -130,7 +136,9 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
     fut.wait();
     ret /= nbSamplingPts;
 
-    ret.transformToExtinction();
+    if(!_lowExtinctionApprox)
+        ret.transformToExtinction();
+
     return ret;
 }
 
@@ -143,6 +151,11 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
 void ArealFocalSpotExtension::setDiscretization(const QSize& discretization)
 {
     _discretizationSteps = discretization;
+}
+
+void ArealFocalSpotExtension::enableLowExtinctionApproximation(bool enable)
+{
+    _lowExtinctionApprox = enable;
 }
 
 // Use SerializationInterface::toVariant() documentation.
@@ -221,7 +234,7 @@ QVector<QPointF> ArealFocalSpotExtension::discretizationGrid() const
 
 bool ArealFocalSpotExtension::isLinear() const
 {
-    return false;
+    return _lowExtinctionApprox;
 }
 
 } // namespace CTL

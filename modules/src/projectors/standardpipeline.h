@@ -157,6 +157,7 @@ private:
     {
     public:
         void setDiscretization(const QSize& discretization);
+        void enableLowExtinctionApproximation(bool enable = true);
 
         SettingsAFS(const SettingsAFS&) = delete;
         SettingsAFS& operator=(const SettingsAFS&) = delete;

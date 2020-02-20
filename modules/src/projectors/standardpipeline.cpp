@@ -439,6 +439,11 @@ void StandardPipeline::SettingsAFS::setDiscretization(const QSize &discretizatio
     _ext->setDiscretization(discretization);
 }
 
+void StandardPipeline::SettingsAFS::enableLowExtinctionApproximation(bool enable)
+{
+    _ext->enableLowExtinctionApproximation(enable);
+}
+
 void StandardPipeline::SettingsDetectorSaturation::setSpectralSamples(uint nbSamples)
 {
     _ext->setIntensitySampling(nbSamples);

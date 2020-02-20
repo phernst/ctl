@@ -74,6 +74,7 @@ public:
     using ProjectorExtension::ProjectorExtension;
 
     void setDiscretization(const QSize& discretization);
+    void enableLowExtinctionApproximation(bool enable = true);
 
     // SerializationInterface interface
     QVariant toVariant() const override;
@@ -86,6 +87,7 @@ protected:
 
     QSize _discretizationSteps = { 1, 1 }; //!< Requested number of discretization steps in both dimensions.
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
+    bool _lowExtinctionApprox = false; //!< True if low attenuation approximation has been enabled.
 
     QVector<QPointF> discretizationGrid() const;
 };
