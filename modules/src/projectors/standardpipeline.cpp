@@ -416,7 +416,7 @@ uint StandardPipeline::posPoisson() const
 uint StandardPipeline::posSpectral() const
 {
     return _approxMode ? uint(_arealFSEnabled)
-                       : uint(_arealFSEnabled) + uint(_spectralEffEnabled);
+                       : uint(_arealFSEnabled) + uint(_poissonEnabled);
 }
 
 void StandardPipeline::SettingsPoissonNoise::setFixedSeed(uint seed)
