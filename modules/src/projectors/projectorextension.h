@@ -102,19 +102,19 @@ typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorEx
 
 // u_ptr, u_ptr
 std::unique_ptr<AbstractProjector>& operator|=(std::unique_ptr<AbstractProjector>& lhs,
-                                                      std::unique_ptr<ProjectorExtension> rhs);
+                                               std::unique_ptr<ProjectorExtension> rhs);
 std::unique_ptr<ProjectorExtension>& operator|=(std::unique_ptr<ProjectorExtension>& lhs,
-                                                      std::unique_ptr<ProjectorExtension> rhs);
+                                                std::unique_ptr<ProjectorExtension> rhs);
 // u_ptr, raw_ptr
 std::unique_ptr<AbstractProjector>& operator|=(std::unique_ptr<AbstractProjector>& lhs,
-                                                      ProjectorExtension* rhs);
+                                               ProjectorExtension* rhs);
 std::unique_ptr<ProjectorExtension>& operator|=(std::unique_ptr<ProjectorExtension>& lhs,
-                                                      ProjectorExtension* rhs);
+                                                ProjectorExtension* rhs);
 // raw_ptr, u_ptr
 AbstractProjector*& operator|=(AbstractProjector*& lhs,
-                                      std::unique_ptr<ProjectorExtension> rhs);
+                               std::unique_ptr<ProjectorExtension> rhs);
 ProjectorExtension*& operator|=(ProjectorExtension*& lhs,
-                                      std::unique_ptr<ProjectorExtension> rhs);
+                                std::unique_ptr<ProjectorExtension> rhs);
 // raw_ptr, raw_ptr
 AbstractProjector*& pipe(AbstractProjector*& lhs, ProjectorExtension* rhs);
 ProjectorExtension*& pipe(ProjectorExtension*& lhs, ProjectorExtension* rhs);
