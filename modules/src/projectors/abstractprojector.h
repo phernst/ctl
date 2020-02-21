@@ -104,10 +104,10 @@ inline bool AbstractProjector::isLinear() const { return true; }
 
 inline ProjectionData AbstractProjector::projectComposite(const CompositeVolume &volume)
 {
-    ProjectionData ret = project(volume.materialVolume(0));
+    ProjectionData ret = project(volume.subVolume(0));
 
-    for(uint material = 1; material < volume.nbMaterials(); ++material)
-        ret += project(volume.materialVolume(material));
+    for(uint material = 1; material < volume.nbSubVolumes(); ++material)
+        ret += project(volume.subVolume(material));
 
     return ret;
 }

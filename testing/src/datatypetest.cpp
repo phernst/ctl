@@ -390,10 +390,10 @@ void DataTypeTest::testCompositeVolume()
     QCOMPARE(realVol2.muVolume(1.5f, 1.0f).max(), 0.3f);
 
     CompositeVolume compositeVol;
-    compositeVol.addMaterialVolume(realVol1);
-    compositeVol.addMaterialVolume(realVol2);
+    compositeVol.addSubVolume(realVol1);
+    compositeVol.addSubVolume(realVol2);
 
-    QCOMPARE(compositeVol.nbMaterials(), 2u);
+    QCOMPARE(compositeVol.nbSubVolumes(), 2u);
     QCOMPARE(compositeVol.muVolume(0, 1.5f, 1.0f).max(), 0.15f);
     QCOMPARE(compositeVol.muVolume(1, 1.5f, 1.0f).max(), 0.30f);
 }

@@ -58,8 +58,8 @@ void ProjectorTest::testSpectralExtension()
                                                   database::attenuationModel(database::Composite::Bone_Cortical));
 
     CompositeVolume compVol;
-    compVol.addMaterialVolume(volume);
-    compVol.addMaterialVolume(volume2);
+    compVol.addSubVolume(volume);
+    compVol.addSubVolume(volume2);
 
     auto photonsPerPixel = 100000.0;
     auto simpleSys = SimpleCTsystem::fromCTsystem(system);
