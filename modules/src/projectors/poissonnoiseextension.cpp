@@ -8,13 +8,13 @@
 
 namespace CTL {
 
-void PoissonNoiseExtension::configure(const AcquisitionSetup& setup,
-                                      const AbstractProjectorConfig& config)
+DECLARE_SERIALIZABLE_TYPE(PoissonNoiseExtension)
+
+void PoissonNoiseExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
-    _config.reset(config.clone());
 
-    ProjectorExtension::configure(setup, config);
+    ProjectorExtension::configure(setup);
 }
 
 ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& nestedProjector)
@@ -25,7 +25,8 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
     if(!_useFixedSeed)
     {
         std::random_device rd;
-        _rng.seed(rd());
+        _seed = rd();
+        _rng.seed(_seed);
     }
 
     auto const seed = static_cast<uint>(_rng());
@@ -53,9 +54,45 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
 
 bool PoissonNoiseExtension::isLinear() const { return false; }
 
+// Use SerializationInterface::toVariant() documentation.
+QVariant PoissonNoiseExtension::toVariant() const
+{
+    QVariantMap ret = ProjectorExtension::toVariant().toMap();
+
+    ret.insert("#", "PoissonNoiseExtension");
+
+    return ret;
+}
+
+QVariant PoissonNoiseExtension::parameter() const
+{
+    QVariantMap ret = ProjectorExtension::parameter().toMap();
+
+    qInfo() << _seed;
+
+    ret.insert("Use fixed seed", _useFixedSeed);
+    ret.insert("Use parallelization", _useParallelization);
+    ret.insert("Seed", _seed);
+
+    return ret;
+}
+
+void PoissonNoiseExtension::setParameter(const QVariant& parameter)
+{
+    qInfo() << "set parameter";
+
+    ProjectorExtension::setParameter(parameter);
+
+    QVariantMap map = parameter.toMap();
+    _useFixedSeed = map.value("Use fixed seed", false).toBool();
+    _useParallelization = map.value("Use parallelization", true).toBool();
+    _seed = map.value("Seed", 0).toUInt();
+}
+
 void PoissonNoiseExtension::setFixedSeed(uint seed)
 {
     _useFixedSeed = true;
+    _seed = seed;
     _rng.seed(seed);
 }
 
@@ -77,6 +114,19 @@ void PoissonNoiseExtension::processViewCompact(SingleViewData& view,
     }
 
     std::mt19937_64 gen(seed);
+    constexpr float gaussianThreshold = 1.0e4; // threshold for switch to normal distribution
+
+    auto randomizedPoisson = [&gen] (float count) // Poisson distributed count
+    {
+        std::poisson_distribution<ulong> d(count);
+        return float(d(gen));
+    };
+
+    auto randomizedGaussian = [&gen] (float count) // Normally distributed count
+    {
+        std::normal_distribution<float> d(count, std::sqrt(count));
+        return d(gen);
+    };
 
     float origCount, noisyCount;
     uint mod = 0u;
@@ -84,10 +134,15 @@ void PoissonNoiseExtension::processViewCompact(SingleViewData& view,
     {
         for(auto& pix : module.data())
         {
-            origCount = i_0[mod] * expf(-pix); // mean
-            std::poisson_distribution<ulong> d(origCount);
-            noisyCount = d(gen); // Poisson distributed random number
-            pix = logf(i_0[mod] / noisyCount);
+            origCount = i_0[mod] * std::exp(-pix); // mean
+
+            // randomize counts
+            if(origCount < gaussianThreshold)
+                noisyCount = randomizedPoisson(origCount);
+            else // good approximation for large counts
+                noisyCount = randomizedGaussian(origCount);
+
+            pix = std::log(i_0[mod] / noisyCount);
         }
         ++mod;
     }

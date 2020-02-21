@@ -34,8 +34,8 @@ int main(int argc, char* argv[])
         auto setup = CTL::GeometryDecoder::decodeFullGeometry(projMats, nbDetectorPixelsPerModule);
 
         // configure a projector and project volume
-        CTL::OCL::RayCasterProjector projector;
-        projector.configure(setup, CTL::OCL::RayCasterProjector::Config()); // default config
+        CTL::OCL::RayCasterProjector projector;  // default config (change via projector.settings())
+        projector.configure(setup);
         auto projections = projector.project(volume);
 
         // save projections

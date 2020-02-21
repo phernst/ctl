@@ -8,13 +8,22 @@ namespace CTL {
 
 class DetectorSaturationExtension : public ProjectorExtension
 {
+    CTL_TYPE_ID(102)
+
+    // abstract interface
+    public: void configure(const AcquisitionSetup& setup) override;
+
 public:
     using ProjectorExtension::ProjectorExtension;
 
     // ProjectorExtension interface
-    void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
     bool isLinear() const override;
     void setIntensitySampling(uint nbSamples);
+
+    // SerializationInterface interface
+    QVariant toVariant() const override;
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
 
 protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;

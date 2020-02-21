@@ -14,7 +14,8 @@ HEADERS += \
     $$PWD/../src/projectors/raycasteradapter.h \
     $$PWD/../src/projectors/raycasterprojector.h \
     $$PWD/../src/processing/volumeresampler.h \
-    $$PWD/../src/processing/volumeslicer.h
+    $$PWD/../src/processing/volumeslicer.h \
+    $$PWD/../src/projectors/standardpipeline.h
 
 SOURCES += \
     $$PWD/../src/processing/consistency.cpp \
@@ -25,7 +26,8 @@ SOURCES += \
     $$PWD/../src/projectors/raycasteradapter.cpp \
     $$PWD/../src/projectors/raycasterprojector.cpp \
     $$PWD/../src/processing/volumeresampler.cpp \
-    $$PWD/../src/processing/volumeslicer.cpp
+    $$PWD/../src/processing/volumeslicer.cpp \
+    $$PWD/../src/projectors/standardpipeline.cpp
 
 
 # OpenCL source files

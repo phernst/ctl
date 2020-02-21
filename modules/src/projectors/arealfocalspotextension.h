@@ -65,18 +65,29 @@ namespace CTL {
  */
 class ArealFocalSpotExtension : public ProjectorExtension
 {
+    CTL_TYPE_ID(101)
+
+    // abstract interface
+    public: void configure(const AcquisitionSetup& setup) override;
+
 public:
     using ProjectorExtension::ProjectorExtension;
 
-    void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
     void setDiscretization(const QSize& discretization);
+    void enableLowExtinctionApproximation(bool enable = true);
+
+    // SerializationInterface interface
+    QVariant toVariant() const override;
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
+    bool isLinear() const override;
 
 protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
 
     QSize _discretizationSteps = { 1, 1 }; //!< Requested number of discretization steps in both dimensions.
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
-    std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
+    bool _lowExtinctionApprox = false; //!< True if low attenuation approximation has been enabled.
 
     QVector<QPointF> discretizationGrid() const;
 };

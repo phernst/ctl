@@ -15,7 +15,7 @@ CompositeVolume ModelBasedVolumeDecomposer::decompose(const VoxelVolume<float>& 
         for(auto& voxVal : matVol.data())
             voxVal *= _segmentationModels[mat]->valueAt(voxVal);
 
-        ret.addMaterialVolume(std::move(matVol));
+        ret.addSubVolume(std::move(matVol));
     }
 
     return ret;

@@ -4,29 +4,24 @@ namespace CTL {
 
 // ### CompositeVolume ###
 
-const SpectralVolumeData& CompositeVolume::materialVolume(uint materialIdx) const
+const SpectralVolumeData& CompositeVolume::subVolume(uint materialIdx) const
 {
-    return _materialVolumes[materialIdx];
+    return _subVolumes[materialIdx];
 }
 
 SpectralVolumeData CompositeVolume::muVolume(uint materialIdx, float centerEnergy, float binWidth) const
 {
-    return _materialVolumes[materialIdx].muVolume(centerEnergy, binWidth);
+    return _subVolumes[materialIdx].muVolume(centerEnergy, binWidth);
 }
 
-uint CompositeVolume::nbMaterials() const
+uint CompositeVolume::nbSubVolumes() const
 {
-    return static_cast<uint>(_materialVolumes.size());
+    return static_cast<uint>(_subVolumes.size());
 }
 
-void CompositeVolume::addMaterialVolume(const SpectralVolumeData& volume)
+void CompositeVolume::addSubVolume(SpectralVolumeData volume)
 {
-    _materialVolumes.push_back(volume);
-}
-
-void CompositeVolume::addMaterialVolume(SpectralVolumeData&& volume)
-{
-    _materialVolumes.push_back(std::move(volume));
+    _subVolumes.push_back(std::move(volume));
 }
 
 }

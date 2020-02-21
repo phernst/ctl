@@ -7,16 +7,16 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(ArealFocalSpotExtension)
+
 /*!
  * Re-implementation of the configuration step. This takes copies of the AcquisitionSetup
  * and the AbstractProjectorConfig. The actual configure() method of the nested projector is
  * called within project(). Use setDiscretization() to change the level of discretization.
  */
-void ArealFocalSpotExtension::configure(const AcquisitionSetup& setup,
-                                        const AbstractProjectorConfig& config)
+void ArealFocalSpotExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
-    _config.reset(config.clone());
 }
 
 /*!
@@ -107,20 +107,26 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
         }
 
         // re-configure projector
-        ProjectorExtension::configure(tmpSetup, *_config);
+        ProjectorExtension::configure(tmpSetup);
 
         // projecting volume
         if(first)
         {
             ret = nestedProjector.project();
-            ret.transformToIntensity();
+            if(!_lowExtinctionApprox) // average in intensity domain required
+                ret.transformToIntensity();
         }
         else
         {
             auto proj = nestedProjector.project();
-            fut.wait();
-            nextProj = std::move(proj);
-            fut = std::async(processProj, &nextProj);
+            if(!_lowExtinctionApprox)
+            {
+                fut.wait();
+                nextProj = std::move(proj);
+                fut = std::async(processProj, &nextProj);
+            }
+            else // average in extinction domain
+                ret += proj;
         }
 
         first = false;
@@ -130,7 +136,9 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
     fut.wait();
     ret /= nbSamplingPts;
 
-    ret.transformToExtinction();
+    if(!_lowExtinctionApprox)
+        ret.transformToExtinction();
+
     return ret;
 }
 
@@ -143,6 +151,38 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
 void ArealFocalSpotExtension::setDiscretization(const QSize& discretization)
 {
     _discretizationSteps = discretization;
+}
+
+void ArealFocalSpotExtension::enableLowExtinctionApproximation(bool enable)
+{
+    _lowExtinctionApprox = enable;
+}
+
+// Use SerializationInterface::toVariant() documentation.
+QVariant ArealFocalSpotExtension::toVariant() const
+{
+    QVariantMap ret = ProjectorExtension::toVariant().toMap();
+
+    ret.insert("#", "ArealFocalSpotExtension");
+
+    return ret;
+}
+
+QVariant ArealFocalSpotExtension::parameter() const
+{
+    QVariantMap ret = ProjectorExtension::parameter().toMap();
+
+    ret.insert("Discretization X", _discretizationSteps.width());
+    ret.insert("Discretization Y", _discretizationSteps.height());
+
+    return ret;
+}
+
+void ArealFocalSpotExtension::setParameter(const QVariant& parameter)
+{
+    QVariantMap map = parameter.toMap();
+    _discretizationSteps.setWidth(map.value("Discretization X", 1).toInt());
+    _discretizationSteps.setHeight(map.value("Discretization X", 1).toInt());
 }
 
 /*!
@@ -190,6 +230,11 @@ QVector<QPointF> ArealFocalSpotExtension::discretizationGrid() const
     }
 
     return ret;
+}
+
+bool ArealFocalSpotExtension::isLinear() const
+{
+    return _lowExtinctionApprox;
 }
 
 } // namespace CTL

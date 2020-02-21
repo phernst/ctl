@@ -40,7 +40,13 @@ std::unique_ptr<AbstractPrepareStep>
 JsonSerializer::deserializePrepareStep(const QString& fileName) const
 {
     return std::unique_ptr<AbstractPrepareStep>(
-        SerializationHelper::parsePrepareStep(variantFromJsonFile(fileName)));
+                SerializationHelper::parsePrepareStep(variantFromJsonFile(fileName)));
+}
+
+std::unique_ptr<AbstractProjector> JsonSerializer::deserializeProjector(const QString& fileName) const
+{
+    return std::unique_ptr<AbstractProjector>(
+                SerializationHelper::parseProjector(variantFromJsonFile(fileName)));
 }
 
 std::unique_ptr<CTsystem> JsonSerializer::deserializeSystem(const QString& fileName) const

@@ -4,6 +4,7 @@
 #include "img/compositevolume.h"
 #include "img/projectiondata.h"
 #include "img/voxelvolume.h"
+#include "io/serializationinterface.h"
 
 #include <QObject>
 #include <memory>
@@ -67,18 +68,25 @@ signals:
     void projectionFinished(int viewNb);
 };
 
-class AbstractProjector
+class AbstractProjector : public SerializationInterface
 {
+    CTL_TYPE_ID(0)
+
     // abstract interface
-    public:virtual void configure(const AcquisitionSetup& setup,
-                                  const AbstractProjectorConfig& config) = 0;
+    public:virtual void configure(const AcquisitionSetup& setup) = 0;
     public:virtual ProjectionData project(const VolumeData& volume) = 0;
 
 public:
-    virtual ~AbstractProjector() = default;
+    virtual ~AbstractProjector() override = default;
 
     virtual bool isLinear() const;
     virtual ProjectionData projectComposite(const CompositeVolume& volume);
+
+    void fromVariant(const QVariant& variant) override;
+    QVariant toVariant() const override;
+    virtual QVariant parameter() const;
+    virtual void setParameter(const QVariant& parameter);
+
     ProjectorNotifier* notifier();
 
 private:
@@ -96,14 +104,37 @@ inline bool AbstractProjector::isLinear() const { return true; }
 
 inline ProjectionData AbstractProjector::projectComposite(const CompositeVolume &volume)
 {
-    ProjectionData ret = project(volume.materialVolume(0));
+    ProjectionData ret = project(volume.subVolume(0));
 
-    for(uint material = 1; material < volume.nbMaterials(); ++material)
-        ret += project(volume.materialVolume(material));
+    for(uint material = 1; material < volume.nbSubVolumes(); ++material)
+        ret += project(volume.subVolume(material));
 
     return ret;
 }
 
+inline QVariant AbstractProjector::parameter() const { return QVariant(); }
+
+inline void AbstractProjector::setParameter(const QVariant&) {}
+
+// Use SerializationInterface::toVariant() documentation.
+inline QVariant AbstractProjector::toVariant() const
+{
+    QVariantMap ret = SerializationInterface::toVariant().toMap();
+
+    ret.insert("parameters", parameter());
+
+    return ret;
+}
+
+// Use SerializationInterface::fromVariant() documentation.
+inline void AbstractProjector::fromVariant(const QVariant& variant)
+{
+    SerializationInterface::fromVariant(variant);
+
+    const auto map = variant.toMap();
+
+    setParameter(map.value("parameters").toMap());
+}
 
 // factory function `makeProjector`
 template <typename ProjectorType, typename... ConstructorArguments>
@@ -153,15 +184,13 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
  */
 
 /*!
- * \fn void AbstractProjector::configure(const AcquisitionSetup& setup, const
- * AbstractProjectorConfig& config)
+ * \fn void AbstractProjector::configure(const AcquisitionSetup& setup)
  *
  * \brief Configures the projector.
  *
  * This method should be used to gather all necessary information to prepare the actual forward
- * projection. This usually contains all geometry and system information (which can be retrieved
- * from \a setup) and implementation specific parameters from \a config. To do so, consider
- * sub-classing AbstractProjectorConfig for the particular purpose.
+ * projection. This usually contains all geometry and system information, which can be retrieved
+ * from \a setup.
  */
 
 /*!
@@ -172,6 +201,31 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
  * This method takes a voxelized dataset \a volume. It shall return the full set of forward
  * projections that have been requested by the AcquisitionSetup set in the configure() step.
  */
+
+/*!
+* \fn ProjectionData AbstractProjector::projectComposite(const CompositeVolume& volume)
+*
+* \brief Provides the functionality to forward project CompositeVolume data.
+*
+* This method takes a composite dataset \a volume and returns the full set of forward projections
+* according to the AcquisitionSetup set in the configure() step.
+*
+* By default, this method performs separate calls to project() for each individual voxel volume
+* stored in the composite \a volume. The final projection result is the sum of all these individual
+* projections (extinction domain).
+* Change this behavior in sub-classes, if this is not suitable for your desired purpose. This is
+* typically the case for non-linear operations.
+*/
+
+/*!
+* \fn bool AbstractProjector::isLinear() const
+*
+* \brief Returns true if the projection operation is linear.
+*
+* By default, this method returns true. Override this method to return false in case of sub-classing
+* that leads to non-linear operations. Overrides of this method should never return an unconditional
+* \c true (as this might outrule underlying non-linearity).
+*/
 
 } // namespace CTL
 

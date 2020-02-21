@@ -1,23 +1,23 @@
-#ifndef PROJECTORASSEMBLYWIDGET_H
-#define PROJECTORASSEMBLYWIDGET_H
+#ifndef EXTENSIONCHAINWIDGET_H
+#define EXTENSIONCHAINWIDGET_H
 
-#include <QListWidget>
 #include <QWidget>
 #include <array>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class ProjectorAssemblyWidget; }
+namespace Ui { class ExtensionChainWidget; }
 QT_END_NAMESPACE
 
+class ExtensionConfigWidget;
+class QListWidgetItem;
 
-
-class ProjectorAssemblyWidget : public QWidget
+class ExtensionChainWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    ProjectorAssemblyWidget(QWidget *parent = nullptr);
-    ~ProjectorAssemblyWidget();
+    ExtensionChainWidget(QWidget *parent = nullptr);
+    ~ExtensionChainWidget();
 
     enum Extension
     {
@@ -46,15 +46,23 @@ public:
     static CompatibilityReport reportPhysicalCompatibility(const std::vector<Extension>& extensions);
     static QString compatibilityReport2String(const std::vector<Extension>& extensions,
                                               const CompatibilityReport& report);
+    QString codeString();
+
+    void setExtensionPrototypes(const QVector<QListWidgetItem*>& prototypes);
+    QVector<QListWidgetItem*> extensions();
+
+signals:
+    void extensionItemClicked(QListWidgetItem* item);
 
 private slots:
     void on_extensionList_itemDoubleClicked(QListWidgetItem* item);
     void on_pipelineList_itemDoubleClicked(QListWidgetItem* item);
-    void on_pushButton_clicked();
+    void updateViewer();
 
 private:
-    Ui::ProjectorAssemblyWidget* ui;
+    Ui::ExtensionChainWidget* ui;
 
-    void updateViewer();
+    void initExtensionList();
 };
-#endif // PROJECTORASSEMBLYWIDGET_H
+
+#endif // EXTENSIONCHAINWIDGET_H

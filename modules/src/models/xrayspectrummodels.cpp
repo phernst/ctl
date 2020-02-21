@@ -113,13 +113,13 @@ void XraySpectrumTabulatedModel::setParameter(const QVariant& parameter)
         _lookupTables.clear();
 
         // populate lookup table
-        auto lookupTableData = parameter.toMap().value("lookup tables").toList();
-        foreach(const QVariant& var, lookupTableData)
+        const auto lookupTableData = parameter.toMap().value("lookup tables").toList();
+        for(const auto& var : lookupTableData)
         {
             // each "var" represents a lookup table for a certain tube voltage
-            auto varAsMap = var.toMap();
-            auto voltage = varAsMap.value("table voltage").toFloat();
-            auto tableData = varAsMap.value("table data");
+            const auto varAsMap = var.toMap();
+            const auto voltage = varAsMap.value("table voltage").toFloat();
+            const auto tableData = varAsMap.value("table data");
 
             TabulatedDataModel table;
             table.setParameter(tableData);
