@@ -108,13 +108,20 @@ void SpectralEffectsExtension::updateSpectralInformation()
     _spectralInfo = RadiationEncoder::spectralInformation(_setup, _deltaE);
 }
 
+/*!
+ * Returns `true` if no spetral effects need to be considered, i.e. neither the detector nor any of
+ * the subvolumes in \a volume have spectral information.
+ * This function throws an exception if the detector has a spectral response model and not all the
+ * subvolumes in \a volume have spectral information.
+ * In any other case than the aforementioned, `false` is returned.
+ */
 bool SpectralEffectsExtension::canBypassExtension(const CompositeVolume& volume) const
 {
     const auto spectralResp = _setup.system()->detector()->hasSpectralResponseModel();
-    bool allVolumesSpectral = true;
-    bool noVolumeSpectral = true;
+    auto allVolumesSpectral = true;
+    auto noVolumeSpectral = true;
 
-    for(uint v = 0; v < volume.nbSubVolumes(); ++v)
+    for(auto v = 0u, nbSubVolumes = volume.nbSubVolumes(); v < nbSubVolumes; ++v)
     {
         if(volume.subVolume(v).hasSpectralInformation())
             noVolumeSpectral = false;

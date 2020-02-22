@@ -18,11 +18,10 @@ static void grindBall(VoxelVolume<float>& volume, float radius);
  */
 SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues)
     : VoxelVolume<float> (std::move(muValues))
-    , _absorptionModel(new ConstantModel())
+    , _absorptionModel(new ConstantModel)
     , _isMu(true)
     , _refEnergy(42.0f)
     , _refMassAttenuationCoeff(1.0f)
-
 {
 }
 

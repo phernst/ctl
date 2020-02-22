@@ -187,12 +187,13 @@ SpectralInformation RadiationEncoder::spectralInformation(AcquisitionSetup setup
         ret._binWidth = std::max(ret._bestReso, 0.1f); // minimum (automatic) bin width: 0.1 keV
 
     // set required number of samples (minimum of one sample) and update coverage interval
-    uint nbEnergyBins = std::max({ uint(std::ceil(ret._fullCoverage.width() / ret._binWidth)), 1u });
+    const auto nbEnergyBins = std::max({ uint(std::ceil(ret._fullCoverage.width() / ret._binWidth)),
+                                         1u });
     ret._fullCoverage.end() = ret._fullCoverage.start() + nbEnergyBins * ret._binWidth;
 
     ret.reserveMemory(nbEnergyBins, nbViews); // reserve memory
 
-    RadiationEncoder radiationEnc(setup.system());
+    const RadiationEncoder radiationEnc(setup.system());
 
     // get (view-dependent) spectra
     for(auto view = 0u; view < nbViews; ++view)
