@@ -2,6 +2,7 @@
 #define COMPOSITEVOLUME_H
 
 #include "spectralvolumedata.h"
+#include <deque>
 
 namespace CTL {
 
@@ -9,7 +10,7 @@ class CompositeVolume
 {
 public:
     CompositeVolume() = default;
-    template<class... Volumes>
+    template <class... Volumes>
     CompositeVolume(SpectralVolumeData volume, Volumes&&... otherVolumes);
 
     // getter methods
@@ -21,16 +22,16 @@ public:
     void addSubVolume(SpectralVolumeData volume);
 
 private:
-    std::vector<SpectralVolumeData> _subVolumes;
+    std::deque<SpectralVolumeData> _subVolumes;
 };
 
-template<class... Volumes>
+template <class... Volumes>
 CompositeVolume::CompositeVolume(SpectralVolumeData volume, Volumes&&... otherVolumes)
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
 {
-    addSubVolume(std::move(volume));
+    _subVolumes.push_front(std::move(volume));
 }
 
-}
+} // namespace CTL
 
 #endif // COMPOSITEVOLUME_H
