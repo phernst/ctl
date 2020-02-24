@@ -165,6 +165,20 @@ VoxelVolume<T> VoxelVolume<T>::fromChunk2DStack(const std::vector<Chunk2D<T>>& s
     return ret;
 }
 
+/*!
+ * Constructs a cubic voxelized volume with \a nbVoxel x \a nbVoxel x \a nbVoxel voxels (voxel
+ * dimension: \a voxelSize x \a voxelSize x \a voxelSize), filled with \a fillValue.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::cube(uint nbVoxel, float voxelSize, const T& fillValue)
+{
+    const Dimensions dim{nbVoxel, nbVoxel, nbVoxel};
+
+    return { dim,
+             { voxelSize, voxelSize, voxelSize },
+             std::vector<T>(dim.totalNbElements(), fillValue) };
+}
+
 template<typename T>
 void VoxelVolume<T>::setVoxelSize(float isotropicSize)
 {
