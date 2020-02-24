@@ -411,7 +411,6 @@ SpectralVolumeData SpectralVolumeData::fromHUVolume(VoxelVolume<float> HUValues,
         throw std::runtime_error("SpectralVolumeData::fromMuVolume: Cannot create volume: No "
                                  "negative reference energies allowed.");
 
-    constexpr auto cm2mm = 0.1f; // 1/cm -> 1/mm
     constexpr auto HUscaleFactor = 1000.0f;
 
     // transform to attenuation values
@@ -419,7 +418,7 @@ SpectralVolumeData SpectralVolumeData::fromHUVolume(VoxelVolume<float> HUValues,
     HUValues = (HUValues*(muWater/HUscaleFactor)) + muWater;
 
     // transform to densities (g/cm^3)
-    HUValues /= (cm2mm * absorptionModel->valueAt(referenceEnergy));
+    HUValues /= absorptionModel->valueAt(referenceEnergy);
 
     return SpectralVolumeData(std::move(HUValues), absorptionModel, absorptionModel->name());
 }
