@@ -8,10 +8,13 @@ namespace CTL {
 static void grindBall(VoxelVolume<float>& volume, float radius);
 
 /*!
- * \brief Constructs a SpectralVolumeData representing the attenuation coefficients \a muValues.
+ * \brief Constructs a SpectralVolumeData representing the attenuation coefficients \a muValues
+ * (in 1/mm).
  *
  * This is a convenience constructor, mainly intended to allow for implicit casts of
  * VoxelVolume<float> to SpectralVolumeData.
+ *
+ * Note that it is not meaningful to use this constructor with input data in Hounsfield units (HU).
  *
  * No spectral information is available in the resulting object. It is strongly encouraged to use
  * VoxelVolume<float> directly when managing non-spectral attenuation information.
@@ -29,6 +32,12 @@ SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues)
  * \brief Constructs a SpectralVolumeData representing the attenuation coefficients \a muValues
  * (in 1/mm) with respect to the given \a referenceEnergy (in keV) for a material described by
  * \a absorptionModel.
+ *
+ * Note that this can only be used when \a muValues holds values in 1/mm. To create from Hounsfield
+ * units (HU), use fromHUVolume().
+ *
+ * Keeps internally stored data in attenuation domain. The factory method fromMuVolume() has similar
+ * function, but transforms data to density domain.
  */
 SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues,
                                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
@@ -144,19 +153,43 @@ bool SpectralVolumeData::hasSpectralInformation() const
 
 /*!
  * Returns true if the data stored by this instance are density values (in g/cm^3).
+ *
+ * \code
+ * auto volume = SpectralVolumeData(VoxelVolume<float>::cube(100, 1.0f, 0.02f),
+ *                                  database::attenuationModel(database::Composite::Water),
+ *                                  65.0f);
+ *
+ * qInfo() << volume.isDensityVolume(); // output: false  <-- constructor keeps attenuation domain
+ *
+ * // This time, we use the factory method.
+ * auto volume2 = SpectralVolumeData::fromMuVolume(VoxelVolume<float>::cube(100, 1.0f, 0.02f),
+ *                                                 database::attenuationModel(database::Composite::Water),
+ *                                                 65.0f);
+ *
+ * qInfo() << volume2.isDensityVolume(); // output: true  <-- fromMuVolume() transforms to density
+ * \endcode
  */
-bool SpectralVolumeData::isDensityVolume() const
-{
-    return !_isMu;
-}
+bool SpectralVolumeData::isDensityVolume() const { return !_isMu; }
 
 /*!
  * Returns true if the data stored by this instance are attenuation values (in 1/mm).
+ *
+ * \code
+ * auto volume = SpectralVolumeData(VoxelVolume<float>::cube(100, 1.0f, 0.02f),
+ *                                  database::attenuationModel(database::Composite::Water),
+ *                                  65.0f);
+ *
+ * qInfo() << volume.isDensityVolume(); // output: false  <-- constructor keeps attenuation domain
+ *
+ * // This time, we use the factory method.
+ * auto volume2 = SpectralVolumeData::fromMuVolume(VoxelVolume<float>::cube(100, 1.0f, 0.02f),
+ *                                                 database::attenuationModel(database::Composite::Water),
+ *                                                 65.0f);
+ *
+ * qInfo() << volume2.isDensityVolume(); // output: true  <-- fromMuVolume() transforms to density
+ * \endcode
  */
-bool SpectralVolumeData::isMuVolume() const
-{
-    return _isMu;
-}
+bool SpectralVolumeData::isMuVolume() const { return _isMu; }
 
 /*!
  * Returns the mass attenuation coefficient (in cm^2/g) of the material described by this instance
@@ -180,40 +213,47 @@ const QString& SpectralVolumeData::materialName() const
     return _materialName;
 }
 
-/*!
- * Returns the attenuation coefficient (with respect to the reference energy \a referenceEnergy)
- * representation of this instance.
- *
- * Note that this creates a copy of the data. The density values are transformed to attenuation
- * coefficients with respect to the given reference energy \a referenceEnergy. In case this
- * instance does already contain attenuation coefficient data, the values are re-referenced to
- * \a referenceEnergy.
- *
- * If this instance contains attenuation coefficient data and
- * \a referenceEnergy == referenceEnergy(), it is discouraged to call this method because it would
- * only create an unnecessary copy.
- *
- * \code
- *  VoxelVolume<float> muValues(100, 100, 100, 1.0f, 1.0f, 1.0f);
- *  muValues.fill(0.02f); // 0.02 / mm is approx. attenuation of water for 60 keV
- *  auto volume = SpectralVolumeData(muValues,
- *                                   database::attenuationModel(database::Composite::Water),
- *                                   60.0f);
- *
- *  qInfo() << volume.referenceEnergy();                // output: 60
- *  qInfo() << volume.referenceMassAttenuationCoeff();  // output: 0.2059
- *
- *  auto otherVolume = volume.muVolume(60.0f); // unneccesary copy, result identical to 'volume'
- *  otherVolume = volume.muVolume(45.0f);      // changes reference energy from 60 keV to 45 keV
- *
- *  qInfo() << otherVolume.referenceEnergy();                // output: 45
- *  qInfo() << otherVolume.referenceMassAttenuationCoeff();  // output: 0.2476
- * \endcode
- */
+///
+/// Returns the attenuation coefficient (with respect to the reference energy \a referenceEnergy)
+/// representation of this instance.
+///
+/// Note that this creates a copy of the data. The density values are transformed to attenuation
+/// coefficients with respect to the given reference energy \a referenceEnergy. In case this
+/// instance does already contain attenuation coefficient data, the values are re-referenced to
+/// \a referenceEnergy.
+///
+/// If this instance contains attenuation coefficient data and
+/// \a referenceEnergy == referenceEnergy(), it is discouraged to call this method because it would
+/// only create an unnecessary copy.
+///
+/// \code
+/// // Starting point: voxel data with attenuation coefficients in 1/mm
+/// // here: make a cube phantom (100^3 voxels, size 1 mm^3) filled with value 0.02/mm (water)
+/// VoxelVolume<float> muValues(100, 100, 100, 1.0f, 1.0f, 1.0f);
+/// muValues.fill(0.02f); // 0.02 / mm is approx. attenuation of water for 60 keV
+///
+/// // Now: create spectral data by complementing \c muValues with the attenuation model of water
+/// auto volume = SpectralVolumeData(muValues,              /* std::move(muValues), if no longer required. */
+///                                  database::attenuationModel(database::Composite::Water),
+///                                  60.0f);
+///
+/// qInfo() << volume.max();                                // output: 0.02 (our input, still in attenuation domain)
+/// qInfo() << volume.referenceEnergy();                    // output: 60
+/// qInfo() << volume.referenceMassAttenuationCoeff();      // output: 0.2059
+///
+/// // auto otherVolume = volume.muVolume(60.0f);           // meaningless copy, result identical to 'volume'
+/// auto otherVolume = volume.muVolume(45.0f);              // changes reference energy from 60 keV to 45 keV
+///
+/// qInfo() << otherVolume.max();                           // output: 0.0240505 (rescaled to new reference energy)
+/// qInfo() << otherVolume.referenceEnergy();               // output: 45
+/// qInfo() << otherVolume.referenceMassAttenuationCoeff(); // output: 0.2476
+/// \endcode
+///
+
 SpectralVolumeData SpectralVolumeData::muVolume(float referenceEnergy) const
 {
     SpectralVolumeData ret(*this);
-
+    // asdasd /*  asd  */
     if(isMuVolume()) // change reference energy
         ret.changeReferenceEnergy(referenceEnergy);
     else // transform to mu values from density
@@ -375,13 +415,31 @@ void SpectralVolumeData::setMaterialName(const QString& name)
     _materialName = name;
 }
 
-/*!
- * Creates a SpectralVolumeData object from the attenuation values given by \a muValues (in 1 / mm)
- * corresponding to the reference energy \a referenceEnergy of the material specified by its
- * spectrally-dependend mass attenuation coefficients in \a absorptionModel.
- *
- * Generates the density representation of the data.
- */
+///
+/// Creates a SpectralVolumeData object from the attenuation values given by \a muValues (in 1 / mm)
+/// corresponding to the reference energy \a referenceEnergy of the material specified by its
+/// spectrally-dependend mass attenuation coefficients in \a absorptionModel.
+///
+/// Generates the density representation of the data. To prevent transformation into density domain
+/// (e.g. if follow-up processing needs to be done in attenuation domain anyway), use the constructor
+/// with the same input instead.
+///
+///  \code
+///  // Starting point: voxel data with attenuation coefficients in 1/mm
+///  // here: make a cube phantom (100^3 voxels, size 1 mm^3) representing cortical bone
+///  auto volumeMu = VoxelVolume<float>(100, 100, 100, 1.0f, 1.0f, 1.0f);
+///  volumeMu.fill(0.056f); // fill with value 0.056/mm <-- approx. attenuation coeff. of bone @ 65 keV
+///
+///  // create spectral volume from mu (i.e. att. coeff.) data (cortical bone data, reference energy of 65 keV)
+///  auto volume = SpectralVolumeData::fromMuVolume(volumeMu,  /* std::move(volumeMu), if no longer required. */
+///                                                 database::attenuationModel(database::Composite::Bone_Cortical),
+///                                                 65.0f);
+///
+///  qInfo() << volume.max(); // output: 1.91896 (g/cm^3) <-- density representation
+/// \endcode
+///
+/// \sa muVolume()
+///
 SpectralVolumeData SpectralVolumeData::fromMuVolume(VoxelVolume<float> muValues,
                                                     std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
                                                     float referenceEnergy)
@@ -398,13 +456,28 @@ SpectralVolumeData SpectralVolumeData::fromMuVolume(VoxelVolume<float> muValues,
     return SpectralVolumeData(std::move(muValues), absorptionModel, absorptionModel->name());
 }
 
-/*!
- * Creates a SpectralVolumeData object from the attenuation values given by \a muValues (in
- * Hounsfield units) corresponding to the reference energy \a referenceEnergy of the material
- * specified by its spectrally-dependend mass attenuation coefficients in \a absorptionModel.
- *
- * Generates the density representation of the data.
- */
+///
+/// Creates a SpectralVolumeData object from the attenuation values given by \a HUValues (in
+/// Hounsfield units) representing the material specified by its spectrally-dependend mass
+/// attenuation coefficients in \a absorptionModel. For meaningful results, you need to also specify
+/// the reference energy, to which the Hounsfield units correspond, by \a referenceEnergy (in keV).
+///
+/// Generates the density representation of the data.
+///
+/// \code
+/// // Starting point: voxel data in Hounsfield units (eg. loaded patient data)
+/// // here: make a cube phantom (100^3 voxels, size 1 mm^3) filled with value 100 HU
+/// auto volumeHU = VoxelVolume<float>(100, 100, 100, 1.0f, 1.0f, 1.0f);
+/// volumeHU.fill(100.0f); // fill with value 100 HU
+///
+/// // Now: create spectral volume from HU data (soft tissue data, reference energy of 62 keV)
+/// auto volume = SpectralVolumeData::fromHUVolume(volumeHU,   /* std::move(volumeHU), if no longer required. */
+///                                                database::attenuationModel(database::Composite::Tissue_Soft),
+///                                                62.0f);
+///
+/// qInfo() << volume.max(); // output: 1.10614 (g/cm^3)  <-- density representation
+/// \endcode
+///
 SpectralVolumeData SpectralVolumeData::fromHUVolume(VoxelVolume<float> HUValues,
                                                     std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
                                                     float referenceEnergy)
