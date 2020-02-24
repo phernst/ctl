@@ -34,20 +34,21 @@ SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues,
                                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
                                        float referenceEnergy,
                                        const QString& materialName)
-    : VoxelVolume<float> (std::move(muValues))
+    : VoxelVolume<float>(std::move(muValues))
+    , _absorptionModel(std::move(absorptionModel))
+    , _materialName(materialName.isEmpty() ? _absorptionModel->name() : materialName)
+    , _refEnergy(referenceEnergy)
 {
-    if(referenceEnergy < 0.0f)
+    if(_refEnergy < 0.0f)
         throw std::runtime_error("SpectralVolumeData::SpectralVolumeData: Cannot create volume: No "
                                  "negative reference energies allowed.");
-    if(!absorptionModel)
-        throw std::runtime_error("SpectralVolumeData::SpectralVolumeData: Invalid absorption model (nullptr)!");
+    if(!_absorptionModel)
+        throw std::runtime_error("SpectralVolumeData::SpectralVolumeData: Invalid absorption model "
+                                 "(nullptr)!");
 
-    _absorptionModel = std::move(absorptionModel);
     _hasNonDefaultAbsModel = true;
-    _materialName = materialName.isEmpty() ? _absorptionModel->name() : materialName;
     _isMu = true;
-    _refEnergy = referenceEnergy;
-    _refMassAttenuationCoeff = _absorptionModel->valueAt(referenceEnergy);
+    _refMassAttenuationCoeff = _absorptionModel->valueAt(_refEnergy);
 }
 
 /*!
@@ -59,14 +60,15 @@ SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> muValues,
 SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> materialDensity,
                                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
                                        const QString& materialName)
-    : VoxelVolume<float> (std::move(materialDensity))
+    : VoxelVolume<float>(std::move(materialDensity))
+    , _absorptionModel(std::move(absorptionModel))
+    , _materialName(materialName.isEmpty() ? _absorptionModel->name() : materialName)
 {
-    if(!absorptionModel)
-        throw std::runtime_error("SpectralVolumeData::SpectralVolumeData: Invalid absorption model (nullptr)!");
+    if(!_absorptionModel)
+        throw std::runtime_error("SpectralVolumeData::SpectralVolumeData: Invalid absorption model "
+                                 "(nullptr)!");
 
-    _absorptionModel = std::move(absorptionModel);
     _hasNonDefaultAbsModel = true;
-    _materialName = materialName.isEmpty() ? _absorptionModel->name() : materialName;
 }
 
 /*!
