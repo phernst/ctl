@@ -149,6 +149,8 @@ void SpectralEffectsExtension::applyDetectorResponse(ProjectionData& intensity, 
 
 ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& volume)
 {
+    qDebug() << "linear case";
+
     // project all material densities
     const auto nbMaterials = volume.nbSubVolumes();
     std::vector<ProjectionData> materialProjs;
