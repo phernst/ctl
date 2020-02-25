@@ -11,24 +11,24 @@ namespace CTL {
 DECLARE_SERIALIZABLE_TYPE(StandardPipeline)
 
 /*!
- * Constructs a StandardPipeline object and with the SimulationPolicy \a policy.
+ * Constructs a StandardPipeline object and with the ApproximationPolicy \a policy.
  *
  * The default configuration enables spectral effects and Poisson noise simulation.
  */
-StandardPipeline::StandardPipeline(SimulationPolicy policy)
+StandardPipeline::StandardPipeline(ApproximationPolicy policy)
+    : _approxMode(policy)
+    , _projector (new OCL::RayCasterProjector)
+    , _extAFS (new ArealFocalSpotExtension)
+    , _extDetSat (new DetectorSaturationExtension)
+    , _extPoisson (new PoissonNoiseExtension)
+    , _extSpectral (new SpectralEffectsExtension)
 {
-    _extAFS      = new ArealFocalSpotExtension;
-    _extDetSat   = new DetectorSaturationExtension;
-    _extPoisson  = new PoissonNoiseExtension;
-    _extSpectral = new SpectralEffectsExtension;
-
-    _extAFS->setDiscretization( {3, 3} );
-
-    _projector   = new OCL::RayCasterProjector;
     _pipeline.setProjector(_projector);
 
-    if(policy == SimulationPolicy::Accurate)
-        _approxMode = false;
+    // configure extensions
+    _extAFS->setDiscretization( {3, 3} );
+    if(policy == ApproximationPolicy::Full_Approximation)
+        _extAFS->enableLowExtinctionApproximation();
 
     enableArealFocalSpot(false);
     enableDetectorSaturation(false);
@@ -38,6 +38,7 @@ StandardPipeline::StandardPipeline(SimulationPolicy policy)
 
 StandardPipeline::~StandardPipeline()
 {
+    // handover ownership to ProjectionPipeline member
     enableArealFocalSpot(true);
     enableDetectorSaturation(true);
     enablePoissonNoise(true);
@@ -102,6 +103,9 @@ void StandardPipeline::fromVariant(const QVariant& variant)
     _extPoisson->fromVariant(map.value("ext Poisson"));
     _extSpectral->fromVariant(map.value("ext spectral"));
 
+    _approxMode = ApproximationPolicy(map.value("approximation policy",
+                                                int(ApproximationPolicy::Default_Approximation)).toInt());
+
     enableArealFocalSpot(map.value("use areal focal spot").toBool());
     enableDetectorSaturation(map.value("use detector saturation").toBool());
     enablePoissonNoise(map.value("use poisson noise").toBool());
@@ -117,6 +121,7 @@ QVariant StandardPipeline::toVariant() const
     ret.insert("use detector saturation", _detSatEnabled);
     ret.insert("use poisson noise", _poissonEnabled);
     ret.insert("use spectral effects", _spectralEffEnabled);
+    ret.insert("approximation policy", _approxMode);
 
     ret.insert("projector", _projector->toVariant());
     ret.insert("ext AFS", _extAFS->toVariant());
@@ -210,6 +215,8 @@ void StandardPipeline::enableSpectralEffects(bool enable)
  * - setDiscretization(const QSize& discretization): sets the number of sampling
  * points for the subsampling of the areal focal spot to \a discretization (width x height)
  * [ default value: {3, 3} ]
+ * - enableLowExtinctionApproximation(bool enable): sets the use of the linear approximation to
+ * \a enable. [ default: \c false (\c true for StandardPipeline::Full_Approximation) ]
  *
  * Example:
  * \code
@@ -399,24 +406,26 @@ uint StandardPipeline::posDetSat() const
 
 /*!
  * Returns the position of the Poisson noise extension in the standard pipeline.
- * Depending on whether the mode has been set to StandardPipeline::Accurate or
- * StandardPipeline::Fast, the Poisson extension is placed before or after the spectral effects
- * extension, respectively.
+ * Depending on whether the mode has been set to StandardPipeline::No_Approximation or not (i.e.
+ * StandardPipeline::Full_Approximation or StandardPipeline::Default_Approximation), the
+ * Poisson extension is placed before or after the spectral effects extension, respectively.
  */
 uint StandardPipeline::posPoisson() const
 {
-    return _approxMode ? uint(_arealFSEnabled) + uint(_spectralEffEnabled)
-                       : uint(_arealFSEnabled);
+    return (_approxMode == No_Approximation) ? uint(_arealFSEnabled)
+                                             : uint(_arealFSEnabled) + uint(_spectralEffEnabled);
 }
 
 /*!
- * Returns the position of the detector saturation extension in the standard pipeline.
- * This is defined to always be the last position, as it is only accurate in this spot.
+ * Returns the position of the spectral effects extension in the standard pipeline.
+ * Depending on whether the mode has been set to StandardPipeline::No_Approximation or not (i.e.
+ * StandardPipeline::Full_Approximation or StandardPipeline::Default_Approximation), the
+ * spectral effects extension is placed after or before the Poisson noise extension, respectively.
  */
 uint StandardPipeline::posSpectral() const
 {
-    return _approxMode ? uint(_arealFSEnabled)
-                       : uint(_arealFSEnabled) + uint(_poissonEnabled);
+    return (_approxMode == No_Approximation) ? uint(_arealFSEnabled) + uint(_poissonEnabled)
+                                             : uint(_arealFSEnabled);
 }
 
 void StandardPipeline::SettingsPoissonNoise::setFixedSeed(uint seed)
@@ -476,18 +485,26 @@ void StandardPipeline::SettingsRayCaster::setVolumeUpSampling(uint upsamplingFac
 }
 
 /*!
- * \enum StandardPipeline::SimulationPolicy
+ * \enum StandardPipeline::ApproximationPolicy
  * Enumeration for the approximation behavior in the standard pipeline. See Detailed Description
  * for more details.
  */
 
-/*! \var StandardPipeline::SimulationPolicy StandardPipeline::Fast
+/*! \var StandardPipeline::ApproximationPolicy StandardPipeline::Full_Approximation,
+ *  Same configuration as in Default_Approximation setting. Additionally, a linearized approach is
+ *  used in the ArealFocalSpotExtension (if enabled).
+ *  Not suited in combination with a spectral detector response and inaccurate in case of high
+ *  extinction gradients (e.g. edges of highly absorbing material) in the projection images.
+ */
+
+/*! \var StandardPipeline::ApproximationPolicy StandardPipeline::Default_Approximation,
+ *  The default setting for the StandardPipeline.
  *  Configuration in which Poisson noise addition is applied to final result of the spectral effects
  *  simulation. Approximation with substantially increased computation speed. Not suited in
  *  combination with a spectral detector response.
  */
 
-/*! \var StandardPipeline::SimulationPolicy StandardPipeline::Accurate
+/*! \var StandardPipeline::ApproximationPolicy StandardPipeline::No_Approximation
  *  Configuration with spectral effects simulation wrapping Poisson noise addition for each energy
  *  bin. Approximation-free but increased computation effort. Can be used in combination with a
  *  spectral detector response.

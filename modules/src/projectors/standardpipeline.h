@@ -26,22 +26,28 @@ class SpectralEffectsExtension;
  * - enableArealFocalSpot()     - simulation of finite focal spot size [disabled]
  * - enableDetectorSaturation() - simulation of over-/undersaturation effects [disabled]
  * - enablePoissonNoise()       - simulation of Poisson noise [enabled]
- * - enableSpectralEffects()    - full spectral simulation (energy dependent attenuation and response) [enabled]
+ * - enableSpectralEffects()    - full spectral simulation (energy dependent attenuation and
+ * response) [enabled]
  *
  * Specific settings for all effects can be adjusted using the corresponding setter objects.
  *
- * The StandardPipeline supports two different options with respect to the order in which the
- * effects are processed internally:
- * - SimulationPolicy::Fast
- * - SimulationPolicy::Accurate
+ * The StandardPipeline supports three different options with respect to degree of approximation
+ * used in the processing of individual effects:
+ * - ApproximationPolicy::No_Approximation
+ * - ApproximationPolicy::Default_Approximation
+ * - ApproximationPolicy::Full_Approximation
  *
- * The Fast setting (default) uses the approximation of processing Poisson noise after the spectral
- * effects. This leads to substantial acceleration with slight loss in accuracy.
+ * The Default_Approximation setting (default) uses the approximation of processing Poisson noise
+ * after the spectral effects. This leads to substantial acceleration with slight loss in accuracy.
  * However, in case a spectral detector response is in use, the use of the Fast setting is strongly
  * discouraged, because it then leads to incorrect results.
- * In the Accurate setting, Poisson noise is processed for each individual energy bin requested by
- * the spectral effects extension. While being most accurate, this option is substatially more
- * time-consuming and not strongly required in many situations.
+ * In addition to the approximation described above, the Full_Approximation also uses the linearized
+ * setting for the ArealFocalSpotExtension. This uses sub-sample averaging in extinction domain and
+ * leads to further increases in computation speed, but yields inaccurate results in case of strong
+ * extinction gradients (e.g. edges) in the  projection images.
+ * In the No_Approximation setting (most accurate), Poisson noise is processed for each individual
+ * energy bin requested by the spectral effects extension. While being most accurate, this option is
+ * substatially more time-consuming and not strongly required in many situations.
  * The approximation behavior must be decided in the constructor and cannot be changed afterwards.
  *
  * StandardPipeline uses OCL::RayCasterProjector as the actual forward projector. Its settings can
@@ -49,8 +55,11 @@ class SpectralEffectsExtension;
  *
  * A fully-enabled pipeline is composed as follows:
  *
- * <i>Volume Data</i> <- OCL::RayCasterProjector <- ArealFocalSpotExtension <- SpectralEffectsExtension <- PoissonNoiseExtension <- DetectorSaturationExtension  [Fast]<br>
- * <i>Volume Data</i> <- OCL::RayCasterProjector <- ArealFocalSpotExtension <- PoissonNoiseExtension <- SpectralEffectsExtension <- DetectorSaturationExtension  [Accurate]
+ * <i>Volume Data</i> <- OCL::RayCasterProjector <- ArealFocalSpotExtension <-
+ * SpectralEffectsExtension <- PoissonNoiseExtension <- DetectorSaturationExtension
+ * [Default_Approximation or Full_Approximation]<br>
+ * <i>Volume Data</i> <- OCL::RayCasterProjector <- ArealFocalSpotExtension <- PoissonNoiseExtension
+ *  <- SpectralEffectsExtension <- DetectorSaturationExtension  [No_Approximation]
  *
  * The StandardPipeline object itself can be used in the same way as any projector; use configure()
  * to pass the AcquisitionSetup for the simulation and then call project() (or projectComposite())
@@ -92,13 +101,14 @@ class StandardPipeline: public AbstractProjector
     class SettingsRayCaster;
 
 public:    
-    enum SimulationPolicy
+    enum ApproximationPolicy
     {
-        Fast,
-        Accurate,
+        No_Approximation,
+        Default_Approximation,
+        Full_Approximation,
     };
 
-    StandardPipeline(SimulationPolicy policy = StandardPipeline::Fast);
+    StandardPipeline(ApproximationPolicy policy = StandardPipeline::Default_Approximation);
     ~StandardPipeline();
 
     void configure(const AcquisitionSetup& setup) override;
@@ -140,7 +150,7 @@ private:
     bool _detSatEnabled = false;      //!< enabled/disabled state variable for detector saturation
     bool _spectralEffEnabled = false; //!< enabled/disabled state variable for spectral effects
     bool _poissonEnabled = false;     //!< enabled/disabled state variable for Poisson noise
-    bool _approxMode = true;          //!< enabled/disabled state variable for approximation mode
+    ApproximationPolicy _approxMode;  //!< approximation level for the simulation
 
     OCL::RayCasterProjector* _projector;     //!< Pointer to the ray caster projector.
     ArealFocalSpotExtension* _extAFS;        //!< Pointer to the ArealFocalSpotExtension.
