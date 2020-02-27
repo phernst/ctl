@@ -1,7 +1,5 @@
 #include "chunk2d.h"
 
-#include <stdexcept>
-
 namespace CTL {
 
 /*!
@@ -22,8 +20,8 @@ Chunk2D<T>::Chunk2D(const Dimensions& dimensions)
  */
 template <typename T>
 Chunk2D<T>::Chunk2D(const Dimensions& dimensions, const T& initValue)
-    : _dim(dimensions)
-    , _data(size_t(dimensions.height) * dimensions.width, initValue)
+    : _data(size_t(dimensions.height) * size_t(dimensions.width), initValue)
+    , _dim(dimensions)
 {
 }
 
@@ -75,8 +73,8 @@ Chunk2D<T>::Chunk2D(uint width, uint height)
  */
 template <typename T>
 Chunk2D<T>::Chunk2D(uint width, uint height, const T& initValue)
-    : _dim({ width, height })
-    , _data(size_t(height) * width, initValue)
+    : _data(size_t(height) * size_t(width), initValue)
+    , _dim({ width, height })
 {
 }
 
@@ -121,13 +119,7 @@ T Chunk2D<T>::max() const
     if(allocatedElements() == 0)
         return T(0);
 
-    T tempMax = _data.front();
-
-    for(auto el : _data)
-        if(el > tempMax)
-            tempMax = el;
-
-    return tempMax;
+    return *std::max_element(_data.cbegin(), _data.cend());
 }
 
 /*!
@@ -141,13 +133,7 @@ T Chunk2D<T>::min() const
     if(allocatedElements() == 0)
         return T(0);
 
-    T tempMin = _data.front();
-
-    for(auto el : _data)
-        if(el < tempMin)
-            tempMin = el;
-
-    return tempMin;
+    return *std::min_element(_data.cbegin(), _data.cend());
 }
 
 /*!
@@ -208,9 +194,8 @@ Chunk2D<T>& Chunk2D<T>::operator+=(const Chunk2D<T>& other)
         throw std::domain_error("Chunk2D requires same dimensions for '+' operation:\n"
                                 + dimensions().info() + " += " + other.dimensions().info());
 
-    auto otherIt = other.constData().cbegin();
-    for(auto& val : _data)
-        val += *otherIt++;
+    std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
+                   [](const T& a, const T& b) { return a + b; });
 
     return *this;
 }
@@ -227,9 +212,8 @@ Chunk2D<T>& Chunk2D<T>::operator-=(const Chunk2D<T>& other)
         throw std::domain_error("Chunk2D requires same dimensions for '-' operation:\n"
                                 + dimensions().info() + " -= " + other.dimensions().info());
 
-    auto otherIt = other.constData().cbegin();
-    for(auto& val : _data)
-        val -= *otherIt++;
+    std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
+                   [](const T& a, const T& b) { return a - b; });
 
     return *this;
 }
@@ -238,7 +222,7 @@ Chunk2D<T>& Chunk2D<T>::operator-=(const Chunk2D<T>& other)
  * Multiplies the data of this chunk element-wise by \a factor and returns a reference to this instance.
  */
 template <typename T>
-Chunk2D<T>& Chunk2D<T>::operator*=(T factor)
+Chunk2D<T>& Chunk2D<T>::operator*=(const T& factor)
 {
     for(auto& val : _data)
         val *= factor;
@@ -250,7 +234,7 @@ Chunk2D<T>& Chunk2D<T>::operator*=(T factor)
  * Divides the data of this chunk element-wise by \a divisor and returns a reference to this instance.
  */
 template <typename T>
-Chunk2D<T>& Chunk2D<T>::operator/=(T divisor)
+Chunk2D<T>& Chunk2D<T>::operator/=(const T& divisor)
 {
     for(auto& val : _data)
         val /= divisor;
@@ -288,7 +272,7 @@ Chunk2D<T> Chunk2D<T>::operator-(const Chunk2D<T>& other) const
  * Multiplies the data of this chunk element-wise by \a factor and returns the result.
  */
 template <typename T>
-Chunk2D<T> Chunk2D<T>::operator*(T factor) const
+Chunk2D<T> Chunk2D<T>::operator*(const T& factor) const
 {
     Chunk2D<T> ret(*this);
     ret *= factor;
@@ -300,7 +284,7 @@ Chunk2D<T> Chunk2D<T>::operator*(T factor) const
  * Divides the data of this chunk element-wise by \a divisor and returns the results.
  */
 template <typename T>
-Chunk2D<T> Chunk2D<T>::operator/(T divisor) const
+Chunk2D<T> Chunk2D<T>::operator/(const T& divisor) const
 {
     Chunk2D<T> ret(*this);
     ret /= divisor;
@@ -423,7 +407,7 @@ uint Chunk2D<T>::height() const
 template <typename T>
 size_t Chunk2D<T>::nbElements() const
 {
-    return _dim.width * size_t(_dim.height);
+    return size_t(_dim.width) * size_t(_dim.height);
 }
 
 /*!
@@ -492,8 +476,8 @@ void Chunk2D<T>::freeMemory()
 template <typename T>
 typename std::vector<T>::reference Chunk2D<T>::operator()(uint x, uint y)
 {
-    Q_ASSERT((y * _dim.width + x) < allocatedElements());
-    return _data[y * _dim.width + x];
+    Q_ASSERT((size_t(y) * size_t(_dim.width) + size_t(x)) < allocatedElements());
+    return _data[size_t(y) * size_t(_dim.width) + size_t(x)];
 }
 
 /*!
@@ -503,8 +487,8 @@ typename std::vector<T>::reference Chunk2D<T>::operator()(uint x, uint y)
 template <typename T>
 typename std::vector<T>::const_reference Chunk2D<T>::operator()(uint x, uint y) const
 {
-    Q_ASSERT((y * _dim.width + x) < allocatedElements());
-    return _data[y * _dim.width + x];
+    Q_ASSERT((size_t(y) * size_t(_dim.width) + size_t(x)) < allocatedElements());
+    return _data[size_t(y) * size_t(_dim.width) + size_t(x)];
 }
 
 /*!
