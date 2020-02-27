@@ -3,7 +3,7 @@
 
 #include "abstractprojector.h"
 #include "acquisition/acquisitionsetup.h"
-#include "img/abstractdynamicvoxelvolume.h"
+#include "img/abstractdynamicvolumedata.h"
 
 namespace CTL {
 
@@ -18,7 +18,7 @@ public:
     explicit DynamicProjector(std::unique_ptr<AbstractProjector> projector);
 
     // using _projector view by view (reconfigure _projector for each view)
-    ProjectionData project(AbstractDynamicVoxelVolume& volume);
+    ProjectionData project(AbstractDynamicVolumeData& volume);
 
 private:
     std::unique_ptr<AbstractProjector> _projector; //!< used static projector

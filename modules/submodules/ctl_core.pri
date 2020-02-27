@@ -46,7 +46,6 @@ HEADERS += \
     $$PWD/../src/components/tubulargantry.h \
     $$PWD/../src/components/xraylaser.h \
     $$PWD/../src/components/xraytube.h \
-    $$PWD/../src/img/abstractdynamicvoxelvolume.h \
     $$PWD/../src/img/chunk2d.h \
     $$PWD/../src/img/compositevolume.h \
     $$PWD/../src/img/modulelayout.h \
@@ -100,7 +99,8 @@ HEADERS += \
     $$PWD/../src/models/abstractxrayspectrummodel.h \
     $$PWD/../src/acquisition/radiationencoder.h \
     $$PWD/../src/projectors/spectraleffectsextension.h \
-    $$PWD/../src/projectors/projectionpipeline.h
+    $$PWD/../src/projectors/projectionpipeline.h \
+    $$PWD/../src/img/abstractdynamicvolumedata.h
 
 SOURCES += \
     $$PWD/../src/acquisition/acquisitionsetup.cpp \

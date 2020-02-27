@@ -35,7 +35,7 @@ ProjectionData DynamicProjector::project(const VolumeData& volume)
     return ret;
 }
 
-ProjectionData DynamicProjector::project(AbstractDynamicVoxelVolume& volume)
+ProjectionData DynamicProjector::project(AbstractDynamicVolumeData& volume)
 {
     ProjectionData ret(extractViewDimensions(*_setup.system()->detector()));
 
