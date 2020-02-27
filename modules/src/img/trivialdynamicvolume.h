@@ -11,13 +11,12 @@ namespace CTL {
 
 class TrivialDynamicVolume : public AbstractDynamicVolumeData
 {
-public: SpectralVolumeData* clone() const override;
+    // abstract interface
+    protected: void updateVolume() override;
+    public: SpectralVolumeData* clone() const override;
 
 public:
     using AbstractDynamicVolumeData::AbstractDynamicVolumeData;
-
-protected:
-    void updateVolume() override;
 };
 
 SpectralVolumeData* TrivialDynamicVolume::clone() const
@@ -26,9 +25,9 @@ SpectralVolumeData* TrivialDynamicVolume::clone() const
 }
 
 /*!
- * Does nothing, i.e. values of the volume are not changed.
+ * Scaling with a factor > 1 that linearly increases with the time (example implementation).
  */
-inline void TrivialDynamicVolume::updateVolume() { *this *= (std::fabs(std::sin(time()))/10.0f + 1.1f); }
+inline void TrivialDynamicVolume::updateVolume() { *this *= float(0.01 * time() + 1.0); }
 
 } // namespace CTL
 

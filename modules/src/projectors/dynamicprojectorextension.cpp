@@ -2,6 +2,7 @@
 #include "abstractprojectorconfig.h"
 #include "acquisition/acquisitionsetup.h"
 #include "components/abstractdetector.h"
+#include "img/abstractdynamicvolumedata.h"
 
 namespace CTL {
 
@@ -21,13 +22,13 @@ ProjectionData DynamicProjectorExtension::project(const VolumeData& volume)
         return ProjectorExtension::project(volume);
     }
 
-    notifier()->disconnect();
+    // notifier()->disconnect();
 
     auto volCopy = static_cast<AbstractDynamicVolumeData*>(dynamicVolPtr->clone());
 
     ProjectionData ret(_setup.system()->detector()->viewDimensions());
 
-    for(uint view = 0, nbViews = _setup.nbViews(); view < nbViews; ++view)
+    for(auto view = 0u, nbViews = _setup.nbViews(); view < nbViews; ++view)
     {
         volCopy->setTime(_setup.view(view).timeStamp());
         _setup.prepareView(view);
@@ -35,13 +36,13 @@ ProjectionData DynamicProjectorExtension::project(const VolumeData& volume)
         ProjectorExtension::configure({ *_setup.system(), 1 });
         ret.append(ProjectorExtension::project(*volCopy).view(0));
 
-        emit notifier()->projectionFinished(view);
+        // emit notifier()->projectionFinished(static_cast<int>(view));
     }
 
     return ret;
 }
 
-ProjectionData DynamicProjectorExtension::projectComposite(const CompositeVolume &volume)
+ProjectionData DynamicProjectorExtension::projectComposite(const CompositeVolume& volume)
 {
     return AbstractProjector::projectComposite(volume);
 }

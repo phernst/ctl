@@ -12,14 +12,14 @@ namespace CTL {
 class AbstractDynamicVolumeData : public SpectralVolumeData
 {
     // abstract interface
-protected:virtual void updateVolume() = 0;
-public:virtual SpectralVolumeData* clone() const override = 0;
+    protected:virtual void updateVolume() = 0;
+    public: SpectralVolumeData* clone() const override = 0;
 
 public:
     AbstractDynamicVolumeData(const SpectralVolumeData& other);
 
-    void setTime(float seconds);
-    float time() const;
+    void setTime(double seconds);
+    double time() const;
 
 protected:
     AbstractDynamicVolumeData(const AbstractDynamicVolumeData&) = default;
@@ -28,7 +28,7 @@ protected:
     AbstractDynamicVolumeData& operator=(AbstractDynamicVolumeData&&) = default;
 
 private:
-    float _time = 0.0f; //!< current time in milliseconds
+    double _time = 0.0; //!< current time in milliseconds
 };
 
 /*!
@@ -39,14 +39,13 @@ inline AbstractDynamicVolumeData::AbstractDynamicVolumeData(const SpectralVolume
 {
 }
 
-inline void AbstractDynamicVolumeData::setTime(float seconds)
+inline void AbstractDynamicVolumeData::setTime(double seconds)
 {
     _time = seconds;
     updateVolume();
 }
 
-inline float AbstractDynamicVolumeData::time() const { return _time; }
-
+inline double AbstractDynamicVolumeData::time() const { return _time; }
 
 } // namespace CTL
 
