@@ -124,12 +124,12 @@ float SpectralVolumeData::meanMassAttenuationCoeff(float centerEnergy, float bin
  * data (check this via isDensityVolume()) it is discouraged to call this method because it would
  * only create an unnecessary copy.
  */
-SpectralVolumeData SpectralVolumeData::densityVolume() const
+std::unique_ptr<SpectralVolumeData> SpectralVolumeData::densityVolume() const
 {
-    SpectralVolumeData ret(*this);
+    auto ret = std::unique_ptr<SpectralVolumeData>(this->clone());
 
     if(isMuVolume())
-        ret.transformToDensity();
+        ret->transformToDensity();
 
     return ret;
 }
@@ -255,14 +255,14 @@ const QString& SpectralVolumeData::materialName() const
 /// \endcode
 ///
 
-SpectralVolumeData SpectralVolumeData::muVolume(float referenceEnergy) const
+std::unique_ptr<SpectralVolumeData> SpectralVolumeData::muVolume(float referenceEnergy) const
 {
-    SpectralVolumeData ret(*this);
-    // asdasd /*  asd  */
+    auto ret = std::unique_ptr<SpectralVolumeData>(this->clone());
+
     if(isMuVolume()) // change reference energy
-        ret.changeReferenceEnergy(referenceEnergy);
+        ret->changeReferenceEnergy(referenceEnergy);
     else // transform to mu values from density
-        ret.transformToAttenuationCoeff(referenceEnergy);
+        ret->transformToAttenuationCoeff(referenceEnergy);
 
     return ret;
 }
@@ -275,16 +275,16 @@ SpectralVolumeData SpectralVolumeData::muVolume(float referenceEnergy) const
  *
  * \sa muVolume(float), meanMassAttenuationCoeff().
  */
-SpectralVolumeData SpectralVolumeData::muVolume(float centerEnergy, float binWidth) const
+std::unique_ptr<SpectralVolumeData> SpectralVolumeData::muVolume(float centerEnergy, float binWidth) const
 {
-    SpectralVolumeData ret(*this);
+    auto ret = std::unique_ptr<SpectralVolumeData>(this->clone());
 
     const auto meanMassAttCoeff = meanMassAttenuationCoeff(centerEnergy, binWidth);
 
     if(isMuVolume()) // change reference mass attenuation coeff
-        ret.changeReferenceMassAttCoeff(meanMassAttCoeff, centerEnergy);
+        ret->changeReferenceMassAttCoeff(meanMassAttCoeff, centerEnergy);
     else // transform to mu values from density
-        ret.transformToAttenuationCoeff(meanMassAttCoeff, centerEnergy);
+        ret->transformToAttenuationCoeff(meanMassAttCoeff, centerEnergy);
 
     return ret;
 }

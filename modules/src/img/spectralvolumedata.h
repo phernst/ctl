@@ -54,15 +54,15 @@ public:
 
     // getter methods
     std::shared_ptr<AbstractIntegrableDataModel> absorptionModel() const;
-    SpectralVolumeData densityVolume() const;
+    std::unique_ptr<SpectralVolumeData> densityVolume() const;
     bool hasSpectralInformation() const;
     bool isDensityVolume() const;
     bool isMuVolume() const;
     float massAttenuationCoeff(float atEnergy) const;
     const QString& materialName() const;
     float meanMassAttenuationCoeff(float centerEnergy, float binWidth) const;
-    SpectralVolumeData muVolume(float referenceEnergy) const;
-    SpectralVolumeData muVolume(float centerEnergy, float binWidth) const;
+    std::unique_ptr<SpectralVolumeData> muVolume(float referenceEnergy) const;
+    std::unique_ptr<SpectralVolumeData> muVolume(float centerEnergy, float binWidth) const;
     float referenceEnergy() const;
     float referenceMassAttenuationCoeff() const;
 

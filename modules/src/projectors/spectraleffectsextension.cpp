@@ -157,7 +157,7 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
     for(uint material = 0; material < nbMaterials; ++material)
     {
         if(volume.subVolume(material).isMuVolume()) // need transformation to densities
-            materialProjs.push_back(ProjectorExtension::project(volume.subVolume(material).densityVolume()));
+            materialProjs.push_back(ProjectorExtension::project(*volume.subVolume(material).densityVolume()));
         else // density information already stored in volume.materialVolume(material)
             materialProjs.push_back(ProjectorExtension::project(volume.subVolume(material)));
     }
@@ -247,8 +247,8 @@ ProjectionData SpectralEffectsExtension::singleBinIntensityNonLinear(const Compo
     // project all material densities
     std::vector<ProjectionData> materialProjs;
     for(uint material = 0; material < volume.nbSubVolumes(); ++material)
-        binProj += ProjectorExtension::project(volume.muVolume(material, binInfo.energy,
-                                                               _spectralInfo.binWidth()));
+        binProj += ProjectorExtension::project(*volume.muVolume(material, binInfo.energy,
+                                                                _spectralInfo.binWidth()));
 
     binProj.transformToIntensity(binInfo.intensities);
     applyDetectorResponse(binProj, binInfo.energy);
