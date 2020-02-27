@@ -6,6 +6,12 @@
 #include "io/jsonserializer.h"
 
 #include <QDir>
+
+#ifdef I
+    #define REINSTATE_I_MACRO
+    #undef I
+#endif
+
 namespace CTL {
 
 namespace database {
@@ -199,5 +205,11 @@ private:
 
 
 } // namespace CTL
+
+#ifdef REINSTATE_I_MACRO
+    #ifdef _Complex_I
+        #define I _Complex_I
+    #endif
+#endif
 
 #endif // CTLDATABASEHANDLER_H
