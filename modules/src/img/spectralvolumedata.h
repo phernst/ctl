@@ -49,6 +49,9 @@ public:
                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel,
                        const QString& materialName = QString());
 
+    ~SpectralVolumeData() override = default;
+    virtual SpectralVolumeData* clone() const;
+
     // getter methods
     std::shared_ptr<AbstractIntegrableDataModel> absorptionModel() const;
     SpectralVolumeData densityVolume() const;
@@ -74,6 +77,11 @@ public:
     void setMaterialName(const QString& name);
 
     using VoxelVolume<float>::operator=;
+
+    SpectralVolumeData(const SpectralVolumeData&) = default;
+    SpectralVolumeData(SpectralVolumeData&&) = default;
+    SpectralVolumeData& operator=(const SpectralVolumeData&) = default;
+    SpectralVolumeData& operator=(SpectralVolumeData&&) = default;
 
     // factory methods
     static SpectralVolumeData fromMuVolume(VoxelVolume<float> muValues,

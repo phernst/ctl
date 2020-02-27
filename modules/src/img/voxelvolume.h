@@ -67,6 +67,14 @@ public:
                 float zSize,
                 std::vector<T> data);
 
+    VoxelVolume(const VoxelVolume&) = default;
+    VoxelVolume(VoxelVolume&&) = default;
+    VoxelVolume& operator=(const VoxelVolume&) = default;
+    VoxelVolume& operator=(VoxelVolume&&) = default;
+
+    // dtor (virtual)
+    virtual ~VoxelVolume() = default;
+
     // factory
     static VoxelVolume<T> fromChunk2DStack(const std::vector<Chunk2D<T>>& stack);
     static VoxelVolume<T> cube(uint nbVoxel, float voxelSize, const T& fillValue);

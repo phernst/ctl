@@ -80,6 +80,11 @@ SpectralVolumeData::SpectralVolumeData(VoxelVolume<float> materialDensity,
     _hasNonDefaultAbsModel = true;
 }
 
+SpectralVolumeData* SpectralVolumeData::clone() const
+{
+    return new SpectralVolumeData(*this);
+}
+
 /*!
  * Returns the absorption model of this instance.
  *
