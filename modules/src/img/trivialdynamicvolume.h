@@ -1,7 +1,7 @@
 #ifndef TRIVIALDYNAMICVOLUME_H
 #define TRIVIALDYNAMICVOLUME_H
 
-#include "abstractdynamicvoxelvolume.h"
+#include "abstractdynamicvolumedata.h"
 #include <cmath>
 /*
  * NOTE: This is header only.
