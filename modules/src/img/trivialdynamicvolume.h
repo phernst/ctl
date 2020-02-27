@@ -27,7 +27,7 @@ SpectralVolumeData* TrivialDynamicVolume::clone() const
 /*!
  * Scaling with a factor > 1 that linearly increases with the time (example implementation).
  */
-inline void TrivialDynamicVolume::updateVolume() { *this *= float(0.01 * time() + 1.0); }
+inline void TrivialDynamicVolume::updateVolume() { *this *= float(std::abs(0.01 * time()) + 1.0); }
 
 } // namespace CTL
 
