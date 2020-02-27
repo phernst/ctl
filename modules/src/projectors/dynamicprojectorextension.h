@@ -13,6 +13,7 @@ class DynamicProjectorExtension : public ProjectorExtension
     public: ProjectionData project(const VolumeData& volume) override;
 
 public:
+    DynamicProjectorExtension() = default;
     ProjectionData projectComposite(const CompositeVolume& volume) override;
 
     using ProjectorExtension::ProjectorExtension;

@@ -71,6 +71,7 @@ class ArealFocalSpotExtension : public ProjectorExtension
     public: void configure(const AcquisitionSetup& setup) override;
 
 public:
+    ArealFocalSpotExtension() = default;
     using ProjectorExtension::ProjectorExtension;
     explicit ArealFocalSpotExtension(const QSize& discretization,
                                      bool lowExtinctionApproximation = false);

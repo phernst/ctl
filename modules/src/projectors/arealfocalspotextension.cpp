@@ -9,7 +9,6 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(ArealFocalSpotExtension)
 
-
 /*!
  * Constructs an ArealFocalSpotExtension with a focal spot sub-sampling given by \a discretization
  * and linearization approximation enabled if \a lowExtinctionApproximation = \c true.

@@ -14,6 +14,7 @@ class DetectorSaturationExtension : public ProjectorExtension
     public: void configure(const AcquisitionSetup& setup) override;
 
 public:
+    DetectorSaturationExtension() = default;
     using ProjectorExtension::ProjectorExtension;
     explicit DetectorSaturationExtension(uint nbSpectralSamples);
 
@@ -30,12 +31,12 @@ protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
 
 private:
-    AcquisitionSetup _setup;
-    uint _nbSamples = 0;
-
     void processCounts(ProjectionData& projections);
     void processExtinctions(ProjectionData& projections);
     void processIntensities(ProjectionData& projections);
+
+    AcquisitionSetup _setup;
+    uint _nbSamples = 0;
 };
 
 } // namespace CTL

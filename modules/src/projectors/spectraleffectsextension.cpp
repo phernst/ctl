@@ -166,7 +166,7 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
     ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
     sumProj.allocateMemory(_setup.nbViews(), 0.0f);
 
-    for(uint bin = 0; bin < _spectralInfo.nbEnergyBins(); ++bin)
+    for(auto bin = 0u, nbEnergyBins = _spectralInfo.nbEnergyBins(); bin < nbEnergyBins; ++bin)
     {
         std::vector<float> mu(nbMaterials);
         for(uint material = 0; material < nbMaterials; ++material)

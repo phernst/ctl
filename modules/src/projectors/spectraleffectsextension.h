@@ -18,9 +18,9 @@ class SpectralEffectsExtension : public ProjectorExtension
     public: ProjectionData project(const VolumeData& volume) override;
 
 public:
-    using ProjectorExtension::ProjectorExtension;
     SpectralEffectsExtension() = default;
     explicit SpectralEffectsExtension(float energyBinWidth);
+    using ProjectorExtension::ProjectorExtension;
 
     ProjectionData projectComposite(const CompositeVolume& volume) override;
     bool isLinear() const override;
@@ -32,11 +32,7 @@ public:
 
     void setSpectralSamplingResolution(float energyBinWidth);
 
-private:
-    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
-    SpectralInformation _spectralInfo;
-    float _deltaE = 0.0f;   
-
+private:  
     void updateSpectralInformation();
     bool canBypassExtension(const CompositeVolume& volume) const;
     void applyDetectorResponse(ProjectionData& intensity, float energy) const;
@@ -54,6 +50,10 @@ private:
     void addDummyPrepareSteps();
     void removeDummyPrepareSteps();
     void replaceDummyPrepareSteps(const BinInformation& binInfo, float binWidth);
+
+    SpectralInformation _spectralInfo;
+    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
+    float _deltaE = 0.0f;
 };
 
 
