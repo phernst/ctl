@@ -43,17 +43,17 @@ namespace CTL {
  *  // ...
  *  AcquisitionSetup acquisitionSetup;
  *  // ...
- *  RayCasterProjector::Config projectorConfig;
- *  // ...
  *
  *  // Core part
- *  AbstractProjector* simpleProjector = new RayCasterProjector; // our simple projector
+ *  auto simpleProjector = new RayCasterProjector; // our simple projector
+ *  // optional parameter settings for the projector
+ *  // e.g. simpleProjector->settings().raySampling = 0.1f;
  *
  *  // this is what you do without extension:
- *      // simpleProjector->configurate(acquisitionSetup, projectorConfig);
+ *      // simpleProjector->configure(acquisitionSetup);
  *      // ProjectionData projections = simpleProjector->project(volume);
  *
- * // instead we now do the following
+ *  // instead we now do the following
  *  ArealFocalSpotExtension* extendedRayCaster = new ArealFocalSpotExtension;
  *
  *  extendedRayCaster->use(simpleProjector);                            // tell the extension to use the ray caster
@@ -72,6 +72,8 @@ class ArealFocalSpotExtension : public ProjectorExtension
 
 public:
     using ProjectorExtension::ProjectorExtension;
+    explicit ArealFocalSpotExtension(const QSize& discretization,
+                                     bool lowExtinctionApproximation = false);
 
     void setDiscretization(const QSize& discretization);
     void enableLowExtinctionApproximation(bool enable = true);

@@ -18,6 +18,7 @@ class PoissonNoiseExtension : public ProjectorExtension
 
 public:
     using ProjectorExtension::ProjectorExtension;
+    explicit PoissonNoiseExtension(uint fixedSeed, bool useParalellization = true);
 
     // ProjectorExtension interface
     bool isLinear() const override;

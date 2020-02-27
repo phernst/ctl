@@ -9,6 +9,20 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(ArealFocalSpotExtension)
 
+
+/*!
+ * Constructs an ArealFocalSpotExtension with a focal spot sub-sampling given by \a discretization
+ * and linearization approximation enabled if \a lowExtinctionApproximation = \c true.
+ *
+ * \sa setDiscretization(), enableLowExtinctionApproximation()
+ */
+ArealFocalSpotExtension::ArealFocalSpotExtension(const QSize& discretization,
+                                                 bool lowExtinctionApproximation)
+    : _discretizationSteps(discretization)
+    , _lowExtinctionApprox(lowExtinctionApproximation)
+{
+}
+
 /*!
  * Re-implementation of the configuration step. This takes copies of the AcquisitionSetup
  * and the AbstractProjectorConfig. The actual configure() method of the nested projector is

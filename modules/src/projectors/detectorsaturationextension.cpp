@@ -17,6 +17,11 @@ void DetectorSaturationExtension::configure(const AcquisitionSetup& setup)
     ProjectorExtension::configure(setup);
 }
 
+DetectorSaturationExtension::DetectorSaturationExtension(uint nbSpectralSamples)
+    : _nbSamples(nbSpectralSamples)
+{
+}
+
 bool DetectorSaturationExtension::isLinear() const { return false; }
 
 void DetectorSaturationExtension::setIntensitySampling(uint nbSamples) { _nbSamples = nbSamples; }
@@ -70,7 +75,8 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
         processIntensities(ret);
         break;
     case AbstractDetector::Undefined:
-        qWarning() << "DetectorSaturationExtension::project(): Undefined saturation model!";
+        qWarning() << "DetectorSaturationExtension::project(): Undefined saturation model. "
+                      "Extension has no effect!";
         break;
     }
 

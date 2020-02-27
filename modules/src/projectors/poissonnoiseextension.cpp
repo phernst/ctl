@@ -17,6 +17,12 @@ void PoissonNoiseExtension::configure(const AcquisitionSetup& setup)
     ProjectorExtension::configure(setup);
 }
 
+PoissonNoiseExtension::PoissonNoiseExtension(uint fixedSeed, bool useParalellization)
+    : _useParallelization(useParalellization)
+{
+    setFixedSeed(fixedSeed);
+}
+
 ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& nestedProjector)
 {
     // compute (clean) projections

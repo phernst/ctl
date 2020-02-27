@@ -15,6 +15,7 @@ class DetectorSaturationExtension : public ProjectorExtension
 
 public:
     using ProjectorExtension::ProjectorExtension;
+    explicit DetectorSaturationExtension(uint nbSpectralSamples);
 
     // ProjectorExtension interface
     bool isLinear() const override;
