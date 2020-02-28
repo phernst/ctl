@@ -140,9 +140,9 @@ VoxelVolume<T> VoxelVolume<T>::fromChunk2DStack(const std::vector<Chunk2D<T>>& s
         return { 0, 0, 0 };
 
     // get dim information from stack
-    auto& firstChunk = stack.front();
-    auto& chunkDim = firstChunk.dimensions();
-    size_t chunkElements = firstChunk.nbElements();
+    const auto& firstChunk = stack.front();
+    const auto& chunkDim = firstChunk.dimensions();
+    const auto chunkElements = firstChunk.nbElements();
     Dimensions volDim = { chunkDim.width, chunkDim.height, uint(stack.size()) };
 
     // dimension consistency check within the passed stack
@@ -156,7 +156,7 @@ VoxelVolume<T> VoxelVolume<T>::fromChunk2DStack(const std::vector<Chunk2D<T>>& s
 
     // fill in data -> the data of each chunk will be copied into the volume as a z-slice
     auto retPtr = ret.rawData();
-    for(auto& chunk : stack)
+    for(const auto& chunk : stack)
     {
         std::copy_n(chunk.rawData(), chunkElements, retPtr);
         retPtr += chunkElements;
@@ -172,10 +172,9 @@ VoxelVolume<T> VoxelVolume<T>::fromChunk2DStack(const std::vector<Chunk2D<T>>& s
 template<typename T>
 VoxelVolume<T> VoxelVolume<T>::cube(uint nbVoxel, float voxelSize, const T& fillValue)
 {
-    const Dimensions dim{nbVoxel, nbVoxel, nbVoxel};
+    const Dimensions dim{ nbVoxel, nbVoxel, nbVoxel };
 
-    return { dim,
-             { voxelSize, voxelSize, voxelSize },
+    return { dim, { voxelSize, voxelSize, voxelSize },
              std::vector<T>(dim.totalNbElements(), fillValue) };
 }
 
@@ -203,9 +202,9 @@ void VoxelVolume<T>::freeMemory()
 template <typename T>
 typename std::vector<T>::reference VoxelVolume<T>::operator()(uint x, uint y, uint z)
 {
-    const size_t voxPerSlice = size_t(_dim.x) * _dim.y;
-    const size_t voxPerLine = size_t(_dim.x);
-    size_t lup = z * voxPerSlice + y * voxPerLine + x;
+    const auto voxPerSlice = size_t(_dim.x) * size_t(_dim.y);
+    const auto voxPerLine = size_t(_dim.x);
+    const auto lup = size_t(z) * voxPerSlice + size_t(y) * voxPerLine + size_t(x);
 
     Q_ASSERT(lup < _data.size());
     return _data[lup];
@@ -217,9 +216,9 @@ typename std::vector<T>::reference VoxelVolume<T>::operator()(uint x, uint y, ui
 template <typename T>
 typename std::vector<T>::const_reference VoxelVolume<T>::operator()(uint x, uint y, uint z) const
 {
-    const size_t voxPerSlice = size_t(_dim.x) * _dim.y;
-    const size_t voxPerLine = size_t(_dim.x);
-    size_t lup = z * voxPerSlice + y * voxPerLine + x;
+    const auto voxPerSlice = size_t(_dim.x) * size_t(_dim.y);
+    const auto voxPerLine = size_t(_dim.x);
+    const auto lup = size_t(z) * voxPerSlice + size_t(y) * voxPerLine + size_t(x);
 
     Q_ASSERT(lup < _data.size());
     return _data[lup];
@@ -236,13 +235,13 @@ Chunk2D<T> VoxelVolume<T>::sliceX(uint slice) const
     Chunk2D<T> ret(_dim.y, _dim.z);
     ret.allocateMemory();
 
-    const size_t voxPerYZSlice = size_t(_dim.y) * _dim.z;
+    const auto voxPerYZSlice = size_t(_dim.y) * size_t(_dim.z);
 
     std::vector<T> dataVec(voxPerYZSlice);
     // ekel loop
     auto dataIt = dataVec.begin();
-    for(uint zIdx = 0; zIdx < _dim.z; ++zIdx)
-        for(uint yIdx = 0; yIdx < _dim.y; ++yIdx, ++dataIt)
+    for(auto zIdx = 0u; zIdx < _dim.z; ++zIdx)
+        for(auto yIdx = 0u; yIdx < _dim.y; ++yIdx, ++dataIt)
             *dataIt = (*this)(slice, yIdx, zIdx);
 
     ret.setData(std::move(dataVec));
@@ -259,16 +258,16 @@ Chunk2D<T> VoxelVolume<T>::sliceY(uint slice) const
 
     Chunk2D<T> ret(_dim.x, _dim.z);
 
-    const size_t voxPerXZSlice = size_t(_dim.x) * _dim.z;
-    const size_t voxPerXYSlice = size_t(_dim.x) * _dim.y;
+    const auto voxPerXZSlice = size_t(_dim.x) * size_t(_dim.z);
+    const auto voxPerXYSlice = size_t(_dim.x) * size_t(_dim.y);
 
     std::vector<T> dataVec(voxPerXZSlice);
     // ekel loop
-    const uint sliceOffset = slice * _dim.x;
-    for(uint zIdx = 0; zIdx < _dim.z; ++zIdx)
+    const auto sliceOffset = size_t(slice) * size_t(_dim.x);
+    for(auto zIdx = 0u; zIdx < _dim.z; ++zIdx)
     {
-        size_t lup = sliceOffset + zIdx * voxPerXYSlice;
-        std::copy_n(_data.begin() + lup, _dim.x, dataVec.begin() + zIdx * _dim.x);
+        const auto lup = sliceOffset + size_t(zIdx) * voxPerXYSlice;
+        std::copy_n(_data.cbegin() + lup, _dim.x, dataVec.begin() + size_t(zIdx) * size_t(_dim.x));
     }
 
     ret.setData(std::move(dataVec));
@@ -285,11 +284,11 @@ Chunk2D<T> VoxelVolume<T>::sliceZ(uint slice) const
 
     Chunk2D<T> ret(_dim.x, _dim.y);
 
-    const size_t voxPerSlice = size_t(_dim.x) * _dim.y;
-    size_t lup = slice * voxPerSlice;
+    const auto voxPerSlice = size_t(_dim.x) * size_t(_dim.y);
+    const auto lup = size_t(slice) * voxPerSlice;
 
     std::vector<T> dataVec(voxPerSlice);
-    std::copy_n(_data.begin() + lup, voxPerSlice, dataVec.begin());
+    std::copy_n(_data.cbegin() + lup, voxPerSlice, dataVec.begin());
 
     ret.setData(std::move(dataVec));
     return ret;
@@ -309,10 +308,10 @@ VoxelVolume<T> VoxelVolume<T>::reslicedByX(bool reverse) const
     std::vector<Chunk2D<T>> chunkStack;
     chunkStack.reserve(_dim.x);
     if(reverse)
-        for(int i=_dim.x-1; i>=0; --i)
+        for(auto i = _dim.x - 1u; i != static_cast<uint>(-1); --i)
             chunkStack.push_back(sliceX(i));
     else
-        for(uint i=0; i<_dim.x; ++i)
+        for(auto i = 0u; i < _dim.x; ++i)
             chunkStack.push_back(sliceX(i));
 
     return VoxelVolume<T>::fromChunk2DStack(chunkStack);
@@ -332,10 +331,10 @@ VoxelVolume<T> VoxelVolume<T>::reslicedByY(bool reverse) const
     std::vector<Chunk2D<T>> chunkStack;
     chunkStack.reserve(_dim.y);
     if(reverse)
-        for(int i=_dim.y-1; i>=0; --i)
+        for(auto i = _dim.y - 1u; i != static_cast<uint>(-1); --i)
             chunkStack.push_back(sliceY(i));
     else
-        for(uint i=0; i<_dim.y; ++i)
+        for(auto i = 0u; i < _dim.y; ++i)
             chunkStack.push_back(sliceY(i));
 
     return VoxelVolume<T>::fromChunk2DStack(chunkStack);
@@ -355,7 +354,7 @@ VoxelVolume<T> VoxelVolume<T>::reslicedByZ(bool reverse) const
     std::vector<Chunk2D<T>> chunkStack;
     chunkStack.reserve(_dim.z);
     if(reverse)
-        for(int i=_dim.z-1; i>=0; --i)
+        for(auto i = _dim.z - 1u; i != static_cast<uint>(-1); --i)
             chunkStack.push_back(sliceZ(i));
     else
         return *this;
@@ -372,13 +371,7 @@ T VoxelVolume<T>::max() const
     if(allocatedElements() == 0)
         return T(0);
 
-    T tempMax = _data.front();
-
-    for(auto vox : _data)
-        if(vox > tempMax)
-            tempMax = vox;
-
-    return tempMax;
+    return *std::max_element(_data.cbegin(), _data.cend());
 }
 
 /*!
@@ -390,13 +383,7 @@ T VoxelVolume<T>::min() const
     if(allocatedElements() == 0)
         return T(0);
 
-    T tempMin = _data.front();
-
-    for(auto vox : _data)
-        if(vox < tempMin)
-            tempMin = vox;
-
-    return tempMin;
+    return *std::min_element(_data.cbegin(), _data.cend());
 }
 
 // operators
@@ -414,9 +401,8 @@ VoxelVolume<T>& VoxelVolume<T>::operator+=(const VoxelVolume<T>& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '+=' operation.");
 
-    const auto& otherDat = other.constData();
-    for(uint vox = 0; vox < totalVoxelCount(); ++vox)
-        _data[vox] += otherDat[vox];
+    std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
+                   [](const T& a, const T& b) { return a + b; });
 
     return *this;
 }
@@ -435,9 +421,8 @@ VoxelVolume<T>& VoxelVolume<T>::operator-=(const VoxelVolume<T>& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '-=' operation.");
 
-    const auto& otherDat = other.constData();
-    for(uint vox = 0; vox < totalVoxelCount(); ++vox)
-        _data[vox] -= otherDat[vox];
+    std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
+                   [](const T& a, const T& b) { return a - b; });
 
     return *this;
 }
@@ -752,7 +737,7 @@ const T* VoxelVolume<T>::rawData() const
 template <typename T>
 size_t VoxelVolume<T>::totalVoxelCount() const
 {
-    return _dim.x * size_t(_dim.y) * _dim.z;
+    return size_t(_dim.x) * size_t(_dim.y) * size_t(_dim.z);
 }
 
 /*!
@@ -770,7 +755,7 @@ const typename VoxelVolume<T>::VoxelSize& VoxelVolume<T>::voxelSize() const
 template <typename T>
 float VoxelVolume<T>::smallestVoxelSize() const
 {
-    return qMin(qMin(_size.x,_size.y),_size.z);
+    return std::min(std::min(_size.x, _size.y), _size.z);
 }
 
 /*!
