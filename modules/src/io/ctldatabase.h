@@ -1,10 +1,9 @@
 #ifndef CTLDATABASEHANDLER_H
 #define CTLDATABASEHANDLER_H
 
+#include "jsonserializer.h"
 #include "models/abstractdatamodel.h"
 #include "models/tabulateddatamodel.h"
-#include "io/jsonserializer.h"
-
 #include <QDir>
 
 #ifdef I
@@ -13,7 +12,6 @@
 #endif
 
 namespace CTL {
-
 namespace database {
 
 enum class Element {
@@ -163,7 +161,7 @@ enum class Composite {
 };
 
 enum class Spectrum {
-  Example = 2001
+    Example = 2001
 };
 
 std::shared_ptr<AbstractIntegrableDataModel> attenuationModel(database::Element Element);
@@ -173,7 +171,7 @@ std::shared_ptr<TabulatedDataModel> xRaySpectrum(database::Spectrum Spectrum);
 float density(database::Composite composite);
 float density(database::Element element);
 
-}
+} // namespace database
 
 class CTLDatabaseHandler
 {
@@ -182,7 +180,8 @@ public:
 
     void setDataBaseRoot(const QString& path);
 
-    std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::Composite composite);
+    std::shared_ptr<AbstractIntegrableDataModel>
+    loadAttenuationModel(database::Composite composite);
     std::shared_ptr<AbstractIntegrableDataModel> loadAttenuationModel(database::Element element);
     std::shared_ptr<TabulatedDataModel> loadXRaySpectrum(database::Spectrum spectrum);
 
@@ -202,7 +201,6 @@ private:
     JsonSerializer _serializer;
     QMap<int, QString> _fileMap;
 };
-
 
 } // namespace CTL
 
