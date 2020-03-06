@@ -37,7 +37,10 @@ CTLDatabaseHandler& CTLDatabaseHandler::instance()
 void CTLDatabaseHandler::setDataBaseRoot(const QString& path)
 {
     if(!QFile::exists(path))
+    {
         qWarning() << "Directory " << path << " does not exist.";
+        return;
+    }
     _dbRoot.setPath(path);
 
     makeFileMap();
@@ -79,7 +82,7 @@ float CTLDatabaseHandler::loadDensity(database::Element element)
 
 void CTLDatabaseHandler::makeFileMap()
 {
-    static const QStringList elementFiles{
+    auto elementFiles = {
         "z01", "z02", "z03", "z04", "z05", "z06", "z07", "z08", "z09", "z10", "z11", "z12",
         "z13", "z14", "z15", "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23", "z24",
         "z25", "z26", "z27", "z28", "z29", "z30", "z31", "z32", "z33", "z34", "z35", "z36",
@@ -89,7 +92,7 @@ void CTLDatabaseHandler::makeFileMap()
         "z73", "z74", "z75", "z76", "z77", "z78", "z79", "z80", "z81", "z82", "z83", "z84",
         "z85", "z86", "z87", "z88", "z89", "z90", "z91", "z92"
     };
-    static const QStringList compositeFiles{
+    auto compositeFiles = {
         "adipose",    "air",         "c552",       "alanine",    "ceric",        "bakelite",
         "blood",      "bone",        "b100",       "brain",      "breast",       "telluride",
         "fluoride",   "calcium",     "cesium",     "concreteba", "concrete",     "eye",
@@ -99,7 +102,7 @@ void CTLDatabaseHandler::makeFileMap()
         "pmma",       "polystyrene", "polyvinyl",  "nylonfilm",  "teflon",       "testis",
         "temethane",  "tepropane",   "a150",       "tissue",     "tissue4",      "water"
     };
-    static const QStringList xraySpectraFiles{
+    auto xraySpectraFiles = {
         "120kVp_30deg_1000Air"
     };
 
@@ -116,14 +119,14 @@ void CTLDatabaseHandler::makeFileMap()
 
     folder = _dbRoot.absolutePath() + "/attenuation_spectra/";
     mapPos = 1;
-    std::for_each(elementFiles.constBegin(), elementFiles.constEnd(), insertInFileMap);
+    std::for_each(elementFiles.begin(), elementFiles.end(), insertInFileMap);
 
     mapPos = 1001;
-    std::for_each(compositeFiles.constBegin(), compositeFiles.constEnd(), insertInFileMap);
+    std::for_each(compositeFiles.begin(), compositeFiles.end(), insertInFileMap);
 
     folder = _dbRoot.absolutePath() + "/xray_spectra/";
     mapPos = 2001;
-    std::for_each(xraySpectraFiles.constBegin(), xraySpectraFiles.constEnd(), insertInFileMap);
+    std::for_each(xraySpectraFiles.begin(), xraySpectraFiles.end(), insertInFileMap);
 }
 
 namespace database {
