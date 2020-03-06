@@ -197,11 +197,17 @@ std::vector<float> ImageResampler::sample(const std::vector<Generic2DCoord>& sam
 /*!
  * Returns the dimensions (i.e. number of pixels) of the image managed by this instance.
  */
-const Chunk2D<float>::Dimensions& ImageResampler::imgDim() const
-{
-    return _imgDim;
-}
+const Chunk2D<float>::Dimensions& ImageResampler::imgDim() const { return _imgDim; }
 
+/*!
+ * Returns the sampling range of the first dimension (boundary as first/last pixel).
+ */
+const SamplingRange& ImageResampler::rangeDim1() const { return _rangeDim1; }
+
+/*!
+ * Returns the sampling range of the second dimension (boundary as first/last pixel).
+ */
+const SamplingRange& ImageResampler::rangeDim2() const { return _rangeDim2; }
 
 } // namespace OCL
 } // namespace CTL
