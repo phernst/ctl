@@ -17,6 +17,15 @@ void PoissonNoiseExtension::configure(const AcquisitionSetup& setup)
     ProjectorExtension::configure(setup);
 }
 
+/*!
+ * Constructs a PoissonNoiseExtension and sets the fixed seed for the random number generator to
+ * \a fixedSeed.
+ *
+ * To use PoissonNoiseExtension without fixed seed, use the default constructor instead or
+ * reactivate random seeding after construction with setRandomSeedMode().
+ *
+ * Optionally, parallelization can be deactivated when passing \a useParalellization = \c false.
+ */
 PoissonNoiseExtension::PoissonNoiseExtension(uint fixedSeed, bool useParalellization)
     : _useParallelization(useParalellization)
 {
@@ -58,6 +67,10 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
     return ret;
 }
 
+/*!
+ * Returns false, because addition of Poisson noise is non-linear (it operates on the count domain,
+ * which involves exponentiation of the extinction values).
+ */
 bool PoissonNoiseExtension::isLinear() const { return false; }
 
 // Use SerializationInterface::toVariant() documentation.
@@ -95,6 +108,11 @@ void PoissonNoiseExtension::setParameter(const QVariant& parameter)
     _seed = map.value("Seed", 0).toUInt();
 }
 
+/*!
+ * Activates the fixed seed mode and sets the fixed seed to \a seed.
+ *
+ * To reactivate random seeding, use setRandomSeedMode().
+ */
 void PoissonNoiseExtension::setFixedSeed(uint seed)
 {
     _useFixedSeed = true;
@@ -102,13 +120,30 @@ void PoissonNoiseExtension::setFixedSeed(uint seed)
     _rng.seed(seed);
 }
 
+/*!
+ * Reactivates random seeding for the random number generator.
+ *
+ * Has no effect if fixed seeding has not been enabled before.
+ */
 void PoissonNoiseExtension::setRandomSeedMode() { _useFixedSeed = false; }
 
+/*!
+ * Sets the use of parallelization for the processing of multiple projections to \a enabled.
+ */
 void PoissonNoiseExtension::setParallelizationEnabled(bool enabled)
 {
     _useParallelization = enabled;
 }
 
+/*!
+ * The actual processing of projection data from a single view \a view (ie. with all its detector
+ * modules).
+ *
+ * Transforms data into count domain based on initial counts passed by \a i_0.
+ *
+ * This method approximates the Poisson distribution by a normal distribution for counts larger than
+ * 1.0e4.
+ */
 void PoissonNoiseExtension::processViewCompact(SingleViewData& view,
                                                const std::vector<float>& i_0,
                                                uint seed)

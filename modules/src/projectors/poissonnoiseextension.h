@@ -9,6 +9,22 @@
 
 namespace CTL {
 
+/*!
+ * \class PoissonNoiseExtension
+ *
+ * \brief The PoissonNoiseExtension class is an extension for forward projectors that adds
+ * Poisson-distributed noise to the projection data.
+ *
+ * This extension performs a postprocessing on the projection data to add Poisson-distributed noise
+ * to the projections. For counts larger than 1.0e4. the Poisson distribution is approximated by a
+ * normal distribution.
+ *
+ * Poisson-distributed random numbers are generated using the Mersenne twister engine
+ * (std::mt19937). A fixed seed can be used to create reproducible results (see setFixedSeed()).
+ * \code
+ *
+ * \endcode
+ */
 class PoissonNoiseExtension : public ProjectorExtension
 {
     CTL_TYPE_ID(103)
@@ -37,13 +53,14 @@ protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
 
 private:
-    static void processViewCompact(SingleViewData& view, const std::vector<float>& i_0, uint seed);
-
-    std::mt19937 _rng;
-    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
     bool _useParallelization = true;
     bool _useFixedSeed = false;
     uint _seed = 0;
+    std::mt19937 _rng;
+
+    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
+
+    static void processViewCompact(SingleViewData& view, const std::vector<float>& i_0, uint seed);
 };
 
 } // namespace CTL
