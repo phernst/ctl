@@ -74,8 +74,8 @@ ProjectorExtension::~ProjectorExtension() { delete _projector; }
  * object.
  *
  * Re-implement this method to retrieve all information required for the purpose of the desired
- * extension. Make sure to delegate this call to the nested projector object at the end of the
- * method.
+ * extension. Make sure to delegate this call to the base class (ProjectorExtension) at the end of
+ * the method.
  *
  * Throws std::runtime_error if the nested projector object is unset.
  */
@@ -93,8 +93,7 @@ void ProjectorExtension::configure(const AcquisitionSetup& setup)
  * object.
  *
  * Re-implement this method to modify the projections in order to realize the desired
- * functionality of your extension. Make sure to delegate this call to the nested projector
- * object at the end of the method.
+ * functionality of your extension.
  *
  * Throws std::runtime_error if the nested projector object is unset.
  */
