@@ -51,7 +51,7 @@ void ArealFocalSpotExtension::configure(const AcquisitionSetup& setup)
  * \li Add this offset to the preparation pipeline for the corresponding views
  * \li Call configure() of the nested projector with the resulting setup
  * \li Invoke project() of the nested projector
- * \li Accumulate projections
+ * \li Accumulate projections (in intensity domain, unless low extinction approximation activated)
  *
  * \c end \c foreach
  * \li Return averaged projections.
@@ -73,6 +73,11 @@ void ArealFocalSpotExtension::configure(const AcquisitionSetup& setup)
  * Hence, computation time increases (at least) linearly with the number of requested sampling
  * points. Furthermore, required system memory is doubled, since two full sets of projections need
  * to be kept in memory simultaneously.
+ *
+ * By default, projections are averaged in intensity domain.
+ * This makes the extension non-linear. To enforce averaging in extinction domain, and by that,
+ * make the extension linear, enable the low extinction approximation (see
+ * enableLowExtinctionApproximation()).
  */
 ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nestedProjector)
 {
@@ -168,6 +173,27 @@ void ArealFocalSpotExtension::setDiscretization(const QSize& discretization)
     _discretizationSteps = discretization;
 }
 
+/*!
+ * Sets the use of the low extinction approximation to \a enable.
+ *
+ * When activated, the low extinction approximation causes projection images of individual focal
+ * spot sub-samples to be averaged in extinction domain instead of in intensity domain. This is an
+ * approximation that allows the ArealFocalSpotExtension to become a linear extension, which has
+ * potential performance benefit when used in combination with other extensions. However, the
+ * result will become inaccurate, particularly if strong extinction gradients are present in the
+ * projection images. For low extinction (and esp. their gradients), the approximation is
+ * acceptable.
+ *
+ * From a mathematical point of view, this requires:
+ * \f$
+ * -\ln\frac{1}{F}\sum_{f=1}^{F}\exp(-\epsilon_{f})\approx\frac{1}{F}\sum_{f=1}^{F}\epsilon_{f},
+ * \f$
+ *
+ * where \f$\epsilon_{f}\f$ denotes the extinction value of a certain pixel for focal spot
+ * sub-sample \f$f\f$. It can be shown that this is fulfilled for \f$\epsilon_{f}\ll 1\f$ (overall
+ * low extinction values) or \f$\epsilon_{f}=\epsilon+\delta_{f}\f$ with \f$\delta_{f}\ll 1\f$
+ * (small gradients, i.e. different focal spot positions create only small changes in extinction).
+ */
 void ArealFocalSpotExtension::enableLowExtinctionApproximation(bool enable)
 {
     _lowExtinctionApprox = enable;
@@ -247,6 +273,12 @@ QVector<QPointF> ArealFocalSpotExtension::discretizationGrid() const
     return ret;
 }
 
+/*!
+ * Returns \c false (requires averaging operation in intensity domain) unless the low extinction
+ * approximation is enabled.
+ *
+ * \sa enableLowExtinctionApproximation()
+ */
 bool ArealFocalSpotExtension::isLinear() const
 {
     return _lowExtinctionApprox;

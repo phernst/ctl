@@ -46,21 +46,21 @@ namespace CTL {
  *
  *  // Core part
  *  auto simpleProjector = new RayCasterProjector; // our simple projector
- *  // optional parameter settings for the projector
- *  // e.g. simpleProjector->settings().raySampling = 0.1f;
+ *      // optional parameter settings for the projector
+ *      // e.g. simpleProjector->settings().raySampling = 0.1f;
  *
  *  // this is what you do without extension:
  *      // simpleProjector->configure(acquisitionSetup);
  *      // ProjectionData projections = simpleProjector->project(volume);
  *
  *  // instead we now do the following
- *  ArealFocalSpotExtension* extendedRayCaster = new ArealFocalSpotExtension;
+ *  ArealFocalSpotExtension* extension = new ArealFocalSpotExtension;
  *
- *  extendedRayCaster->use(simpleProjector);                            // tell the extension to use the ray caster
- *  extendedRayCaster->setDiscretization(QSize(5, 5));                  // set discretization grid to 5x5 points
- *  extendedRayCaster->configurate(acquisitionSetup, projectorConfig);  // configurate the extension
+ *  extension->use(simpleProjector);                            // tell the extension to use the ray caster
+ *  extension->setDiscretization(QSize(5, 5));                  // set discretization grid to 5x5 points
+ *  extension->configure(acquisitionSetup);                     // configure the simulation
  *
- *  ProjectionData projections = extendedRayCaster->project(volume);    // (compute and) get the final projections
+ *  ProjectionData projections = extension->project(volume);    // (compute and) get the final projections
  * \endcode
  */
 class ArealFocalSpotExtension : public ProjectorExtension
