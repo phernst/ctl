@@ -30,6 +30,8 @@ ArealFocalSpotExtension::ArealFocalSpotExtension(const QSize& discretization,
 void ArealFocalSpotExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
+
+    ProjectorExtension::configure(setup);
 }
 
 /*!
