@@ -48,16 +48,15 @@ public:
 
     Settings& settings();
 
-private: // members
-    FullGeometry _pMats; //!< full set of projection matrices for all views and modules
-    SingleViewData::Dimensions _viewDim; //!< dimensions of a single view
-    Settings _settings; //!< settings of the projector
-    std::string _oclProgramName; //!< OCL program name (depends on if interpolation is enabled)
-    uint _volDim[3]; //!< cache for volume dimensions
-
-private: // methods
+private:
     void initOpenCL();
     void prepareOpenCLDeviceList();
+
+    Settings _settings; //!< settings of the projector
+    std::string _oclProgramName; //!< OCL program name (depends on if interpolation is enabled)
+    SingleViewData::Dimensions _viewDim; //!< dimensions of a single view
+    uint _volDim[3]; //!< cache for volume dimensions
+    FullGeometry _pMats; //!< full set of projection matrices for all views and modules
 };
 
 /*!

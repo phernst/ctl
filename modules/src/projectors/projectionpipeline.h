@@ -107,13 +107,12 @@ public:
     uint nbExtensions() const;
 
 private:
-    ExtensionPtr _finalProjector; //!< The fully-assembled projector (incl. all extensions).
-
-    AbstractProjector* _projector; //!< Pointer to the actual projector object.
-    std::vector<ProjectorExtension*> _extensions; //!< (Ordered) list of pointers to all extensions.
-
     void stashExtensions(uint nbExt);
     void restoreExtensions(uint nbExt);
+
+    std::vector<ProjectorExtension*> _extensions; //!< (Ordered) list of pointers to all extensions.
+    ExtensionPtr _finalProjector; //!< The fully-assembled projector (incl. all extensions).
+    AbstractProjector* _projector; //!< Pointer to the actual projector object.
 };
 
 }

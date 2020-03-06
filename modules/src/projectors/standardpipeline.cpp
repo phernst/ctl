@@ -16,12 +16,12 @@ DECLARE_SERIALIZABLE_TYPE(StandardPipeline)
  * The default configuration enables spectral effects and Poisson noise simulation.
  */
 StandardPipeline::StandardPipeline(ApproximationPolicy policy)
-    : _approxMode(policy)
-    , _projector (new OCL::RayCasterProjector)
+    : _projector (new OCL::RayCasterProjector)
     , _extAFS (new ArealFocalSpotExtension)
     , _extDetSat (new DetectorSaturationExtension)
     , _extPoisson (new PoissonNoiseExtension)
     , _extSpectral (new SpectralEffectsExtension)
+    , _approxMode(policy)
 {
     _pipeline.setProjector(_projector);
 

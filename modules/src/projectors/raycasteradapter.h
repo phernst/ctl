@@ -28,9 +28,8 @@ public:
 protected:
     RayCaster _rayCaster;
 
-    QVector<ProjectionMatrix> _pMatsVectorized;
     SingleViewData::Dimensions _viewDim;
-
+    QVector<ProjectionMatrix> _pMatsVectorized;
 };
 
 } // namespace OCL

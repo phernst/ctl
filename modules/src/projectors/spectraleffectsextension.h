@@ -53,7 +53,7 @@ private:
 
     SpectralInformation _spectralInfo;
     AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
-    float _deltaE = 0.0f;
+    float _deltaE{ 0.0f };
 };
 
 

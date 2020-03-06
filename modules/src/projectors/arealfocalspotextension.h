@@ -87,12 +87,11 @@ public:
 
 protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
-
-    QSize _discretizationSteps = { 1, 1 }; //!< Requested number of discretization steps in both dimensions.
-    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
-    bool _lowExtinctionApprox = false; //!< True if low attenuation approximation has been enabled.
-
     QVector<QPointF> discretizationGrid() const;
+
+    QSize _discretizationSteps{ 1, 1 }; //!< Requested number of discretization steps in both dimensions.
+    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
+    bool _lowExtinctionApprox{ false }; //!< True if low attenuation approximation has been enabled.
 };
 
 } // namespace CTL

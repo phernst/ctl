@@ -91,14 +91,13 @@ protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
 
 private:
-    bool _useParallelization = true;
-    bool _useFixedSeed = false;
-    uint _seed = 0;
-    std::mt19937 _rng;
-
-    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
-
     static void processViewCompact(SingleViewData& view, const std::vector<float>& i_0, uint seed);
+
+    std::mt19937 _rng;
+    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
+    bool _useParallelization{ true };
+    bool _useFixedSeed{ false };
+    uint _seed{ 0u };
 };
 
 } // namespace CTL

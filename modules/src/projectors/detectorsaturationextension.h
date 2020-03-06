@@ -79,12 +79,12 @@ protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
 
 private:
-    AcquisitionSetup _setup; //!< A copy of the acquisition setup.
-    uint _nbSamples = 0;     //!< Number of samples used to extract spectrally resolved information.
-
     void processCounts(ProjectionData& projections);
     void processExtinctions(ProjectionData& projections);
     void processIntensities(ProjectionData& projections);
+
+    AcquisitionSetup _setup; //!< A copy of the acquisition setup.
+    uint _nbSamples{ 0u };   //!< Number of samples used to extract spectrally resolved information.
 };
 
 } // namespace CTL

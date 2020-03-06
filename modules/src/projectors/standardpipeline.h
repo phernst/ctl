@@ -109,7 +109,7 @@ public:
     };
 
     StandardPipeline(ApproximationPolicy policy = StandardPipeline::Default_Approximation);
-    ~StandardPipeline();
+    ~StandardPipeline() override;
 
     void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
@@ -144,25 +144,6 @@ public:
     SettingsRayCaster settingsRayCaster();
 
 private:
-    ProjectionPipeline _pipeline; //!< The pipeline object; owns the projector and all extensions.
-
-    bool _arealFSEnabled = false;     //!< enabled/disabled state variable for areal focal spot
-    bool _detSatEnabled = false;      //!< enabled/disabled state variable for detector saturation
-    bool _spectralEffEnabled = false; //!< enabled/disabled state variable for spectral effects
-    bool _poissonEnabled = false;     //!< enabled/disabled state variable for Poisson noise
-    ApproximationPolicy _approxMode;  //!< approximation level for the simulation
-
-    OCL::RayCasterProjector* _projector;     //!< Pointer to the ray caster projector.
-    ArealFocalSpotExtension* _extAFS;        //!< Pointer to the ArealFocalSpotExtension.
-    DetectorSaturationExtension* _extDetSat; //!< Pointer to the DetectorSaturationExtension.
-    PoissonNoiseExtension* _extPoisson;      //!< Pointer to the PoissonNoiseExtension.
-    SpectralEffectsExtension* _extSpectral;  //!< Pointer to the SpectralEffectsExtension.
-
-    uint posAFS() const;
-    uint posDetSat() const;
-    uint posPoisson() const;
-    uint posSpectral() const;
-
     class SettingsAFS
     {
     public:
@@ -238,9 +219,28 @@ private:
 
         friend class StandardPipeline;
     };
+
+    uint posAFS() const;
+    uint posDetSat() const;
+    uint posPoisson() const;
+    uint posSpectral() const;
+
+    ProjectionPipeline _pipeline; //!< The pipeline object; owns the projector and all extensions.
+
+    OCL::RayCasterProjector* _projector;     //!< Pointer to the ray caster projector.
+    ArealFocalSpotExtension* _extAFS;        //!< Pointer to the ArealFocalSpotExtension.
+    DetectorSaturationExtension* _extDetSat; //!< Pointer to the DetectorSaturationExtension.
+    PoissonNoiseExtension* _extPoisson;      //!< Pointer to the PoissonNoiseExtension.
+    SpectralEffectsExtension* _extSpectral;  //!< Pointer to the SpectralEffectsExtension.
+
+    ApproximationPolicy _approxMode;  //!< approximation level for the simulation
+    bool _arealFSEnabled = false;     //!< enabled/disabled state variable for areal focal spot
+    bool _detSatEnabled = false;      //!< enabled/disabled state variable for detector saturation
+    bool _spectralEffEnabled = false; //!< enabled/disabled state variable for spectral effects
+    bool _poissonEnabled = false;     //!< enabled/disabled state variable for Poisson noise
 };
 
-}
+} // namespace CTL
 
 /*! \file */
 ///@{

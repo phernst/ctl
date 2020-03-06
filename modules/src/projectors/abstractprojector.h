@@ -89,15 +89,15 @@ public:
 
     ProjectorNotifier* notifier();
 
-private:
-    ProjectorNotifier _notifier; //!< The notifier object used for signal emission.
-
 protected:
     AbstractProjector() = default;
     AbstractProjector(const AbstractProjector&) = delete;
     AbstractProjector(AbstractProjector&&) = delete;
     AbstractProjector& operator=(const AbstractProjector&) = delete;
     AbstractProjector& operator=(AbstractProjector&&) = delete;
+
+private:
+    ProjectorNotifier _notifier; //!< The notifier object used for signal emission.
 };
 
 inline bool AbstractProjector::isLinear() const { return true; }
