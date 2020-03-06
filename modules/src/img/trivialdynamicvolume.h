@@ -19,7 +19,7 @@ public:
     using AbstractDynamicVolumeData::AbstractDynamicVolumeData;
 };
 
-SpectralVolumeData* TrivialDynamicVolume::clone() const
+inline SpectralVolumeData* TrivialDynamicVolume::clone() const
 {
     return new TrivialDynamicVolume(*this);
 }
