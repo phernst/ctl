@@ -73,8 +73,7 @@ double XrayTube::nominalPhotonFlux() const { return _mAs * _intensityConstant; }
  *
  * This is [0 keV, e * tubeVoltage].
  */
-EnergyRange XrayTube::nominalEnergyRange() const { return { 0.0f, float(_tubeVoltage) };
-}
+EnergyRange XrayTube::nominalEnergyRange() const { return { 0.0f, float(_tubeVoltage) }; }
 
 /*!
  * Returns a formatted string with information about the object.
@@ -112,14 +111,14 @@ QString XrayTube::defaultName()
 
 void XrayTube::updateIntensityConstant()
 {
-    constexpr double perMM2toCM2 = 100.0;
+    constexpr auto perMM2toCM2 = 100.0;
     const auto nbSpectralBins = std::max({ qRound(nominalEnergyRange().width()), 1 });
-    _intensityConstant = IntervalDataSeries::sampledFromModel(*_spectrumModel,
-                                                              nominalEnergyRange().start(), nominalEnergyRange().end(),
-                                                              nbSpectralBins).integral()
-                                                               * perMM2toCM2;
+    _intensityConstant = IntervalDataSeries::sampledFromModel(
+                               *_spectrumModel,
+                               nominalEnergyRange().start(),
+                               nominalEnergyRange().end(), nbSpectralBins).integral() * perMM2toCM2;
 
-    qDebug("New intensity constant: %f",_intensityConstant);
+    qDebug("New intensity constant: %f", _intensityConstant);
 }
 
 /*!
