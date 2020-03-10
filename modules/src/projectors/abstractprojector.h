@@ -116,7 +116,6 @@ inline QVariant AbstractProjector::parameter() const { return QVariant(); }
 
 inline void AbstractProjector::setParameter(const QVariant&) {}
 
-// Use SerializationInterface::toVariant() documentation.
 inline QVariant AbstractProjector::toVariant() const
 {
     QVariantMap ret = SerializationInterface::toVariant().toMap();
@@ -126,7 +125,6 @@ inline QVariant AbstractProjector::toVariant() const
     return ret;
 }
 
-// Use SerializationInterface::fromVariant() documentation.
 inline void AbstractProjector::fromVariant(const QVariant& variant)
 {
     SerializationInterface::fromVariant(variant);
@@ -227,6 +225,43 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
 * \c true (as this might outrule underlying non-linearity).
 */
 
+/*!
+* \fn bool AbstractProjector::fromVariant(const QVariant& variant)
+*
+* Implementation of the deserialization interface. Sets the contents of the object based on the
+* QVariant \a variant.
+*
+* This method uses setParameter() to deserialize class members.
+*/
+
+/*!
+* \fn bool AbstractProjector::toVariant() const
+*
+* Implementation of the serialization interface. Stores the contents of this instance in a QVariant.
+*
+* Stores the object's type-id (from SerializationInterface::toVariant()).
+*
+* This method uses parameter() to serialize class members.
+*/
+
+/*!
+* \fn bool AbstractProjector::parameter() const
+*
+* Returns the parameters of this instance as QVariant.
+* This shall return a QVariantMap with key-value-pairs representing all settings of the object.
+*
+* This method is used within toVariant() to serialize the object's settings.
+*/
+
+/*!
+* \fn bool AbstractProjector::setParameter(const QVariant& parameter)
+*
+* Sets the parameters of this instance based on the passed QVariant \a parameter. Parameters need
+* to follow the naming convention as described in parameter().
+*
+* This method is used within fromVariant() to deserialize the object's settings. Direct use of
+* this method is discouraged; consider using dedicated setter methods instead.
+*/
 } // namespace CTL
 
 /*! \file */
