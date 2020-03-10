@@ -78,6 +78,14 @@ QVariant SpectralEffectsExtension::toVariant() const
     return ret;
 }
 
+/*!
+ * Returns the parameters of this instance as QVariant.
+ *
+ * This returns a QVariantMap with one key-value-pair: ("Sampling resolution", _deltaE),
+ * which represents the energy resolution (in keV per bin) used for sampling of spectral effects:
+ *
+ * This method is used within toVariant() to serialize the object's settings.
+ */
 QVariant SpectralEffectsExtension::parameter() const
 {
     QVariantMap ret = ProjectorExtension::parameter().toMap();
@@ -87,6 +95,7 @@ QVariant SpectralEffectsExtension::parameter() const
     return ret;
 }
 
+// Use AbstractProjector::setParameter() documentation.
 void SpectralEffectsExtension::setParameter(const QVariant& parameter)
 {
     ProjectorExtension::setParameter(parameter);
