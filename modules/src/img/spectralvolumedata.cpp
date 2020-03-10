@@ -5,7 +5,7 @@
 
 namespace CTL {
 
-static void grindBall(VoxelVolume<float>& volume, float radius);
+//static void grindBall(VoxelVolume<float>& volume, float radius);
 
 /*!
  * \brief Constructs a SpectralVolumeData representing the attenuation coefficients \a muValues
@@ -316,29 +316,8 @@ float SpectralVolumeData::referenceMassAttenuationCoeff() const
 
 /*!
  * Creates a SpectralVolumeData object that represents a voxelized ball with radius \a radius,
- * isometric voxel size \a voxelSize and filled (homogeneuosly) with attenuation value \a muValue.
- * The voxels surrounding the ball are filled with zeros.
- *
- * Note that this creates a volume without spectral information.
- */
-SpectralVolumeData SpectralVolumeData::createBall(float radius, float voxelSize, float muValue)
-{
-    const auto nbVox = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
-
-    const SpectralVolumeData::Dimensions volDim{ nbVox, nbVox, nbVox };
-    const SpectralVolumeData::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
-    SpectralVolumeData ret{ { volDim, voxSize } };
-    ret.fill(muValue);
-
-    grindBall(ret, radius);
-
-    return ret;
-}
-
-/*!
- * Creates a SpectralVolumeData object that represents a voxelized ball with radius \a radius,
  * isometric voxel size \a voxelSize (both in mm) and filled (homogeneuosly) with density value
- * \a density (in g/cm^3). The material properties (i.e. spectrally-dependend mass attenuation
+ * \a density (in g/cm^3). The material properties (i.e. spectrally-dependent mass attenuation
  * coefficients) are specified by \a absorptionModel. The voxels surrounding the ball are filled
  * with density 0.0 g/cm^3.
  */
@@ -348,16 +327,7 @@ SpectralVolumeData::createBall(float radius,
                                float density,
                                std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
 {
-    const auto nbVox = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
-
-    const SpectralVolumeData::Dimensions volDim{ nbVox, nbVox, nbVox };
-    const SpectralVolumeData::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
-    SpectralVolumeData ret{ { volDim, voxSize }, std::move(absorptionModel) };
-    ret.fill(density);
-
-    grindBall(ret, radius);
-
-    return ret;
+    return { VoxelVolume<float>::ball(radius, voxelSize, density), absorptionModel };
 }
 
 /*!
@@ -423,7 +393,7 @@ void SpectralVolumeData::setMaterialName(const QString& name)
 ///
 /// Creates a SpectralVolumeData object from the attenuation values given by \a muValues (in 1 / mm)
 /// corresponding to the reference energy \a referenceEnergy of the material specified by its
-/// spectrally-dependend mass attenuation coefficients in \a absorptionModel.
+/// spectrally-dependent mass attenuation coefficients in \a absorptionModel.
 ///
 /// Generates the density representation of the data. To prevent transformation into density domain
 /// (e.g. if follow-up processing needs to be done in attenuation domain anyway), use the constructor
@@ -463,7 +433,7 @@ SpectralVolumeData SpectralVolumeData::fromMuVolume(VoxelVolume<float> muValues,
 
 ///
 /// Creates a SpectralVolumeData object from the attenuation values given by \a HUValues (in
-/// Hounsfield units) representing the material specified by its spectrally-dependend mass
+/// Hounsfield units) representing the material specified by its spectrally-dependent mass
 /// attenuation coefficients in \a absorptionModel. For meaningful results, you need to also specify
 /// the reference energy, to which the Hounsfield units correspond, by \a referenceEnergy (in keV).
 ///
@@ -565,28 +535,28 @@ void SpectralVolumeData::transformToDensity()
     _isMu = false;
 }
 
-void grindBall(VoxelVolume<float>& volume, float radius)
-{
-    const auto nbVox = volume.dimensions().x;
-    const auto center = float(nbVox - 1) / 2.0f;
+//void grindBall(VoxelVolume<float>& volume, float radius)
+//{
+//    const auto nbVox = volume.dimensions().x;
+//    const auto center = float(nbVox - 1) / 2.0f;
 
-    auto dist2Center = [center](float x, float y, float z)
-    {
-        const auto dx = x - center;
-        const auto dy = y - center;
-        const auto dz = z - center;
-        return dx * dx + dy * dy + dz * dz;
-    };
+//    auto dist2Center = [center](float x, float y, float z)
+//    {
+//        const auto dx = x - center;
+//        const auto dy = y - center;
+//        const auto dz = z - center;
+//        return dx * dx + dy * dy + dz * dz;
+//    };
 
-    const auto voxSize = volume.voxelSize().x;
-    const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+//    const auto voxSize = volume.voxelSize().x;
+//    const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
 
-    // erase exterior space
-    for(auto x = 0u; x < nbVox; ++x)
-        for(auto y = 0u; y < nbVox; ++y)
-            for(auto z = 0u; z < nbVox; ++z)
-                if(dist2Center(x, y, z) > rSquaredInVoxel)
-                    volume(x, y, z) = 0.0f;
-}
+//    // erase exterior space
+//    for(auto x = 0u; x < nbVox; ++x)
+//        for(auto y = 0u; y < nbVox; ++y)
+//            for(auto z = 0u; z < nbVox; ++z)
+//                if(dist2Center(x, y, z) > rSquaredInVoxel)
+//                    volume(x, y, z) = 0.0f;
+//}
 
 } // namespace CTL

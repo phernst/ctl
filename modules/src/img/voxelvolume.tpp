@@ -1,6 +1,11 @@
 #include "voxelvolume.h"
+#include <cmath>
 
 namespace CTL {
+
+namespace details{
+    template<typename T> void grindBall(VoxelVolume<T>& volume, float radius);
+}
 
 /*!
  * Constructs a voxelized volume with \a nbVoxels voxels.
@@ -178,13 +183,39 @@ VoxelVolume<T> VoxelVolume<T>::cube(uint nbVoxel, float voxelSize, const T& fill
              std::vector<T>(dim.totalNbElements(), fillValue) };
 }
 
+/*!
+ * Constructs voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
+ * all voxels inside a ball of radius \a radius (in mm) around the center of the volume with
+ * \a fillValue. The voxels surrounding the ball are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * each dimension.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::ball(float radius, float voxelSize, const T& fillValue)
+{
+    const auto nbVox = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+
+    const VoxelVolume<T>::Dimensions volDim{ nbVox, nbVox, nbVox };
+    const VoxelVolume<T>::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    VoxelVolume<T> ret{ volDim, voxSize };
+    ret.fill(fillValue);
+
+    details::grindBall(ret, radius);
+
+    return ret;
+}
+
+/*!
+ * Sets an isotropic voxels size of \a isotropicSize (in mm).
+ */
 template<typename T>
 void VoxelVolume<T>::setVoxelSize(float isotropicSize)
 {
     _size = { isotropicSize, isotropicSize, isotropicSize };
 }
 
-/*
+/*!
  * Deletes the data of the voxel volume.
  *
  * \sa allocateMemory()
@@ -841,6 +872,33 @@ bool VoxelVolume<T>::hasEqualSizeAs(const std::vector<T>& other) const
 {
     Q_ASSERT(totalVoxelCount() == other.size());
     return totalVoxelCount() == other.size();
+}
+
+namespace details {
+    template<typename T>
+    void grindBall(VoxelVolume<T>& volume, float radius)
+    {
+        const auto nbVox = volume.dimensions().x;
+        const auto center = float(nbVox - 1) / 2.0f;
+
+        auto dist2Center = [center](float x, float y, float z)
+        {
+            const auto dx = x - center;
+            const auto dy = y - center;
+            const auto dz = z - center;
+            return dx * dx + dy * dy + dz * dz;
+        };
+
+        const auto voxSize = volume.voxelSize().x;
+        const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+
+        // erase exterior space
+        for(auto x = 0u; x < nbVox; ++x)
+            for(auto y = 0u; y < nbVox; ++y)
+                for(auto z = 0u; z < nbVox; ++z)
+                    if(dist2Center(x, y, z) > rSquaredInVoxel)
+                        volume(x, y, z) = 0.0f;
+    }
 }
 
 } // namespace CTL

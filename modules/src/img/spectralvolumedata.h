@@ -66,7 +66,6 @@ public:
     float referenceEnergy() const;
     float referenceMassAttenuationCoeff() const;
 
-    static SpectralVolumeData createBall(float radius, float voxelSize, float muValue);
     static SpectralVolumeData createBall(float radius, float voxelSize, float density,
                                          std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
 

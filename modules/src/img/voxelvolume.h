@@ -77,6 +77,7 @@ public:
 
     // factory
     static VoxelVolume<T> fromChunk2DStack(const std::vector<Chunk2D<T>>& stack);
+    static VoxelVolume<T> ball(float radius, float voxelSize, const T& fillValue);
     static VoxelVolume<T> cube(uint nbVoxel, float voxelSize, const T& fillValue);
 
     // getter methods
