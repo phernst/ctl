@@ -14,6 +14,8 @@ namespace imgproc {
 
 enum FiltMethod {
     Gauss3,     // filter size: 3
+    Gauss5,     // filter size: 5
+    Gauss7,     // filter size: 7
     Average3,   // filter size: 3
     Median3,    // filter size: 3
     MedianAbs3, // filter size: 3
