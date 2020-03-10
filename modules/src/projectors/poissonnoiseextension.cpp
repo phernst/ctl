@@ -83,11 +83,19 @@ QVariant PoissonNoiseExtension::toVariant() const
     return ret;
 }
 
+/*!
+ * Returns the parameters of this instance as QVariant.
+ *
+ * This returns a QVariantMap with three key-value-pairs:
+ * - ("Use fixed seed", _useFixedSeed), storing whether fixed seed mode is used or not.
+ * - ("Use parallelization", _useParallelization), storing whether parallelization is used or not.
+ * - ("Seed", _seed), storing the seed used for the RNG.
+ *
+ * This method is used within toVariant() to serialize the object's settings.
+ */
 QVariant PoissonNoiseExtension::parameter() const
 {
     QVariantMap ret = ProjectorExtension::parameter().toMap();
-
-    qInfo() << _seed;
 
     ret.insert("Use fixed seed", _useFixedSeed);
     ret.insert("Use parallelization", _useParallelization);
@@ -96,10 +104,9 @@ QVariant PoissonNoiseExtension::parameter() const
     return ret;
 }
 
+// Use AbstractProjector::setParameter() documentation.
 void PoissonNoiseExtension::setParameter(const QVariant& parameter)
 {
-    qInfo() << "set parameter";
-
     ProjectorExtension::setParameter(parameter);
 
     QVariantMap map = parameter.toMap();

@@ -52,6 +52,15 @@ QVariant DetectorSaturationExtension::toVariant() const
     return ret;
 }
 
+/*!
+ * Returns the parameters of this instance as QVariant.
+ *
+ * This returns a QVariantMap with one key-value-pair: ("Intensity sampling points", _nbSamples),
+ * which represents the number of sampling points used when (internally) a spectrum needs to be
+ * sampled.
+ *
+ * This method is used within toVariant() to serialize the object's settings.
+ */
 QVariant DetectorSaturationExtension::parameter() const
 {
     QVariantMap ret = ProjectorExtension::parameter().toMap();
@@ -61,6 +70,7 @@ QVariant DetectorSaturationExtension::parameter() const
     return ret;
 }
 
+// Use AbstractProjector::setParameter() documentation.
 void DetectorSaturationExtension::setParameter(const QVariant& parameter)
 {
     ProjectorExtension::setParameter(parameter);

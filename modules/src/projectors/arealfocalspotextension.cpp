@@ -199,7 +199,7 @@ void ArealFocalSpotExtension::enableLowExtinctionApproximation(bool enable)
     _lowExtinctionApprox = enable;
 }
 
-// Use SerializationInterface::toVariant() documentation.
+// Use AbstractProjector::toVariant() documentation.
 QVariant ArealFocalSpotExtension::toVariant() const
 {
     QVariantMap ret = ProjectorExtension::toVariant().toMap();
@@ -209,21 +209,36 @@ QVariant ArealFocalSpotExtension::toVariant() const
     return ret;
 }
 
+/*!
+ * Returns the parameters of this instance as QVariant.
+ *
+ * This returns a QVariantMap with three key-value-pairs: The first to are
+ * ("Discretization X", _discretizationSteps.width()) and ("Discretization Y",
+ * _discretizationSteps.height()), which refer to the number of sampling points used to sub-sample
+ * the focal spot in x and y direction (CT coordinates), respectively. The third key-value-pair is
+ * ("Low extinction approx", _lowExtinctionApprox) and represents the information whether this
+ * instance has the low extinction approximation enabled.
+ *
+ * This method is used within toVariant() to serialize the object's settings.
+ */
 QVariant ArealFocalSpotExtension::parameter() const
 {
     QVariantMap ret = ProjectorExtension::parameter().toMap();
 
     ret.insert("Discretization X", _discretizationSteps.width());
     ret.insert("Discretization Y", _discretizationSteps.height());
+    ret.insert("Low extinction approx", _lowExtinctionApprox);
 
     return ret;
 }
 
+// Use AbstractProjector::setParameter() documentation.
 void ArealFocalSpotExtension::setParameter(const QVariant& parameter)
 {
     QVariantMap map = parameter.toMap();
     _discretizationSteps.setWidth(map.value("Discretization X", 1).toInt());
     _discretizationSteps.setHeight(map.value("Discretization X", 1).toInt());
+    enableLowExtinctionApproximation(map.value("Low extinction approx", false).toBool());
 }
 
 /*!
