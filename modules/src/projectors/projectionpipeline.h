@@ -44,11 +44,11 @@ namespace CTL {
  * spectral effects followed by addition of Poisson noise.
  * \code
  * // create ball phantom made of cortical bone
- * auto volume = SpectralVolumeData::createBall(50.0f, 0.5f, 1.0f,
- *                                              database::attenuationModel(database::Composite::Bone_Cortical));
+ * auto volume = SpectralVolumeData::ball(50.0f, 0.5f, 1.0f,
+ *                                        database::attenuationModel(database::Composite::Bone_Cortical));
  *
  * // create a C-arm CT system and a short scan protocol with 10 views
- * auto system = SimpleCTsystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT()));
+ * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  * auto setup = AcquisitionSetup(system, 10);
  * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0));
  *
