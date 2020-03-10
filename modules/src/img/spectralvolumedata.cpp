@@ -322,12 +322,17 @@ float SpectralVolumeData::referenceMassAttenuationCoeff() const
  * with density 0.0 g/cm^3.
  */
 SpectralVolumeData
-SpectralVolumeData::createBall(float radius,
-                               float voxelSize,
-                               float density,
-                               std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
+SpectralVolumeData::ball(float radius, float voxelSize, float density,
+                         std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
 {
-    return { VoxelVolume<float>::ball(radius, voxelSize, density), absorptionModel };
+    return { VoxelVolume<float>::ball(radius, voxelSize, density), std::move(absorptionModel) };
+}
+
+SpectralVolumeData
+SpectralVolumeData::cube(uint nbVoxel, float voxelSize, float density,
+                         std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
+{
+    return { VoxelVolume<float>::cube(nbVoxel, voxelSize, density), std::move(absorptionModel) };
 }
 
 /*!
