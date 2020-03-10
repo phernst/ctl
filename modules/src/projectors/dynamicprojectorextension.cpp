@@ -6,6 +6,8 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(DynamicProjectorExtension)
+
 void DynamicProjectorExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
@@ -45,6 +47,16 @@ ProjectionData DynamicProjectorExtension::project(const VolumeData& volume)
 ProjectionData DynamicProjectorExtension::projectComposite(const CompositeVolume& volume)
 {
     return AbstractProjector::projectComposite(volume);
+}
+
+// Use SerializationInterface::toVariant() documentation.
+QVariant DynamicProjectorExtension::toVariant() const
+{
+    QVariantMap ret = ProjectorExtension::toVariant().toMap();
+
+    ret.insert("#", "DynamicProjectorExtension");
+
+    return ret;
 }
 
 } // namespace CTL
