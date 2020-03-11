@@ -24,7 +24,7 @@ public:
 
     bool hasTabulatedDataFor(float voltage) const;
 
-private:
+protected:
     QMap<float, TabulatedDataModel> _lookupTables;
 
 };
