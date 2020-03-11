@@ -310,36 +310,24 @@ AbstractDataModel* HeuristicCubicSpectrumModel::clone() const
     return new HeuristicCubicSpectrumModel(*this);
 }
 
-float TASMIPSpectrumModel::valueAt(float position) const
-{
-    _tasmipData->setParameter(_energy);
-    return _tasmipData->valueAt(position);
-}
-
-float TASMIPSpectrumModel::binIntegral(float position, float binWidth) const
-{
-    _tasmipData->setParameter(_energy);
-    return _tasmipData->binIntegral(position, binWidth);
-}
+// _____________________________
+// # TASMIPSpectrumModel
+// -----------------------------
 
 AbstractDataModel* TASMIPSpectrumModel::clone() const
 {
     return new TASMIPSpectrumModel(*this);
 }
 
-void TASMIPSpectrumModel::setParameter(const QVariant& parameter)
+void TASMIPSpectrumModel::setParameter(const QVariant &parameter)
 {
     if(parameter.toFloat() > 140.0f)
         qWarning() << "Trying to set energy parameter to " + QString::number(parameter.toDouble()) +
                       ". TASMIP data is only available up to 140 kV.";
 
     AbstractXraySpectrumModel::setParameter(parameter);
-}
 
-TASMIPSpectrumModel::TASMIPSpectrumModel()
-    : _tasmipData(makeDataModel<XraySpectrumTabulatedModel>())
-{
-    initializeModelData();
+    setLookupTable(TASMIPtable(_energy));
 }
 
 /*
@@ -355,7 +343,7 @@ TASMIPSpectrumModel::TASMIPSpectrumModel()
  * Source: http://ftp.aip.org/epaps/medical_phys/E-MPHYA-24-1661/genspec1.h
  *
  */
-void TASMIPSpectrumModel::initializeModelData()
+TabulatedDataModel TASMIPSpectrumModel::TASMIPtable(float tubeVoltage)
 {
     static constexpr auto nbBins = 140u;
 
@@ -505,8 +493,6 @@ void TASMIPSpectrumModel::initializeModelData()
     static_assert(sizeof coeff == nbBins * 4 * sizeof(float),
                   "number of coefficients does not match.");
 
-    float tubeVoltage = 0.0f;
-
     auto flux = [&tubeVoltage](uint energyBin) -> float
     {
         const auto binStart = energyBin - 0.5f;
@@ -534,15 +520,11 @@ void TASMIPSpectrumModel::initializeModelData()
         return float(binEnergy);
     });
 
-    // compute spectrum for tube voltages in 1 kV steps: 0 kV, 1 kV, 2 kV, ..., 140 kV
-    for(auto kV = 0u; kV <= nbBins; ++kV)
-    {
-        tubeVoltage = float(kV);
-        QVector<float> specVals(nbBins);
-        std::transform(specBins.cbegin(), specBins.cend(), specVals.begin(), flux);
+    // compute spectrum for requested tube voltage
+    QVector<float> specVals(nbBins);
+    std::transform(specBins.cbegin(), specBins.cend(), specVals.begin(), flux);
 
-        _tasmipData->addLookupTable(tubeVoltage, TabulatedDataModel(specBinsF, specVals));
-    }
+    return TabulatedDataModel(specBinsF, specVals);
 }
 
 } // namespace CTL
