@@ -43,6 +43,11 @@ class FixedXraySpectrumModel : public XraySpectrumTabulatedModel
 {
     CTL_TYPE_ID(36)
 
+    // abstract interfaces
+    public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
+    public: AbstractDataModel* clone() const override;
+
 public:
     FixedXraySpectrumModel() = default;
     FixedXraySpectrumModel(const TabulatedDataModel& table);

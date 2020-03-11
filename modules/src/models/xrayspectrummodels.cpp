@@ -178,6 +178,27 @@ AbstractDataModel *XrayLaserSpectrumModel::clone() const
 // _____________________________
 // # FixedXraySpectrumModel
 // -----------------------------
+float FixedXraySpectrumModel::valueAt(float position) const
+{
+    if(_lookupTables.isEmpty())
+        throw std::domain_error("FixedXraySpectrumModel: No tabulated data available.");
+
+    return _lookupTables.first().valueAt(position);
+}
+
+float FixedXraySpectrumModel::binIntegral(float position, float binWidth) const
+{
+    if(_lookupTables.isEmpty())
+        throw std::domain_error("FixedXraySpectrumModel: No tabulated data available.");
+
+    return _lookupTables.first().binIntegral(position, binWidth);
+}
+
+AbstractDataModel* FixedXraySpectrumModel::clone() const
+{
+    return new FixedXraySpectrumModel(*this);
+}
+
 FixedXraySpectrumModel::FixedXraySpectrumModel(const TabulatedDataModel &table)
 {
     addLookupTable(0.0f, table);
