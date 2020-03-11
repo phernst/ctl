@@ -112,11 +112,18 @@ QString XrayTube::defaultName()
 void XrayTube::updateIntensityConstant()
 {
     constexpr auto perMM2toCM2 = 100.0;
-    const auto nbSpectralBins = std::max({ qRound(nominalEnergyRange().width()), 1 });
-    _intensityConstant = IntervalDataSeries::sampledFromModel(
-                               *_spectrumModel,
-                               nominalEnergyRange().start(),
-                               nominalEnergyRange().end(), nbSpectralBins).integral() * perMM2toCM2;
+    const auto energyRange = nominalEnergyRange();
+
+    // integral of TASMIP data encodes photon flux
+    _intensityConstant = _spectrumModel->binIntegral(energyRange.center(),
+                                                     energyRange.width()) * perMM2toCM2;
+
+//    const auto nbSpectralBins = std::max({ qRound(nominalEnergyRange().width()), 1 });
+//    _intensityConstant = IntervalDataSeries::sampledFromModel(
+//                               *_spectrumModel,
+//                               nominalEnergyRange().start(),
+//                               nominalEnergyRange().end(), nbSpectralBins).integral() * perMM2toCM2;
+
 
     qDebug("New intensity constant: %f", _intensityConstant);
 }
