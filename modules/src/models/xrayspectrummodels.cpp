@@ -78,7 +78,7 @@ float XraySpectrumTabulatedModel::binIntegral(float position, float binWidth) co
     return lowerIntegral * weightFactor + upperIntegral * (1.0f - weightFactor);
 }
 
-AbstractDataModel *XraySpectrumTabulatedModel::clone() const
+AbstractDataModel* XraySpectrumTabulatedModel::clone() const
 {
     return new XraySpectrumTabulatedModel(*this);
 }
@@ -89,7 +89,7 @@ QVariant XraySpectrumTabulatedModel::parameter() const
     QVariantList dataList;
 
     auto i = _lookupTables.constBegin();
-    while (i != _lookupTables.constEnd())
+    while(i != _lookupTables.constEnd())
     {
         QVariantMap map;
         map.insert("table voltage", i.key());
@@ -129,7 +129,6 @@ void XraySpectrumTabulatedModel::setParameter(const QVariant& parameter)
     }
 }
 
-
 void XraySpectrumTabulatedModel::setLookupTables(const QMap<float, TabulatedDataModel>& tables)
 {
     _lookupTables = tables;
@@ -148,32 +147,29 @@ bool XraySpectrumTabulatedModel::hasTabulatedDataFor(float voltage) const
     return (voltage >= _lookupTables.firstKey() && voltage <= (_lookupTables.lastKey()));
 }
 
-
 // _____________________________
 // # XrayLaserSpectrumModel
 // -----------------------------
 float XrayLaserSpectrumModel::valueAt(float position) const
 {
-    if(qFuzzyCompare(position,_energy))
+    if(qFuzzyCompare(position, _energy))
         return 1.0f;
     else
         return 0.0f;
 }
-
 
 float XrayLaserSpectrumModel::binIntegral(float position, float binWidth) const
 {
-    if((_energy >= position - 0.5f*binWidth) && (_energy <= position + 0.5f*binWidth))
+    if((_energy >= position - 0.5f * binWidth) && (_energy <= position + 0.5f * binWidth))
         return 1.0f;
     else
         return 0.0f;
 }
 
-AbstractDataModel *XrayLaserSpectrumModel::clone() const
+AbstractDataModel* XrayLaserSpectrumModel::clone() const
 {
     return new XrayLaserSpectrumModel(*this);
 }
-
 
 // _____________________________
 // # FixedXraySpectrumModel
@@ -199,12 +195,12 @@ AbstractDataModel* FixedXraySpectrumModel::clone() const
     return new FixedXraySpectrumModel(*this);
 }
 
-FixedXraySpectrumModel::FixedXraySpectrumModel(const TabulatedDataModel &table)
+FixedXraySpectrumModel::FixedXraySpectrumModel(const TabulatedDataModel& table)
 {
     addLookupTable(0.0f, table);
 }
 
-void FixedXraySpectrumModel::setParameter(const QVariant &parameter)
+void FixedXraySpectrumModel::setParameter(const QVariant& parameter)
 {
     if(parameter.canConvert(QMetaType::Float))
     {
@@ -253,15 +249,15 @@ void FixedXraySpectrumModel::setLookupTable(const TabulatedDataModel& table)
 // -----------------------------
 float KramersLawSpectrumModel::valueAt(float position) const
 {
-    return (position<_energy) ? (_energy / position - 1.0f) : 0.0f;
+    return (position < _energy) ? (_energy / position - 1.0f) : 0.0f;
 }
 
 float KramersLawSpectrumModel::binIntegral(float position, float binWidth) const
 {
     static constexpr float LOW_END = 0.1f;
 
-    float bot = position - 0.5f*binWidth;
-    float top = position + 0.5f*binWidth;
+    float bot = position - 0.5f * binWidth;
+    float top = position + 0.5f * binWidth;
 
     if((top < LOW_END) || (bot > _energy))
         return 0.0f;
@@ -274,15 +270,16 @@ float KramersLawSpectrumModel::binIntegral(float position, float binWidth) const
     return _energy * std::log(top / bot) - (top - bot);
 }
 
-AbstractDataModel *KramersLawSpectrumModel::clone() const
+AbstractDataModel* KramersLawSpectrumModel::clone() const
 {
     return new KramersLawSpectrumModel(*this);
 }
 
 float HeuristicCubicSpectrumModel::valueAt(float position) const
 {
-    return (position < _energy) ? _energy * std::pow(_energy - position, 2.0f) - std::pow(_energy - position, 3.0f)
-                                : 0.0f;
+    return (position < _energy)
+        ? _energy * std::pow(_energy - position, 2.0f) - std::pow(_energy - position, 3.0f)
+        : 0.0f;
 }
 
 float HeuristicCubicSpectrumModel::binIntegral(float position, float binWidth) const
@@ -290,11 +287,11 @@ float HeuristicCubicSpectrumModel::binIntegral(float position, float binWidth) c
     auto antiderivative = [this](float E)
     {
         return (-1.0f / 3.0f) * _energy * std::pow(_energy - E, 3.0f) +
-               (1.0f / 4.0f) * std::pow(_energy - E, 4.0f);
+               ( 1.0f / 4.0f) *           std::pow(_energy - E, 4.0f);
     };
 
-    const float bot = position - 0.5f*binWidth;
-    float top = position + 0.5f*binWidth;
+    const float bot = position - 0.5f * binWidth;
+    float top = position + 0.5f * binWidth;
 
     if((top < 0.0f) || (bot > _energy))
         return 0.0f;
@@ -314,12 +311,9 @@ AbstractDataModel* HeuristicCubicSpectrumModel::clone() const
 // # TASMIPSpectrumModel
 // -----------------------------
 
-AbstractDataModel* TASMIPSpectrumModel::clone() const
-{
-    return new TASMIPSpectrumModel(*this);
-}
+AbstractDataModel* TASMIPSpectrumModel::clone() const { return new TASMIPSpectrumModel(*this); }
 
-void TASMIPSpectrumModel::setParameter(const QVariant &parameter)
+void TASMIPSpectrumModel::setParameter(const QVariant& parameter)
 {
     if(parameter.toFloat() > 140.0f)
         qWarning() << "Trying to set energy parameter to " + QString::number(parameter.toDouble()) +
@@ -347,7 +341,7 @@ TabulatedDataModel TASMIPSpectrumModel::TASMIPtable(float tubeVoltage)
 {
     static constexpr auto nbBins = 140u;
 
-    static constexpr float coeff[nbBins][4]={
+    static constexpr float coeff[nbBins][4] = {
         { +0.000000e+000f,+0.000000e+000f,+0.000000e+000f,+0.000000e+000f }, // 0.0 keV...0.5 keV
         { +0.000000e+000f,+0.000000e+000f,+0.000000e+000f,+0.000000e+000f }, // 0.5 keV...1.5 keV
         { +0.000000e+000f,+0.000000e+000f,+0.000000e+000f,+0.000000e+000f }, // 1.5 keV...2.5 keV
@@ -516,9 +510,8 @@ TabulatedDataModel TASMIPSpectrumModel::TASMIPtable(float tubeVoltage)
 
     // convert to floating point values
     QVector<float> specBinsF(nbBins);
-    std::transform(specBins.cbegin(), specBins.cend(), specBinsF.begin(), [](uint binEnergy) {
-        return float(binEnergy);
-    });
+    std::transform(specBins.cbegin(), specBins.cend(), specBinsF.begin(),
+                   [](uint binEnergy) { return float(binEnergy); });
 
     // compute spectrum for requested tube voltage
     QVector<float> specVals(nbBins);

@@ -88,14 +88,13 @@ class TASMIPSpectrumModel : public FixedXraySpectrumModel
     // abstract interfaces
     public: AbstractDataModel* clone() const override;
 
-    void setParameter(const QVariant& parameter) override;
-
 public:
     TASMIPSpectrumModel() = default;
 
+    void setParameter(const QVariant& parameter) override;
+
 private:
     TabulatedDataModel TASMIPtable(float tubeVoltage);
-
 };
 
 } // namespace CTL
