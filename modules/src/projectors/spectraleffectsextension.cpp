@@ -10,6 +10,10 @@ namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(SpectralEffectsExtension)
 
+/*!
+ * Constructs a SpectralEffectsExtension and sets the bin width for sub-sampling of the spectral
+ * range to \a energyBinWidth (in keV).
+ */
 SpectralEffectsExtension::SpectralEffectsExtension(float energyBinWidth)
     : _deltaE(energyBinWidth)
 {
@@ -25,14 +29,27 @@ void SpectralEffectsExtension::configure(const AcquisitionSetup& setup)
 }
 
 /*!
+ * Computes projections of \a volume considering spectral effects, by means of creating individual
+ * projections for a number of energy bins and averaging the results in intensity domain.
+ *
+ * For a specific pixel, computation of the extinction value can be expressed as:
+ *
  * \f$
  * \begin{align*}
  * \epsilon & =\ln\frac{I_{0}}{\sum_{E}i_{0}(E)
  * \exp\left[-m(E)\mathcal{F}_{\textrm{linear}}(\rho)\right]}\\
  * \epsilon & =\ln\frac{I_{0}}{\sum_{E}i_{0}(E)
- * \exp\left[-\mathcal{F}_{\textrm{non-linear}}(m(E)\cdot\rho)\right]}
+ * \exp\left[-\mathcal{F}_{\textrm{non-linear}}(m(E)\cdot\rho)\right]},
  * \end{align*}
  * \f$
+ *
+ * depending on whether the nested projector of this instance is linear
+ * (\f$\mathcal{F}_{\textrm{linear}}\f$, upper row) or not (\f$\mathcal{F}_{\textrm{non-linear}}\f$,
+ * bottom row). Here, \f$i_{0}(E)\f$ denotes the initial intensity of energy \f$E\f$, \f$m(E)\f$
+ * is the energy-dependent mass attenuation coefficient of the material, and \f$\rho\f$ is the
+ * material density (3D voxelized data); I_{0} denotes the total intensity.
+ * As can be seen from the equations, in case of a linear nested projector, it is sufficient to
+ * forward project the material density, thus only a single projection operation is required.
  */
 ProjectionData SpectralEffectsExtension::project(const VolumeData& volume)
 {
@@ -43,6 +60,12 @@ ProjectionData SpectralEffectsExtension::project(const VolumeData& volume)
 }
 
 /*!
+ * Computes projections of the composite volume \a volume considering spectral effects, by means of
+ * creating individual projections for a number of energy bins and averaging the results in intensity
+ * domain.
+ *
+ * For a specific pixel, computation of the extinction value can be expressed as:
+ *
  * \f$
  * \begin{align*}
  * \epsilon & =\ln\frac{I_{0}}{\sum_{E}i_{0}(E)
@@ -51,6 +74,16 @@ ProjectionData SpectralEffectsExtension::project(const VolumeData& volume)
  * \exp\left[-\sum_{k}\mathcal{F}_{\textrm{non-linear}}(m_{k}(E)\cdot\rho_{k})\right]}\\
  * \end{align*}
  * \f$
+ *
+ * depending on whether the nested projector of this instance is linear
+ * (\f$\mathcal{F}_{\textrm{linear}}\f$, upper row) or not (\f$\mathcal{F}_{\textrm{non-linear}}\f$,
+ * bottom row). Here, \f$i_{0}(E)\f$ denotes the initial intensity of energy \f$E\f$,
+ * \f$m_{k}(E)\f$ is the energy-dependent mass attenuation coefficient of material \f$k\f$, and
+ * \f$\rho_{k}\f$ its material density (3D voxelized data); I_{0} denotes the total intensity.
+ * As can be seen from the equations, in case of a linear nested projector, it is sufficient to
+ * forward project the material densities of all materials, thus only a single projection operation
+ * per sub-volume in \a volume is required. Note that this might result in substantial memory
+ * requirement.
  */
 ProjectionData SpectralEffectsExtension::projectComposite(const CompositeVolume& volume)
 {
@@ -66,6 +99,9 @@ ProjectionData SpectralEffectsExtension::projectComposite(const CompositeVolume&
         return projectNonLinear(volume);
 }
 
+/*!
+ * Returns false, because spectral effects are non-linear (summation in intensity domain).
+ */
 bool SpectralEffectsExtension::isLinear() const { return false; }
 
 // Use SerializationInterface::toVariant() documentation.
@@ -104,6 +140,10 @@ void SpectralEffectsExtension::setParameter(const QVariant& parameter)
     setSpectralSamplingResolution(deltaE);
 }
 
+/*!
+ * Sets the energy resolution for sampling of spectral effects to \a energyBinWidth (in keV). This
+ * represents the bin width used for (spectrally) sub-sampling the projections.
+ */
 void SpectralEffectsExtension::setSpectralSamplingResolution(float energyBinWidth)
 {
     _deltaE = energyBinWidth;
@@ -112,13 +152,18 @@ void SpectralEffectsExtension::setSpectralSamplingResolution(float energyBinWidt
         updateSpectralInformation();
 }
 
+/*!
+ * Causes an update of the spectral information to take place.
+ *
+ * \sa RadiationEncoder::spectralInformation().
+ */
 void SpectralEffectsExtension::updateSpectralInformation()
 {
     _spectralInfo = RadiationEncoder::spectralInformation(_setup, _deltaE);
 }
 
 /*!
- * Returns `true` if no spetral effects need to be considered, i.e. neither the detector nor any of
+ * Returns `true` if no spectral effects need to be considered, i.e. neither the detector nor any of
  * the subvolumes in \a volume have spectral information.
  * This function throws an exception if the detector has a spectral response model and not all the
  * subvolumes in \a volume have spectral information.
@@ -147,6 +192,11 @@ bool SpectralEffectsExtension::canBypassExtension(const CompositeVolume& volume)
     return false; // regular execution of SpectralEffectsExtension
 }
 
+/*!
+ * Processes projection data in \a intensity (corresponding to the radiation energy \a energy) to
+ * account for spectral detector response. For that, each intensity value is multiplied by the
+ * detector response for energy \a energy.
+ */
 void SpectralEffectsExtension::applyDetectorResponse(ProjectionData& intensity, float energy) const
 {
     if(!_setup.system()->detector()->hasSpectralResponseModel())
@@ -156,6 +206,15 @@ void SpectralEffectsExtension::applyDetectorResponse(ProjectionData& intensity, 
     intensity *= _setup.system()->detector()->spectralResponseModel()->valueAt(energy);
 }
 
+/*!
+ * Computes the projections from \a volume with a linear nested projector.
+ *
+ * The internal workflow is as follows:
+ * 1. Compute forward projections of the material density of all sub-volumes in \a volume.
+ * 2. For each energy bin: compute intensity using singleBinIntensityLinear() and add result to
+ * total sum.
+ * 3. Transform final result to extinction domain.
+ */
 ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& volume)
 {
     qDebug() << "linear case";
@@ -190,6 +249,16 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
     return sumProj;
 }
 
+/*!
+ * Computes the projections from \a volume with a non-linear nested projector.
+ *
+ * The internal workflow is as follows:
+ * 1. Add dummy prepare steps to the setup (later used to adjust system for the energy bin).
+ * 2. For each energy bin: compute intensity using singleBinIntensityNonLinear() and add result to
+ * total sum.
+ * 3. Transform final result to extinction domain.
+ * 4. Remove dummy prepare steps to restore original setup.
+ */
 ProjectionData SpectralEffectsExtension::projectNonLinear(const CompositeVolume &volume)
 {
     qDebug() << "non-linear case";
@@ -210,6 +279,21 @@ ProjectionData SpectralEffectsExtension::projectNonLinear(const CompositeVolume 
     return sumProj;
 }
 
+/*!
+ * Computes the intensity image for a specific energy bin (as specified by \a binInfo) based on the
+ * precomputed forward projections of material densities (\a materialProjs) and the specific mass
+ * attenuation coefficients \a mu for the particular energy bin (one value for each material, i.e.
+ * materialProjs.size() == mu.size()).
+ *
+ * The internal workflow is as follows:
+ * 1. For each material: compute product of projection and corresponding attenuation coefficient
+ * and sum up results
+ * 2. Transform final sum to intensity domain (based on intensity data from \a binInfo).
+ * 3. Apply (spectral) detector response (see applyDetectorResponse()).
+ *
+ * In case the total intensity of the energy bin is zero, the bin will be skipped and a zero image
+ * is returned.
+ */
 ProjectionData SpectralEffectsExtension::singleBinIntensityLinear(const std::vector<ProjectionData>& materialProjs,
                                                                   const std::vector<float>& mu,
                                                                   const BinInformation& binInfo)
@@ -235,6 +319,19 @@ ProjectionData SpectralEffectsExtension::singleBinIntensityLinear(const std::vec
     return binProj;
 }
 
+/*!
+ * Computes the projection intensity image of the volume data in \a volume for a specific energy
+ * bin (as specified by \a binInfo).
+ *
+ * The internal workflow is as follows:
+ * 1. For each material: compute forward projection of the attenuation data for the specific energy
+ * bin (see SpectralVolumeData::muVolume()) and sum up results.
+ * 2. Transform final sum to intensity domain (based on intensity data from \a binInfo).
+ * 3. Apply (spectral) detector response (see applyDetectorResponse()).
+ *
+ * In case the total intensity of the energy bin is zero, the bin will be skipped and a zero image
+ * is returned.
+ */
 ProjectionData SpectralEffectsExtension::singleBinIntensityNonLinear(const CompositeVolume& volume,
                                                                      const BinInformation& binInfo)
 {
@@ -265,6 +362,12 @@ ProjectionData SpectralEffectsExtension::singleBinIntensityNonLinear(const Compo
     return binProj;
 }
 
+/*!
+ * Adds dummy prepare steps (of type prepare::SourceParam) to the setup. Those are later used to
+ * adjust the energy range and the flux of the system for the currently processed energy bin.
+ *
+ * \sa replaceDummyPrepareSteps().
+ */
 void SpectralEffectsExtension::addDummyPrepareSteps()
 {
     for(uint view = 0; view < _setup.nbViews(); ++view)
@@ -274,12 +377,21 @@ void SpectralEffectsExtension::addDummyPrepareSteps()
     }
 }
 
+/*!
+ * Removes all dummy prepare steps added by addDummyPrepareSteps(). Must not be called if
+ * addDummyPrepareSteps() has not been called earlier.
+ */
 void SpectralEffectsExtension::removeDummyPrepareSteps()
 {
     for(uint v = 0; v < _setup.nbViews(); ++v)
         _setup.view(v).removeLastPrepareStep();
 }
 
+/*!
+ * Replaces the dummy prepare steps (see addDummyPrepareSteps()) in the setup to adjust the energy
+ * range and the flux of the system for the currently processed energy bin (as specified by
+ * \a binInfo).
+ */
 void SpectralEffectsExtension::replaceDummyPrepareSteps(const BinInformation& binInfo, float binWidth)
 {
     for(uint view = 0; view < _setup.nbViews(); ++view)
