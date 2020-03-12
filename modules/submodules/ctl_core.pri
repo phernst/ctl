@@ -100,7 +100,8 @@ HEADERS += \
     $$PWD/../src/projectors/spectraleffectsextension.h \
     $$PWD/../src/projectors/projectionpipeline.h \
     $$PWD/../src/img/abstractdynamicvolumedata.h \
-    $$PWD/../src/projectors/dynamicprojectorextension.h
+    $$PWD/../src/projectors/dynamicprojectorextension.h \
+    $$PWD/../src/img/lineardynamicvolume.h
 
 SOURCES += \
     $$PWD/../src/acquisition/acquisitionsetup.cpp \
@@ -162,7 +163,8 @@ SOURCES += \
     $$PWD/../src/projectors/spectraleffectsextension.cpp \
     $$PWD/../src/projectors/projectionpipeline.cpp \
     $$PWD/../src/projectors/projectorextension.cpp \
-    $$PWD/../src/projectors/dynamicprojectorextension.cpp
+    $$PWD/../src/projectors/dynamicprojectorextension.cpp \
+    $$PWD/../src/img/lineardynamicvolume.cpp
 
 # Qt-free headers and sources
 HEADERS += \
