@@ -15,6 +15,26 @@ void DynamicProjectorExtension::configure(const AcquisitionSetup& setup)
     ProjectorExtension::configure(setup);
 }
 
+/*!
+ * Computes the projections of \a volume using the acquisition setup set previously with
+ * configure().
+ *
+ * This extension enables support for volume data that change over time (i.e. from view to view).
+ * To be more specific, volume data in \a volume is updated to the next time step in advance of
+ * processing each view. Supposing the passed volume data (i.e. \a volume) is a dynamic volume, the
+ * internal workflow is as follows:
+ *
+ * For each view in the setup:
+ * 1. Set the time for \a volume to the time stamp encoded in the setup for the current view.
+ * This updates the volume's contents (see AbstractDynamicVolumeData::setTime()).
+ * 2. Prepare the current view.
+ * 3. Configure the nested projector with an AcquisitionSetup containing the current system for
+ * one view (the current one).
+ * 4. Compute the projection and append the result to the full set of projections.
+ *
+ * If \a volume is not a dynamic volume (see AbstractDynamicVolumeData), this extension is skipped
+ * and the projection operation is delegated to the nested projector instead.
+ */
 ProjectionData DynamicProjectorExtension::project(const VolumeData& volume)
 {
     auto dynamicVolPtr = dynamic_cast<const AbstractDynamicVolumeData*>(&volume);
