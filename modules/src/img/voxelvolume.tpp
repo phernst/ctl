@@ -627,6 +627,26 @@ size_t VoxelVolume<T>::Dimensions::totalNbElements() const
 }
 
 /*!
+ * Returns true if the voxel sizes of this instance and \a other are equal (in all three dimensions).
+ */
+template<typename T>
+bool VoxelVolume<T>::VoxelSize::operator==(const VoxelSize& other) const
+{
+    return qFuzzyCompare(x, other.x) && qFuzzyCompare(y, other.y) && qFuzzyCompare(z, other.z);
+}
+
+/*!
+ * Returns true if voxel sizes of this instance and \a other differ (in any of the three
+ * dimensions).
+ */
+template<typename T>
+bool VoxelVolume<T>::VoxelSize::operator!=(const VoxelSize& other) const
+{
+    return !qFuzzyCompare(x, other.x) || !qFuzzyCompare(y, other.y) || !qFuzzyCompare(z, other.z);
+}
+
+
+/*!
  * Returns the number of elements for which memory has been allocated. This is either zero if no
  * memory has been allocated (after instantiation with a non-allocating constructor) or equal to the
  * number of elements.

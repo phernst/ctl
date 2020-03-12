@@ -43,6 +43,9 @@ public:
     struct VoxelSize
     {
         float x, y, z;
+
+        bool operator==(const VoxelSize& other) const;
+        bool operator!=(const VoxelSize& other) const;
     };
     struct Offset
     {
