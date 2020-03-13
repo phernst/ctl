@@ -21,6 +21,12 @@ public:
     template <class... Volumes>
     CompositeVolume(const CompositeVolume& volume, Volumes&&... otherVolumes);
 
+    CompositeVolume(const CompositeVolume& volume) = default;
+    CompositeVolume(CompositeVolume&& volume) = default;
+    CompositeVolume& operator=(const CompositeVolume& volume) = default;
+    CompositeVolume& operator=(CompositeVolume&& volume) = default;
+    ~CompositeVolume() = default;
+
     // getter methods
     const SpectralVolumeData& subVolume(uint materialIdx) const;
     std::unique_ptr<SpectralVolumeData> muVolume(uint materialIdx, float centerEnergy,
@@ -35,7 +41,7 @@ public:
     void addSubVolume(const CompositeVolume& volume);
 
 private:
-    std::deque<std::unique_ptr<SpectralVolumeData>> _subVolumes;
+    std::deque<CopyableUniquePtr<SpectralVolumeData>> _subVolumes;
 };
 
 template <class... Volumes>
@@ -50,7 +56,7 @@ CompositeVolume::CompositeVolume(std::unique_ptr<SpectralVolumeData> volume,
                                  Volumes&&... otherVolumes)
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
 {
-    _subVolumes.push_front(std::move(volume));
+    _subVolumes.emplace_front(std::move(volume));
 }
 
 template <class... Volumes>
@@ -65,7 +71,9 @@ CompositeVolume::CompositeVolume(CompositeVolume&& volume, Volumes&&... otherVol
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
 {
     std::for_each(volume._subVolumes.begin(), volume._subVolumes.end(),
-                  [this] (std::unique_ptr<SpectralVolumeData>& vol) { _subVolumes.push_front(std::move(vol)); });
+                  [this](CopyableUniquePtr<SpectralVolumeData>& vol) {
+                      _subVolumes.push_front(std::move(vol));
+                  });
 }
 
 template <class... Volumes>
@@ -73,7 +81,9 @@ CompositeVolume::CompositeVolume(const CompositeVolume& volume, Volumes&&... oth
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
 {
     std::for_each(volume._subVolumes.cbegin(), volume._subVolumes.cend(),
-                  [this] (const std::unique_ptr<SpectralVolumeData>& vol) { _subVolumes.emplace_front(vol->clone()); });
+                  [this](const CopyableUniquePtr<SpectralVolumeData>& vol) {
+                      _subVolumes.emplace_front(vol->clone());
+                  });
 }
 
 } // namespace CTL
