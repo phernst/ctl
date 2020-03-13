@@ -38,4 +38,10 @@ void CompositeVolume::addSubVolume(CompositeVolume&& volume)
                   [this] (std::unique_ptr<SpectralVolumeData>& vol) { _subVolumes.push_back(std::move(vol)); });
 }
 
+void CompositeVolume::addSubVolume(const CompositeVolume& volume)
+{
+    std::for_each(volume._subVolumes.cbegin(), volume._subVolumes.cend(),
+                  [this] (const std::unique_ptr<SpectralVolumeData>& vol) { _subVolumes.emplace_back(vol->clone()); });
+}
+
 } // namespace CTL

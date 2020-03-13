@@ -28,6 +28,7 @@ public:
     void addSubVolume(std::unique_ptr<SpectralVolumeData> volume);
     void addSubVolume(const AbstractDynamicVolumeData& volume);
     void addSubVolume(CompositeVolume&& volume);
+    void addSubVolume(const CompositeVolume& volume);
 
 private:
     std::deque<std::unique_ptr<SpectralVolumeData>> _subVolumes;
