@@ -16,6 +16,10 @@ public:
     CompositeVolume(std::unique_ptr<SpectralVolumeData> volume, Volumes&&... otherVolumes);
     template <class... Volumes>
     CompositeVolume(const AbstractDynamicVolumeData& volume, Volumes&&... otherVolumes);
+    template <class... Volumes>
+    CompositeVolume(CompositeVolume&& volume, Volumes&&... otherVolumes);
+    template <class... Volumes>
+    CompositeVolume(const CompositeVolume& volume, Volumes&&... otherVolumes);
 
     // getter methods
     const SpectralVolumeData& subVolume(uint materialIdx) const;
@@ -54,6 +58,22 @@ CompositeVolume::CompositeVolume(const AbstractDynamicVolumeData& volume, Volume
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
 {
     _subVolumes.emplace_front(volume.clone());
+}
+
+template <class... Volumes>
+CompositeVolume::CompositeVolume(CompositeVolume&& volume, Volumes&&... otherVolumes)
+    : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
+{
+    std::for_each(volume._subVolumes.begin(), volume._subVolumes.end(),
+                  [this] (std::unique_ptr<SpectralVolumeData>& vol) { _subVolumes.push_front(std::move(vol)); });
+}
+
+template <class... Volumes>
+CompositeVolume::CompositeVolume(const CompositeVolume& volume, Volumes&&... otherVolumes)
+    : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
+{
+    std::for_each(volume._subVolumes.cbegin(), volume._subVolumes.cend(),
+                  [this] (const std::unique_ptr<SpectralVolumeData>& vol) { _subVolumes.emplace_front(vol->clone()); });
 }
 
 } // namespace CTL
