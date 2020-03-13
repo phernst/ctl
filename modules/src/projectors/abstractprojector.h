@@ -102,12 +102,17 @@ private:
 
 inline bool AbstractProjector::isLinear() const { return true; }
 
-inline ProjectionData AbstractProjector::projectComposite(const CompositeVolume &volume)
+inline ProjectionData AbstractProjector::projectComposite(const CompositeVolume& volume)
 {
+    if(volume.isEmpty())
+        throw std::runtime_error("AbstractProjector::projectComposite: Volume is empty.");
+
+    // project first sub volume
     ProjectionData ret = project(volume.subVolume(0));
 
-    for(uint material = 1; material < volume.nbSubVolumes(); ++material)
-        ret += project(volume.subVolume(material));
+    // project remaining sub volumes
+    for(auto subVol = 1u, nbSubVol = volume.nbSubVolumes(); subVol < nbSubVol; ++subVol)
+        ret += project(volume.subVolume(subVol));
 
     return ret;
 }

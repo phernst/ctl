@@ -9,6 +9,8 @@ namespace CTL {
 class CompositeVolume
 {
 public:
+    using SubVolPtr = CopyableUniquePtr<SpectralVolumeData>;
+
     CompositeVolume() = default;
     template <class... Volumes>
     CompositeVolume(SpectralVolumeData volume, Volumes&&... otherVolumes);
@@ -28,10 +30,14 @@ public:
     ~CompositeVolume() = default;
 
     // getter methods
-    const SpectralVolumeData& subVolume(uint materialIdx) const;
+    const std::deque<SubVolPtr>& data() const;
+    std::deque<SubVolPtr>& data();
+    bool isEmpty() const;
     std::unique_ptr<SpectralVolumeData> muVolume(uint materialIdx, float centerEnergy,
                                                  float binWidth) const;
     uint nbSubVolumes() const;
+    const SpectralVolumeData& subVolume(uint materialIdx) const;
+    SpectralVolumeData& subVolume(uint materialIdx);
 
     // other methods
     void addSubVolume(SpectralVolumeData volume);
@@ -41,7 +47,7 @@ public:
     void addSubVolume(const CompositeVolume& volume);
 
 private:
-    std::deque<CopyableUniquePtr<SpectralVolumeData>> _subVolumes;
+    std::deque<SubVolPtr> _subVolumes;
 };
 
 template <class... Volumes>
@@ -71,7 +77,7 @@ CompositeVolume::CompositeVolume(CompositeVolume&& volume, Volumes&&... otherVol
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
 {
     std::for_each(volume._subVolumes.begin(), volume._subVolumes.end(),
-                  [this](CopyableUniquePtr<SpectralVolumeData>& vol) {
+                  [this](SubVolPtr& vol) {
                       _subVolumes.push_front(std::move(vol));
                   });
 }
@@ -81,7 +87,7 @@ CompositeVolume::CompositeVolume(const CompositeVolume& volume, Volumes&&... oth
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
 {
     std::for_each(volume._subVolumes.cbegin(), volume._subVolumes.cend(),
-                  [this](const CopyableUniquePtr<SpectralVolumeData>& vol) {
+                  [this](const SubVolPtr& vol) {
                       _subVolumes.emplace_front(vol->clone());
                   });
 }

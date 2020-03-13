@@ -222,26 +222,31 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
     // project all material densities
     const auto nbMaterials = volume.nbSubVolumes();
     std::vector<ProjectionData> materialProjs;
-    for(uint material = 0; material < nbMaterials; ++material)
+    for(const auto& subVolume : volume.data())
     {
-        if(volume.subVolume(material).isMuVolume()) // need transformation to densities
-            materialProjs.push_back(ProjectorExtension::project(*volume.subVolume(material).densityVolume()));
+        if(subVolume->isMuVolume()) // need transformation to densities
+            materialProjs.push_back(ProjectorExtension::project(*subVolume->densityVolume()));
         else // density information already stored in volume.materialVolume(material)
-            materialProjs.push_back(ProjectorExtension::project(volume.subVolume(material)));
+            materialProjs.push_back(ProjectorExtension::project(*subVolume));
     }
 
     // process all energy bins and sum up intensities
     ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
     sumProj.allocateMemory(_setup.nbViews(), 0.0f);
+    std::vector<float> massAttenuationCoeffs(nbMaterials);
 
     for(auto bin = 0u, nbEnergyBins = _spectralInfo.nbEnergyBins(); bin < nbEnergyBins; ++bin)
     {
-        std::vector<float> mu(nbMaterials);
-        for(uint material = 0; material < nbMaterials; ++material)
-            mu[material] = volume.subVolume(material).meanMassAttenuationCoeff(
-                                     _spectralInfo.bin(bin).energy, _spectralInfo.binWidth());
+        // for each material (sub volume): obtain mass attenuation coefficients for this bin
+        std::transform(volume.data().cbegin(), volume.data().cend(), massAttenuationCoeffs.begin(),
+                       [bin, this](const CompositeVolume::SubVolPtr& subVolume)
+                       {
+                           return subVolume->meanMassAttenuationCoeff(_spectralInfo.bin(bin).energy,
+                                                                      _spectralInfo.binWidth());
+                       });
 
-        sumProj += singleBinIntensityLinear(materialProjs, mu, _spectralInfo.bin(bin));
+        sumProj += singleBinIntensityLinear(materialProjs, massAttenuationCoeffs,
+                                            _spectralInfo.bin(bin));
     }
 
     sumProj.transformToExtinction(_spectralInfo.totalIntensity());
