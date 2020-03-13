@@ -32,4 +32,10 @@ void CompositeVolume::addSubVolume(const AbstractDynamicVolumeData& volume)
     _subVolumes.emplace_back(volume.clone());
 }
 
+void CompositeVolume::addSubVolume(CompositeVolume&& volume)
+{
+    std::for_each(volume._subVolumes.begin(), volume._subVolumes.end(),
+                  [this] (std::unique_ptr<SpectralVolumeData>& vol) { _subVolumes.push_back(std::move(vol)); });
+}
+
 } // namespace CTL
