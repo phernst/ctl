@@ -11,12 +11,12 @@ namespace CTL {
  * \brief The CompositeVolume class is a container to hold multiple volume datasets of any type from
  * the CTL.
  *
- * This class can hold multiple volume datasets of all sub-classes of SpectralVolumeData.
- * In particular, this encompasses:
+ * This class can hold multiple volume datasets of SpectralVolumeData or its subclasses.
+ * More precisely, an instance of CompositeVolume can consume (copy or move)
  * - SpectralVolumeData
- * - VoxelVolume (by means of implicit conversion to SpectralVolumeData)
- * - any implementation of AbstractDynamicVolumeData
- * - other CompositeVolume
+ * - a VoxelVolume (by means of implicit conversion to SpectralVolumeData)
+ * - any implementation of AbstractDynamicVolumeData (only by copy or by an unique_ptr)
+ * - another CompositeVolume (collecting its sub-volumes individually).
  *
  * When used with a projector, the CompositeVolume object must be passed to
  * AbstractProjector::projectComposite(). This results in computation of projections considering all
