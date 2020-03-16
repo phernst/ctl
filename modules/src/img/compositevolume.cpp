@@ -4,20 +4,34 @@ namespace CTL {
 
 // ### CompositeVolume ###
 
-const SpectralVolumeData& CompositeVolume::subVolume(uint materialIdx) const
+SpectralVolumeData& CompositeVolume::subVolume(uint volIdx)
 {
-    return *_subVolumes[materialIdx];
+    return *_subVolumes[volIdx];
 }
 
-SpectralVolumeData& CompositeVolume::subVolume(uint materialIdx)
+/*!
+ * Returns the sub-volume at position \a volIdx.
+ *
+ * Does not perform out-of-range checks.
+ */
+const SpectralVolumeData& CompositeVolume::subVolume(uint volIdx) const
 {
-    return *_subVolumes[materialIdx];
+    return *_subVolumes[volIdx];
 }
 
+/*!
+ * Convenience method; returns the sub-volume at position \a volIdx transformed to attenuation
+ * values corresponding to the energy bin specified by \a centerEnergy and \a binWidth.
+ * Same as: subVolume(volIdx).muVolume(centerEnergy, binWidth)
+ *
+ * Does not perform out-of-range checks.
+ *
+ * \sa SpectralVolumeData::muVolume().
+ */
 std::unique_ptr<SpectralVolumeData>
-CompositeVolume::muVolume(uint materialIdx, float centerEnergy, float binWidth) const
+CompositeVolume::muVolume(uint volIdx, float centerEnergy, float binWidth) const
 {
-    return _subVolumes[materialIdx]->muVolume(centerEnergy, binWidth);
+    return _subVolumes[volIdx]->muVolume(centerEnergy, binWidth);
 }
 
 uint CompositeVolume::nbSubVolumes() const { return static_cast<uint>(_subVolumes.size()); }

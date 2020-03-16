@@ -5,7 +5,36 @@
 #include <deque>
 
 namespace CTL {
-
+/*!
+ * \class CompositeVolume
+ *
+ * \brief The CompositeVolume class is a container to hold multiple volume datasets of any type from
+ * the CTL.
+ *
+ * This class can hold multiple volume datasets of all sub-classes of SpectralVolumeData.
+ * In particular, this encompasses:
+ * - SpectralVolumeData
+ * - VoxelVolume (by means of implicit conversion to SpectralVolumeData)
+ * - any implementation of AbstractDynamicVolumeData
+ * - other CompositeVolume
+ *
+ * When used with a projector, the CompositeVolume object must be passed to
+ * AbstractProjector::projectComposite(). This results in computation of projections considering all
+ * sub-volumes held by the CompositeVolume object (with all their individual properties, such as
+ * spectral information or temporal dynamics; given that appropriate projector extensions are in
+ * use).
+ *
+ * Sub-volume are added to the container using addSubVolume(). Alternatively, the CompositeVolume
+ * can be created directly using a constructor and passing to it all sub-volumes that shall be
+ * added.
+ *
+ * All sub-volumes may differ in any arbitrary property, for example:
+ * - dimensions (i.e. voxel count)
+ * - voxel size
+ * - (positional) offset
+ * - volume type (plain, spectral, dynamic)
+ * This allows for fully flexible composition of phantom data.
+ */
 class CompositeVolume
 {
 public:
@@ -33,11 +62,11 @@ public:
     const std::deque<SubVolPtr>& data() const;
     std::deque<SubVolPtr>& data();
     bool isEmpty() const;
-    std::unique_ptr<SpectralVolumeData> muVolume(uint materialIdx, float centerEnergy,
+    std::unique_ptr<SpectralVolumeData> muVolume(uint volIdx, float centerEnergy,
                                                  float binWidth) const;
     uint nbSubVolumes() const;
-    const SpectralVolumeData& subVolume(uint materialIdx) const;
-    SpectralVolumeData& subVolume(uint materialIdx);
+    const SpectralVolumeData& subVolume(uint volIdx) const;
+    SpectralVolumeData& subVolume(uint volIdx);
 
     // other methods
     void addSubVolume(SpectralVolumeData volume);
