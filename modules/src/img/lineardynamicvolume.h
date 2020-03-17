@@ -36,6 +36,10 @@ class LinearDynamicVolume : public AbstractDynamicVolumeData
     public: SpectralVolumeData* clone() const override;
 
 public:
+    LinearDynamicVolume(float slope,
+                        float offset,
+                        const VoxelVolume<float>::Dimensions& nbVoxel,
+                        const VoxelVolume<float>::VoxelSize& voxelSize);
     LinearDynamicVolume(VoxelVolume<float> slope,
                         VoxelVolume<float> offset,
                         const VoxelVolume<float>::VoxelSize& voxelSize);

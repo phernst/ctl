@@ -50,6 +50,24 @@ SpectralVolumeData* LinearDynamicVolume::clone() const
 }
 
 /*!
+ * Constructs a LinearDynamicVolume with \a \nbVoxel voxels in each dimension (size: \a voxelSize)
+ * and assigns an identical linear relation for the attenuation coefficients of all voxels
+ * \f$\mu(x,y,z)\f$ specified by \a slope and \a offset, corresponding to:
+ *
+ * \f$ \mu(x,y,z) = t \cdot slope + offset \f$, where \f$t\f$ denotes the time point
+ * set via setTime() in milliseconds.
+ */
+LinearDynamicVolume::LinearDynamicVolume(float slope, float offset,
+                                         const Dimensions& nbVoxel, const VoxelSize& voxelSize)
+    : AbstractDynamicVolumeData( SpectralVolumeData( VoxelVolume<float>(nbVoxel, voxelSize) ) )
+    , _offset(nbVoxel, voxelSize)
+    , _slope(nbVoxel, voxelSize)
+{
+    _offset.fill(offset);
+    _slope.fill(slope);
+}
+
+/*!
  * Sets the voxels to the values given by the linear relation:
  *
  * \f$ \mu(x,y,z) = t \cdot slope(x,y,z) + offset(x,y,z) \f$, where \f$t\f$ denotes the time point
