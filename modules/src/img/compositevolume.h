@@ -79,6 +79,9 @@ private:
     std::deque<SubVolPtr> _subVolumes;
 };
 
+/*!
+ * Constructs a CompositeVolume and adds all data passed to the constructor as sub-volumes.
+ */
 template <class... Volumes>
 CompositeVolume::CompositeVolume(SpectralVolumeData volume, Volumes&&... otherVolumes)
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
@@ -86,6 +89,9 @@ CompositeVolume::CompositeVolume(SpectralVolumeData volume, Volumes&&... otherVo
     _subVolumes.emplace_front(new SpectralVolumeData(std::move(volume)));
 }
 
+/*!
+ * Constructs a CompositeVolume and adds all data passed to the constructor as sub-volumes.
+ */
 template <class... Volumes>
 CompositeVolume::CompositeVolume(std::unique_ptr<SpectralVolumeData> volume,
                                  Volumes&&... otherVolumes)
@@ -94,6 +100,9 @@ CompositeVolume::CompositeVolume(std::unique_ptr<SpectralVolumeData> volume,
     _subVolumes.emplace_front(std::move(volume));
 }
 
+/*!
+ * Constructs a CompositeVolume and adds all data passed to the constructor as sub-volumes.
+ */
 template <class... Volumes>
 CompositeVolume::CompositeVolume(const AbstractDynamicVolumeData& volume, Volumes&&... otherVolumes)
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
@@ -101,6 +110,9 @@ CompositeVolume::CompositeVolume(const AbstractDynamicVolumeData& volume, Volume
     _subVolumes.emplace_front(volume.clone());
 }
 
+/*!
+ * Constructs a CompositeVolume and adds all data passed to the constructor as sub-volumes.
+ */
 template <class... Volumes>
 CompositeVolume::CompositeVolume(CompositeVolume&& volume, Volumes&&... otherVolumes)
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
@@ -111,6 +123,9 @@ CompositeVolume::CompositeVolume(CompositeVolume&& volume, Volumes&&... otherVol
                   });
 }
 
+/*!
+ * Constructs a CompositeVolume and adds all data passed to the constructor as sub-volumes.
+ */
 template <class... Volumes>
 CompositeVolume::CompositeVolume(const CompositeVolume& volume, Volumes&&... otherVolumes)
     : CompositeVolume(std::forward<Volumes>(otherVolumes)...)
