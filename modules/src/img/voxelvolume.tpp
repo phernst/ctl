@@ -5,6 +5,9 @@ namespace CTL {
 
 namespace details{
     template<typename T> void grindBall(VoxelVolume<T>& volume, float radius);
+    template<typename T> void grindCylinderX(VoxelVolume<T>& volume, float radius);
+    template<typename T> void grindCylinderY(VoxelVolume<T>& volume, float radius);
+    template<typename T> void grindCylinderZ(VoxelVolume<T>& volume, float radius);
 }
 
 /*!
@@ -184,7 +187,7 @@ VoxelVolume<T> VoxelVolume<T>::cube(uint nbVoxel, float voxelSize, const T& fill
 }
 
 /*!
- * Constructs voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
+ * Constructs a voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
  * all voxels inside a ball of radius \a radius (in mm) around the center of the volume with
  * \a fillValue. The voxels surrounding the ball are filled with zeros.
  *
@@ -202,6 +205,78 @@ VoxelVolume<T> VoxelVolume<T>::ball(float radius, float voxelSize, const T& fill
     ret.fill(fillValue);
 
     details::grindBall(ret, radius);
+
+    return ret;
+}
+
+/*!
+ * Constructs a voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
+ * all voxels inside a cylinder of radius \a radius (in mm) and height \a height (in mm) aligned
+ * with the *x*-axis with* \a fillValue. The voxels surrounding the cylinder are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *y*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *x*-direction.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::cylinderX(float radius, float height, float voxelSize, const T& fillValue)
+{
+    const auto nbVoxCircle = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+    const auto nbVoxHeight = static_cast<uint>(std::ceil(height / voxelSize));
+
+    const VoxelVolume<T>::Dimensions volDim{ nbVoxHeight, nbVoxCircle, nbVoxCircle };
+    const VoxelVolume<T>::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    VoxelVolume<T> ret{ volDim, voxSize };
+    ret.fill(fillValue);
+
+    details::grindCylinderX(ret, radius);
+
+    return ret;
+}
+
+/*!
+ * Constructs a voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
+ * all voxels inside a cylinder of radius \a radius (in mm) and height \a height (in mm) aligned
+ * with the *y*-axis with* \a fillValue. The voxels surrounding the cylinder are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *x*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *y*-direction.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::cylinderY(float radius, float height, float voxelSize, const T& fillValue)
+{
+    const auto nbVoxCircle = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+    const auto nbVoxHeight = static_cast<uint>(std::ceil(height / voxelSize));
+
+    const VoxelVolume<T>::Dimensions volDim{ nbVoxCircle, nbVoxHeight, nbVoxCircle };
+    const VoxelVolume<T>::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    VoxelVolume<T> ret{ volDim, voxSize };
+    ret.fill(fillValue);
+
+    details::grindCylinderY(ret, radius);
+
+    return ret;
+}
+
+/*!
+ * Constructs a voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
+ * all voxels inside a cylinder of radius \a radius (in mm) and height \a height (in mm) aligned
+ * with the *z*-axis with* \a fillValue. The voxels surrounding the cylinder are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *x*- and *y*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *z*-direction.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::cylinderZ(float radius, float height, float voxelSize, const T& fillValue)
+{
+    const auto nbVoxCircle = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+    const auto nbVoxHeight = static_cast<uint>(std::ceil(height / voxelSize));
+
+    const VoxelVolume<T>::Dimensions volDim{ nbVoxCircle, nbVoxCircle, nbVoxHeight };
+    const VoxelVolume<T>::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    VoxelVolume<T> ret{ volDim, voxSize };
+    ret.fill(fillValue);
+
+    details::grindCylinderZ(ret, radius);
 
     return ret;
 }
@@ -917,6 +992,81 @@ namespace details {
             for(auto y = 0u; y < nbVox; ++y)
                 for(auto z = 0u; z < nbVox; ++z)
                     if(dist2Center(x, y, z) > rSquaredInVoxel)
+                        volume(x, y, z) = 0.0f;
+    }
+
+    template<typename T>
+    void grindCylinderX(VoxelVolume<T>& volume, float radius)
+    {
+        const auto nbVoxCircle = volume.dimensions().y;
+        const auto nbVoxHeight = volume.dimensions().x;
+        const auto center = float(nbVoxCircle - 1) / 2.0f;
+
+        auto dist2Center = [center](float y, float z)
+        {
+            const auto dy = y - center;
+            const auto dz = z - center;
+            return dy * dy + dz * dz;
+        };
+
+        const auto voxSize = volume.voxelSize().x; // isotropic
+        const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+
+        // erase exterior space
+        for(auto x = 0u; x < nbVoxHeight; ++x)
+            for(auto y = 0u; y < nbVoxCircle; ++y)
+                for(auto z = 0u; z < nbVoxCircle; ++z)
+                    if(dist2Center(y, z) > rSquaredInVoxel)
+                        volume(x, y, z) = 0.0f;
+    }
+
+    template<typename T>
+    void grindCylinderY(VoxelVolume<T>& volume, float radius)
+    {
+        const auto nbVoxCircle = volume.dimensions().x;
+        const auto nbVoxHeight = volume.dimensions().y;
+        const auto center = float(nbVoxCircle - 1) / 2.0f;
+
+        auto dist2Center = [center](float x, float z)
+        {
+            const auto dx = x - center;
+            const auto dz = z - center;
+            return dx * dx + dz * dz;
+        };
+
+        const auto voxSize = volume.voxelSize().x; // isotropic
+        const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+
+        // erase exterior space
+        for(auto x = 0u; x < nbVoxCircle; ++x)
+            for(auto y = 0u; y < nbVoxHeight; ++y)
+                for(auto z = 0u; z < nbVoxCircle; ++z)
+                    if(dist2Center(x, z) > rSquaredInVoxel)
+                        volume(x, y, z) = 0.0f;
+    }
+
+    template<typename T>
+    void grindCylinderZ(VoxelVolume<T>& volume, float radius)
+    {
+        const auto nbVoxCircle = volume.dimensions().x;
+        const auto nbVoxHeight = volume.dimensions().z;
+        const auto center = float(nbVoxCircle - 1) / 2.0f;
+
+        auto dist2Center = [center](float x, float y)
+        {
+            const auto dx = x - center;
+            const auto dy = y - center;
+            return dx * dx + dy * dy;
+        };
+
+        const auto voxSize = volume.voxelSize().x; // isotropic
+        const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+
+        // erase exterior space
+        for(auto x = 0u; x < nbVoxCircle; ++x)
+            for(auto y = 0u; y < nbVoxCircle; ++y)
+                for(auto z = 0u; z < nbVoxHeight; ++z)
+                    if(dist2Center(x, y) > rSquaredInVoxel)
                         volume(x, y, z) = 0.0f;
     }
 }

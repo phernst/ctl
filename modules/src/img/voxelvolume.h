@@ -82,6 +82,9 @@ public:
     static VoxelVolume<T> fromChunk2DStack(const std::vector<Chunk2D<T>>& stack);
     static VoxelVolume<T> ball(float radius, float voxelSize, const T& fillValue);
     static VoxelVolume<T> cube(uint nbVoxel, float voxelSize, const T& fillValue);
+    static VoxelVolume<T> cylinderX(float radius, float height, float voxelSize, const T& fillValue);
+    static VoxelVolume<T> cylinderY(float radius, float height, float voxelSize, const T& fillValue);
+    static VoxelVolume<T> cylinderZ(float radius, float height, float voxelSize, const T& fillValue);
 
     // getter methods
     size_t allocatedElements() const;

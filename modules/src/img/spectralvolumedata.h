@@ -70,6 +70,12 @@ public:
                                    std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
     static SpectralVolumeData cube(uint nbVoxel, float voxelSize, float density,
                                    std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
+    static SpectralVolumeData cylinderX(float radius, float height, float voxelSize, float density,
+                                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
+    static SpectralVolumeData cylinderY(float radius, float height, float voxelSize, float density,
+                                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
+    static SpectralVolumeData cylinderZ(float radius, float height, float voxelSize, float density,
+                                        std::shared_ptr<AbstractIntegrableDataModel> absorptionModel);
 
     // setter methods
     void replaceAbsorptionModel(AbstractIntegrableDataModel* absorptionModel);

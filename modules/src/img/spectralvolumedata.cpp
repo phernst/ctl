@@ -342,6 +342,63 @@ SpectralVolumeData::cube(uint nbVoxel, float voxelSize, float density,
 }
 
 /*!
+ * Creates a SpectralVolumeData object that represents a voxelized cylinder with radius \a radius
+ * and height \a height (both in mm) that is aligned with the *x*-axis. It has isometric voxel
+ * size \a voxelSize (in mm) and is filled (homogeneuosly) with density value \a density
+ * (in g/cm^3). The material properties (i.e. spectrally-dependent mass attenuation coefficients)
+ * are specified by \a absorptionModel. The voxels surrounding the cylinder are filled with density
+ * 0.0 g/cm^3.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *y*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *x*-direction.
+ */
+SpectralVolumeData
+SpectralVolumeData::cylinderX(float radius, float height, float voxelSize, float density,
+                              std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
+{
+    return { VoxelVolume<float>::cylinderX(radius, height, voxelSize, density),
+             std::move(absorptionModel) };
+}
+
+/*!
+ * Creates a SpectralVolumeData object that represents a voxelized cylinder with radius \a radius
+ * and height \a height (both in mm) that is aligned with the *y*-axis. It has isometric voxel
+ * size \a voxelSize (in mm) and is filled (homogeneuosly) with density value \a density
+ * (in g/cm^3). The material properties (i.e. spectrally-dependent mass attenuation coefficients)
+ * are specified by \a absorptionModel. The voxels surrounding the cylinder are filled with density
+ * 0.0 g/cm^3.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *x*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *y*-direction.
+ */
+SpectralVolumeData
+SpectralVolumeData::cylinderY(float radius, float height, float voxelSize, float density,
+                              std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
+{
+    return { VoxelVolume<float>::cylinderY(radius, height, voxelSize, density),
+             std::move(absorptionModel) };
+}
+
+/*!
+ * Creates a SpectralVolumeData object that represents a voxelized cylinder with radius \a radius
+ * and height \a height (both in mm) that is aligned with the *z*-axis. It has isometric voxel
+ * size \a voxelSize (in mm) and is filled (homogeneuosly) with density value \a density
+ * (in g/cm^3). The material properties (i.e. spectrally-dependent mass attenuation coefficients)
+ * are specified by \a absorptionModel. The voxels surrounding the cylinder are filled with density
+ * 0.0 g/cm^3.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *x*- and *y*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *z*-direction.
+ */
+SpectralVolumeData
+SpectralVolumeData::cylinderZ(float radius, float height, float voxelSize, float density,
+                              std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
+{
+    return { VoxelVolume<float>::cylinderZ(radius, height, voxelSize, density),
+             std::move(absorptionModel) };
+}
+
+/*!
  * Replaces the absorption model in this instance by \a absorptionModel (must not be nullptr).
  *
  * Note that this is only allowed for objects that already have spectral information available and
