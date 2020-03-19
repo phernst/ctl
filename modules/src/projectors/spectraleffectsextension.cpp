@@ -228,7 +228,7 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
             {
                 materialProjs.push_back(ProjectorExtension::project(*subVolume->densityVolume()));
             }
-            else // without spectral information: "denisty = mu" (mass attenuation coeff = 1)
+            else // without spectral information: "density = mu" (mass attenuation coeff = 1)
             {
                 qWarning() << "A subvolume has no spectral information (material name: \"" +
                               subVolume->materialName() + "\"); treated as constant attenuation.";
