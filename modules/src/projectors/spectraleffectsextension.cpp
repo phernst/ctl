@@ -225,7 +225,14 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
     for(const auto& subVolume : volume.data())
     {
         if(subVolume->isMuVolume()) // need transformation to densities
-            materialProjs.push_back(ProjectorExtension::project(*subVolume->densityVolume()));
+        {
+            if(subVolume->hasSpectralInformation())
+                materialProjs.push_back(ProjectorExtension::project(*subVolume->densityVolume()));
+            else // compatability for combinations of volumes with and without spectral information
+                materialProjs.push_back(ProjectorExtension::project(
+                                            SpectralVolumeData::fromMuVolume(*subVolume,
+                                                                             std::make_shared<ConstantModel>())));
+        }
         else // density information already stored in volume.materialVolume(material)
             materialProjs.push_back(ProjectorExtension::project(*subVolume));
     }
