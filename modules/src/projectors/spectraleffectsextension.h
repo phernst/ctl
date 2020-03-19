@@ -107,7 +107,7 @@ private:
     ProjectionData projectLinear(const CompositeVolume& volume);
     ProjectionData projectNonLinear(const CompositeVolume& volume);
     ProjectionData singleBinIntensityLinear(const std::vector<ProjectionData>& materialProjs,
-                                            const std::vector<float>& mu,
+                                            const std::vector<float>& massAttenCoeffs,
                                             const BinInformation& binInfo);
     ProjectionData singleBinIntensityNonLinear(const CompositeVolume& volume,
                                                const BinInformation& binInfo);
