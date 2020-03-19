@@ -328,6 +328,12 @@ SpectralVolumeData::ball(float radius, float voxelSize, float density,
     return { VoxelVolume<float>::ball(radius, voxelSize, density), std::move(absorptionModel) };
 }
 
+/*!
+ * Constructs a cubic SpectralVolumeData with \a nbVoxel x \a nbVoxel x \a nbVoxel voxels (voxel
+ * dimension: \a voxelSize x \a voxelSize x \a voxelSize), filled (homogeneuosly) with density value
+ * \a density (in g/cm^3). The material properties (i.e. spectrally-dependent mass attenuation
+ * coefficients) are specified by \a absorptionModel.
+ */
 SpectralVolumeData
 SpectralVolumeData::cube(uint nbVoxel, float voxelSize, float density,
                          std::shared_ptr<AbstractIntegrableDataModel> absorptionModel)
