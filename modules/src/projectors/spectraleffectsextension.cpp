@@ -220,42 +220,32 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
     qDebug() << "linear case";
 
     // project all material densities
-    const auto nbSubVolumes = volume.nbSubVolumes();
+    const auto nbMaterials = volume.nbSubVolumes();
     std::vector<ProjectionData> materialProjs;
-    std::vector<float> massAttenFirstBin;
-    materialProjs.reserve(nbSubVolumes);
-    massAttenFirstBin.reserve(nbSubVolumes);
-
     for(const auto& subVolume : volume.data())
     {
-        auto muVolFirstBin = subVolume->muVolume(_spectralInfo.bin(0).energy,
-                                                 _spectralInfo.binWidth());
-
-        massAttenFirstBin.push_back(muVolFirstBin->referenceMassAttenuationCoeff());
-        materialProjs.push_back(ProjectorExtension::project(*muVolFirstBin));
+        if(subVolume->isMuVolume()) // need transformation to densities
+            materialProjs.push_back(ProjectorExtension::project(*subVolume->densityVolume()));
+        else // density information already stored in volume.materialVolume(material)
+            materialProjs.push_back(ProjectorExtension::project(*subVolume));
     }
 
     // process all energy bins and sum up intensities
     ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
     sumProj.allocateMemory(_setup.nbViews(), 0.0f);
-    std::vector<float> massAttenuationCoeffRatios(nbSubVolumes);
+    std::vector<float> massAttenuationCoeffs(nbMaterials);
 
     for(auto bin = 0u, nbEnergyBins = _spectralInfo.nbEnergyBins(); bin < nbEnergyBins; ++bin)
     {
-        // for each material (subvolume): obtain ratio of mass attenuation coefficients for this bin
-        std::transform(
-            volume.data().cbegin(), volume.data().cend(), // input 1
-            massAttenFirstBin.cbegin(),                   // input 2
-            massAttenuationCoeffRatios.begin(),           // output
-            [bin, this](const CompositeVolume::SubVolPtr& subVolume, float massAttenFirstBin)
-            {
-                auto massAttenCurrentBin = subVolume->meanMassAttenuationCoeff(
-                    _spectralInfo.bin(bin).energy, _spectralInfo.binWidth());
+        // for each material (sub volume): obtain mass attenuation coefficients for this bin
+        std::transform(volume.data().cbegin(), volume.data().cend(), massAttenuationCoeffs.begin(),
+                       [bin, this](const CompositeVolume::SubVolPtr& subVolume)
+                       {
+                           return subVolume->meanMassAttenuationCoeff(_spectralInfo.bin(bin).energy,
+                                                                      _spectralInfo.binWidth());
+                       });
 
-                return massAttenCurrentBin / massAttenFirstBin;
-            });
-
-        sumProj += singleBinIntensityLinear(materialProjs, massAttenuationCoeffRatios,
+        sumProj += singleBinIntensityLinear(materialProjs, massAttenuationCoeffs,
                                             _spectralInfo.bin(bin));
     }
 
@@ -284,7 +274,7 @@ ProjectionData SpectralEffectsExtension::projectNonLinear(const CompositeVolume 
     ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
     sumProj.allocateMemory(_setup.nbViews(), 0.0f);
 
-    for(auto bin = 0u, nbEnergyBins = _spectralInfo.nbEnergyBins(); bin < nbEnergyBins; ++bin)
+    for(uint bin = 0; bin < _spectralInfo.nbEnergyBins(); ++bin)
         sumProj += singleBinIntensityNonLinear(volume, _spectralInfo.bin(bin));
 
     sumProj.transformToExtinction(_spectralInfo.totalIntensity());
@@ -296,9 +286,9 @@ ProjectionData SpectralEffectsExtension::projectNonLinear(const CompositeVolume 
 
 /*!
  * Computes the intensity image for a specific energy bin (as specified by \a binInfo) based on the
- * precomputed forward projections \a materialProjs of attenuation values (mu values) for a
- * reference energy and the ratio of mass attenuation coefficients \a muRatio for the particular
- * energy bin (one value for each material, i.e. materialProjs.size() == muRatio.size()).
+ * precomputed forward projections of material densities (\a materialProjs) and the specific mass
+ * attenuation coefficients \a mu for the particular energy bin (one value for each material, i.e.
+ * materialProjs.size() == mu.size()).
  *
  * The internal workflow is as follows:
  * 1. For each material: compute product of projection and corresponding attenuation coefficient
@@ -310,9 +300,11 @@ ProjectionData SpectralEffectsExtension::projectNonLinear(const CompositeVolume 
  * is returned.
  */
 ProjectionData SpectralEffectsExtension::singleBinIntensityLinear(const std::vector<ProjectionData>& materialProjs,
-                                                                  const std::vector<float>& muRatio,
+                                                                  const std::vector<float>& mu,
                                                                   const BinInformation& binInfo)
 {
+    constexpr auto cm2mm = 0.1f; // 1/cm -> 1/mm
+
     ProjectionData binProj(_setup.system()->detector()->viewDimensions());
     binProj.allocateMemory(_setup.nbViews(), 0.0f);
 
@@ -322,9 +314,9 @@ ProjectionData SpectralEffectsExtension::singleBinIntensityLinear(const std::vec
         return binProj;
     }
 
-    const auto nbSubVolumes = materialProjs.size();
-    for(auto subVol = 0u; subVol < nbSubVolumes; ++subVol)
-        binProj += materialProjs[subVol] * muRatio[subVol];
+    const auto nbMaterials = materialProjs.size();
+    for(uint material = 0; material < nbMaterials; ++material)
+        binProj += materialProjs[material] * mu[material] * cm2mm; // cm^-1 --> mm^-1
 
     binProj.transformToIntensity(binInfo.intensities);
     applyDetectorResponse(binProj, binInfo.energy);
