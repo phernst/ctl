@@ -53,10 +53,7 @@ void SpectralEffectsExtension::configure(const AcquisitionSetup& setup)
  */
 ProjectionData SpectralEffectsExtension::project(const VolumeData& volume)
 {
-    CompositeVolume vol;
-    vol.addSubVolume(volume);
-
-    return projectComposite(vol);
+    return projectComposite(CompositeVolume{ volume });
 }
 
 /*!
@@ -210,7 +207,7 @@ void SpectralEffectsExtension::applyDetectorResponse(ProjectionData& intensity, 
  * Computes the projections from \a volume with a linear nested projector.
  *
  * The internal workflow is as follows:
- * 1. Compute forward projections of the material density of all sub-volumes in \a volume.
+ * 1. Compute forward projections of the material density of all subvolumes in \a volume.
  * 2. For each energy bin: compute intensity using singleBinIntensityLinear() and add result to
  * total sum.
  * 3. Transform final result to extinction domain.
@@ -227,36 +224,46 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
     {
         if(subVolume->isMuVolume()) // need transformation to densities
         {
-            if(subVolume->hasSpectralInformation())
+            if(subVolume->hasSpectralInformation()) // conversion to density is possible
+            {
                 materialProjs.push_back(ProjectorExtension::project(*subVolume->densityVolume()));
-            else // compatability for combinations of volumes with and without spectral information
+            }
+            else // without spectral information: "denisty = mu" (mass attenuation coeff = 1)
+            {
+                qWarning() << "A subvolume has no spectral information (material name: \"" +
+                              subVolume->materialName() + "\"); treated as constant attenuation.";
+
                 materialProjs.push_back(
                     ProjectorExtension::project(SpectralVolumeData::fromMuVolume(
-                        *subVolume, std::make_shared<ConstantModel>())));
+                        *subVolume, std::make_shared<ConstantModel>(1.0f))));
+            }
         }
-        else // density information already stored in sub volume
+        else // density information already stored in subvolume
+        {
             materialProjs.push_back(ProjectorExtension::project(*subVolume));
+        }
     }
 
     // process all energy bins and sum up intensities
     ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
     sumProj.allocateMemory(_setup.nbViews(), 0.0f);
     std::vector<float> massAttenuationCoeffs(volume.nbSubVolumes());
+    const auto binWidth = _spectralInfo.binWidth();
 
     for(auto bin = 0u, nbEnergyBins = _spectralInfo.nbEnergyBins(); bin < nbEnergyBins; ++bin)
     {
-        // for each material (sub volume): obtain mass attenuation coefficients for this bin
+        const auto binInfo = _spectralInfo.bin(bin);
+        const auto binEnergy = binInfo.energy;
+
+        // for each material (sub-volume): obtain mass attenuation coefficients for this bin
         std::transform(volume.data().cbegin(), volume.data().cend(), massAttenuationCoeffs.begin(),
-                       [bin, this](const CompositeVolume::SubVolPtr& subVolume)
+                       [binEnergy, binWidth](const CompositeVolume::SubVolPtr& subVolume)
                        {
                            constexpr auto cm2mm = 0.1f; // 1/cm -> 1/mm
-                           return subVolume->meanMassAttenuationCoeff(
-                                       _spectralInfo.bin(bin).energy,
-                                       _spectralInfo.binWidth()) * cm2mm;
+                           return subVolume->meanMassAttenuationCoeff(binEnergy, binWidth) * cm2mm;
                        });
 
-        sumProj += singleBinIntensityLinear(materialProjs, massAttenuationCoeffs,
-                                            _spectralInfo.bin(bin));
+        sumProj += singleBinIntensityLinear(materialProjs, massAttenuationCoeffs, binInfo);
     }
 
     sumProj.transformToExtinction(_spectralInfo.totalIntensity());
