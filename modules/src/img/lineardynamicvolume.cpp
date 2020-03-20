@@ -17,10 +17,10 @@ LinearDynamicVolume::LinearDynamicVolume(VoxelVolume<float> slope,
                                          VoxelVolume<float> offset,
                                          const VoxelVolume<float>::VoxelSize& voxelSize)
     : AbstractDynamicVolumeData( SpectralVolumeData( VoxelVolume<float>(slope.dimensions(), voxelSize) ) )
-    , _offset(std::move(offset))
+    , _lag(std::move(offset))
     , _slope(std::move(slope))
 {
-    if(_offset.dimensions() != _slope.dimensions())
+    if(_lag.dimensions() != _slope.dimensions())
         throw std::domain_error("LinearDynamicVolume: Passed offset and slope volumes have different sizes!");
 
     setTime(0.0); // initial time point 0ms
@@ -40,7 +40,7 @@ LinearDynamicVolume::LinearDynamicVolume(VoxelVolume<float> slope,
 LinearDynamicVolume::LinearDynamicVolume(VoxelVolume<float> slope, VoxelVolume<float> offset)
     : LinearDynamicVolume(std::move(slope), std::move(offset), slope.voxelSize())
 {
-    if(_offset.voxelSize() != _slope.voxelSize())
+    if(_lag.voxelSize() != _slope.voxelSize())
         throw std::domain_error("LinearDynamicVolume: Passed offset and slope volumes have different sizes!");
 }
 
@@ -60,10 +60,10 @@ SpectralVolumeData* LinearDynamicVolume::clone() const
 LinearDynamicVolume::LinearDynamicVolume(float slope, float offset,
                                          const Dimensions& nbVoxel, const VoxelSize& voxelSize)
     : AbstractDynamicVolumeData( SpectralVolumeData( VoxelVolume<float>(nbVoxel, voxelSize) ) )
-    , _offset(nbVoxel, voxelSize)
+    , _lag(nbVoxel, voxelSize)
     , _slope(nbVoxel, voxelSize)
 {
-    _offset.fill(offset);
+    _lag.fill(offset);
     _slope.fill(slope);
 }
 
@@ -73,6 +73,6 @@ LinearDynamicVolume::LinearDynamicVolume(float slope, float offset,
  * \f$ \mu(x,y,z) = t \cdot slope(x,y,z) + offset(x,y,z) \f$, where \f$t\f$ denotes the time point
  * set via setTime() in milliseconds.
  */
-void LinearDynamicVolume::updateVolume() { setData((_slope * float(time()) + _offset).data()); }
+void LinearDynamicVolume::updateVolume() { setData((_slope * float(time()) + _lag).data()); }
 
 } // namespace CTL

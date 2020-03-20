@@ -3,9 +3,6 @@
 
 #include "abstractdynamicvolumedata.h"
 #include <cmath>
-/*
- * NOTE: This is header only.
- */
 
 namespace CTL {
 
@@ -47,7 +44,7 @@ public:
                         VoxelVolume<float> offset);
 
 private:
-    VoxelVolume<float> _offset;
+    VoxelVolume<float> _lag;
     VoxelVolume<float> _slope;
 };
 

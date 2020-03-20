@@ -3,6 +3,7 @@
 
 #include "abstractdynamicvolumedata.h"
 #include <cmath>
+
 /*
  * NOTE: This is header only.
  */
