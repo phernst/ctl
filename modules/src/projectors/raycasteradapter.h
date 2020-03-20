@@ -2,7 +2,6 @@
 #define RAYCASTERADAPTER_H
 
 #include "abstractprojector.h"
-#include "abstractprojectorconfig.h"
 #include "mat/mat.h"
 #include "raycaster.h"
 
@@ -12,12 +11,10 @@ namespace OCL {
 class RayCasterAdapter : public AbstractProjector
 {
 public:
-    class Config : public AbstractProjectorConfig
+    class Config
     {
     public:
         float increment_mm{ 0.1f };
-
-        AbstractProjectorConfig* clone() const override;
     };
 
     void configure(const AcquisitionSetup& setup) override;

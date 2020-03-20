@@ -2,7 +2,6 @@
 #define AREALFOCALSPOTEXTENSION_H
 
 #include "projectorextension.h"
-#include "abstractprojectorconfig.h"
 #include "acquisition/acquisitionsetup.h"
 #include <QPointF>
 #include <QSize>

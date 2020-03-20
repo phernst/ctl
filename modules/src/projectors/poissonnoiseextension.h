@@ -3,7 +3,6 @@
 
 #include "projectorextension.h"
 #include "acquisition/acquisitionsetup.h"
-#include "projectors/abstractprojectorconfig.h"
 
 #include <random>
 

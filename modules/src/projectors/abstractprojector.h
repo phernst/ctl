@@ -3,7 +3,6 @@
 
 #include "img/compositevolume.h"
 #include "img/projectiondata.h"
-#include "img/voxelvolume.h"
 #include "io/serializationinterface.h"
 
 #include <QObject>
@@ -17,14 +16,12 @@ namespace CTL {
 
 // forward declarations
 class AcquisitionSetup;
-class AbstractProjectorConfig;
 
 /*!
- * Alias name for template specialization VoxelVolume<float>.
+ * Alias name for SpectralVolumeData.
  *
  * Also serves as a placeholder for potential future changes to the concept of volume data.
  */
-//typedef VoxelVolume<float> VolumeData;
 typedef SpectralVolumeData VolumeData;
 
 /*!

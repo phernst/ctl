@@ -88,7 +88,6 @@ HEADERS += \
     $$PWD/../src/processing/modelbasedvolumedecomposer.h \
     $$PWD/../src/processing/threadpool.h \
     $$PWD/../src/projectors/abstractprojector.h \
-    $$PWD/../src/projectors/abstractprojectorconfig.h \
     $$PWD/../src/projectors/arealfocalspotextension.h \
     $$PWD/../src/projectors/detectorsaturationextension.h \
     $$PWD/../src/projectors/poissonnoiseextension.h \

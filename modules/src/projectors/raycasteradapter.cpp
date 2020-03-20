@@ -49,10 +49,6 @@ void RayCasterAdapter::applyRayCasterConfig(const Config& rcConfig)
     _rayCaster.setIncrement(rcConfig.increment_mm);
 }
 
-AbstractProjectorConfig* RayCasterAdapter::Config::clone() const
-{
-    return new Config(*this);
-}
 
 } // namespace OCL
 } // namespace CTL

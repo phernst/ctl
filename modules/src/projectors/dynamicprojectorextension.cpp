@@ -1,5 +1,4 @@
 #include "dynamicprojectorextension.h"
-#include "abstractprojectorconfig.h"
 #include "acquisition/acquisitionsetup.h"
 #include "components/abstractdetector.h"
 #include "img/abstractdynamicvolumedata.h"

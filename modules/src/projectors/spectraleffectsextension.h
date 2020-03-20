@@ -2,7 +2,6 @@
 #define SPECTRALEFFECTSEXTENSION_H
 
 #include "projectorextension.h"
-#include "abstractprojectorconfig.h"
 #include "acquisition/acquisitionsetup.h"
 #include "processing/coordinates.h" // Range<T>
 #include "acquisition/radiationencoder.h"

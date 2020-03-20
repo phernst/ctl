@@ -2,8 +2,6 @@
 #define RAYCASTERPROJECTOR_H
 
 #include "abstractprojector.h"
-#include "abstractprojectorconfig.h"
-
 #include "acquisition/geometryencoder.h"
 
 namespace CTL {
