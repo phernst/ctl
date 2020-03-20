@@ -200,8 +200,12 @@ void ProjectorExtension::use(AbstractProjector* other)
     delete _projector;
     _projector = other;
     if(_projector)
+    {
         QObject::connect(_projector->notifier(), &ProjectorNotifier::projectionFinished,
                          this->notifier(), &ProjectorNotifier::projectionFinished);
+        QObject::connect(_projector->notifier(), &ProjectorNotifier::information,
+                         this->notifier(), &ProjectorNotifier::information);
+    }
 }
 
 /*!
