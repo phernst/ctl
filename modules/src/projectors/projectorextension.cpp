@@ -49,8 +49,13 @@ ProjectorExtension::ProjectorExtension(AbstractProjector* projector)
         qWarning() << "ProjectorExtension::ProjectorExtension(): Tried to pass the object itself "
                       "to the constructor. Nested projector is set to nullptr.";
     if(_projector)
+    {
         QObject::connect(_projector->notifier(), &ProjectorNotifier::projectionFinished,
                          this->notifier(), &ProjectorNotifier::projectionFinished);
+        QObject::connect(_projector->notifier(), &ProjectorNotifier::information,
+                         this->notifier(), &ProjectorNotifier::information);
+
+    }
 }
 
 /*!
