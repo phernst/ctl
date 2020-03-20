@@ -52,12 +52,6 @@ namespace CTL {
  * setParameter() approach should be sufficient and is recommended.
  */
 
-/*!
- * \class DataModelPtr
- * \brief Helper class to provide unique_ptr like behavior for subclasses of AbstractDataModel with
- * option to copy by means of deep copying (provided by clone()).
- */
-
 class AbstractDataModel : public SerializationInterface
 {
     CTL_TYPE_ID(0)
@@ -153,10 +147,17 @@ auto makeDataModel(ConstructorArguments&&... arguments) ->
 ///@{
 /*!
 * \fn std::unique_ptr<ModelType> CTL::makeDataModel(ConstructorArguments&&... arguments)
-* \relates AbstractDataModel
+* \relates CTL::AbstractDataModel
 * Global (free) make function that creates a new AbstractDataModel from the constructor \a arguments.
 * The component is returned as a `std::unique_ptr<ModelType>`, whereas `ModelType` is the
 * template argument of this function that needs to be specified.
+*/
+
+/*!
+* \typedef using DataModelPtr = CopyableUniquePtr<ModelType>
+* \relates CTL::AbstractDataModel
+*
+* \brief Alias name for CopyableUniquePtr<ModelType> to a suitable ModelType.
 */
 ///@}
 

@@ -150,12 +150,6 @@ protected:
  */
 
 /*!
- * \struct AbstractSource::EnergyRange
- *
- * Holds the borders (i.e. minimum to maximum) of the energy range.
- */
-
-/*!
  * Constructs an AbstractSource object named \a name.
  *
  * Focal spot size defaults to QSizeF(0.0, 0.0) and the focal spot position is initialized with
@@ -482,5 +476,16 @@ inline double AbstractSource::fluxModifier() const { return _fluxModifier; }
 inline void AbstractSource::setFluxModifier(double modifier) { _fluxModifier = modifier; }
 
 } // namespace CTL
+
+/*! \file */
+///@{
+/*!
+ * \typedef typedef Range<float> EnergyRange
+ *
+ * \brief Alias name for Range<float>. Holds the borders (i.e. minimum to maximum) of the energy range.
+ *
+ * \relates CTL::AbstractSource
+ */
+///@}
 
 #endif // CTL_ABSTRACTSOURCE_H
