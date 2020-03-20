@@ -117,7 +117,7 @@ private:
     AbstractProjector* _projector; //!< Pointer to the actual projector object.
 };
 
-}
+} // namespace CTL
 
 /*! \file */
 ///@{

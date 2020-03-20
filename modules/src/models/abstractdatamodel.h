@@ -146,19 +146,40 @@ auto makeDataModel(ConstructorArguments&&... arguments) ->
 /*! \file */
 ///@{
 /*!
-* \fn std::unique_ptr<ModelType> CTL::makeDataModel(ConstructorArguments&&... arguments)
+* \typedef CTL::DataModelPtr
+*
+* \brief Template alias name for CopyableUniquePtr<ModelType> to a suitable ModelType.
+*
 * \relates CTL::AbstractDataModel
-* Global (free) make function that creates a new AbstractDataModel from the constructor \a arguments.
-* The component is returned as a `std::unique_ptr<ModelType>`, whereas `ModelType` is the
-* template argument of this function that needs to be specified.
 */
 
 /*!
-* \typedef using DataModelPtr = CopyableUniquePtr<ModelType>
-* \relates CTL::AbstractDataModel
-*
-* \brief Alias name for CopyableUniquePtr<ModelType> to a suitable ModelType.
-*/
+ * \typedef CTL::AbstractDataModelPtr
+ *
+ * \brief Alias name for DataModelPtr<AbstractDataModel>.
+ *
+ * It provide `unique_ptr` like behavior for subclasses of AbstractDataModel with option to copy by
+ * means of deep copying (provided by clone()).
+ *
+ * \relates CTL::AbstractDataModel
+ */
+
+/*!
+ * \fn std::unique_ptr<ModelType> CTL::makeDataModel(ConstructorArguments&&... arguments)
+ *
+ * Global (free) make function that creates a new AbstractDataModel from the constructor \a arguments.
+ * The component is returned as a `std::unique_ptr<ModelType>`, whereas `ModelType` is the
+ * template argument of this function that needs to be specified.
+ * \relates CTL::AbstractDataModel
+ */
+
+/*!
+ * \typedef using DataModelPtr = CopyableUniquePtr<ModelType>
+ *
+ * \brief Alias name for CopyableUniquePtr<ModelType> to a suitable ModelType.
+ *
+ * \relates CTL::AbstractDataModel
+ */
 ///@}
 
 

@@ -144,7 +144,7 @@ protected:
  */
 
 /*!
- * \fn AbstractSource::EnergyRange AbstractSource::energyRange() const
+ * \fn EnergyRange AbstractSource::energyRange() const
  *
  * Abstract interface method. Returns the energy range that contains all radiation from the source.
  */
@@ -480,9 +480,11 @@ inline void AbstractSource::setFluxModifier(double modifier) { _fluxModifier = m
 /*! \file */
 ///@{
 /*!
- * \typedef typedef Range<float> EnergyRange
+ * \typedef CTL::EnergyRange
  *
- * \brief Alias name for Range<float>. Holds the borders (i.e. minimum to maximum) of the energy range.
+ * \brief Alias name for CTL::Range<float>.
+ *
+ * Holds the borders (i.e. minimum to maximum) of the energy range.
  *
  * \relates CTL::AbstractSource
  */

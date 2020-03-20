@@ -17,11 +17,6 @@ namespace CTL {
 // forward declarations
 class AcquisitionSetup;
 
-/*!
- * Alias name for SpectralVolumeData.
- *
- * Also serves as a placeholder for potential future changes to the concept of volume data.
- */
 typedef SpectralVolumeData VolumeData;
 
 /*!
@@ -287,12 +282,14 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
 /*! \file */
 ///@{
 /*!
- * \typedef typedef SpectralVolumeData VolumeData;
- *
- * \brief Alias name for SpectralVolumeData.
- *
- * \relates CTL::AbstractProjector
- */
+* \typedef CTL::VolumeData
+*
+* \brief Alias name for CTL::SpectralVolumeData.
+*
+* Also serves as a placeholder for potential future changes to the concept of volume data.
+*
+* \relates CTL::AbstractProjector
+*/
 
 /*!
  * \fn std::unique_ptr<ProjectorType> CTL::makeProjector(ConstructorArguments&&... arguments)
