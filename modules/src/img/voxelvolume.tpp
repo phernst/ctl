@@ -1,6 +1,14 @@
 #include "voxelvolume.h"
+#include <cmath>
 
 namespace CTL {
+
+namespace details {
+    template<typename T> void grindBall(VoxelVolume<T>& volume, float radius);
+    template<typename T> void grindCylinderX(VoxelVolume<T>& volume, float radius);
+    template<typename T> void grindCylinderY(VoxelVolume<T>& volume, float radius);
+    template<typename T> void grindCylinderZ(VoxelVolume<T>& volume, float radius);
+}
 
 /*!
  * Constructs a voxelized volume with \a nbVoxels voxels.
@@ -140,9 +148,9 @@ VoxelVolume<T> VoxelVolume<T>::fromChunk2DStack(const std::vector<Chunk2D<T>>& s
         return { 0, 0, 0 };
 
     // get dim information from stack
-    auto& firstChunk = stack.front();
-    auto& chunkDim = firstChunk.dimensions();
-    size_t chunkElements = firstChunk.nbElements();
+    const auto& firstChunk = stack.front();
+    const auto& chunkDim = firstChunk.dimensions();
+    const auto chunkElements = firstChunk.nbElements();
     Dimensions volDim = { chunkDim.width, chunkDim.height, uint(stack.size()) };
 
     // dimension consistency check within the passed stack
@@ -156,7 +164,7 @@ VoxelVolume<T> VoxelVolume<T>::fromChunk2DStack(const std::vector<Chunk2D<T>>& s
 
     // fill in data -> the data of each chunk will be copied into the volume as a z-slice
     auto retPtr = ret.rawData();
-    for(auto& chunk : stack)
+    for(const auto& chunk : stack)
     {
         std::copy_n(chunk.rawData(), chunkElements, retPtr);
         retPtr += chunkElements;
@@ -165,13 +173,124 @@ VoxelVolume<T> VoxelVolume<T>::fromChunk2DStack(const std::vector<Chunk2D<T>>& s
     return ret;
 }
 
+/*!
+ * Constructs a cubic voxelized volume with \a nbVoxel x \a nbVoxel x \a nbVoxel voxels (voxel
+ * dimension: \a voxelSize x \a voxelSize x \a voxelSize), filled with \a fillValue.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::cube(uint nbVoxel, float voxelSize, const T& fillValue)
+{
+    const Dimensions dim{ nbVoxel, nbVoxel, nbVoxel };
+
+    return { dim, { voxelSize, voxelSize, voxelSize },
+             std::vector<T>(dim.totalNbElements(), fillValue) };
+}
+
+/*!
+ * Constructs a voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
+ * all voxels inside a ball of radius \a radius (in mm) around the center of the volume with
+ * \a fillValue. The voxels surrounding the ball are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * each dimension.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::ball(float radius, float voxelSize, const T& fillValue)
+{
+    const auto nbVox = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+
+    const VoxelVolume<T>::Dimensions volDim{ nbVox, nbVox, nbVox };
+    const VoxelVolume<T>::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    VoxelVolume<T> ret{ volDim, voxSize };
+    ret.fill(fillValue);
+
+    details::grindBall(ret, radius);
+
+    return ret;
+}
+
+/*!
+ * Constructs a voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
+ * all voxels inside a cylinder of radius \a radius (in mm) and height \a height (in mm) aligned
+ * with the *x*-axis with* \a fillValue. The voxels surrounding the cylinder are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *y*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *x*-direction.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::cylinderX(float radius, float height, float voxelSize, const T& fillValue)
+{
+    const auto nbVoxCircle = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+    const auto nbVoxHeight = static_cast<uint>(std::ceil(height / voxelSize));
+
+    const VoxelVolume<T>::Dimensions volDim{ nbVoxHeight, nbVoxCircle, nbVoxCircle };
+    const VoxelVolume<T>::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    VoxelVolume<T> ret{ volDim, voxSize };
+    ret.fill(fillValue);
+
+    details::grindCylinderX(ret, radius);
+
+    return ret;
+}
+
+/*!
+ * Constructs a voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
+ * all voxels inside a cylinder of radius \a radius (in mm) and height \a height (in mm) aligned
+ * with the *y*-axis with* \a fillValue. The voxels surrounding the cylinder are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *x*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *y*-direction.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::cylinderY(float radius, float height, float voxelSize, const T& fillValue)
+{
+    const auto nbVoxCircle = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+    const auto nbVoxHeight = static_cast<uint>(std::ceil(height / voxelSize));
+
+    const VoxelVolume<T>::Dimensions volDim{ nbVoxCircle, nbVoxHeight, nbVoxCircle };
+    const VoxelVolume<T>::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    VoxelVolume<T> ret{ volDim, voxSize };
+    ret.fill(fillValue);
+
+    details::grindCylinderY(ret, radius);
+
+    return ret;
+}
+
+/*!
+ * Constructs a voxelized volume with voxels of isotropic dimensions \a voxelSize (in mm) and fills
+ * all voxels inside a cylinder of radius \a radius (in mm) and height \a height (in mm) aligned
+ * with the *z*-axis with* \a fillValue. The voxels surrounding the cylinder are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *x*- and *y*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *z*-direction.
+ */
+template<typename T>
+VoxelVolume<T> VoxelVolume<T>::cylinderZ(float radius, float height, float voxelSize, const T& fillValue)
+{
+    const auto nbVoxCircle = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
+    const auto nbVoxHeight = static_cast<uint>(std::ceil(height / voxelSize));
+
+    const VoxelVolume<T>::Dimensions volDim{ nbVoxCircle, nbVoxCircle, nbVoxHeight };
+    const VoxelVolume<T>::VoxelSize voxSize{ voxelSize, voxelSize, voxelSize };
+    VoxelVolume<T> ret{ volDim, voxSize };
+    ret.fill(fillValue);
+
+    details::grindCylinderZ(ret, radius);
+
+    return ret;
+}
+
+/*!
+ * Sets an isotropic voxels size of \a isotropicSize (in mm).
+ */
 template<typename T>
 void VoxelVolume<T>::setVoxelSize(float isotropicSize)
 {
     _size = { isotropicSize, isotropicSize, isotropicSize };
 }
 
-/*
+/*!
  * Deletes the data of the voxel volume.
  *
  * \sa allocateMemory()
@@ -189,9 +308,9 @@ void VoxelVolume<T>::freeMemory()
 template <typename T>
 typename std::vector<T>::reference VoxelVolume<T>::operator()(uint x, uint y, uint z)
 {
-    const size_t voxPerSlice = size_t(_dim.x) * _dim.y;
-    const size_t voxPerLine = size_t(_dim.x);
-    size_t lup = z * voxPerSlice + y * voxPerLine + x;
+    const auto voxPerSlice = size_t(_dim.x) * size_t(_dim.y);
+    const auto voxPerLine = size_t(_dim.x);
+    const auto lup = size_t(z) * voxPerSlice + size_t(y) * voxPerLine + size_t(x);
 
     Q_ASSERT(lup < _data.size());
     return _data[lup];
@@ -203,9 +322,9 @@ typename std::vector<T>::reference VoxelVolume<T>::operator()(uint x, uint y, ui
 template <typename T>
 typename std::vector<T>::const_reference VoxelVolume<T>::operator()(uint x, uint y, uint z) const
 {
-    const size_t voxPerSlice = size_t(_dim.x) * _dim.y;
-    const size_t voxPerLine = size_t(_dim.x);
-    size_t lup = z * voxPerSlice + y * voxPerLine + x;
+    const auto voxPerSlice = size_t(_dim.x) * size_t(_dim.y);
+    const auto voxPerLine = size_t(_dim.x);
+    const auto lup = size_t(z) * voxPerSlice + size_t(y) * voxPerLine + size_t(x);
 
     Q_ASSERT(lup < _data.size());
     return _data[lup];
@@ -222,13 +341,13 @@ Chunk2D<T> VoxelVolume<T>::sliceX(uint slice) const
     Chunk2D<T> ret(_dim.y, _dim.z);
     ret.allocateMemory();
 
-    const size_t voxPerYZSlice = size_t(_dim.y) * _dim.z;
+    const auto voxPerYZSlice = size_t(_dim.y) * size_t(_dim.z);
 
     std::vector<T> dataVec(voxPerYZSlice);
     // ekel loop
     auto dataIt = dataVec.begin();
-    for(uint zIdx = 0; zIdx < _dim.z; ++zIdx)
-        for(uint yIdx = 0; yIdx < _dim.y; ++yIdx, ++dataIt)
+    for(auto zIdx = 0u; zIdx < _dim.z; ++zIdx)
+        for(auto yIdx = 0u; yIdx < _dim.y; ++yIdx, ++dataIt)
             *dataIt = (*this)(slice, yIdx, zIdx);
 
     ret.setData(std::move(dataVec));
@@ -245,16 +364,16 @@ Chunk2D<T> VoxelVolume<T>::sliceY(uint slice) const
 
     Chunk2D<T> ret(_dim.x, _dim.z);
 
-    const size_t voxPerXZSlice = size_t(_dim.x) * _dim.z;
-    const size_t voxPerXYSlice = size_t(_dim.x) * _dim.y;
+    const auto voxPerXZSlice = size_t(_dim.x) * size_t(_dim.z);
+    const auto voxPerXYSlice = size_t(_dim.x) * size_t(_dim.y);
 
     std::vector<T> dataVec(voxPerXZSlice);
     // ekel loop
-    const uint sliceOffset = slice * _dim.x;
-    for(uint zIdx = 0; zIdx < _dim.z; ++zIdx)
+    const auto sliceOffset = size_t(slice) * size_t(_dim.x);
+    for(auto zIdx = 0u; zIdx < _dim.z; ++zIdx)
     {
-        size_t lup = sliceOffset + zIdx * voxPerXYSlice;
-        std::copy_n(_data.begin() + lup, _dim.x, dataVec.begin() + zIdx * _dim.x);
+        const auto lup = sliceOffset + size_t(zIdx) * voxPerXYSlice;
+        std::copy_n(_data.cbegin() + lup, _dim.x, dataVec.begin() + size_t(zIdx) * size_t(_dim.x));
     }
 
     ret.setData(std::move(dataVec));
@@ -271,11 +390,11 @@ Chunk2D<T> VoxelVolume<T>::sliceZ(uint slice) const
 
     Chunk2D<T> ret(_dim.x, _dim.y);
 
-    const size_t voxPerSlice = size_t(_dim.x) * _dim.y;
-    size_t lup = slice * voxPerSlice;
+    const auto voxPerSlice = size_t(_dim.x) * size_t(_dim.y);
+    const auto lup = size_t(slice) * voxPerSlice;
 
     std::vector<T> dataVec(voxPerSlice);
-    std::copy_n(_data.begin() + lup, voxPerSlice, dataVec.begin());
+    std::copy_n(_data.cbegin() + lup, voxPerSlice, dataVec.begin());
 
     ret.setData(std::move(dataVec));
     return ret;
@@ -295,10 +414,10 @@ VoxelVolume<T> VoxelVolume<T>::reslicedByX(bool reverse) const
     std::vector<Chunk2D<T>> chunkStack;
     chunkStack.reserve(_dim.x);
     if(reverse)
-        for(int i=_dim.x-1; i>=0; --i)
+        for(auto i = _dim.x - 1u; i != static_cast<uint>(-1); --i)
             chunkStack.push_back(sliceX(i));
     else
-        for(uint i=0; i<_dim.x; ++i)
+        for(auto i = 0u; i < _dim.x; ++i)
             chunkStack.push_back(sliceX(i));
 
     return VoxelVolume<T>::fromChunk2DStack(chunkStack);
@@ -318,10 +437,10 @@ VoxelVolume<T> VoxelVolume<T>::reslicedByY(bool reverse) const
     std::vector<Chunk2D<T>> chunkStack;
     chunkStack.reserve(_dim.y);
     if(reverse)
-        for(int i=_dim.y-1; i>=0; --i)
+        for(auto i = _dim.y - 1u; i != static_cast<uint>(-1); --i)
             chunkStack.push_back(sliceY(i));
     else
-        for(uint i=0; i<_dim.y; ++i)
+        for(auto i = 0u; i < _dim.y; ++i)
             chunkStack.push_back(sliceY(i));
 
     return VoxelVolume<T>::fromChunk2DStack(chunkStack);
@@ -341,7 +460,7 @@ VoxelVolume<T> VoxelVolume<T>::reslicedByZ(bool reverse) const
     std::vector<Chunk2D<T>> chunkStack;
     chunkStack.reserve(_dim.z);
     if(reverse)
-        for(int i=_dim.z-1; i>=0; --i)
+        for(auto i = _dim.z - 1u; i != static_cast<uint>(-1); --i)
             chunkStack.push_back(sliceZ(i));
     else
         return *this;
@@ -358,13 +477,7 @@ T VoxelVolume<T>::max() const
     if(allocatedElements() == 0)
         return T(0);
 
-    T tempMax = _data.front();
-
-    for(auto vox : _data)
-        if(vox > tempMax)
-            tempMax = vox;
-
-    return tempMax;
+    return *std::max_element(_data.cbegin(), _data.cend());
 }
 
 /*!
@@ -376,13 +489,7 @@ T VoxelVolume<T>::min() const
     if(allocatedElements() == 0)
         return T(0);
 
-    T tempMin = _data.front();
-
-    for(auto vox : _data)
-        if(vox < tempMin)
-            tempMin = vox;
-
-    return tempMin;
+    return *std::min_element(_data.cbegin(), _data.cend());
 }
 
 // operators
@@ -400,9 +507,8 @@ VoxelVolume<T>& VoxelVolume<T>::operator+=(const VoxelVolume<T>& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '+=' operation.");
 
-    const auto& otherDat = other.constData();
-    for(uint vox = 0; vox < totalVoxelCount(); ++vox)
-        _data[vox] += otherDat[vox];
+    std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
+                   [](const T& a, const T& b) { return a + b; });
 
     return *this;
 }
@@ -421,9 +527,8 @@ VoxelVolume<T>& VoxelVolume<T>::operator-=(const VoxelVolume<T>& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '-=' operation.");
 
-    const auto& otherDat = other.constData();
-    for(uint vox = 0; vox < totalVoxelCount(); ++vox)
-        _data[vox] -= otherDat[vox];
+    std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
+                   [](const T& a, const T& b) { return a - b; });
 
     return *this;
 }
@@ -557,6 +662,413 @@ VoxelVolume<T> VoxelVolume<T>::operator/(const T& divisor) const
     VoxelVolume<T> ret(*this);
     ret /= divisor;
     return ret;
+}
+
+
+/*!
+ * Returns true if all three dimensions of this instance and \a other are equal.
+ */
+template<typename T>
+bool VoxelVolume<T>::Dimensions::operator==(const Dimensions& other) const
+{
+    return (x == other.x) && (y == other.y) && (z == other.z);
+}
+
+/*!
+ * Returns true if any of the three dimensions of this instance and \a other differ.
+ */
+template<typename T>
+bool VoxelVolume<T>::Dimensions::operator!=(const Dimensions& other) const
+{
+    return (x != other.x) || (y != other.y) || (z != other.z);
+}
+
+/*!
+ * Returns a string that contains the dimensions joined with " x ".
+ */
+template<typename T>
+std::string VoxelVolume<T>::Dimensions::info() const
+{
+    return std::to_string(x) + " x " + std::to_string(y) + " x " + std::to_string(z);
+}
+
+/*!
+ * Returns the total number of voxels in the volume.
+ */
+template <typename T>
+size_t VoxelVolume<T>::Dimensions::totalNbElements() const
+{
+    return size_t(x) * size_t(y) * size_t(z);
+}
+
+/*!
+ * Returns true if the voxel sizes of this instance and \a other are equal (in all three dimensions).
+ */
+template<typename T>
+bool VoxelVolume<T>::VoxelSize::operator==(const VoxelSize& other) const
+{
+    return qFuzzyCompare(x, other.x) && qFuzzyCompare(y, other.y) && qFuzzyCompare(z, other.z);
+}
+
+/*!
+ * Returns true if voxel sizes of this instance and \a other differ (in any of the three
+ * dimensions).
+ */
+template<typename T>
+bool VoxelVolume<T>::VoxelSize::operator!=(const VoxelSize& other) const
+{
+    return !qFuzzyCompare(x, other.x) || !qFuzzyCompare(y, other.y) || !qFuzzyCompare(z, other.z);
+}
+
+
+/*!
+ * Returns the number of elements for which memory has been allocated. This is either zero if no
+ * memory has been allocated (after instantiation with a non-allocating constructor) or equal to the
+ * number of elements.
+ *
+ * Same as: constData().size().
+ *
+ * \sa totalVoxelCount(), allocateMemory().
+ */
+template <typename T>
+size_t VoxelVolume<T>::allocatedElements() const
+{
+    return _data.size();
+}
+
+/*!
+ * Enforces memory allocation. This resizes the internal std::vector to the required number of
+ * elements, given by the dimensions of the chunk, i.e. width x heigth.
+ *
+ * As a result, allocatedElements() will return the same as totalVoxelCount().
+ *
+ * \sa totalVoxelCount().
+ */
+template <typename T>
+void VoxelVolume<T>::allocateMemory()
+{
+    _data.resize(totalVoxelCount());
+}
+
+/*!
+ * Enforces memory allocation and if the current number of allocated elements is less than the
+ * number of elements in the chunk, additional copies of \a initValue are appended.
+ *
+ * \sa allocatedElements(), allocateMemory(), fill().
+ */
+template<typename T>
+void VoxelVolume<T>::allocateMemory(const T& initValue)
+{
+    _data.resize(totalVoxelCount(), initValue);
+}
+
+/*!
+ * Fills the volume with \a fillValue. Note that this will overwrite all data stored in the volume.
+ *
+ * This method allocates memory for the data if it has not been allocated before.
+ */
+template <typename T>
+void VoxelVolume<T>::fill(const T &fillValue)
+{
+    if(allocatedElements() != totalVoxelCount())
+        allocateMemory();
+
+    std::fill(_data.begin(), _data.end(), fillValue);
+}
+
+/*!
+ * Returns a constant reference to the stored data vector.
+ */
+template <typename T>
+const std::vector<T>& VoxelVolume<T>::constData() const
+{
+    return _data;
+}
+
+/*!
+ * Returns a constant reference to the stored data vector.
+ */
+template <typename T>
+const std::vector<T>& VoxelVolume<T>::data() const
+{
+    return _data;
+}
+
+/*!
+ * Returns a reference to the stored data vector.
+ */
+template <typename T>
+std::vector<T>& VoxelVolume<T>::data()
+{
+    return _data;
+}
+
+/*!
+ * Returns `true` if the number of allocated elements is equal to the total number of voxels.
+ * Otherwise the function returns `false`.
+ * \sa totalVoxelCount(), allocatedElements()
+ */
+template <typename T>
+bool VoxelVolume<T>::hasData() const
+{
+    return totalVoxelCount() == allocatedElements();
+}
+
+/*!
+ * Returns the number of voxels in all three dimensions.
+ *
+ * For the total number of voxels in the volume, use totalVoxelCount().
+ */
+template <typename T>
+const typename VoxelVolume<T>::Dimensions& VoxelVolume<T>::nbVoxels() const
+{
+    return _dim;
+}
+
+/*!
+ * Returns the offset of the volume.
+ */
+template <typename T>
+const typename VoxelVolume<T>::Offset& VoxelVolume<T>::offset() const
+{
+    return _offset;
+}
+
+/*!
+ * Returns the pointer to the raw data.
+ *
+ * Same as data().data().
+ */
+template <typename T>
+T* VoxelVolume<T>::rawData()
+{
+    return _data.data();
+}
+
+/*!
+ * Returns the pointer to the constant raw data.
+ *
+ * Same as constData().data().
+ */
+template <typename T>
+const T* VoxelVolume<T>::rawData() const
+{
+    return _data.data();
+}
+
+/*!
+ * Returns the total number of voxels in the volume. This is the product of the voxel count in
+ * all three dimensions.
+ */
+template <typename T>
+size_t VoxelVolume<T>::totalVoxelCount() const
+{
+    return size_t(_dim.x) * size_t(_dim.y) * size_t(_dim.z);
+}
+
+/*!
+ * Returns the size of the voxels (in millimeter).
+ */
+template <typename T>
+const typename VoxelVolume<T>::VoxelSize& VoxelVolume<T>::voxelSize() const
+{
+    return _size;
+}
+
+/*!
+ * Returns the smallest edge length of the voxels (in millimeter).
+ */
+template <typename T>
+float VoxelVolume<T>::smallestVoxelSize() const
+{
+    return std::min(std::min(_size.x, _size.y), _size.z);
+}
+
+/*!
+ * Sets the offset of the volume to \a offset. This is expected to be specified in millimeter.
+ */
+template <typename T>
+void VoxelVolume<T>::setVolumeOffset(const Offset& offset)
+{
+    _offset = offset;
+}
+
+/*!
+ * Convenience setter. Sets the offset of the volume using the components \a xOffset, \a yOffset and
+ * \a zOffset. Offset values are expected to be specified in millimeter.
+ */
+template <typename T>
+void VoxelVolume<T>::setVolumeOffset(float xOffset, float yOffset, float zOffset)
+{
+    _offset = { xOffset, yOffset, zOffset };
+}
+
+/*!
+ * Sets the voxel size to \a size. This is expected to be specified in millimeter.
+ */
+template <typename T>
+void VoxelVolume<T>::setVoxelSize(const VoxelSize& size)
+{
+    _size = size;
+}
+
+/*!
+ * Convenience setter. Sets the voxel size using the components \a xSize, \a ySize and
+ * \a zSize. Dimensions are expected to be specified in millimeter.
+ */
+template <typename T>
+void VoxelVolume<T>::setVoxelSize(float xSize, float ySize, float zSize)
+{
+    _size = { xSize, ySize, zSize };
+}
+
+/*!
+ * Returns the number of voxels in all three dimensions.
+ *
+ * Same as nbVoxels().
+ */
+template<typename T>
+const typename VoxelVolume<T>::Dimensions& VoxelVolume<T>::dimensions() const
+{
+    return _dim;
+}
+
+/*!
+ * Move-sets the data vector to \a data. This method performs a dimensionality check and throws an
+ * error if dimensions mismatch.
+ */
+template <typename T>
+void VoxelVolume<T>::setData(std::vector<T>&& data)
+{
+    if(!hasEqualSizeAs(data))
+        throw std::domain_error("data vector has incompatible size for VoxelVolume");
+
+    _data = std::move(data);
+}
+
+/*!
+ * Sets the data vector to \a data. This method performs a dimensionality check and throws an error
+ * if dimensions mismatch.
+ */
+template <typename T>
+void VoxelVolume<T>::setData(const std::vector<T>& data)
+{
+    if(!hasEqualSizeAs(data))
+        throw std::domain_error("data vector has incompatible size for VoxelVolume");
+
+    _data = data;
+}
+
+/*!
+ * Checks if the number of elements in \a other match the voxel count of this instance.
+ */
+template <typename T>
+bool VoxelVolume<T>::hasEqualSizeAs(const std::vector<T>& other) const
+{
+    Q_ASSERT(totalVoxelCount() == other.size());
+    return totalVoxelCount() == other.size();
+}
+
+namespace details {
+    template<typename T>
+    void grindBall(VoxelVolume<T>& volume, float radius)
+    {
+        const auto nbVox = volume.dimensions().x;
+        const auto center = float(nbVox - 1) / 2.0f;
+
+        auto dist2Center = [center](float x, float y, float z)
+        {
+            const auto dx = x - center;
+            const auto dy = y - center;
+            const auto dz = z - center;
+            return dx * dx + dy * dy + dz * dz;
+        };
+
+        const auto voxSize = volume.voxelSize().x;
+        const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+
+        // erase exterior space
+        for(auto x = 0u; x < nbVox; ++x)
+            for(auto y = 0u; y < nbVox; ++y)
+                for(auto z = 0u; z < nbVox; ++z)
+                    if(dist2Center(x, y, z) > rSquaredInVoxel)
+                        volume(x, y, z) = 0.0f;
+    }
+
+    template<typename T>
+    void grindCylinderX(VoxelVolume<T>& volume, float radius)
+    {
+        const auto nbVoxCircle = volume.dimensions().y;
+        const auto nbVoxHeight = volume.dimensions().x;
+        const auto center = float(nbVoxCircle - 1) / 2.0f;
+
+        auto dist2Center = [center](float y, float z)
+        {
+            const auto dy = y - center;
+            const auto dz = z - center;
+            return dy * dy + dz * dz;
+        };
+
+        const auto voxSize = volume.voxelSize().x; // isotropic
+        const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+
+        // erase exterior space
+        for(auto y = 0u; y < nbVoxCircle; ++y)
+            for(auto z = 0u; z < nbVoxCircle; ++z)
+                if(dist2Center(y, z) > rSquaredInVoxel)
+                    for(auto x = 0u; x < nbVoxHeight; ++x)
+                        volume(x, y, z) = 0.0f;
+    }
+
+    template<typename T>
+    void grindCylinderY(VoxelVolume<T>& volume, float radius)
+    {
+        const auto nbVoxCircle = volume.dimensions().x;
+        const auto nbVoxHeight = volume.dimensions().y;
+        const auto center = float(nbVoxCircle - 1) / 2.0f;
+
+        auto dist2Center = [center](float x, float z)
+        {
+            const auto dx = x - center;
+            const auto dz = z - center;
+            return dx * dx + dz * dz;
+        };
+
+        const auto voxSize = volume.voxelSize().x; // isotropic
+        const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+
+        // erase exterior space
+        for(auto x = 0u; x < nbVoxCircle; ++x)
+            for(auto z = 0u; z < nbVoxCircle; ++z)
+                if(dist2Center(x, z) > rSquaredInVoxel)
+                    for(auto y = 0u; y < nbVoxHeight; ++y)
+                        volume(x, y, z) = 0.0f;
+    }
+
+    template<typename T>
+    void grindCylinderZ(VoxelVolume<T>& volume, float radius)
+    {
+        const auto nbVoxCircle = volume.dimensions().x;
+        const auto nbVoxHeight = volume.dimensions().z;
+        const auto center = float(nbVoxCircle - 1) / 2.0f;
+
+        auto dist2Center = [center](float x, float y)
+        {
+            const auto dx = x - center;
+            const auto dy = y - center;
+            return dx * dx + dy * dy;
+        };
+
+        const auto voxSize = volume.voxelSize().x; // isotropic
+        const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
+
+        // erase exterior space
+        for(auto x = 0u; x < nbVoxCircle; ++x)
+            for(auto y = 0u; y < nbVoxCircle; ++y)
+                if(dist2Center(x, y) > rSquaredInVoxel)
+                    for(auto z = 0u; z < nbVoxHeight; ++z)
+                        volume(x, y, z) = 0.0f;
+    }
 }
 
 } // namespace CTL

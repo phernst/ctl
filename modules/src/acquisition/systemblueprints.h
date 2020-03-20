@@ -1,5 +1,5 @@
-#ifndef SYSTEMBLUEPRINTS_H
-#define SYSTEMBLUEPRINTS_H
+#ifndef CTL_SYSTEMBLUEPRINTS_H
+#define CTL_SYSTEMBLUEPRINTS_H
 
 #include "components/allcomponents.h"
 #include "acquisition/ctsystembuilder.h"
@@ -94,4 +94,4 @@ inline AbstractDetector* GenericCarmCT::detector() const
 
 } // namespace CTL
 
-#endif // SYSTEMBLUEPRINTS_H
+#endif // CTL_SYSTEMBLUEPRINTS_H

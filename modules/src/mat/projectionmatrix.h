@@ -1,5 +1,5 @@
-#ifndef PROJECTIONMATRIX_H
-#define PROJECTIONMATRIX_H
+#ifndef CTL_PROJECTIONMATRIX_H
+#define CTL_PROJECTIONMATRIX_H
 
 #include "matrix.h"
 
@@ -169,4 +169,4 @@ inline ProjectionMatrix::ProjectionMatrix(const Matrix<3, 4>& other)
 
 /*! \file */
 
-#endif // PROJECTIONMATRIX_H
+#endif // CTL_PROJECTIONMATRIX_H

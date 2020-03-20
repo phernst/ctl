@@ -1,5 +1,5 @@
-#ifndef DENUTILS_H
-#define DENUTILS_H
+#ifndef CTL_DENUTILS_H
+#define CTL_DENUTILS_H
 
 #include "dfileformat.h"
 
@@ -54,4 +54,4 @@ bool remove(S&& fileName);
 
 #include "den_utils.tpp"
 
-#endif // DENUTILS_H
+#endif // CTL_DENUTILS_H

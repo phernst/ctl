@@ -260,6 +260,36 @@ void filterBuffer_Gauss3(const std::vector<T*>& buffer)
 }
 
 template <typename T>
+void filterBuffer_Gauss5(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 5;
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return + T(0.0625) * pipe(0)
+               + T(0.2500) * pipe(1)
+               + T(0.3750) * pipe(2)
+               + T(0.2500) * pipe(3)
+               + T(0.0625) * pipe(4);
+    });
+}
+
+template <typename T>
+void filterBuffer_Gauss7(const std::vector<T*>& buffer)
+{
+    constexpr uint filterSize = 7;
+    meta_filt<T, filterSize>(buffer, [](const PipeBuffer<T, filterSize>& pipe)
+    {
+        return + T(0.015625) * pipe(0)
+               + T(0.093750) * pipe(1)
+               + T(0.234375) * pipe(2)
+               + T(0.312500) * pipe(3)
+               + T(0.234375) * pipe(4)
+               + T(0.093750) * pipe(5)
+               + T(0.015625) * pipe(6);
+    });
+}
+
+template <typename T>
 void filterBuffer_Average3(const std::vector<T*>& buffer)
 {
     constexpr uint filterSize = 3;
@@ -395,6 +425,10 @@ PtrToFilterFct<T> selectFilterFct(int m)
     // Generic Filters
     case FiltMethod::Gauss3:
         return &filterBuffer_Gauss3;
+    case FiltMethod::Gauss5:
+        return &filterBuffer_Gauss5;
+    case FiltMethod::Gauss7:
+        return &filterBuffer_Gauss7;
     case FiltMethod::Average3:
         return &filterBuffer_Average3;
     case FiltMethod::Median3:
@@ -770,6 +804,67 @@ template void filter<2u>(VoxelVolume<double>& volume, FiltMethod m);
  *
  * In general, values on the borders will be computed by extrapolating with zeros outside, where no
  * valid values are available for the filtering, i.e. within the half filter size.
+ */
+
+/*! \var FiltMethod::Gauss3
+ * This computes a Gaussian smoothing based on bionomial coefficients. The filter size `N` is three.
+ * For this, the standard deviation is
+ * \f$
+ * \sigma=\frac{\sqrt{N-1}}{2}=\frac{1}{\sqrt{2}}\approx0.7071
+ * \f$
+ * and the elements are
+ * \f$
+ * \frac{1}{4}\left[\begin{array}{ccc}
+ * 1 & 2 & 1\end{array}\right]\;.
+ * \f$
+ */
+
+/*! \var FiltMethod::Gauss5
+ * This computes a Gaussian smoothing based on bionomial coefficients. The filter size `N` is five.
+ * For this, the standard deviation is
+ * \f$
+ * \sigma=\frac{\sqrt{N-1}}{2}=1
+ * \f$
+ * and the elements are
+ * \f$
+ * \frac{1}{16}\left[\begin{array}{ccccc}
+ * 1 & 4 & 6 & 4 & 1\end{array}\right]\;.
+ * \f$
+ */
+
+/*! \var FiltMethod::Gauss7
+ * This computes a Gaussian smoothing based on bionomial coefficients. The filter size `N` is seven.
+ * For this, the standard deviation is
+ * \f$
+ * \sigma=\frac{\sqrt{N-1}}{2}=\frac{\sqrt{6}}{2}\approx1.225
+ * \f$
+ * and the elements are
+ * \f$
+ * \frac{1}{64}\left[\begin{array}{ccccccc}
+ * 1 & 6 & 15 & 20 & 15 & 6 & 1\end{array}\right]\;.
+ * \f$
+ */
+
+/*! \var FiltMethod::Average3
+ * This computes the arithmetic mean over three adjacent image values, i.e. the filter elements are
+ * \f$
+ * \frac{1}{3}\left[\begin{array}{ccc}
+ * 1 & 1 & 1\end{array}\right]\;.
+ * \f$
+ */
+
+/*! \var FiltMethod::Median3
+ * This computes the median of three adjacent image values.
+ */
+
+/*! \var FiltMethod::MedianAbs3
+ * This computes the median element wrt. the absolute value of three adjacent image values and
+ * returns the orignial (signed) image value.
+ */
+
+/*! \var FiltMethod::MaxAbs3
+ * This computes the maximum element wrt. the absolute value of three adjacent image values and
+ * returns the orignial (signed) image value.
  */
 
 /*! \var FiltMethod::RamLak

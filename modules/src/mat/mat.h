@@ -1,5 +1,5 @@
-#ifndef MAT_H
-#define MAT_H
+#ifndef CTL_MAT_H
+#define CTL_MAT_H
 
 /*
  * This is a wrapping header, which includes everything from the `CTL::mat` namespace.
@@ -15,4 +15,4 @@
 #include "pmatcomparator.h"
 #include "deg.h"
 
-#endif // MAT_H
+#endif // CTL_MAT_H

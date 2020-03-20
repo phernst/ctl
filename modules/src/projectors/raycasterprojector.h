@@ -1,9 +1,7 @@
-#ifndef RAYCASTERPROJECTOR_H
-#define RAYCASTERPROJECTOR_H
+#ifndef CTL_RAYCASTERPROJECTOR_H
+#define CTL_RAYCASTERPROJECTOR_H
 
 #include "abstractprojector.h"
-#include "abstractprojectorconfig.h"
-
 #include "acquisition/geometryencoder.h"
 
 namespace CTL {
@@ -21,8 +19,12 @@ namespace OCL {
  */
 class RayCasterProjector : public AbstractProjector
 {
-public:
-    class Config : public AbstractProjectorConfig
+    CTL_TYPE_ID(1)
+
+public:    
+    RayCasterProjector();
+
+    class Settings
     {
     public:
         std::vector<uint> deviceIDs; //!< used device IDs in the OpenCLConfig device list (if empty: use all)
@@ -31,23 +33,28 @@ public:
         uint volumeUpSampling = 1; //!< factor that increases the number of voxels in each dimension
         bool interpolate = true; //!< enables interpolation of voxel value (attenuation) during ray casting
 
-        AbstractProjectorConfig* clone() const override;
-        static Config optimizedFor(const VolumeData& volume, const AbstractDetector &detector);
+        static Settings optimizedFor(const VolumeData& volume, const AbstractDetector &detector);
     };
 
-    void configure(const AcquisitionSetup& setup,
-                   const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
 
-private: // members
-    FullGeometry _pMats; //!< full set of projection matrices for all views and modules
-    SingleViewData::Dimensions _viewDim; //!< dimensions of a single view
-    Config _config; //!< configuration of the projector
-    std::string _oclProgramName; //!< OCL program name (depends on if interpolation is enabled)
-    uint _volDim[3]; //!< cache for volume dimensions
+    // SerializationInterface interface
+    QVariant toVariant() const override;
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
 
-private: // methods
+    Settings& settings();
+
+private:
     void initOpenCL();
+    void prepareOpenCLDeviceList();
+
+    Settings _settings; //!< settings of the projector
+    std::string _oclProgramName; //!< OCL program name (depends on if interpolation is enabled)
+    SingleViewData::Dimensions _viewDim; //!< dimensions of a single view
+    uint _volDim[3]; //!< cache for volume dimensions
+    FullGeometry _pMats; //!< full set of projection matrices for all views and modules
 };
 
 /*!
@@ -58,4 +65,4 @@ private: // methods
 } // namespace OCL
 } // namespace CTL
 
-#endif // RAYCASTERPROJECTOR_H
+#endif // CTL_RAYCASTERPROJECTOR_H

@@ -1,28 +1,34 @@
-#ifndef TRIVIALDYNAMICVOLUME_H
-#define TRIVIALDYNAMICVOLUME_H
+#ifndef CTL_TRIVIALDYNAMICVOLUME_H
+#define CTL_TRIVIALDYNAMICVOLUME_H
 
-#include "abstractdynamicvoxelvolume.h"
-
+#include "abstractdynamicvolumedata.h"
+#include <cmath>
 /*
  * NOTE: This is header only.
  */
 
 namespace CTL {
 
-class TrivialDynamicVolume : public AbstractDynamicVoxelVolume
+class TrivialDynamicVolume : public AbstractDynamicVolumeData
 {
-public:
-    using AbstractDynamicVoxelVolume::AbstractDynamicVoxelVolume;
+    // abstract interface
+    protected: void updateVolume() override;
+    public: SpectralVolumeData* clone() const override;
 
-protected:
-    void updateVolume() override;
+public:
+    using AbstractDynamicVolumeData::AbstractDynamicVolumeData;
 };
 
+inline SpectralVolumeData* TrivialDynamicVolume::clone() const
+{
+    return new TrivialDynamicVolume(*this);
+}
+
 /*!
- * Does nothing, i.e. values of the volume are not changed.
+ * Scaling with a factor > 1 that linearly increases with the time (example implementation).
  */
-inline void TrivialDynamicVolume::updateVolume() {}
+inline void TrivialDynamicVolume::updateVolume() { *this *= float(std::abs(0.01 * time()) + 1.0); }
 
 } // namespace CTL
 
-#endif // TRIVIALDYNAMICVOLUME_H
+#endif // CTL_TRIVIALDYNAMICVOLUME_H

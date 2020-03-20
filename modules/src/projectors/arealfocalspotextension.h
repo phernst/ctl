@@ -1,8 +1,7 @@
-#ifndef AREALFOCALSPOTEXTENSION_H
-#define AREALFOCALSPOTEXTENSION_H
+#ifndef CTL_AREALFOCALSPOTEXTENSION_H
+#define CTL_AREALFOCALSPOTEXTENSION_H
 
 #include "projectorextension.h"
-#include "abstractprojectorconfig.h"
 #include "acquisition/acquisitionsetup.h"
 #include <QPointF>
 #include <QSize>
@@ -43,46 +42,59 @@ namespace CTL {
  *  // ...
  *  AcquisitionSetup acquisitionSetup;
  *  // ...
- *  RayCasterProjector::Config projectorConfig;
- *  // ...
  *
  *  // Core part
- *  AbstractProjector* simpleProjector = new RayCasterProjector; // our simple projector
+ *  auto simpleProjector = new RayCasterProjector; // our simple projector
+ *      // optional parameter settings for the projector
+ *      // e.g. simpleProjector->settings().raySampling = 0.1f;
  *
  *  // this is what you do without extension:
- *      // simpleProjector->configurate(acquisitionSetup, projectorConfig);
+ *      // simpleProjector->configure(acquisitionSetup);
  *      // ProjectionData projections = simpleProjector->project(volume);
  *
- * // instead we now do the following
- *  ArealFocalSpotExtension* extendedRayCaster = new ArealFocalSpotExtension;
+ *  // instead we now do the following
+ *  ArealFocalSpotExtension* extension = new ArealFocalSpotExtension;
  *
- *  extendedRayCaster->use(simpleProjector);                            // tell the extension to use the ray caster
- *  extendedRayCaster->setDiscretization(QSize(5, 5));                  // set discretization grid to 5x5 points
- *  extendedRayCaster->configurate(acquisitionSetup, projectorConfig);  // configurate the extension
+ *  extension->use(simpleProjector);                            // tell the extension to use the ray caster
+ *  extension->setDiscretization(QSize(5, 5));                  // set discretization grid to 5x5 points
+ *  extension->configure(acquisitionSetup);                     // configure the simulation
  *
- *  ProjectionData projections = extendedRayCaster->project(volume);    // (compute and) get the final projections
+ *  ProjectionData projections = extension->project(volume);    // (compute and) get the final projections
  * \endcode
  */
 class ArealFocalSpotExtension : public ProjectorExtension
 {
-public:
-    using ProjectorExtension::ProjectorExtension;
+    CTL_TYPE_ID(101)
 
-    void configure(const AcquisitionSetup& setup, const AbstractProjectorConfig& config) override;
+    // abstract interface
+    public: void configure(const AcquisitionSetup& setup) override;
+
+public:
+    ArealFocalSpotExtension() = default;
+    using ProjectorExtension::ProjectorExtension;
+    explicit ArealFocalSpotExtension(const QSize& discretization,
+                                     bool lowExtinctionApproximation = false);
+
     void setDiscretization(const QSize& discretization);
+    void enableLowExtinctionApproximation(bool enable = true);
+
+    // SerializationInterface interface
+    QVariant toVariant() const override;
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
+    bool isLinear() const override;
 
 protected:
     ProjectionData extendedProject(const MetaProjector& nestedProjector) override;
-
-    QSize _discretizationSteps = { 1, 1 }; //!< Requested number of discretization steps in both dimensions.
-    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
-    std::unique_ptr<AbstractProjectorConfig> _config; //!< A copy of the projector configuration.
-
     QVector<QPointF> discretizationGrid() const;
+
+    QSize _discretizationSteps{ 1, 1 }; //!< Requested number of discretization steps in both dimensions.
+    AcquisitionSetup _setup; //!< A copy of the setup used for acquisition.
+    bool _lowExtinctionApprox{ false }; //!< True if low attenuation approximation has been enabled.
 };
 
 } // namespace CTL
 
 /*! \file */
 
-#endif // AREALFOCALSPOTEXTENSION_H
+#endif // CTL_AREALFOCALSPOTEXTENSION_H

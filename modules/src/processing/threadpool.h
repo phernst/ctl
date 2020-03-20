@@ -1,5 +1,5 @@
-#ifndef THREADPOOL_H
-#define THREADPOOL_H
+#ifndef CTL_THREADPOOL_H
+#define CTL_THREADPOOL_H
 
 #include <algorithm>
 #include <thread>
@@ -121,4 +121,4 @@ inline void ThreadPool::enqueueThread(Function&& f, Args&&... args)
 
 } // namespace CTL
 
-#endif // THREADPOOL_H
+#endif // CTL_THREADPOOL_H

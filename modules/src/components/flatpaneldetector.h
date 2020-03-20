@@ -1,5 +1,5 @@
-#ifndef FLATPANELDETECTOR_H
-#define FLATPANELDETECTOR_H
+#ifndef CTL_FLATPANELDETECTOR_H
+#define CTL_FLATPANELDETECTOR_H
 
 #include "abstractdetector.h"
 #include <QSize>
@@ -49,4 +49,4 @@ private:
 
 /*! \file */
 
-#endif // FLATPANELDETECTOR_H
+#endif // CTL_FLATPANELDETECTOR_H

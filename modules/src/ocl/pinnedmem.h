@@ -1,5 +1,5 @@
-#ifndef PINNEDMEM_H
-#define PINNEDMEM_H
+#ifndef CTL_PINNEDMEM_H
+#define CTL_PINNEDMEM_H
 
 #include "openclconfig.h"
 #include <algorithm>
@@ -383,4 +383,4 @@ cl::Buffer& PinnedBufBase<T>::pinnedBuffer() { return _pinnedBuf; }
 } // namespace OCL
 } // namespace CTL
 
-#endif // PINNEDMEM_H
+#endif // CTL_PINNEDMEM_H

@@ -1,5 +1,5 @@
-#ifndef VOXELVOLUMEVIEW_H
-#define VOXELVOLUMEVIEW_H
+#ifndef CTL_VOXELVOLUMEVIEW_H
+#define CTL_VOXELVOLUMEVIEW_H
 
 #include <QWidget>
 #include <QDebug>
@@ -58,4 +58,4 @@ void VoxelVolumeView::setVolumeData(const CTL::VoxelVolume<T> &volume)
     checkIfAutoWindowingRequired();
 }
 
-#endif // VOXELVOLUMEVIEW_H
+#endif // CTL_VOXELVOLUMEVIEW_H

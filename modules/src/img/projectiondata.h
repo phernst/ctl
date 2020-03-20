@@ -1,5 +1,5 @@
-#ifndef PROJECTIONDATA_H
-#define PROJECTIONDATA_H
+#ifndef CTL_PROJECTIONDATA_H
+#define CTL_PROJECTIONDATA_H
 
 #include "singleviewdata.h"
 
@@ -28,8 +28,9 @@ public:
 
         bool operator==(const Dimensions& other) const;
         bool operator!=(const Dimensions& other) const;
+
         std::string info() const;
-        uint totalNbElements() const;
+        size_t totalNbElements() const;
     };
 
     explicit ProjectionData(const SingleViewData::Dimensions& viewDimensions);
@@ -105,4 +106,4 @@ private:
 
 /*! \file */
 
-#endif // PROJECTIONDATA_H
+#endif // CTL_PROJECTIONDATA_H

@@ -1,5 +1,5 @@
-#ifndef VOLUMESLICERWIDGET_H
-#define VOLUMESLICERWIDGET_H
+#ifndef CTL_VOLUMESLICERWIDGET_H
+#define CTL_VOLUMESLICERWIDGET_H
 
 #include "img/voxelvolume.h"
 #ifdef OCL_CONFIG_MODULE_AVAILABLE
@@ -37,4 +37,4 @@ private:
 #endif
 };
 
-#endif // VOLUMESLICERWIDGET_H
+#endif // CTL_VOLUMESLICERWIDGET_H

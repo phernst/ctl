@@ -188,9 +188,6 @@ void MainWindow::on__PB_simulateScan_clicked()
     AbstractProjector* projector = nullptr;
 
     AbstractProjector* actualForwardProj = new OCL::RayCasterProjector;
-    auto actualProjConfig = OCL::RayCasterProjector::Config();
-            //OCL::RayCasterProjector::Config::optimizedFor(_volumeData, *acqSetup.system()->detector());
-
     projector = actualForwardProj;
 
     if(ui->_CB_simulateFocalSpot->isChecked())
@@ -205,9 +202,10 @@ void MainWindow::on__PB_simulateScan_clicked()
         projector = poissonExt;
     }
 
-    projector->configure(acqSetup, actualProjConfig);
+    projector->configure(acqSetup);
 
     QObject::connect(projector->notifier(), &ProjectorNotifier::projectionFinished, this, &MainWindow::showProjectionDone);
+    QObject::connect(projector->notifier(), SIGNAL(information(QString)), ui->_statusBar, SLOT(showMessage(QString)));
 
     if(ui->_RB_hounsfield->isChecked())
     {        

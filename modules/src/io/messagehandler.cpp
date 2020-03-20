@@ -167,6 +167,11 @@ bool MessageHandler::writeLogFile() const
     return out.status() == QTextStream::Ok;
 }
 
+void MessageHandler::messageFromSignal(QString msg)
+{
+    processMessage(QtInfoMsg, QMessageLogContext(), msg);
+}
+
 
 void MessageHandler::qInstaller(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {

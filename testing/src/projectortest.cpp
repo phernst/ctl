@@ -52,14 +52,14 @@ void ProjectorTest::testSpectralExtension()
     system.addComponent(std::move(tube));
     system.addComponent(std::move(tubeGantry));
 
-    auto volume = SpectralVolumeData::createBall(40.0f, 0.5f, 1.0f,
+    auto volume = SpectralVolumeData::ball(40.0f, 0.5f, 1.0f,
                                                  database::attenuationModel(database::Composite::Water));
-    auto volume2 = SpectralVolumeData::createBall(30.0f, 0.5f, 0.3f,
+    auto volume2 = SpectralVolumeData::ball(30.0f, 0.5f, 0.3f,
                                                   database::attenuationModel(database::Composite::Bone_Cortical));
 
     CompositeVolume compVol;
-    compVol.addMaterialVolume(volume);
-    compVol.addMaterialVolume(volume2);
+    compVol.addSubVolume(volume);
+    compVol.addSubVolume(volume2);
 
     auto photonsPerPixel = 100000.0;
     auto simpleSys = SimpleCTsystem::fromCTsystem(system);
@@ -78,9 +78,8 @@ void ProjectorTest::testSpectralExtension()
     }
 
     // configure a projector and project volume
-    OCL::RayCasterProjector::Config rcConfig;
-    rcConfig.interpolate = ENABLE_INTERPOLATION_IN_RAYCASTER;
     OCL::RayCasterProjector* myProjector = new OCL::RayCasterProjector;
+    myProjector->settings().interpolate = ENABLE_INTERPOLATION_IN_RAYCASTER;
 
     PoissonNoiseExtension* noiseExt = new PoissonNoiseExtension;
     noiseExt->setFixedSeed(1337u);
@@ -90,7 +89,7 @@ void ProjectorTest::testSpectralExtension()
     spectralExt->setSpectralSamplingResolution(15.0f);
     //spectralExt->setSpectralRange(0,150);
     spectralExt->use(noiseExt);
-    spectralExt->configure(setup, rcConfig);
+    spectralExt->configure(setup);
 
 
     io::BaseTypeIO<io::DenFileIO> io;
@@ -167,10 +166,9 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
     setup.setNbViews(1);
     setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0, projAngle, 0.0));
 
-    auto rcConfig = OCL::RayCasterProjector::Config();
-    rcConfig.interpolate = ENABLE_INTERPOLATION_IN_RAYCASTER;
     auto projector = makeProjector<OCL::RayCasterProjector>();
-    projector->configure(setup, rcConfig);
+    projector->settings().interpolate = ENABLE_INTERPOLATION_IN_RAYCASTER;
+    projector->configure(setup);
 
     auto projectionsClean = projector->project(_testVolume);
 
@@ -186,7 +184,7 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
                              makeExtension<ArealFocalSpotExtension>();
 
     compoundProjector->setDiscretization(QSize(2, 2));
-    compoundProjector->configure(setup, rcConfig);
+    compoundProjector->configure(setup);
 
     // repeatedly compute noisy projections
     auto projsWithNoise = compoundProjector->project(_testVolume);

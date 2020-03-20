@@ -1,5 +1,5 @@
-#ifndef GENERICDETECTOR_H
-#define GENERICDETECTOR_H
+#ifndef CTL_GENERICDETECTOR_H
+#define CTL_GENERICDETECTOR_H
 
 #include "abstractdetector.h"
 #include "mat/matrix_utils.h"
@@ -61,4 +61,4 @@ private:
 
 /*! \file */
 
-#endif // GENERICDETECTOR_H
+#endif // CTL_GENERICDETECTOR_H

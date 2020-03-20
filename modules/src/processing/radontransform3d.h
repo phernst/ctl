@@ -1,5 +1,5 @@
-#ifndef RADONTRANSFORM3D_H
-#define RADONTRANSFORM3D_H
+#ifndef CTL_RADONTRANSFORM3D_H
+#define CTL_RADONTRANSFORM3D_H
 
 #include "img/voxelvolume.h"
 #include "mat/matrix.h"
@@ -175,4 +175,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // RADONTRANSFORM3D_H
+#endif // CTL_RADONTRANSFORM3D_H

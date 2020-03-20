@@ -1,5 +1,5 @@
-#ifndef SINGLEVIEWDATA_H
-#define SINGLEVIEWDATA_H
+#ifndef CTL_SINGLEVIEWDATA_H
+#define CTL_SINGLEVIEWDATA_H
 
 #include "chunk2d.h"
 #include "modulelayout.h"
@@ -29,7 +29,9 @@ public:
 
         bool operator==(const Dimensions& other) const;
         bool operator!=(const Dimensions& other) const;
+
         std::string info() const;
+        size_t totalNbElements() const;
     };
 
     explicit SingleViewData(const ModuleData::Dimensions& moduleDimensions);
@@ -101,4 +103,4 @@ private:
 
 /*! \file */
 
-#endif // SINGLEVIEWDATA_H
+#endif // CTL_SINGLEVIEWDATA_H

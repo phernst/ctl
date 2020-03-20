@@ -1,5 +1,5 @@
-#ifndef ACQUISITIONVISUALIZERWIDGET_H
-#define ACQUISITIONVISUALIZERWIDGET_H
+#ifndef CTL_ACQUISITIONVISUALIZERWIDGET_H
+#define CTL_ACQUISITIONVISUALIZERWIDGET_H
 
 #include "systemvisualizerwidget.h"
 #include"acquisition/acquisitionsetup.h"
@@ -37,4 +37,4 @@ private slots:
     void updateAnimation();
 };
 
-#endif // ACQUISITIONVISUALIZERWIDGET_H
+#endif // CTL_ACQUISITIONVISUALIZERWIDGET_H

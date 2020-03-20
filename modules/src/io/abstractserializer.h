@@ -1,11 +1,12 @@
-#ifndef ABSTRACTSERIALIZER_H
-#define ABSTRACTSERIALIZER_H
+#ifndef CTL_ABSTRACTSERIALIZER_H
+#define CTL_ABSTRACTSERIALIZER_H
 
 #include "acquisition/abstractpreparestep.h"
 #include "acquisition/acquisitionsetup.h"
 #include "acquisition/ctsystem.h"
 #include "components/systemcomponent.h"
 #include "models/abstractdatamodel.h"
+#include "projectors/abstractprojector.h"
 
 namespace CTL {
 
@@ -17,6 +18,7 @@ public:
     // convenience declarations (helps with IDE suggestions)
     void serialize(const AbstractDataModel& model, const QString& fileName) const;
     void serialize(const AbstractPrepareStep& prepStep, const QString& fileName) const;
+    void serialize(const AbstractProjector& prepStep, const QString& fileName) const;
     void serialize(const AcquisitionSetup& setup, const QString& fileName) const;
     void serialize(const CTsystem& system, const QString& fileName) const;
     void serialize(const SystemComponent& component, const QString& fileName) const;
@@ -30,6 +32,7 @@ public:
     public:virtual std::unique_ptr<SystemComponent> deserializeComponent(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<AbstractDataModel> deserializeDataModel(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<AbstractPrepareStep> deserializePrepareStep(const QString& fileName) const = 0;
+    public:virtual std::unique_ptr<AbstractProjector> deserializeProjector(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<CTsystem> deserializeSystem(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<AcquisitionSetup> deserializeAquisitionSetup(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<SerializationInterface> deserializeMiscObject(const QString& fileName) const = 0;
@@ -46,6 +49,8 @@ private:
     std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, AbstractDataModel*);
     template<class DerivedType>
     std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, AbstractPrepareStep*);
+    template<class DerivedType>
+    std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, AbstractProjector*);
     template<class DerivedType>
     std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, CTsystem*);
     template<class DerivedType>
@@ -70,6 +75,11 @@ inline void AbstractSerializer::serialize(const AbstractPrepareStep& prepStep,
                                    const QString& fileName) const
 {
     serialize(static_cast<const SerializationInterface&>(prepStep), fileName);
+}
+inline void AbstractSerializer::serialize(const AbstractProjector& projector,
+                                          const QString& fileName) const
+{
+    serialize(static_cast<const SerializationInterface&>(projector), fileName);
 }
 
 inline void AbstractSerializer::serialize(const AcquisitionSetup& setup, const QString& fileName) const
@@ -122,6 +132,15 @@ std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QStrin
         return nullptr;
 }
 template<class DerivedType>
+std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, AbstractProjector*)
+{
+    auto uPtr = deserializeProjector(fileName);
+    if(dynamic_cast<DerivedType*>(uPtr.get()))
+        return std::unique_ptr<DerivedType>(static_cast<DerivedType*>(uPtr.release()));
+    else
+        return nullptr;
+}
+template<class DerivedType>
 std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, CTsystem*)
 {
     auto uPtr = deserializeSystem(fileName);
@@ -151,4 +170,4 @@ std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QStrin
 
 } // namespace CTL
 
-#endif // ABSTRACTSERIALIZER_H
+#endif // CTL_ABSTRACTSERIALIZER_H

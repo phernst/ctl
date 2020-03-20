@@ -1,5 +1,5 @@
-#ifndef XRAYLASER_H
-#define XRAYLASER_H
+#ifndef CTL_XRAYLASER_H
+#define CTL_XRAYLASER_H
 
 #include "abstractsource.h"
 
@@ -56,4 +56,4 @@ private:
 
 } // namespace CTL
 
-#endif // XRAYLASER_H
+#endif // CTL_XRAYLASER_H

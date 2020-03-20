@@ -90,6 +90,11 @@ float ConstantModel::valueAt(float) const { return _amplitude; }
 
 AbstractDataModel* ConstantModel::clone() const { return new ConstantModel(*this); }
 
+float ConstantModel::binIntegral(float, float binWidth) const
+{
+    return binWidth * _amplitude;
+}
+
 /*!
  * Returns the parameters of this instance as QVariant.
  *

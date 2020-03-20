@@ -1,5 +1,5 @@
-#ifndef STEPFUNCTIONMODELS_H
-#define STEPFUNCTIONMODELS_H
+#ifndef CTL_STEPFUNCTIONMODELS_H
+#define CTL_STEPFUNCTIONMODELS_H
 
 #include "abstractdatamodel.h"
 
@@ -32,11 +32,12 @@ private:
     StepDirection _stepDirection;
 };
 
-class ConstantModel : public AbstractDataModel
+class ConstantModel : public AbstractIntegrableDataModel
 {
     CTL_TYPE_ID(51)
 
     public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
     public: AbstractDataModel* clone() const override;
 
 public:
@@ -70,4 +71,4 @@ private:
 
 } // namespace CTL
 
-#endif // STEPFUNCTIONMODELS_H
+#endif // CTL_STEPFUNCTIONMODELS_H

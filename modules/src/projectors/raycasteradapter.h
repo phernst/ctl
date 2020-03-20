@@ -1,8 +1,7 @@
-#ifndef RAYCASTERADAPTER_H
-#define RAYCASTERADAPTER_H
+#ifndef CTL_RAYCASTERADAPTER_H
+#define CTL_RAYCASTERADAPTER_H
 
 #include "abstractprojector.h"
-#include "abstractprojectorconfig.h"
 #include "mat/mat.h"
 #include "raycaster.h"
 
@@ -12,28 +11,25 @@ namespace OCL {
 class RayCasterAdapter : public AbstractProjector
 {
 public:
-    class Config : public AbstractProjectorConfig
+    class Config
     {
     public:
         float increment_mm{ 0.1f };
-
-        AbstractProjectorConfig* clone() const override;
     };
 
-    void configure(const AcquisitionSetup& setup,
-                   const AbstractProjectorConfig& config) override;
+    void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
+
+    void applyRayCasterConfig(const Config& rcConfig);
 
 protected:
     RayCaster _rayCaster;
 
-    QVector<ProjectionMatrix> _pMatsVectorized;
     SingleViewData::Dimensions _viewDim;
-
-    void applyRayCasterConfig(const Config& rcConfig);
+    QVector<ProjectionMatrix> _pMatsVectorized;
 };
 
 } // namespace OCL
 } // namespace CTL
 
-#endif // RAYCASTERADAPTER_H
+#endif // CTL_RAYCASTERADAPTER_H

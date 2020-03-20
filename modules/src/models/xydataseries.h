@@ -1,5 +1,5 @@
-#ifndef XYDATASERIES_H
-#define XYDATASERIES_H
+#ifndef CTL_XYDATASERIES_H
+#define CTL_XYDATASERIES_H
 
 #include "abstractdatamodel.h"
 #include "pointseriesbase.h"
@@ -41,4 +41,4 @@ public:
 
 } // namespace CTL
 
-#endif // XYDATASERIES_H
+#endif // CTL_XYDATASERIES_H

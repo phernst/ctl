@@ -1,5 +1,5 @@
-#ifndef PROJECTIONVIEW_H
-#define PROJECTIONVIEW_H
+#ifndef CTL_PROJECTIONVIEW_H
+#define CTL_PROJECTIONVIEW_H
 
 #include <QWidget>
 #include "img/projectiondata.h"
@@ -35,4 +35,4 @@ private slots:
     void autoWindowing();
 
 };
-#endif // PROJECTIONVIEW_H
+#endif // CTL_PROJECTIONVIEW_H

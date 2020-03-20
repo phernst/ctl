@@ -1,5 +1,5 @@
-#ifndef GEOMETRYDECODER_H
-#define GEOMETRYDECODER_H
+#ifndef CTL_GEOMETRYDECODER_H
+#define CTL_GEOMETRYDECODER_H
 
 #include "acquisitionsetup.h"
 #include "viewgeometry.h"
@@ -77,4 +77,4 @@ private:
 
 /*! \file */
 
-#endif // GEOMETRYDECODER_H
+#endif // CTL_GEOMETRYDECODER_H

@@ -1,5 +1,5 @@
-#ifndef MATRIX_TYPES_H
-#define MATRIX_TYPES_H
+#ifndef CTL_MATRIX_TYPES_H
+#define CTL_MATRIX_TYPES_H
 
 #include "homography.h"
 #include "projectionmatrix.h"
@@ -16,4 +16,4 @@ typedef mat::Matrix<3, 1> Vector3x1;
 
 } // namespace CTL
 
-#endif // MATRIX_TYPES_H
+#endif // CTL_MATRIX_TYPES_H

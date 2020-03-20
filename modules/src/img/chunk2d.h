@@ -1,7 +1,9 @@
-#ifndef CHUNK2D_H
-#define CHUNK2D_H
+#ifndef CTL_CHUNK2D_H
+#define CTL_CHUNK2D_H
 
 #include <QtGlobal>
+#include <algorithm>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -26,7 +28,6 @@ namespace CTL {
 template <typename T>
 class Chunk2D
 {
-
 public:
     struct Dimensions
     {
@@ -35,7 +36,9 @@ public:
 
         bool operator==(const Dimensions& other) const;
         bool operator!=(const Dimensions& other) const;
+
         std::string info() const;
+        size_t totalNbElements() const;
     };
 
     explicit Chunk2D(const Dimensions& dimensions);
@@ -71,13 +74,13 @@ public:
 
     Chunk2D& operator+=(const Chunk2D<T>& other);
     Chunk2D& operator-=(const Chunk2D<T>& other);
-    Chunk2D& operator*=(T factor);
-    Chunk2D& operator/=(T divisor);
+    Chunk2D& operator*=(const T& factor);
+    Chunk2D& operator/=(const T& divisor);
 
     Chunk2D operator+(const Chunk2D<T>& other) const;
     Chunk2D operator-(const Chunk2D<T>& other) const;
-    Chunk2D operator*(T factor) const;
-    Chunk2D operator/(T divisor) const;
+    Chunk2D operator*(const T& factor) const;
+    Chunk2D operator/(const T& divisor) const;
 
     // setter methods
     void setData(std::vector<T>&& data);
@@ -90,9 +93,8 @@ public:
     void freeMemory();
 
 protected:
-    Dimensions _dim; //!< The dimensions (width x height) of the chunk.
-
     std::vector<T> _data; //!< The internal data of the chunk.
+    Dimensions _dim; //!< The dimensions (width x height) of the chunk.
 
 private:
     bool hasEqualSizeAs(const std::vector<T>& other) const;
@@ -111,4 +113,4 @@ private:
 
 /*! \file */
 
-#endif // CHUNK2D_H
+#endif // CTL_CHUNK2D_H

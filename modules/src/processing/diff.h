@@ -1,5 +1,5 @@
-#ifndef DIFF_H
-#define DIFF_H
+#ifndef CTL_DIFF_H
+#define CTL_DIFF_H
 
 typedef unsigned int uint; //!< Alias for unsigned int
 
@@ -56,4 +56,4 @@ extern template void diff<2u>(VoxelVolume<double>& volume, DiffMethod m);
 
 ///@}
 
-#endif // DIFF_H
+#endif // CTL_DIFF_H

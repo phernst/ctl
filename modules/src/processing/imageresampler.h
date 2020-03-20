@@ -1,5 +1,5 @@
-#ifndef IMAGERESAMPLER_H
-#define IMAGERESAMPLER_H
+#ifndef CTL_IMAGERESAMPLER_H
+#define CTL_IMAGERESAMPLER_H
 
 #include "img/chunk2d.h"
 #include "ocl/openclconfig.h"
@@ -17,22 +17,24 @@ public:
                    const SamplingRange& rangeDim2,
                    uint oclDeviceNb = 0);
 
-    void setSamplingRanges(const SamplingRange& rangeDim1,
-                           const SamplingRange& rangeDim2);
-
     Chunk2D<float> image() const;
+    const Chunk2D<float>::Dimensions& imgDim() const;
+    const SamplingRange& rangeDim1() const;
+    const SamplingRange& rangeDim2() const;
+
     Chunk2D<float> resample(const std::vector<float>& samplingPtsDim1,
                             const std::vector<float>& samplingPtsDim2) const;
 
     std::vector<float> sample(const std::vector<Generic2DCoord>& samplingPts) const;
 
-    const Chunk2D<float>::Dimensions& imgDim() const;
+    void setSamplingRanges(const SamplingRange& rangeDim1,
+                           const SamplingRange& rangeDim2);
 
 private:
-    Chunk2D<float>::Dimensions _imgDim; //!< Dimensions of the image
+    Chunk2D<float>::Dimensions _imgDim; //!< Dimensions of the image.
 
-    SamplingRange _rangeDim1;
-    SamplingRange _rangeDim2;
+    SamplingRange _rangeDim1; //!< Sampling range of the first dimension.
+    SamplingRange _rangeDim2; //!< Sampling range of the second dimension.
 
     cl::CommandQueue _q;
     cl::Kernel* _kernel;
@@ -46,4 +48,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // IMAGERESAMPLER_H
+#endif // CTL_IMAGERESAMPLER_H

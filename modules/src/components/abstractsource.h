@@ -1,5 +1,5 @@
-#ifndef ABSTRACTSOURCE_H
-#define ABSTRACTSOURCE_H
+#ifndef CTL_ABSTRACTSOURCE_H
+#define CTL_ABSTRACTSOURCE_H
 #include "mat/matrix_types.h"
 #include "models/intervaldataseries.h"
 #include "models/abstractxrayspectrummodel.h"
@@ -86,6 +86,7 @@ public:
 
     // getter methods
     EnergyRange energyRange() const;
+    float meanEnergy() const;
     double photonFlux() const;
     double fluxModifier() const;
     const QSizeF& focalSpotSize() const;
@@ -435,7 +436,17 @@ inline EnergyRange AbstractSource::energyRange() const
         return nomRange;
 
     return { std::max(nomRange.start(), _restrictedEnergyWindow.start()),
-             std::min(nomRange.end(), _restrictedEnergyWindow.end()) };
+                std::min(nomRange.end(), _restrictedEnergyWindow.end()) };
+}
+
+/*!
+ * Returns the mean energy (in keV) of the spectrum emitted by this instance. Spectrum sampling is
+ * performed using the number of samples returned by spectrumDiscretizationHint(). Note that, in
+ * general, this is only an approximative mean.
+ */
+inline float AbstractSource::meanEnergy() const
+{
+    return spectrum(spectrumDiscretizationHint()).centroid();
 }
 
 /*!
@@ -472,4 +483,4 @@ inline void AbstractSource::setFluxModifier(double modifier) { _fluxModifier = m
 
 } // namespace CTL
 
-#endif // ABSTRACTSOURCE_H
+#endif // CTL_ABSTRACTSOURCE_H

@@ -1,5 +1,5 @@
-#ifndef DATAMODELOPERATIONS_H
-#define DATAMODELOPERATIONS_H
+#ifndef CTL_DATAMODELOPERATIONS_H
+#define CTL_DATAMODELOPERATIONS_H
 
 #include "abstractdatamodel.h"
 
@@ -89,4 +89,4 @@ public:
 
 } // namespace CTL
 
-#endif // DATAMODELOPERATIONS_H
+#endif // CTL_DATAMODELOPERATIONS_H

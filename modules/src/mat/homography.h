@@ -1,5 +1,5 @@
-#ifndef HOMOGRAPHY_H
-#define HOMOGRAPHY_H
+#ifndef CTL_HOMOGRAPHY_H
+#define CTL_HOMOGRAPHY_H
 
 #include "matrix.h"
 #include <qnamespace.h>
@@ -65,4 +65,4 @@ public:
 } // namespace mat
 } // namespace CTL
 
-#endif // HOMOGRAPHY_H
+#endif // CTL_HOMOGRAPHY_H

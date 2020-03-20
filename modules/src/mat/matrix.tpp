@@ -543,6 +543,12 @@ Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>
     constexpr auto rowInc = toRow >= fromRow ? 1u : static_cast<uint>(-1);
     constexpr auto colInc = toCol >= fromCol ? 1u : static_cast<uint>(-1);
 
+    // suppress MSVS compiler warning `4307` caused by an (intended) integer overflow
+#ifdef _MSC_VER
+    #pragma warning( push )
+    #pragma warning( disable : 4307 )
+#endif
+
     for(auto row = fromRow, endRow = toRow + rowInc, subRow = 0u;
         row != endRow;
         row += rowInc, ++subRow)
@@ -550,6 +556,10 @@ Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>
             col != endCol;
             col += colInc, ++subCol)
             ret(subRow, subCol) = (*this)(row, col);
+
+#ifdef _MSC_VER
+    #pragma warning( pop )
+#endif
 
     return ret;
 }
@@ -572,10 +582,20 @@ auto Matrix<Rows, Cols>::subMat() const -> Matrix<vecRowDim(from, to), vecColDim
     Matrix<vecRowDim(from, to), vecColDim(from, to)> ret;
     constexpr auto inc = to >= from ? 1u : static_cast<uint>(-1);
 
+    // suppress MSVS compiler warning `4307` caused by an (intended) integer overflow
+#ifdef _MSC_VER
+    #pragma warning( push )
+    #pragma warning( disable : 4307 )
+#endif
+
     for(auto el = from, endEl = to + inc, sub = 0u;
         el != endEl;
         el += inc, ++sub)
         ret(sub) = (*this)(el);
+
+#ifdef _MSC_VER
+    #pragma warning( pop )
+#endif
 
     return ret;
 }

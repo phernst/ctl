@@ -555,9 +555,9 @@ std::string ProjectionData::Dimensions::info() const
 /*!
  * Returns the total number of elements for data with this dimensions.
  */
-uint ProjectionData::Dimensions::totalNbElements() const
+size_t ProjectionData::Dimensions::totalNbElements() const
 {
-    return nbChannels * nbRows * nbModules * nbViews;
+    return size_t(nbChannels) * size_t(nbRows) * size_t(nbModules) * size_t(nbViews);
 }
 
 /*!

@@ -1,7 +1,7 @@
 /* Template details / switches for DFileFormat template class */
 
-#ifndef DEN_TPL_DEDUCT_H
-#define DEN_TPL_DEDUCT_H
+#ifndef CTL_DEN_TPL_DEDUCT_H
+#define CTL_DEN_TPL_DEDUCT_H
 
 #include <string>
 
@@ -84,4 +84,4 @@ namespace _tpl_deduct {
 } // namespace CTL
 
 
-#endif // DEN_TPL_DEDUCT_H
+#endif // CTL_DEN_TPL_DEDUCT_H

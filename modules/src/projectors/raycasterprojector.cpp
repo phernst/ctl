@@ -18,6 +18,8 @@ const std::string CL_PROGRAM_NAME_NO_INTERP = "rayCaster_noInterp"; //!< OCL pro
 namespace CTL {
 namespace OCL {
 
+DECLARE_SERIALIZABLE_TYPE(RayCasterProjector)
+
 namespace {
 // helper classes
 struct VolumeSpecs
@@ -49,12 +51,50 @@ std::vector<cl::Buffer> createReadOnlyBuffers(uint nbBuffers, const PtrWrapper& 
                                               const std::vector<cl::CommandQueue>& queues);
 } // unnamed namespace
 
+RayCasterProjector::RayCasterProjector()
+{
+    initOpenCL();
+}
+
+// Use SerializationInterface::toVariant() documentation.
+QVariant RayCasterProjector::toVariant() const
+{
+    QVariantMap ret = SerializationInterface::toVariant().toMap();
+
+    ret.insert("#", "RayCasterProjector");
+
+    return ret;
+}
+
+QVariant RayCasterProjector::parameter() const
+{
+    QVariantMap ret = AbstractProjector::parameter().toMap();
+
+    ret.insert("Rays per pixel X", _settings.raysPerPixel[0]);
+    ret.insert("Rays per pixel Y", _settings.raysPerPixel[1]);
+    ret.insert("Ray sampling step length", _settings.raySampling);
+    ret.insert("Volume upsampling factor", _settings.volumeUpSampling);
+    ret.insert("Interpolate", _settings.interpolate);
+
+    return ret;
+}
+
+void RayCasterProjector::setParameter(const QVariant& parameter)
+{
+    QVariantMap map = parameter.toMap();
+
+    _settings.raysPerPixel[0] = map.value("Rays per pixel X", 1u).toUInt();
+    _settings.raysPerPixel[1] = map.value("Rays per pixel Y", 1u).toUInt();
+    _settings.raySampling = map.value("Ray sampling step length", 0.3f).toFloat();
+    _settings.volumeUpSampling = map.value("Volume upsampling factor", 1u).toUInt();
+    _settings.interpolate = map.value("Interpolate", true).toBool();
+}
+
 /*!
  * Configures the projector. This extracts all information that is required for projecting with
- * this projector from the \a setup and \a config.
+ * this projector from the \a setup.
  */
-void RayCasterProjector::configure(const AcquisitionSetup &setup,
-                                   const AbstractProjectorConfig& config)
+void RayCasterProjector::configure(const AcquisitionSetup& setup)
 {
     // get projection matrices
     _pMats = GeometryEncoder::encodeFullGeometry(setup);
@@ -64,24 +104,32 @@ void RayCasterProjector::configure(const AcquisitionSetup &setup,
     _viewDim.nbRows = uint(detectorPixels.height());
     _viewDim.nbChannels = uint(detectorPixels.width());
     _viewDim.nbModules = setup.system()->detector()->nbDetectorModules();
+}
 
-    // prepare RayCaster
-    Q_ASSERT(dynamic_cast<const Config*>(&config));
-    _config = static_cast<const Config&>(config);
+//void RayCasterProjector::setConfiguration(const Config& config)
+//{
+//    // prepare RayCaster
+//    _settings = config;
 
-    Q_ASSERT(_config.raysPerPixel[0]);
-    Q_ASSERT(_config.raysPerPixel[1]);
-    Q_ASSERT(!qFuzzyIsNull(_config.raySampling));
+//    Q_ASSERT(_settings.raysPerPixel[0]);
+//    Q_ASSERT(_settings.raysPerPixel[1]);
+//    Q_ASSERT(!qFuzzyIsNull(_settings.raySampling));
 
-    if(_config.interpolate) {
-        _oclProgramName = CL_PROGRAM_NAME_INTERP;
-    }
-    else {
-        _oclProgramName = CL_PROGRAM_NAME_NO_INTERP;
-        _config.volumeUpSampling = 1;
-    }
+//    if(_settings.interpolate) {
+//        _oclProgramName = CL_PROGRAM_NAME_INTERP;
+//    }
+//    else {
+//        _oclProgramName = CL_PROGRAM_NAME_NO_INTERP;
+//        _settings.volumeUpSampling = 1;
+//    }
 
-    initOpenCL();
+//    initOpenCL();
+//}
+
+
+RayCasterProjector::Settings& RayCasterProjector::settings()
+{
+    return _settings;
 }
 
 /*!
@@ -90,6 +138,18 @@ void RayCasterProjector::configure(const AcquisitionSetup &setup,
  */
 ProjectionData RayCasterProjector::project(const VolumeData& volume)
 {
+    // prepare the device list to be used by OpenCL
+    prepareOpenCLDeviceList();
+
+    // choose correct OpenCL program
+    if(_settings.interpolate) {
+        _oclProgramName = CL_PROGRAM_NAME_INTERP;
+    }
+    else {
+        _oclProgramName = CL_PROGRAM_NAME_NO_INTERP;
+        _settings.volumeUpSampling = 1;
+    }
+
     // the returned object
     ProjectionData ret(_viewDim);
     // check for a valid volume
@@ -102,12 +162,11 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         qWarning() << "voxel size is zero or negative";
 
     // projection dimensions
-    const uint nbViews = _pMats.size();
-    const size_t pixelPerModule = size_t(_viewDim.nbRows) * _viewDim.nbChannels;
-    const size_t pixelPerView = size_t(_viewDim.nbModules) * pixelPerModule;
+    const auto nbViews = _pMats.size();
+    const auto pixelPerView = _viewDim.totalNbElements();
 
     // upsample volume (if volumeUpSampling > 1)
-    const auto volumeSpecs = VolumeSpecs::upSampleVolume(volume, _config.volumeUpSampling);
+    const auto volumeSpecs = VolumeSpecs::upSampleVolume(volume, _settings.volumeUpSampling);
 
     // volume specs
     const auto& volDim = volumeSpecs.volDim;
@@ -117,7 +176,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
 
     // determine ray step length in mm
     cl_float smallestVoxelSize = qMin(qMin(voxelSize.s[0], voxelSize.s[1]), voxelSize.s[2]);
-    cl_float increment_mm = smallestVoxelSize * _config.raySampling;
+    cl_float increment_mm = smallestVoxelSize * _settings.raySampling;
 
     try // exception handling
     {
@@ -128,7 +187,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
 
         // context and number of used devices
         auto& context = oclConfig.context();
-        const auto nbUsedDevs = qMin(uint(_config.deviceIDs.size()), nbViews);
+        const auto nbUsedDevs = qMin(uint(_settings.deviceIDs.size()), nbViews);
         if(nbUsedDevs == 0)
             throw std::runtime_error("no devices or no views for RayCasterProjector::project");
         qDebug() << "number of used devices for RayCasterProjector: " << nbUsedDevs;
@@ -145,11 +204,11 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         std::vector<cl::CommandQueue> queues;
         queues.reserve(nbUsedDevs);
         const auto& availDevices = oclConfig.devices();
-        for(uint dev = 0; dev < nbUsedDevs; ++dev)
-            queues.emplace_back(context, availDevices[_config.deviceIDs[dev]]);
+        for(auto dev = 0u; dev < nbUsedDevs; ++dev)
+            queues.emplace_back(context, availDevices[_settings.deviceIDs[dev]]);
 
         // Prepare input data
-        cl_uint2 raysPerPixel{ { _config.raysPerPixel[0], _config.raysPerPixel[1] } };
+        cl_uint2 raysPerPixel{ { _settings.raysPerPixel[0], _settings.raysPerPixel[1] } };
         cl_float3 volCorner = volumeCorner(volDim, voxelSize, volOffset);
         std::vector<cl_double16> QRs(_viewDim.nbModules);
 
@@ -158,7 +217,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         std::vector<PinnedBufHostWrite<cl_double16>> qrBufs;
         sourceBufs.reserve(nbUsedDevs);
         qrBufs.reserve(nbUsedDevs);
-        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+        for(auto dev = 0u; dev < nbUsedDevs; ++dev)
         {
             sourceBufs.emplace_back(1, queues[dev]);
             qrBufs.emplace_back(_viewDim.nbModules, queues[dev]);
@@ -177,16 +236,16 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         std::vector<cl::Image3D> volumeImgs;
         std::vector<cl::Buffer> volumeBufs;
         std::vector<cl::Buffer> volumeDimensionsBufs;
-        if(_config.interpolate) // volume is cl::Image3D
+        if(_settings.interpolate) // volume is cl::Image3D
         {
             volumeImgs.reserve(nbUsedDevs);
-            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            for(auto dev = 0u; dev < nbUsedDevs; ++dev)
                 volumeImgs.emplace_back(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                                         cl::ImageFormat(CL_INTENSITY, CL_FLOAT),
                                         volDim[0], volDim[1], volDim[2]);
             cl::size_t<3> zeroVecOrigin;
             zeroVecOrigin[0] = zeroVecOrigin[1] = zeroVecOrigin[2] = 0;
-            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            for(auto dev = 0u; dev < nbUsedDevs; ++dev)
                 queues[dev].enqueueWriteImage(volumeImgs[dev], CL_FALSE, zeroVecOrigin, volDim,
                                               0, 0, volumeDataPtr);
 
@@ -195,7 +254,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         {
             volumeBufs.reserve(nbUsedDevs);
             const auto memSize = sizeof(float) * volDim[0] * volDim[1] * volDim[2];
-            for(uint dev = 0; dev < nbUsedDevs; ++dev)
+            for(auto dev = 0u; dev < nbUsedDevs; ++dev)
             {
                 volumeBufs.emplace_back(context, CL_MEM_READ_ONLY | CL_MEM_HOST_WRITE_ONLY,
                                         memSize);
@@ -212,7 +271,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         // Allocate output buffer: pinned (page-locked) projection buffer for each device
         std::vector<PinnedBufHostRead<float>> projectionBuffers;
         projectionBuffers.reserve(nbUsedDevs);
-        for(uint dev = 0; dev < nbUsedDevs; ++dev)
+        for(auto dev = 0u; dev < nbUsedDevs; ++dev)
             projectionBuffers.emplace_back(pixelPerView, queues[dev]);
 
         // Set kernel arguments
@@ -226,7 +285,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
             kernel->setArg(4, voxelSizeBufs[dev]);
             kernel->setArg(5, qrBufs[dev].devBuffer());
             kernel->setArg(6, projectionBuffers[dev].devBuffer());
-            if(_config.interpolate)
+            if(_settings.interpolate)
             {
                 kernel->setArg(7, volumeImgs[dev]);
             }
@@ -238,10 +297,15 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         };
 
         // Task for copy from pinned memory to "ret" object
-        auto cpyProjections = [&](uint view, const float* pinnedProjections, const cl::Event* event)
+        auto cpyProjections = [&ret](uint view, const float* pinnedProjections,
+                                     const cl::Event* event)
         {
+            const auto viewDim = ret.dimensions();
+            const auto pixelPerModule = viewDim.nbRows * viewDim.nbChannels;
+
             event->wait();
-            for(uint module = 0; module < _viewDim.nbModules; ++module)
+
+            for(auto module = 0u; module < viewDim.nbModules; ++module)
             {
                 std::copy_n(pinnedProjections, pixelPerModule,
                             ret.view(view).module(module).rawData());
@@ -253,14 +317,14 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         std::vector<cl::Event> readViewFinished(nbUsedDevs);
 
         // loop over all projections
-        uint device = 0;
-        for(uint view = 0; view < nbViews; ++view)
+        auto device = 0u;
+        for(auto view = 0u; view < nbViews; ++view)
         {
             const auto& currentViewPMats = _pMats.at(view);
             // all modules have same source position --> use first module PMat (arbitrary)
             auto sourcePosition = determineSource(currentViewPMats.first());
             // individual module geometry: QR is only determined by M, where P=[M|p4]
-            for(uint module = 0; module < _viewDim.nbModules; ++module)
+            for(auto module = 0u; module < _viewDim.nbModules; ++module)
                 QRs[module] = decomposeM(currentViewPMats.at(module).M());
 
             // wait for previous job of the device
@@ -292,7 +356,7 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
             emit notifier()->projectionFinished(int(view));
         }
         // wait for remaining devices
-        for(uint remainingDev = 0; remainingDev < nbUsedDevs; ++remainingDev)
+        for(auto remainingDev = 0u; remainingDev < nbUsedDevs; ++remainingDev)
             if(cpyThreads[remainingDev].joinable())
                 cpyThreads[remainingDev].join();
 
@@ -317,9 +381,8 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
  * It does not change the OpenCLConfig device settings or it uses the default settings of
  * OpenCLConfig.
  * Throws std::runtime_error if
- * \li the .cl kernel file is not readable (e.g. file does not exists)
+ * \li a .cl kernel file is not readable (e.g. file does not exists)
  * \li OpenCLConfig is not valid
- * \li `deviceID` of the RayCasterProjector::Config exceeds the size of the OpenCLConfig device list
  * \li an OpenCL exception is thrown.
  */
 void RayCasterProjector::initOpenCL()
@@ -330,35 +393,26 @@ void RayCasterProjector::initOpenCL()
         // general checks
         if(!oclConfig.isValid())
             throw std::runtime_error("OpenCLConfig is not valid");
-        // check for invalid device IDs
-        for(auto devID : _config.deviceIDs)
-            if(devID >= oclConfig.devices().size())
-                throw std::runtime_error("device ID is not available.\nID = " +
-                                         std::to_string(devID) +
-                                         "\nnumber of devices = " +
-                                         std::to_string(oclConfig.devices().size()));
-        // if not deviceIDs specified, use all available devices
-        if(_config.deviceIDs.empty())
-        {
-            _config.deviceIDs.resize(oclConfig.devices().size());
-            std::iota(_config.deviceIDs.begin(), _config.deviceIDs.end(), 0);
-        }
 
-        // check if required kernel is provided
-        if(oclConfig.kernelExists(CL_KERNEL_NAME, _oclProgramName))
-            return;
+        // add required OpenCL kernels
 
+        // ++ Interpolating kernel +++
         // load source code from file
-        const auto& clFileName = _config.interpolate
-                                ? CL_FILE_NAME_INTERP
-                                : CL_FILE_NAME_NO_INTERP;
-        ClFileLoader clFile(clFileName);
-        if(!clFile.isValid())
-            throw std::runtime_error(clFileName + "\nis not readable");
-        const auto clSourceCode = clFile.loadSourceCode();
-
+        ClFileLoader clFileInterp(CL_FILE_NAME_INTERP);
+        if(!clFileInterp.isValid())
+            throw std::runtime_error(CL_FILE_NAME_INTERP + "\nis not readable");
+        const auto clSourceCode = clFileInterp.loadSourceCode();
         // add kernel to OCLConfig
-        oclConfig.addKernel(CL_KERNEL_NAME, clSourceCode, _oclProgramName);
+        oclConfig.addKernel(CL_KERNEL_NAME, clSourceCode, CL_PROGRAM_NAME_INTERP);
+
+        // ++ Non-Interpolating kernel (no image support req.) +++
+        // load source code from file
+        ClFileLoader clFileNoInterp(CL_FILE_NAME_NO_INTERP);
+        if(!clFileNoInterp.isValid())
+            throw std::runtime_error(CL_FILE_NAME_INTERP + "\nis not readable");
+        const auto clSourceCodeNoInterp = clFileNoInterp.loadSourceCode();
+        // add kernel to OCLConfig
+        oclConfig.addKernel(CL_KERNEL_NAME, clSourceCodeNoInterp, CL_PROGRAM_NAME_NO_INTERP);
 
     } catch(const cl::Error& err)
     {
@@ -367,13 +421,45 @@ void RayCasterProjector::initOpenCL()
     }
 }
 
-// RayCasterProjector::Config
-
-// Use documentation of AbstractProjectorConfig::clone()
-AbstractProjectorConfig* RayCasterProjector::Config::clone() const
+/*!
+ * Prepares the device list used in the OpenCL environment (using OpenCLConfig).
+ *
+ * This does not change the OpenCLConfig device settings or it uses the default settings of
+ * OpenCLConfig.
+ * Throws std::runtime_error if
+ * \li OpenCLConfig is not valid
+ * \li `deviceID` of the RayCasterProjector::Config exceeds the size of the OpenCLConfig device list
+ * \li an OpenCL exception is thrown.
+ */
+void RayCasterProjector::prepareOpenCLDeviceList()
 {
-    return new Config(*this);
+    try // OCL exception catching
+    {
+        auto& oclConfig = OpenCLConfig::instance();
+        // general checks
+        if(!oclConfig.isValid())
+            throw std::runtime_error("OpenCLConfig is not valid");
+        // check for invalid device IDs
+        for(auto devID : _settings.deviceIDs)
+            if(devID >= oclConfig.devices().size())
+                throw std::runtime_error("device ID is not available.\nID = " +
+                                         std::to_string(devID) +
+                                         "\nnumber of devices = " +
+                                         std::to_string(oclConfig.devices().size()));
+        // if not deviceIDs specified, use all available devices
+        if(_settings.deviceIDs.empty())
+        {
+            _settings.deviceIDs.resize(oclConfig.devices().size());
+            std::iota(_settings.deviceIDs.begin(), _settings.deviceIDs.end(), 0);
+        }
+
+    } catch(const cl::Error& err)
+    {
+        qCritical() << "OpenCL error:" << err.what() << "(" << err.err() << ")";
+        throw std::runtime_error("OpenCL error");
+    }
 }
+
 
 /*!
  * Returns a RayCasterProjector::Config that is optimized w.r.t. a certain combination of
@@ -393,10 +479,10 @@ AbstractProjectorConfig* RayCasterProjector::Config::clone() const
  * upsampled volume that does not fit into the OpenCL device memory. In such a case you may reset
  * `config.volumeUpSampling` to 1.
  */
-RayCasterProjector::Config RayCasterProjector::Config::optimizedFor(const VolumeData &volume,
-                                                                    const AbstractDetector &detector)
+RayCasterProjector::Settings RayCasterProjector::Settings::optimizedFor(const VolumeData &volume,
+                                                                        const AbstractDetector &detector)
 {
-    Config ret;
+    Settings ret;
 
     // opimlized number of rays
     double Xmm = detector.pixelDimensions().width();

@@ -1,5 +1,5 @@
-#ifndef CYLINDRICALDETECTOR_H
-#define CYLINDRICALDETECTOR_H
+#ifndef CTL_CYLINDRICALDETECTOR_H
+#define CTL_CYLINDRICALDETECTOR_H
 
 #include "abstractdetector.h"
 
@@ -84,4 +84,4 @@ private:
 
 /*! \file */
 
-#endif // CYLINDRICALDETECTOR_H
+#endif // CTL_CYLINDRICALDETECTOR_H

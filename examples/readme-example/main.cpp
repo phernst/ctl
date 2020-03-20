@@ -33,9 +33,8 @@ int main(int argc, char* argv[])
             return -1;
 
         // configure a projector and project volume
-        CTL::OCL::RayCasterProjector::Config rcConfig;  // config with standard settings
-        CTL::OCL::RayCasterProjector myProjector;       // the projector
-        myProjector.configure(myCarmSetup, rcConfig);   // configure projector
+        CTL::OCL::RayCasterProjector myProjector;       // the projector (uses its default settings)
+        myProjector.configure(myCarmSetup);             // configure projector
         auto projections = myProjector.project(volume); // project
 
         // save projections

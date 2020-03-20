@@ -1,5 +1,5 @@
-#ifndef DEG_H
-#define DEG_H
+#ifndef CTL_DEG_H
+#define CTL_DEG_H
 
 #include "pi.h"
 
@@ -12,4 +12,4 @@ constexpr long double operator"" _deg(long double deg)
     return deg * PIl / 180.0l;
 }
 
-#endif // DEG_H
+#endif // CTL_DEG_H

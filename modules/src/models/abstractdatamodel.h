@@ -1,5 +1,5 @@
-#ifndef ABSTRACTDATAMODEL_H
-#define ABSTRACTDATAMODEL_H
+#ifndef CTL_ABSTRACTDATAMODEL_H
+#define CTL_ABSTRACTDATAMODEL_H
 
 #include "io/serializationinterface.h"
 #include "copyableuniqueptr.h"
@@ -161,4 +161,4 @@ auto makeDataModel(ConstructorArguments&&... arguments) ->
 ///@}
 
 
-#endif // ABSTRACTDATAMODEL_H
+#endif // CTL_ABSTRACTDATAMODEL_H

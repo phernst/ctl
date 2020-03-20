@@ -46,7 +46,6 @@ HEADERS += \
     $$PWD/../src/components/tubulargantry.h \
     $$PWD/../src/components/xraylaser.h \
     $$PWD/../src/components/xraytube.h \
-    $$PWD/../src/img/abstractdynamicvoxelvolume.h \
     $$PWD/../src/img/chunk2d.h \
     $$PWD/../src/img/compositevolume.h \
     $$PWD/../src/img/modulelayout.h \
@@ -89,17 +88,19 @@ HEADERS += \
     $$PWD/../src/processing/modelbasedvolumedecomposer.h \
     $$PWD/../src/processing/threadpool.h \
     $$PWD/../src/projectors/abstractprojector.h \
-    $$PWD/../src/projectors/abstractprojectorconfig.h \
     $$PWD/../src/projectors/arealfocalspotextension.h \
     $$PWD/../src/projectors/detectorsaturationextension.h \
-    $$PWD/../src/projectors/dynamicprojector.h \
     $$PWD/../src/projectors/poissonnoiseextension.h \
     $$PWD/../src/projectors/projectorextension.h \
     $$PWD/../src/models/datamodeloperations.h \
     $$PWD/../src/components/attenuationfilter.h \
     $$PWD/../src/models/abstractxrayspectrummodel.h \
     $$PWD/../src/acquisition/radiationencoder.h \
-    $$PWD/../src/projectors/spectraleffectsextension.h
+    $$PWD/../src/projectors/spectraleffectsextension.h \
+    $$PWD/../src/projectors/projectionpipeline.h \
+    $$PWD/../src/img/abstractdynamicvolumedata.h \
+    $$PWD/../src/projectors/dynamicprojectorextension.h \
+    $$PWD/../src/img/lineardynamicvolume.h
 
 SOURCES += \
     $$PWD/../src/acquisition/acquisitionsetup.cpp \
@@ -152,14 +153,17 @@ SOURCES += \
     $$PWD/../src/processing/modelbasedvolumedecomposer.cpp \
     $$PWD/../src/projectors/arealfocalspotextension.cpp \
     $$PWD/../src/projectors/detectorsaturationextension.cpp \
-    $$PWD/../src/projectors/dynamicprojector.cpp \
     $$PWD/../src/projectors/poissonnoiseextension.cpp \
     $$PWD/../src/models/abstractdatamodel.cpp \
     $$PWD/../src/models/datamodeloperations.cpp \
     $$PWD/../src/components/attenuationfilter.cpp \
     $$PWD/../src/models/abstractxrayspectrummodel.cpp \
     $$PWD/../src/acquisition/radiationencoder.cpp \
-    $$PWD/../src/projectors/spectraleffectsextension.cpp
+    $$PWD/../src/projectors/spectraleffectsextension.cpp \
+    $$PWD/../src/projectors/projectionpipeline.cpp \
+    $$PWD/../src/projectors/projectorextension.cpp \
+    $$PWD/../src/projectors/dynamicprojectorextension.cpp \
+    $$PWD/../src/img/lineardynamicvolume.cpp
 
 # Qt-free headers and sources
 HEADERS += \

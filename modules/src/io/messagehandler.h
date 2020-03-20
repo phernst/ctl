@@ -1,5 +1,5 @@
-#ifndef MESSAGEHANDLER_H
-#define MESSAGEHANDLER_H
+#ifndef CTL_MESSAGEHANDLER_H
+#define CTL_MESSAGEHANDLER_H
 
 #include <QMessageLogContext>
 #include <QObject>
@@ -65,6 +65,9 @@ signals:
     void newLogEntry() const;
     void messagePrinted() const;
 
+public slots:
+    void messageFromSignal(QString msg);
+
 private:
     MessageHandler();
 
@@ -95,4 +98,4 @@ private:
 
 } // namespace CTL
 
-#endif // MESSAGEHANDLER_H
+#endif // CTL_MESSAGEHANDLER_H

@@ -1,5 +1,5 @@
-#ifndef XRAYTUBE_H
-#define XRAYTUBE_H
+#ifndef CTL_XRAYTUBE_H
+#define CTL_XRAYTUBE_H
 
 #include "abstractsource.h"
 
@@ -59,4 +59,4 @@ private:
 
 } // namespace CTL
 
-#endif // XRAYTUBE_H
+#endif // CTL_XRAYTUBE_H

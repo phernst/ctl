@@ -1,5 +1,5 @@
-#ifndef SIMPLESYSTEM_H
-#define SIMPLESYSTEM_H
+#ifndef CTL_SIMPLESYSTEM_H
+#define CTL_SIMPLESYSTEM_H
 
 #include "ctsystem.h"
 
@@ -147,4 +147,4 @@ private:
 
 /*! \file */
 
-#endif // SIMPLESYSTEM_H
+#endif // CTL_SIMPLESYSTEM_H

@@ -1,5 +1,5 @@
-#ifndef XRAYSPECTRUMMODELS_H
-#define XRAYSPECTRUMMODELS_H
+#ifndef CTL_XRAYSPECTRUMMODELS_H
+#define CTL_XRAYSPECTRUMMODELS_H
 
 #include "abstractxrayspectrummodel.h"
 #include "tabulateddatamodel.h"
@@ -24,7 +24,7 @@ public:
 
     bool hasTabulatedDataFor(float voltage) const;
 
-private:
+protected:
     QMap<float, TabulatedDataModel> _lookupTables;
 
 };
@@ -42,6 +42,11 @@ class XrayLaserSpectrumModel : public AbstractXraySpectrumModel
 class FixedXraySpectrumModel : public XraySpectrumTabulatedModel
 {
     CTL_TYPE_ID(36)
+
+    // abstract interfaces
+    public: float valueAt(float position) const override;
+    public: float binIntegral(float position, float binWidth) const override;
+    public: AbstractDataModel* clone() const override;
 
 public:
     FixedXraySpectrumModel() = default;
@@ -76,26 +81,22 @@ class HeuristicCubicSpectrumModel : public AbstractXraySpectrumModel
     public: AbstractDataModel* clone() const override;
 };
 
-class TASMIPSpectrumModel : public AbstractXraySpectrumModel
+class TASMIPSpectrumModel : public FixedXraySpectrumModel
 {
     CTL_TYPE_ID(43)
 
     // abstract interfaces
-    public: float valueAt(float position) const override;
-    public: float binIntegral(float position, float binWidth) const override;
     public: AbstractDataModel* clone() const override;
+
+public:
+    TASMIPSpectrumModel() = default;
 
     void setParameter(const QVariant& parameter) override;
 
-public:
-    TASMIPSpectrumModel();
-
 private:
-    DataModelPtr<XraySpectrumTabulatedModel> _tasmipData;
-
-    void initializeModelData();
+    TabulatedDataModel TASMIPtable(float tubeVoltage);
 };
 
 } // namespace CTL
 
-#endif // XRAYSPECTRUMMODELS_H
+#endif // CTL_XRAYSPECTRUMMODELS_H

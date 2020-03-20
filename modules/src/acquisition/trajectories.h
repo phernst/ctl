@@ -1,5 +1,5 @@
-#ifndef TRAJECTORIES_H
-#define TRAJECTORIES_H
+#ifndef CTL_TRAJECTORIES_H
+#define CTL_TRAJECTORIES_H
 
 #include "abstractpreparestep.h"
 #include "mat/mat.h"
@@ -109,4 +109,4 @@ private:
 } // namespace protocols
 } // namespace CTL
 
-#endif // TRAJECTORIES_H
+#endif // CTL_TRAJECTORIES_H

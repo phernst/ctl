@@ -1,5 +1,5 @@
-#ifndef FILTER_H
-#define FILTER_H
+#ifndef CTL_FILTER_H
+#define CTL_FILTER_H
 
 typedef unsigned int uint; //!< Alias for unsigned int
 
@@ -14,6 +14,8 @@ namespace imgproc {
 
 enum FiltMethod {
     Gauss3,     // filter size: 3
+    Gauss5,     // filter size: 5
+    Gauss7,     // filter size: 7
     Average3,   // filter size: 3
     Median3,    // filter size: 3
     MedianAbs3, // filter size: 3
@@ -53,4 +55,4 @@ extern template void filter<1u>(Chunk2D<double>& image, FiltMethod m);
 
 ///@}
 
-#endif // FILTER_H
+#endif // CTL_FILTER_H

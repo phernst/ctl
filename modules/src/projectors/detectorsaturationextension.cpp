@@ -8,26 +8,93 @@
 
 namespace CTL {
 
-void DetectorSaturationExtension::configure(const AcquisitionSetup& setup,
-                                            const AbstractProjectorConfig& config)
+DECLARE_SERIALIZABLE_TYPE(DetectorSaturationExtension)
+
+void DetectorSaturationExtension::configure(const AcquisitionSetup& setup)
 {
     _setup = setup;
 
-    if(_nbSamples == 0)
-        _nbSamples = _setup.system()->source()->spectrumDiscretizationHint();
-
-    ProjectorExtension::configure(setup, config);
+    ProjectorExtension::configure(setup);
 }
 
+/*!
+ * Constructs a DetectorSaturationExtension and sets the number of samples used when (internally)
+ * a spectrum needs to be sampled to \a nbSpectralSamples.
+ */
+DetectorSaturationExtension::DetectorSaturationExtension(uint nbSpectralSamples)
+    : _nbSamples(nbSpectralSamples)
+{
+}
+
+/*!
+ * Returns false, because in general, detector saturation effects are non-linear.
+ */
 bool DetectorSaturationExtension::isLinear() const { return false; }
 
+/*!
+ * Sets the number of samples used when (internally) a spectrum needs to be sampled to 
+ * \a nbSpectralSamples. This has no meaning if the saturation model set for the detector is
+ * specified in the extinction domain (because processing extinctions does not require computation
+ * of a spectrum at any point).
+ * 
+ * If \a nbSamples = 0, the sampling hint from the source component will be used (see 
+ * AbstractSource::spectrumDiscretizationHint().
+ */
 void DetectorSaturationExtension::setIntensitySampling(uint nbSamples) { _nbSamples = nbSamples; }
 
+// Use SerializationInterface::toVariant() documentation.
+QVariant DetectorSaturationExtension::toVariant() const
+{
+    QVariantMap ret = ProjectorExtension::toVariant().toMap();
+
+    ret.insert("#", "DetectorSaturationExtension");
+
+    return ret;
+}
+
+/*!
+ * Returns the parameters of this instance as QVariant.
+ *
+ * This returns a QVariantMap with one key-value-pair: ("Intensity sampling points", _nbSamples),
+ * which represents the number of sampling points used when (internally) a spectrum needs to be
+ * sampled.
+ *
+ * This method is used within toVariant() to serialize the object's settings.
+ */
+QVariant DetectorSaturationExtension::parameter() const
+{
+    QVariantMap ret = ProjectorExtension::parameter().toMap();
+
+    ret.insert("Intensity sampling points", _nbSamples);
+
+    return ret;
+}
+
+// Use AbstractProjector::setParameter() documentation.
+void DetectorSaturationExtension::setParameter(const QVariant& parameter)
+{
+    ProjectorExtension::setParameter(parameter);
+
+    QVariantMap map = parameter.toMap();
+
+    _nbSamples = map.value("Intensity sampling points", 0u).toUInt();
+}
+
+/*!
+ * Performs the extension of the projection step by means of postprocessing the projection data
+ * created by \a nestedProjector. This allows for handling the cases of single and composite 
+ * volumes in the same fashion.
+ */
 ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector& nestedProjector)
 {
     auto ret = nestedProjector.project();
 
+    emit notifier()->information("Processing detector saturation.");
+
     auto saturationModelType = _setup.system()->detector()->saturationModelType();
+
+    if(_nbSamples == 0)
+        _nbSamples = _setup.system()->source()->spectrumDiscretizationHint();
 
     switch(saturationModelType)
     {
@@ -41,13 +108,19 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
         processIntensities(ret);
         break;
     case AbstractDetector::Undefined:
-        qWarning() << "DetectorSaturationExtension::project(): Undefined saturation model!";
+        qWarning() << "DetectorSaturationExtension::project(): Undefined saturation model. "
+                      "Extension has no effect!";
         break;
     }
 
     return ret;
 }
 
+/*!
+ * Applies the detector saturation model to \a projections in the photon count domain.
+ * Transformation of input extinction data from \a projections to counts is based on the incident
+ * photon count queried from the system (see SimpleCTsystem::photonsPerPixel()).
+ */
 void DetectorSaturationExtension::processCounts(ProjectionData& projections)
 {
     auto detectorPtr = _setup.system()->detector();
@@ -82,6 +155,9 @@ void DetectorSaturationExtension::processCounts(ProjectionData& projections)
     }
 }
 
+/*!
+ * Applies the detector saturation model to \a projections in the extinction domain.
+ */
 void DetectorSaturationExtension::processExtinctions(ProjectionData& projections)
 {
     auto detectorPtr = _setup.system()->detector();
@@ -103,6 +179,13 @@ void DetectorSaturationExtension::processExtinctions(ProjectionData& projections
     }
 }
 
+/*!
+ * Applies the detector saturation model to \a projections in the intensity domain.
+ * Transformation of input extinction data from \a projections to intensities is based on the
+ * incident photon count queried from the system (see SimpleCTsystem::photonsPerPixel()) multiplied
+ * by the mean energy in the incident X-ray spectrum. Note that this is an approximation. Ideally,
+ * the final radiation spectrum reaching the detector would be considered instead.
+ */
 void DetectorSaturationExtension::processIntensities(ProjectionData& projections)
 {
     auto detectorPtr = _setup.system()->detector();

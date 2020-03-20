@@ -1,5 +1,5 @@
-#ifndef GENERICSOURCE_H
-#define GENERICSOURCE_H
+#ifndef CTL_GENERICSOURCE_H
+#define CTL_GENERICSOURCE_H
 
 #include "abstractsource.h"
 #include "models/xrayspectrummodels.h"
@@ -52,4 +52,4 @@ protected:
 
 } // namespace CTL
 
-#endif // GENERICSOURCE_H
+#endif // CTL_GENERICSOURCE_H

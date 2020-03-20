@@ -8,8 +8,8 @@
 ** Email: robert.frysch@ovgu.de
 ******************************************************************************/
 
-#ifndef HEADER_H
-#define HEADER_H
+#ifndef CTL_HEADER_H
+#define CTL_HEADER_H
 
 #include <climits>
 #include <string>
@@ -114,4 +114,4 @@ inline std::string Header::info() const
 
 #include "den_header.tpp"
 
-#endif // HEADER_H
+#endif // CTL_HEADER_H

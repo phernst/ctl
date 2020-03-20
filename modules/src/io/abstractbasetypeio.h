@@ -1,5 +1,5 @@
-#ifndef ABSTRACTBASETYPEIO_H
-#define ABSTRACTBASETYPEIO_H
+#ifndef CTL_ABSTRACTBASETYPEIO_H
+#define CTL_ABSTRACTBASETYPEIO_H
 
 #include "img/voxelvolume.h"
 #include "img/projectiondata.h"
@@ -92,4 +92,4 @@ protected:
 } // namespace io
 } // namespace CTL
 
-#endif // ABSTRACTBASETYPEIO_H
+#endif // CTL_ABSTRACTBASETYPEIO_H

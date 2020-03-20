@@ -39,6 +39,12 @@ std::unique_ptr<AbstractPrepareStep> BinarySerializer::deserializePrepareStep(co
         SerializationHelper::parsePrepareStep(variantFromBinaryFile(fileName)));
 }
 
+std::unique_ptr<AbstractProjector> BinarySerializer::deserializeProjector(const QString& fileName) const
+{
+    return std::unique_ptr<AbstractProjector>(
+                SerializationHelper::parseProjector(variantFromBinaryFile(fileName)));
+}
+
 std::unique_ptr<SerializationInterface> BinarySerializer::deserializeMiscObject(const QString &fileName) const
 {
     return std::unique_ptr<SerializationInterface>(

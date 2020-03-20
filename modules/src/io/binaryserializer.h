@@ -1,5 +1,5 @@
-#ifndef BINARYSERIALIZER_H
-#define BINARYSERIALIZER_H
+#ifndef CTL_BINARYSERIALIZER_H
+#define CTL_BINARYSERIALIZER_H
 
 #include "abstractserializer.h"
 
@@ -16,6 +16,7 @@ class BinarySerializer : public AbstractSerializer
     public: std::unique_ptr<SystemComponent> deserializeComponent(const QString& fileName) const override;
     public: std::unique_ptr<AbstractDataModel> deserializeDataModel(const QString& fileName) const override;
     public: std::unique_ptr<AbstractPrepareStep> deserializePrepareStep(const QString& fileName) const override;
+    public: std::unique_ptr<AbstractProjector> deserializeProjector(const QString& fileName) const override;
     public: std::unique_ptr<SerializationInterface> deserializeMiscObject(const QString& fileName) const override;
     public: std::unique_ptr<AcquisitionSetup> deserializeAquisitionSetup(const QString& fileName) const override;
     public: std::unique_ptr<CTsystem> deserializeSystem(const QString& fileName) const override;
@@ -27,4 +28,4 @@ private:
 
 } // namespace CTL
 
-#endif // BINARYSERIALIZER_H
+#endif // CTL_BINARYSERIALIZER_H

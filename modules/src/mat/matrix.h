@@ -1,13 +1,13 @@
 /******************************************************************************
 ** 'Matrix' template class for basic matrix calculations
-** by Robert Frysch | Jan 12, 2020
+** by Robert Frysch | Mar 04, 2020
 ** Otto von Guericke University Magdeburg
 ** Institute for Medical Engineering - IMT (Head: Georg Rose)
 ** Email: robert.frysch@ovgu.de
 ******************************************************************************/
 
-#ifndef MATRIX_H
-#define MATRIX_H
+#ifndef CTL_MATRIX_H
+#define CTL_MATRIX_H
 
 #include <algorithm>
 #include <cmath>
@@ -213,4 +213,4 @@ Matrix<Rows1 + Rows2, Cols> vertcat(const Matrix<Rows1, Cols>& m1, const Matrix<
 
 #include "matrix.tpp"
 
-#endif // MATRIX_H
+#endif // CTL_MATRIX_H

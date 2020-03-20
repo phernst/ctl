@@ -1,5 +1,5 @@
-#ifndef ERRORMETRICS_H
-#define ERRORMETRICS_H
+#ifndef CTL_ERRORMETRICS_H
+#define CTL_ERRORMETRICS_H
 
 #include <vector>
 
@@ -124,4 +124,4 @@ namespace metric {
 
 } // namespace CTL
 
-#endif // ERRORMETRICS_H
+#endif // CTL_ERRORMETRICS_H

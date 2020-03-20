@@ -1,5 +1,5 @@
-#ifndef GENERICBEAMMODIFIER_H
-#define GENERICBEAMMODIFIER_H
+#ifndef CTL_GENERICBEAMMODIFIER_H
+#define CTL_GENERICBEAMMODIFIER_H
 
 #include "abstractbeammodifier.h"
 
@@ -57,4 +57,4 @@ public:
  */
 ///@}
 
-#endif // GENERICBEAMMODIFIER_H
+#endif // CTL_GENERICBEAMMODIFIER_H

@@ -124,7 +124,7 @@ void ProjectionMatrix::changeDetectorResolution(double resamplingFactorX, double
  */
 void ProjectionMatrix::normalize()
 {
-    double denom = Matrix<3, 1>({ get<2, 0>(), get<2, 1>(), get<2, 2>() }).norm();
+    auto denom = Matrix<3, 1>{ get<2, 0>(), get<2, 1>(), get<2, 2>() }.norm();
     denom = std::copysign(denom, det(M()));
     Q_ASSERT(!qFuzzyIsNull(denom));
     *this /= denom;
@@ -142,7 +142,7 @@ void ProjectionMatrix::normalize()
  */
 ProjectionMatrix ProjectionMatrix::normalized() const
 {
-    double denom = Matrix<3, 1>({ get<2, 0>(), get<2, 1>(), get<2, 2>() }).norm();
+    auto denom = Matrix<3, 1>{ get<2, 0>(), get<2, 1>(), get<2, 2>() }.norm();
     denom = std::copysign(denom, det(M()));
     Q_ASSERT(!qFuzzyIsNull(denom));
     return *this / denom;
@@ -203,11 +203,11 @@ Matrix<3, 1> ProjectionMatrix::directionSourceToPixel(double x, double y,
         R = -R;
 
     // back substitution to find 'd' in R*d = [x,y,1]^t
-    double dz = 1.0 / R.get<2,2>();
-    double dy = (y - dz*R.get<1,2>()) / R.get<1,1>();
-    double dx = (x - dy*R.get<0,1>() - dz*R.get<0,2>()) / R.get<0,0>();
+    const auto dz = 1.0 / R.get<2,2>();
+    const auto dy = (y - dz*R.get<1,2>()) / R.get<1,1>();
+    const auto dx = (x - dy*R.get<0,1>() - dz*R.get<0,2>()) / R.get<0,0>();
 
-    Matrix<3, 1> ret({ dx, dy, dz });
+    Matrix<3, 1> ret{ dx, dy, dz };
     ret = Q.transposed() * ret;
 
     switch (normalizationMode) {
@@ -220,10 +220,10 @@ Matrix<3, 1> ProjectionMatrix::directionSourceToPixel(double x, double y,
         ret *= std::fabs(R.get<0,0>());
         break;
     case NormalizeByY: // same as NormalizeByRow
-        double aa = R.get<0,0>() * R.get<0,0>(); // a b c
-        double bb = R.get<0,1>() * R.get<0,1>(); // 0 d e
-        double dd = R.get<1,1>() * R.get<1,1>(); // 0 0 f
-        double scale = std::sqrt(aa * dd / (aa + bb));
+        const auto aa = R.get<0,0>() * R.get<0,0>(); // a b c
+        const auto bb = R.get<0,1>() * R.get<0,1>(); // 0 d e
+        const auto dd = R.get<1,1>() * R.get<1,1>(); // 0 0 f
+        const auto scale = std::sqrt(aa * dd / (aa + bb));
         ret *= scale;
         break;
     }
@@ -235,10 +235,10 @@ Matrix<3, 1> ProjectionMatrix::directionSourceToPixel(double x, double y,
  */
 Matrix<3, 1> ProjectionMatrix::principalRayDirection() const
 {
-    Matrix<3, 1> ret({ get<2, 0>(), get<2, 1>(), get<2, 2>() });
+    Matrix<3, 1> ret{ get<2, 0>(), get<2, 1>(), get<2, 2>() };
     const auto vecNorm = ret.norm();
     Q_ASSERT(!qFuzzyIsNull(vecNorm));
-    const double scale = std::copysign(1.0 / vecNorm, det(M()));
+    const auto scale = std::copysign(1.0 / vecNorm, det(M()));
     ret *= scale;
     return ret;
 }
@@ -264,11 +264,11 @@ Matrix<3, 1> ProjectionMatrix::translationCTS() const
 Matrix<3, 1> ProjectionMatrix::sourcePosition() const
 {
     // normalization to convert homogeneous to cartesian coordinates
-    double hom2cart = -det(horzcat(horzcat(column<0>(), column<1>()), column<2>()));
+    const auto hom2cart = -det(horzcat(horzcat(column<0>(), column<1>()), column<2>()));
     Q_ASSERT(!qFuzzyIsNull(hom2cart));
-    Matrix<3, 1> ret({ det(horzcat(horzcat(column<1>(), column<2>()), column<3>())),
-                      -det(horzcat(horzcat(column<0>(), column<2>()), column<3>())),
-                       det(horzcat(horzcat(column<0>(), column<1>()), column<3>())) });
+    Matrix<3, 1> ret{ det(horzcat(horzcat(column<1>(), column<2>()), column<3>())),
+                     -det(horzcat(horzcat(column<0>(), column<2>()), column<3>())),
+                      det(horzcat(horzcat(column<0>(), column<1>()), column<3>())) };
     ret /= hom2cart;
     return ret;
 }
@@ -305,7 +305,7 @@ Matrix<2, 1> ProjectionMatrix::principalPoint() const
 {
     auto M_ = M();
     auto pP = M_ * M_.row<2>().transposed();
-    Matrix<2, 1> ret({ pP.get<0>(), pP.get<1>() });
+    Matrix<2, 1> ret{ pP.get<0>(), pP.get<1>() };
     Q_ASSERT(!qFuzzyIsNull(pP.get<2>()));
     ret /= pP.get<2>();
     return ret;
@@ -411,7 +411,7 @@ double ProjectionMatrix::magnificationY(const Matrix<3, 1>& worldCoordinate) con
 Matrix<2, 1> ProjectionMatrix::projectOntoDetector(double X, double Y, double Z) const
 {
     Matrix<2, 1> ret;
-    const double w = X * get<2, 0>() + Y * get<2, 1>() + Z * get<2, 2>() + get<2, 3>();
+    const auto w = X * get<2, 0>() + Y * get<2, 1>() + Z * get<2, 2>() + get<2, 3>();
     ret.get<0>() = ( X * get<0, 0>() + Y * get<0, 1>() + Z * get<0, 2>() + get<0, 3>() ) / w;
     ret.get<1>() = ( X * get<1, 0>() + Y * get<1, 1>() + Z * get<1, 2>() + get<1, 3>() ) / w;
     return ret;

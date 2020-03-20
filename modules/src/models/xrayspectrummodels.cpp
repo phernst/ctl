@@ -78,7 +78,7 @@ float XraySpectrumTabulatedModel::binIntegral(float position, float binWidth) co
     return lowerIntegral * weightFactor + upperIntegral * (1.0f - weightFactor);
 }
 
-AbstractDataModel *XraySpectrumTabulatedModel::clone() const
+AbstractDataModel* XraySpectrumTabulatedModel::clone() const
 {
     return new XraySpectrumTabulatedModel(*this);
 }
@@ -89,7 +89,7 @@ QVariant XraySpectrumTabulatedModel::parameter() const
     QVariantList dataList;
 
     auto i = _lookupTables.constBegin();
-    while (i != _lookupTables.constEnd())
+    while(i != _lookupTables.constEnd())
     {
         QVariantMap map;
         map.insert("table voltage", i.key());
@@ -113,13 +113,13 @@ void XraySpectrumTabulatedModel::setParameter(const QVariant& parameter)
         _lookupTables.clear();
 
         // populate lookup table
-        auto lookupTableData = parameter.toMap().value("lookup tables").toList();
-        foreach(const QVariant& var, lookupTableData)
+        const auto lookupTableData = parameter.toMap().value("lookup tables").toList();
+        for(const auto& var : lookupTableData)
         {
             // each "var" represents a lookup table for a certain tube voltage
-            auto varAsMap = var.toMap();
-            auto voltage = varAsMap.value("table voltage").toFloat();
-            auto tableData = varAsMap.value("table data");
+            const auto varAsMap = var.toMap();
+            const auto voltage = varAsMap.value("table voltage").toFloat();
+            const auto tableData = varAsMap.value("table data");
 
             TabulatedDataModel table;
             table.setParameter(tableData);
@@ -128,7 +128,6 @@ void XraySpectrumTabulatedModel::setParameter(const QVariant& parameter)
         }
     }
 }
-
 
 void XraySpectrumTabulatedModel::setLookupTables(const QMap<float, TabulatedDataModel>& tables)
 {
@@ -148,42 +147,60 @@ bool XraySpectrumTabulatedModel::hasTabulatedDataFor(float voltage) const
     return (voltage >= _lookupTables.firstKey() && voltage <= (_lookupTables.lastKey()));
 }
 
-
 // _____________________________
 // # XrayLaserSpectrumModel
 // -----------------------------
 float XrayLaserSpectrumModel::valueAt(float position) const
 {
-    if(qFuzzyCompare(position,_energy))
+    if(qFuzzyCompare(position, _energy))
         return 1.0f;
     else
         return 0.0f;
 }
-
 
 float XrayLaserSpectrumModel::binIntegral(float position, float binWidth) const
 {
-    if((_energy >= position - 0.5f*binWidth) && (_energy <= position + 0.5f*binWidth))
+    if((_energy >= position - 0.5f * binWidth) && (_energy <= position + 0.5f * binWidth))
         return 1.0f;
     else
         return 0.0f;
 }
 
-AbstractDataModel *XrayLaserSpectrumModel::clone() const
+AbstractDataModel* XrayLaserSpectrumModel::clone() const
 {
     return new XrayLaserSpectrumModel(*this);
 }
 
-
 // _____________________________
 // # FixedXraySpectrumModel
 // -----------------------------
-FixedXraySpectrumModel::FixedXraySpectrumModel(const TabulatedDataModel &table)
+float FixedXraySpectrumModel::valueAt(float position) const
+{
+    if(_lookupTables.isEmpty())
+        throw std::domain_error("FixedXraySpectrumModel: No tabulated data available.");
+
+    return _lookupTables.first().valueAt(position);
+}
+
+float FixedXraySpectrumModel::binIntegral(float position, float binWidth) const
+{
+    if(_lookupTables.isEmpty())
+        throw std::domain_error("FixedXraySpectrumModel: No tabulated data available.");
+
+    return _lookupTables.first().binIntegral(position, binWidth);
+}
+
+AbstractDataModel* FixedXraySpectrumModel::clone() const
+{
+    return new FixedXraySpectrumModel(*this);
+}
+
+FixedXraySpectrumModel::FixedXraySpectrumModel(const TabulatedDataModel& table)
 {
     addLookupTable(0.0f, table);
 }
 
-void FixedXraySpectrumModel::setParameter(const QVariant &parameter)
+void FixedXraySpectrumModel::setParameter(const QVariant& parameter)
 {
     if(parameter.canConvert(QMetaType::Float))
     {
@@ -232,15 +249,15 @@ void FixedXraySpectrumModel::setLookupTable(const TabulatedDataModel& table)
 // -----------------------------
 float KramersLawSpectrumModel::valueAt(float position) const
 {
-    return (position<_energy) ? (_energy / position - 1.0f) : 0.0f;
+    return (position < _energy) ? (_energy / position - 1.0f) : 0.0f;
 }
 
 float KramersLawSpectrumModel::binIntegral(float position, float binWidth) const
 {
     static constexpr float LOW_END = 0.1f;
 
-    float bot = position - 0.5f*binWidth;
-    float top = position + 0.5f*binWidth;
+    float bot = position - 0.5f * binWidth;
+    float top = position + 0.5f * binWidth;
 
     if((top < LOW_END) || (bot > _energy))
         return 0.0f;
@@ -253,15 +270,16 @@ float KramersLawSpectrumModel::binIntegral(float position, float binWidth) const
     return _energy * std::log(top / bot) - (top - bot);
 }
 
-AbstractDataModel *KramersLawSpectrumModel::clone() const
+AbstractDataModel* KramersLawSpectrumModel::clone() const
 {
     return new KramersLawSpectrumModel(*this);
 }
 
 float HeuristicCubicSpectrumModel::valueAt(float position) const
 {
-    return (position < _energy) ? _energy * std::pow(_energy - position, 2.0f) - std::pow(_energy - position, 3.0f)
-                                : 0.0f;
+    return (position < _energy)
+        ? _energy * std::pow(_energy - position, 2.0f) - std::pow(_energy - position, 3.0f)
+        : 0.0f;
 }
 
 float HeuristicCubicSpectrumModel::binIntegral(float position, float binWidth) const
@@ -269,11 +287,11 @@ float HeuristicCubicSpectrumModel::binIntegral(float position, float binWidth) c
     auto antiderivative = [this](float E)
     {
         return (-1.0f / 3.0f) * _energy * std::pow(_energy - E, 3.0f) +
-               (1.0f / 4.0f) * std::pow(_energy - E, 4.0f);
+               ( 1.0f / 4.0f) *           std::pow(_energy - E, 4.0f);
     };
 
-    const float bot = position - 0.5f*binWidth;
-    float top = position + 0.5f*binWidth;
+    const float bot = position - 0.5f * binWidth;
+    float top = position + 0.5f * binWidth;
 
     if((top < 0.0f) || (bot > _energy))
         return 0.0f;
@@ -289,22 +307,11 @@ AbstractDataModel* HeuristicCubicSpectrumModel::clone() const
     return new HeuristicCubicSpectrumModel(*this);
 }
 
-float TASMIPSpectrumModel::valueAt(float position) const
-{
-    _tasmipData->setParameter(_energy);
-    return _tasmipData->valueAt(position);
-}
+// _____________________________
+// # TASMIPSpectrumModel
+// -----------------------------
 
-float TASMIPSpectrumModel::binIntegral(float position, float binWidth) const
-{
-    _tasmipData->setParameter(_energy);
-    return _tasmipData->binIntegral(position, binWidth);
-}
-
-AbstractDataModel* TASMIPSpectrumModel::clone() const
-{
-    return new TASMIPSpectrumModel(*this);
-}
+AbstractDataModel* TASMIPSpectrumModel::clone() const { return new TASMIPSpectrumModel(*this); }
 
 void TASMIPSpectrumModel::setParameter(const QVariant& parameter)
 {
@@ -313,12 +320,8 @@ void TASMIPSpectrumModel::setParameter(const QVariant& parameter)
                       ". TASMIP data is only available up to 140 kV.";
 
     AbstractXraySpectrumModel::setParameter(parameter);
-}
 
-TASMIPSpectrumModel::TASMIPSpectrumModel()
-    : _tasmipData(makeDataModel<XraySpectrumTabulatedModel>())
-{
-    initializeModelData();
+    setLookupTable(TASMIPtable(_energy));
 }
 
 /*
@@ -334,11 +337,11 @@ TASMIPSpectrumModel::TASMIPSpectrumModel()
  * Source: http://ftp.aip.org/epaps/medical_phys/E-MPHYA-24-1661/genspec1.h
  *
  */
-void TASMIPSpectrumModel::initializeModelData()
+TabulatedDataModel TASMIPSpectrumModel::TASMIPtable(float tubeVoltage)
 {
     static constexpr auto nbBins = 140u;
 
-    static constexpr float coeff[nbBins][4]={
+    static constexpr float coeff[nbBins][4] = {
         { +0.000000e+000f,+0.000000e+000f,+0.000000e+000f,+0.000000e+000f }, // 0.0 keV...0.5 keV
         { +0.000000e+000f,+0.000000e+000f,+0.000000e+000f,+0.000000e+000f }, // 0.5 keV...1.5 keV
         { +0.000000e+000f,+0.000000e+000f,+0.000000e+000f,+0.000000e+000f }, // 1.5 keV...2.5 keV
@@ -484,8 +487,6 @@ void TASMIPSpectrumModel::initializeModelData()
     static_assert(sizeof coeff == nbBins * 4 * sizeof(float),
                   "number of coefficients does not match.");
 
-    float tubeVoltage = 0.0f;
-
     auto flux = [&tubeVoltage](uint energyBin) -> float
     {
         const auto binStart = energyBin - 0.5f;
@@ -509,19 +510,14 @@ void TASMIPSpectrumModel::initializeModelData()
 
     // convert to floating point values
     QVector<float> specBinsF(nbBins);
-    std::transform(specBins.cbegin(), specBins.cend(), specBinsF.begin(), [](uint binEnergy) {
-        return float(binEnergy);
-    });
+    std::transform(specBins.cbegin(), specBins.cend(), specBinsF.begin(),
+                   [](uint binEnergy) { return float(binEnergy); });
 
-    // compute spectrum for tube voltages in 1 kV steps: 0 kV, 1 kV, 2 kV, ..., 140 kV
-    for(auto kV = 0u; kV <= nbBins; ++kV)
-    {
-        tubeVoltage = float(kV);
-        QVector<float> specVals(nbBins);
-        std::transform(specBins.cbegin(), specBins.cend(), specVals.begin(), flux);
+    // compute spectrum for requested tube voltage
+    QVector<float> specVals(nbBins);
+    std::transform(specBins.cbegin(), specBins.cend(), specVals.begin(), flux);
 
-        _tasmipData->addLookupTable(tubeVoltage, TabulatedDataModel(specBinsF, specVals));
-    }
+    return TabulatedDataModel(specBinsF, specVals);
 }
 
 } // namespace CTL

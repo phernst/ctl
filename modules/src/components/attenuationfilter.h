@@ -1,5 +1,5 @@
-#ifndef ATTENUATIONFILTER_H
-#define ATTENUATIONFILTER_H
+#ifndef CTL_ATTENUATIONFILTER_H
+#define CTL_ATTENUATIONFILTER_H
 
 #include "abstractbeammodifier.h"
 #include "io/ctldatabase.h"
@@ -51,4 +51,4 @@ private:
 
 } // namespace CTL
 
-#endif // ATTENUATIONFILTER_H
+#endif // CTL_ATTENUATIONFILTER_H

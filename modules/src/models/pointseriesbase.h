@@ -1,5 +1,5 @@
-#ifndef POINTSERIESBASE_H
-#define POINTSERIESBASE_H
+#ifndef CTL_POINTSERIESBASE_H
+#define CTL_POINTSERIESBASE_H
 
 #include <QList>
 #include <QPair>
@@ -143,4 +143,4 @@ inline std::vector<float> PointSeriesBase::values() const
 
 } // namespace CTL
 
-#endif // POINTSERIESBASE_H
+#endif // CTL_POINTSERIESBASE_H

@@ -1,5 +1,5 @@
-#ifndef METAINFOKEYS_H
-#define METAINFOKEYS_H
+#ifndef CTL_METAINFOKEYS_H
+#define CTL_METAINFOKEYS_H
 
 #include <QMetaType>
 #include <QString>
@@ -86,4 +86,4 @@ struct Dimensions
 
 Q_DECLARE_METATYPE(CTL::io::meta_info::Dimensions)
 
-#endif // METAINFOKEYS_H
+#endif // CTL_METAINFOKEYS_H

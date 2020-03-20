@@ -1,5 +1,5 @@
-#ifndef VOLUMERESAMPLER_H
-#define VOLUMERESAMPLER_H
+#ifndef CTL_VOLUMERESAMPLER_H
+#define CTL_VOLUMERESAMPLER_H
 
 #include "img/voxelvolume.h"
 #include "ocl/openclconfig.h"
@@ -18,10 +18,6 @@ public:
                     const SamplingRange& rangeDim3,
                     uint oclDeviceNb = 0);
 
-    void setSamplingRanges(const SamplingRange& rangeDim1,
-                           const SamplingRange& rangeDim2,
-                           const SamplingRange& rangeDim3);
-
     const SamplingRange& rangeDim1() const;
     const SamplingRange& rangeDim2() const;
     const SamplingRange& rangeDim3() const;
@@ -32,6 +28,10 @@ public:
 
     std::vector<float> sample(const std::vector<Generic3DCoord>& samplingPts) const;
     std::vector<float> sample(const cl::Buffer& coord3dBuffer) const;
+
+    void setSamplingRanges(const SamplingRange& rangeDim1,
+                           const SamplingRange& rangeDim2,
+                           const SamplingRange& rangeDim3);
 
     VoxelVolume<float> volume() const;
 
@@ -59,4 +59,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // VOLUMERESAMPLER_H
+#endif // CTL_VOLUMERESAMPLER_H

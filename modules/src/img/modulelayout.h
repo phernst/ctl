@@ -1,5 +1,5 @@
-#ifndef MODULELAYOUT_H
-#define MODULELAYOUT_H
+#ifndef CTL_MODULELAYOUT_H
+#define CTL_MODULELAYOUT_H
 
 #include <vector>
 
@@ -173,4 +173,4 @@ inline ModuleLayout ModuleLayout::canonicLayout(uint nbRows, uint nbCols, bool r
 
 /*! \file */
 
-#endif // MODULELAYOUT_H
+#endif // CTL_MODULELAYOUT_H

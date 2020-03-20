@@ -1,5 +1,5 @@
-#ifndef VOLUMESLICER_H
-#define VOLUMESLICER_H
+#ifndef CTL_VOLUMESLICER_H
+#define CTL_VOLUMESLICER_H
 
 #include "img/voxelvolume.h"
 #include "mat/matrix.h"
@@ -75,4 +75,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // VOLUMESLICER_H
+#endif // CTL_VOLUMESLICER_H
