@@ -79,6 +79,11 @@ QVariant ProjectionPipeline::toVariant() const
     return ret;
 }
 
+ProjectorNotifier *ProjectionPipeline::notifier()
+{
+    return _finalProjector->notifier();
+}
+
 /*!
  * Constructs a ProjectionPipeline object and sets the projector to \a projector.
  *

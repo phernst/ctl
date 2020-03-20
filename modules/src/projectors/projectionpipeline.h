@@ -90,6 +90,8 @@ public:
     void fromVariant(const QVariant &variant) override;
     QVariant toVariant() const override;
 
+    ProjectorNotifier* notifier() override;
+
     ProjectionPipeline(AbstractProjector* projector = nullptr);
 
     void appendExtension(ExtensionPtr extension);
