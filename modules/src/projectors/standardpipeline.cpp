@@ -334,57 +334,6 @@ StandardPipeline::SettingsRayCaster StandardPipeline::settingsRayCaster() {
     return { _projector };
 }
 
-//void StandardPipeline::setArealFocalSpotDiscretization(const QSize& discretization)
-//{
-//    _extAFS->setDiscretization(discretization);
-//}
-
-//void StandardPipeline::setDetectorSaturationSampling(float energyBinWidth)
-//{
-//    _extDetSat->setIntensitySampling(energyBinWidth);
-//}
-
-//void StandardPipeline::setSpectralEffectsSampling(float energyBinWidth)
-//{
-//    _extSpectral->setSpectralSamplingResolution(energyBinWidth);
-//}
-
-//void StandardPipeline::setPoissonFixedSeed(uint seed)
-//{
-//    _extPoisson->setFixedSeed(seed);
-//}
-
-//void StandardPipeline::setPoissonRandomSeedMode()
-//{
-//    _extPoisson->setRandomSeedMode();
-//}
-
-//void StandardPipeline::setPoissonParallelizationMode(bool enabled)
-//{
-//    _extPoisson->setParallelizationEnabled(enabled);
-//}
-
-//void StandardPipeline::setRayCasterInterpolation(bool enabled)
-//{
-//    _projector->settings().interpolate = enabled;
-//}
-
-//void StandardPipeline::setRayCasterRaysPerPixel(const QSize &sampling)
-//{
-//    _projector->settings().raysPerPixel[0] = sampling.width();
-//    _projector->settings().raysPerPixel[1] = sampling.height();
-//}
-
-//void StandardPipeline::setRayCasterRaySampling(float sampling)
-//{
-//    _projector->settings().raySampling = sampling;
-//}
-
-//void StandardPipeline::setRayCasterVolumeUpSampling(uint upsamplingFactor)
-//{
-//    _projector->settings().volumeUpSampling = upsamplingFactor;
-//}
-
 // ###############
 // private methods
 // ###############

@@ -127,17 +127,6 @@ public:
     void enablePoissonNoise(bool enable = true);
     void enableSpectralEffects(bool enable = true);
 
-//    void setArealFocalSpotDiscretization(const QSize& discretization);
-//    void setDetectorSaturationSampling(float energyBinWidth);
-//    void setSpectralEffectsSampling(float energyBinWidth);
-//    void setPoissonFixedSeed(uint seed);
-//    void setPoissonRandomSeedMode();
-//    void setPoissonParallelizationMode(bool enabled);
-//    void setRayCasterInterpolation(bool enabled);
-//    void setRayCasterRaysPerPixel(const QSize& sampling);
-//    void setRayCasterRaySampling(float sampling);
-//    void setRayCasterVolumeUpSampling(uint upsamplingFactor);
-
     SettingsAFS settingsArealFocalSpot();
     SettingsDetectorSaturation settingsDetectorSaturation();
     SettingsPoissonNoise settingsPoissonNoise();
