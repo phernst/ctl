@@ -115,6 +115,7 @@ public:
     ProjectionData project(const VolumeData& volume) override;
     ProjectionData projectComposite(const CompositeVolume &volume) override;
     bool isLinear() const override;
+    ProjectorNotifier * notifier() override;
 
     // SerializationInterface interface
     void fromVariant(const QVariant& variant) override;

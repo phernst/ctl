@@ -85,6 +85,11 @@ bool StandardPipeline::isLinear() const
     return _pipeline.isLinear();
 }
 
+ProjectorNotifier* StandardPipeline::notifier()
+{
+    return _pipeline.notifier();
+}
+
 void StandardPipeline::fromVariant(const QVariant& variant)
 {
     AbstractProjector::fromVariant(variant);
