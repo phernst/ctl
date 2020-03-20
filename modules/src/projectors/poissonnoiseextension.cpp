@@ -37,6 +37,8 @@ ProjectionData PoissonNoiseExtension::extendedProject(const MetaProjector& neste
     // compute (clean) projections
     auto ret = nestedProjector.project();
 
+    emit notifier()->information("Processing Poisson noise.");
+
     if(!_useFixedSeed)
     {
         std::random_device rd;

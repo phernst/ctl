@@ -89,6 +89,8 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
 {
     auto ret = nestedProjector.project();
 
+    emit notifier()->information("Processing detector saturation.");
+
     auto saturationModelType = _setup.system()->detector()->saturationModelType();
 
     if(_nbSamples == 0)

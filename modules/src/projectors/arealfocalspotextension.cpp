@@ -100,8 +100,12 @@ ProjectionData ArealFocalSpotExtension::extendedProject(const MetaProjector& nes
     std::future<void> fut = std::async([]{});
     ProjectionData nextProj(0,0,0);
 
+    uint ptCount = 1;
     for(const auto& point : discGrid)
     {   
+        emit notifier()->information("Processing sub-sample " + QString::number(ptCount++) + "/" +
+                                     QString::number(nbSamplingPts) + " of areal focal spot.");
+
         AcquisitionSetup tmpSetup(_setup);
 
         for(uint view = 0; view < _setup.nbViews(); ++view)

@@ -217,11 +217,16 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
     qDebug() << "linear case";
 
     // project all material densities
+    const auto nbSubVolumes = volume.nbSubVolumes();
     std::vector<ProjectionData> materialProjs;
-    materialProjs.reserve(volume.nbSubVolumes());
+    materialProjs.reserve(nbSubVolumes);
 
+    uint sv = 1;
     for(const auto& subVolume : volume.data())
     {
+        emit notifier()->information("Projecting density of subvolume " + QString::number(sv++) +
+                                     "/" + QString::number(nbSubVolumes) + ".");
+
         if(subVolume->isMuVolume()) // need transformation to densities
         {
             if(subVolume->hasSpectralInformation()) // conversion to density is possible
@@ -247,11 +252,14 @@ ProjectionData SpectralEffectsExtension::projectLinear(const CompositeVolume& vo
     // process all energy bins and sum up intensities
     ProjectionData sumProj(_setup.system()->detector()->viewDimensions());
     sumProj.allocateMemory(_setup.nbViews(), 0.0f);
-    std::vector<float> massAttenuationCoeffs(volume.nbSubVolumes());
+    std::vector<float> massAttenuationCoeffs(nbSubVolumes);
     const auto binWidth = _spectralInfo.binWidth();
 
     for(auto bin = 0u, nbEnergyBins = _spectralInfo.nbEnergyBins(); bin < nbEnergyBins; ++bin)
     {
+        emit notifier()->information("Processing energy bin " + QString::number(bin+1) +
+                                     "/" + QString::number(nbEnergyBins) + ".");
+
         const auto binInfo = _spectralInfo.bin(bin);
         const auto binEnergy = binInfo.energy;
 
@@ -292,7 +300,12 @@ ProjectionData SpectralEffectsExtension::projectNonLinear(const CompositeVolume 
     sumProj.allocateMemory(_setup.nbViews(), 0.0f);
 
     for(auto bin = 0u, nbEnergyBins = _spectralInfo.nbEnergyBins(); bin < nbEnergyBins; ++bin)
+    {
+        emit notifier()->information("Processing energy bin " + QString::number(bin) +
+                                     "/" + QString::number(nbEnergyBins) + ".");
+
         sumProj += singleBinIntensityNonLinear(volume, _spectralInfo.bin(bin));
+    }
 
     sumProj.transformToExtinction(_spectralInfo.totalIntensity());
 
