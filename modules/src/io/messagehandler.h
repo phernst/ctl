@@ -65,6 +65,9 @@ signals:
     void newLogEntry() const;
     void messagePrinted() const;
 
+public slots:
+    void messageFromSignal(QString msg);
+
 private:
     MessageHandler();
 
