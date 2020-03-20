@@ -86,7 +86,7 @@ public:
     virtual QVariant parameter() const;
     virtual void setParameter(const QVariant& parameter);
 
-    ProjectorNotifier* notifier();
+    virtual ProjectorNotifier* notifier();
 
 protected:
     AbstractProjector() = default;
