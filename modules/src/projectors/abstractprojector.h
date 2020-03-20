@@ -56,6 +56,10 @@ typedef SpectralVolumeData VolumeData;
  *
  * This class uses Qt's signal/slot principle to allow communication of a projector class with other
  * program parts. To do so, connect the signals of this object with the desired receiver objects.
+ *
+ * The ProjectorNotifier offers the following signals:
+ * - projectionFinished(int): intended to be emitted when a projection is fully processed.
+ * - information(QString): used to communicate status information.
  */
 
 class ProjectorNotifier : public QObject
@@ -63,6 +67,7 @@ class ProjectorNotifier : public QObject
     Q_OBJECT
 signals:
     void projectionFinished(int viewNb);
+    void information(QString info);
 };
 
 class AbstractProjector : public SerializationInterface
@@ -175,6 +180,12 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
 * \fn void ProjectorNotifier::projectionFinished(int viewNb)
 *
 * Signal that is emitted after processing of projection \a viewNb is finished.
+*/
+
+/*!
+* \fn void ProjectorNotifier::information(QString info)
+*
+* Signal that can be emitted to communicate a status information.
 */
 
 /*!
