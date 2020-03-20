@@ -1,5 +1,63 @@
 # Changelog
 
+## 2020-03-20 (v.0.3.1)
+
+**Important change for existing users:**
+
+`AbstractProjector::configure()` now only takes one parameter ('AcquisitionSetup'). All previous code must be adjusted accordingly - sorry for that!
+Settings for the actual projector are now done using corresponding setter methods of the projector class itself.
+
+
+### Added core functionality
+
+FOCUS: Projector and Extension refactoring
+
+Major convenience features:
+- added a substantial amount of documentation and example code to many classes
+- added two new convenience classes: `ProjectionPipeline` and `StandardPipeline`
+
+    `ProjectionPipeline` provides a simple means to manage a projector along with an arbitrary number of `ProjectorExtension` objects. It allows for manipulations of the processing pipeline in a list-like fashion.
+    `StandardPipeline` goes even one step further and provides a pre-defined pipeline that is easily configurable using some well-defined setter methods.
+
+- added a fully-functional GUI widget (`PipelineComposerWidget`) to compose a `ProjectionPipeline` incl. all configuration options. This class also provides a simple dialog option (`PipelineComposerWidget::fromDialog()`), allowing you to create your projection pipeline on demand.
+
+Overall, putting together your desired simulation settings should now be considerably simpler than before!
+
+### Changed
+Changes to projectors and extensions:
+- corrected several errors
+- all projectors and extensions are now serializable
+- all extensions now provide constructors with direct member initialization
+- removed `AbstractProjectorConfig` parameter from `AbstractProjector::configure()` - Specific settings for projectors must now be set by means of dedicated setter methods, similar to how it was done already with extensions.
+- `ProjectorNotifier` now supports sending signals with general information as `QString`; included several such information messages in current extensions
+- `SpectralEffectsExtension`
+    - fully refactored code
+    - enabled full compatibility for volume data without spectral information (this holds true also for `CompositeVolume` with mixed subvolumes, i.e. some containing spectral information and some not)
+    - delegated extraction of spectral information to `RadiationEncoder`
+- `PoissonNoiseExtension`
+    - add Gaussian approximation for large photon counts - This change increases computation speed for large counts and avoids some numerical issues with the Poisson distribution of extemely large mean.
+- `ArealFocalSpotExtension`
+    - now correctly defined to be non-linear
+    - added option to perform linear approximation (useful for projections with small extinction gradients)
+- `DynamicProjectorExtension` (formerly DynamicProjector)
+    - refactored: now of base class `ProjectorExtension`
+    - can now properly handle different types of volume data and nested projectors
+    - supports CompositeVolumes with mixed subvolumes (i.e. some containing temporal dynamics and some static volumes)
+
+Other changes:
+- refactoring of volume data classes:
+   - volume classes are now polymorphic
+   - added more factory methods to create volume objects with basic geometrical shapes
+   - refactored `CompositeVolume`: now much more flexible to use
+   - refactored `AbstractDynamicVolumeData` (formerly AbstractDynamicVoxelVolume): now of base class `SpectralVolumeData`
+   - added `LinearDynamicVolume`: simple class allowing for linear relation of temporal dependency of attenuation in each voxel
+- refactored `TASMIPSpectrumModel`: now more performant and memory-saving
+- `RadiationEncoder` can now extract spectral information for an entire setup
+- new submodule (gui_widgets_ocl.pri) containing widgets with OpenCL dependency
+- added Gaussian filter methods
+- add method to directly query the mean energy of a source's spectrum
+- add option to connect messages from (Qt) signals to the `MessageHandler`
+
 ## 2020-02-03 (v.0.3)
 ### Added core functionality
 FOCUS: Image processing
