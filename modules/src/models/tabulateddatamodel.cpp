@@ -51,7 +51,7 @@ void TabulatedDataModel::setData(const QVector<float>& keys, const QVector<float
         throw std::domain_error("TabulatedDataModel::setData(): keys and values have different size.");
 
     _data.clear();
-    for(auto k = 0; k < keys.length(); ++k)
+    for(auto k = 0, length = keys.length(); k < length; ++k)
         _data.insert(keys.at(k), values.at(k));
 }
 
