@@ -301,7 +301,7 @@ ProjectionData SpectralEffectsExtension::projectNonLinear(const CompositeVolume 
 
     for(auto bin = 0u, nbEnergyBins = _spectralInfo.nbEnergyBins(); bin < nbEnergyBins; ++bin)
     {
-        emit notifier()->information("Processing energy bin " + QString::number(bin) +
+        emit notifier()->information("Processing energy bin " + QString::number(bin+1) +
                                      "/" + QString::number(nbEnergyBins) + ".");
 
         sumProj += singleBinIntensityNonLinear(volume, _spectralInfo.bin(bin));
