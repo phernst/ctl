@@ -31,21 +31,18 @@ typedef SpectralVolumeData VolumeData;
  * projectors.
  *
  * This class defines the interface every forward projection implementation needs to satisfy. This
- * comes down to two methods that need to be provided.
- *
- * First, the configure() method is required.
- * It should be used to gather all necessary information to prepare the actual forward projection.
- * This usually contains all geometry and system information (which can be retrieved from the
- * passed AcquisitionSetup) and implementation specific parameters (which should be passed by a
- * AbstractProjectorConfig sub-classed for that particular purpose).
- *
- * Second, the actual forward projection functionality must be made available through project().
- * This method takes the voxelized volume that shall be projected and must return the full set
- * of forward projections that have been requested by the AcquisitionSetup set in the configurate()
- * step.
+ * comes down to two methods that need to be provided:
+ * - configure(): This method takes the AcquisitionSetup to be used for the simulation. All
+ * necessary information to prepare the actual forward projection should be gathered here. This
+ * usually contains all geometry and system information (which can be retrieved from the passed
+ * AcquisitionSetup). Implementation specific parameters (e.g. accuracy settings), however, shall be
+ * set using dedicated setter methods.
+ * - project(): This method must provide the actual forward projection functionality. It takes the
+ * voxelized volume that shall be projected and must return the full set of forward projections
+ * that have been requested by the AcquisitionSetup set in the configure() step.
  *
  * Two structurally different ways of how such an implementation can be realized are given by
- * the examples RayCasterInterface and RayCasterProjector, which can be found in the OpenCL module
+ * the examples RayCasterAdapter and RayCasterProjector. Both can be found in the OpenCL module
  * (ocl_routines.pri).
  */
 
@@ -209,8 +206,18 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
  *
  * \brief Provides the actual forward projection functionality.
  *
- * This method takes a voxelized dataset \a volume. It shall return the full set of forward
+ * This method takes a voxelized dataset \a volume and shall return the full set of forward
  * projections that have been requested by the AcquisitionSetup set in the configure() step.
+ *
+ * The passed volume data can be either:
+ * - SpectralVolumeData,
+ * - VoxelVolume<float> (implicitely converted to SpectralVolumeData),
+ * - any sub-class of AbstractDynamicVolumeData.
+ *
+ * CompositeVolume data can be projected using projectComposite().
+ *
+ * Note that the functionality of specific ProjectorExtension classes might depend on a passing a
+ * certain type of volume data. Please refer to the documentation of the extensions you are using.
  */
 
 /*!
@@ -280,9 +287,9 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
 /*! \file */
 ///@{
 /*!
- * \typedef typedef VoxelVolume<float> CTL::VolumeData
+ * \typedef typedef SpectralVolumeData VolumeData;
  *
- * \brief Alias name for VoxelVolume<float>.
+ * \brief Alias name for SpectralVolumeData.
  *
  * \relates CTL::AbstractProjector
  */
