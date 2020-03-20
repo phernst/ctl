@@ -1,5 +1,5 @@
-#ifndef SPECTRALEFFECTSEXTENSION_H
-#define SPECTRALEFFECTSEXTENSION_H
+#ifndef CTL_SPECTRALEFFECTSEXTENSION_H
+#define CTL_SPECTRALEFFECTSEXTENSION_H
 
 #include "projectorextension.h"
 #include "acquisition/acquisitionsetup.h"
@@ -123,4 +123,4 @@ private:
 
 } // namespace CTL
 
-#endif // SPECTRALEFFECTSEXTENSION_H
+#endif // CTL_SPECTRALEFFECTSEXTENSION_H

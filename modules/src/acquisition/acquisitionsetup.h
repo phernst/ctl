@@ -1,5 +1,5 @@
-#ifndef ACQUISITIONSETUP_H
-#define ACQUISITIONSETUP_H
+#ifndef CTL_ACQUISITIONSETUP_H
+#define CTL_ACQUISITIONSETUP_H
 
 #include "abstractpreparestep.h"
 #include "simplectsystem.h"
@@ -98,4 +98,4 @@ private:
 
 } // namespace CTL
 
-#endif // ACQUISITIONSETUP_H
+#endif // CTL_ACQUISITIONSETUP_H

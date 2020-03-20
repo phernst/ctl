@@ -1,5 +1,5 @@
-#ifndef VIEWGEOMETRY_H
-#define VIEWGEOMETRY_H
+#ifndef CTL_VIEWGEOMETRY_H
+#define CTL_VIEWGEOMETRY_H
 
 #include "mat/projectionmatrix.h"
 #include <QVector>
@@ -108,4 +108,4 @@ private:
 
 ///@}
 ///
-#endif // VIEWGEOMETRY_H
+#endif // CTL_VIEWGEOMETRY_H

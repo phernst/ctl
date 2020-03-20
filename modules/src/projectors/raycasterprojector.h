@@ -1,5 +1,5 @@
-#ifndef RAYCASTERPROJECTOR_H
-#define RAYCASTERPROJECTOR_H
+#ifndef CTL_RAYCASTERPROJECTOR_H
+#define CTL_RAYCASTERPROJECTOR_H
 
 #include "abstractprojector.h"
 #include "acquisition/geometryencoder.h"
@@ -65,4 +65,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // RAYCASTERPROJECTOR_H
+#endif // CTL_RAYCASTERPROJECTOR_H

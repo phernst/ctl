@@ -1,5 +1,5 @@
-#ifndef NRRDFILEIO_H
-#define NRRDFILEIO_H
+#ifndef CTL_NRRDFILEIO_H
+#define CTL_NRRDFILEIO_H
 
 #include "io/basetypeio.h"
 #include <QFile>
@@ -70,4 +70,4 @@ private:
 
 #include "nrrdfileio.tpp"
 
-#endif // NRRDFILEIO_H
+#endif // CTL_NRRDFILEIO_H

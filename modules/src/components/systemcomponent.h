@@ -1,5 +1,5 @@
-#ifndef SYSTEMCOMPONENT_H
-#define SYSTEMCOMPONENT_H
+#ifndef CTL_SYSTEMCOMPONENT_H
+#define CTL_SYSTEMCOMPONENT_H
 
 #include "io/serializationinterface.h"
 #include <QJsonObject>
@@ -181,4 +181,4 @@ private:
  */
 ///@}
 
-#endif // SYSTEMCOMPONENT_H
+#endif // CTL_SYSTEMCOMPONENT_H

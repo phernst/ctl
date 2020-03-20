@@ -1,5 +1,5 @@
-#ifndef PROJECTIONPIPELINE_H
-#define PROJECTIONPIPELINE_H
+#ifndef CTL_PROJECTIONPIPELINE_H
+#define CTL_PROJECTIONPIPELINE_H
 
 #include "projectorextension.h"
 
@@ -132,4 +132,4 @@ private:
 */
 ///@}
 
-#endif // PROJECTIONPIPELINE_H
+#endif // CTL_PROJECTIONPIPELINE_H

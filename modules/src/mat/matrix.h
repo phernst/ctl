@@ -6,8 +6,8 @@
 ** Email: robert.frysch@ovgu.de
 ******************************************************************************/
 
-#ifndef MATRIX_H
-#define MATRIX_H
+#ifndef CTL_MATRIX_H
+#define CTL_MATRIX_H
 
 #include <algorithm>
 #include <cmath>
@@ -213,4 +213,4 @@ Matrix<Rows1 + Rows2, Cols> vertcat(const Matrix<Rows1, Cols>& m1, const Matrix<
 
 #include "matrix.tpp"
 
-#endif // MATRIX_H
+#endif // CTL_MATRIX_H

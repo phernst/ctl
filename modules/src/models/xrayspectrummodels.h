@@ -1,5 +1,5 @@
-#ifndef XRAYSPECTRUMMODELS_H
-#define XRAYSPECTRUMMODELS_H
+#ifndef CTL_XRAYSPECTRUMMODELS_H
+#define CTL_XRAYSPECTRUMMODELS_H
 
 #include "abstractxrayspectrummodel.h"
 #include "tabulateddatamodel.h"
@@ -99,4 +99,4 @@ private:
 
 } // namespace CTL
 
-#endif // XRAYSPECTRUMMODELS_H
+#endif // CTL_XRAYSPECTRUMMODELS_H

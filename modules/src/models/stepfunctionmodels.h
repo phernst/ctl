@@ -1,5 +1,5 @@
-#ifndef STEPFUNCTIONMODELS_H
-#define STEPFUNCTIONMODELS_H
+#ifndef CTL_STEPFUNCTIONMODELS_H
+#define CTL_STEPFUNCTIONMODELS_H
 
 #include "abstractdatamodel.h"
 
@@ -71,4 +71,4 @@ private:
 
 } // namespace CTL
 
-#endif // STEPFUNCTIONMODELS_H
+#endif // CTL_STEPFUNCTIONMODELS_H

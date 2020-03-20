@@ -1,5 +1,5 @@
-#ifndef MATRIX_UTILS_H
-#define MATRIX_UTILS_H
+#ifndef CTL_MATRIX_UTILS_H
+#define CTL_MATRIX_UTILS_H
 
 #include "matrix_types.h"
 #include <QVariant>
@@ -37,4 +37,4 @@ struct Location
 
 #include "matrix_utils.tpp"
 
-#endif // MATRIX_UTILS_H
+#endif // CTL_MATRIX_UTILS_H

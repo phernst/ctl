@@ -1,5 +1,5 @@
-#ifndef SYSTEMVISUALIZERWIDGET_H
-#define SYSTEMVISUALIZERWIDGET_H
+#ifndef CTL_SYSTEMVISUALIZERWIDGET_H
+#define CTL_SYSTEMVISUALIZERWIDGET_H
 
 #include <QWidget>
 
@@ -68,4 +68,4 @@ private:
     void addCoordinateSystem();
 };
 
-#endif // SYSTEMVISUALIZERWIDGET_H
+#endif // CTL_SYSTEMVISUALIZERWIDGET_H

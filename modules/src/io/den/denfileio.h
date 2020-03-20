@@ -1,5 +1,5 @@
-#ifndef DENFILEIO_H
-#define DENFILEIO_H
+#ifndef CTL_DENFILEIO_H
+#define CTL_DENFILEIO_H
 
 #include "dfileformat.h"
 
@@ -147,4 +147,4 @@ inline std::vector<double> DenFileIO::readAll(const QString& fileName) const
 
 #endif // CTL_CORE_MODULE_NOT_AVAILABLE
 
-#endif // DENFILEIO_H
+#endif // CTL_DENFILEIO_H

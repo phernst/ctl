@@ -1,5 +1,5 @@
-#ifndef POISSONNOISEEXTENSION_H
-#define POISSONNOISEEXTENSION_H
+#ifndef CTL_POISSONNOISEEXTENSION_H
+#define CTL_POISSONNOISEEXTENSION_H
 
 #include "projectorextension.h"
 #include "acquisition/acquisitionsetup.h"
@@ -101,4 +101,4 @@ private:
 
 } // namespace CTL
 
-#endif // POISSONNOISEEXTENSION_H
+#endif // CTL_POISSONNOISEEXTENSION_H

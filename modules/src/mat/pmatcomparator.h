@@ -9,8 +9,8 @@
 ** Email: robert.frysch@ovgu.de
 ******************************************************************************/
 
-#ifndef PMATCOMPARATOR_H
-#define PMATCOMPARATOR_H
+#ifndef CTL_PMATCOMPARATOR_H
+#define CTL_PMATCOMPARATOR_H
 
 #include "matrix_types.h"
 #include <cfloat>
@@ -112,4 +112,4 @@ void PMatComparator::setVolumeDefFrom(const VoxelVolume<T>& volume)
 } // namespace mat
 } // namespace CTL
 
-#endif // PMATCOMPARATOR_H
+#endif // CTL_PMATCOMPARATOR_H

@@ -1,5 +1,5 @@
-#ifndef ABSTRACTBEAMMODIFIER_H
-#define ABSTRACTBEAMMODIFIER_H
+#ifndef CTL_ABSTRACTBEAMMODIFIER_H
+#define CTL_ABSTRACTBEAMMODIFIER_H
 
 #include "systemcomponent.h"
 #include "models/intervaldataseries.h"
@@ -113,4 +113,4 @@ inline QVariant AbstractBeamModifier::toVariant() const
 
 } // namespace CTL
 
-#endif // ABSTRACTBEAMMODIFIER_H
+#endif // CTL_ABSTRACTBEAMMODIFIER_H

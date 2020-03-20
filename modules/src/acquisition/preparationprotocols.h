@@ -1,5 +1,5 @@
-#ifndef PREPARATIONPROTOCOLS_H
-#define PREPARATIONPROTOCOLS_H
+#ifndef CTL_PREPARATIONPROTOCOLS_H
+#define CTL_PREPARATIONPROTOCOLS_H
 
 // trajectories as special protocol are separated into "trajectories.h"
 #include "trajectories.h"
@@ -44,4 +44,4 @@ private:
 } // namespace protocols
 } // namespace CTL
 
-#endif // PREPARATIONPROTOCOLS_H
+#endif // CTL_PREPARATIONPROTOCOLS_H

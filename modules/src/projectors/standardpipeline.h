@@ -1,5 +1,5 @@
-#ifndef STANDARDPIPELINE_H
-#define STANDARDPIPELINE_H
+#ifndef CTL_STANDARDPIPELINE_H
+#define CTL_STANDARDPIPELINE_H
 
 #include "projectionpipeline.h"
 
@@ -246,4 +246,4 @@ private:
 ///@{
 ///@}
 
-#endif // STANDARDPIPELINE_H
+#endif // CTL_STANDARDPIPELINE_H

@@ -1,5 +1,5 @@
-#ifndef OPENCLCONFIG_H
-#define OPENCLCONFIG_H
+#ifndef CTL_OPENCLCONFIG_H
+#define CTL_OPENCLCONFIG_H
 
 #define __CL_ENABLE_EXCEPTIONS
 #define CL_USE_DEPRECATED_OPENCL_1_1_APIS
@@ -133,4 +133,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // OPENCLCONFIG_H
+#endif // CTL_OPENCLCONFIG_H

@@ -1,5 +1,5 @@
-#ifndef CLFILELOADER_H
-#define CLFILELOADER_H
+#ifndef CTL_CLFILELOADER_H
+#define CTL_CLFILELOADER_H
 
 #include <string>
 
@@ -79,4 +79,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // CLFILELOADER_H
+#endif // CTL_CLFILELOADER_H

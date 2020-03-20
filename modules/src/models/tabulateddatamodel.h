@@ -1,5 +1,5 @@
-#ifndef TABULATEDDATAMODEL_H
-#define TABULATEDDATAMODEL_H
+#ifndef CTL_TABULATEDDATAMODEL_H
+#define CTL_TABULATEDDATAMODEL_H
 
 #include "abstractdatamodel.h"
 #include <QMap>
@@ -52,4 +52,4 @@ private:
 
 } // namespace CTL
 
-#endif // TABULATEDDATAMODEL_H
+#endif // CTL_TABULATEDDATAMODEL_H

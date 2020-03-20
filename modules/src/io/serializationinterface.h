@@ -1,5 +1,5 @@
-#ifndef SERIALIZATIONINTERFACE_H
-#define SERIALIZATIONINTERFACE_H
+#ifndef CTL_SERIALIZATIONINTERFACE_H
+#define CTL_SERIALIZATIONINTERFACE_H
 
 #include "io/serializationhelper.h"
 
@@ -194,4 +194,4 @@ private:                                                                        
     friend struct SerializationHelper::RegisterWithSerializationHelper;
 ///@}
 
-#endif // SERIALIZATIONINTERFACE_H
+#endif // CTL_SERIALIZATIONINTERFACE_H

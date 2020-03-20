@@ -1,5 +1,5 @@
-#ifndef AREALFOCALSPOTEXTENSION_H
-#define AREALFOCALSPOTEXTENSION_H
+#ifndef CTL_AREALFOCALSPOTEXTENSION_H
+#define CTL_AREALFOCALSPOTEXTENSION_H
 
 #include "projectorextension.h"
 #include "acquisition/acquisitionsetup.h"
@@ -97,4 +97,4 @@ protected:
 
 /*! \file */
 
-#endif // AREALFOCALSPOTEXTENSION_H
+#endif // CTL_AREALFOCALSPOTEXTENSION_H

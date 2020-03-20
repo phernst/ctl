@@ -1,5 +1,5 @@
-#ifndef ABSTRACTDETECTOR_H
-#define ABSTRACTDETECTOR_H
+#ifndef CTL_ABSTRACTDETECTOR_H
+#define CTL_ABSTRACTDETECTOR_H
 
 #include "systemcomponent.h"
 #include "mat/matrix_utils.h"   // for definition of mat::Location
@@ -399,4 +399,4 @@ inline void AbstractDetector::setSpectralResponseModel(std::unique_ptr<AbstractD
  */
 ///@}
 
-#endif // ABSTRACTDETECTOR_H
+#endif // CTL_ABSTRACTDETECTOR_H

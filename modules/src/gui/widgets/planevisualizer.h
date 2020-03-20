@@ -1,5 +1,5 @@
-#ifndef PLANEVISUALIZER_H
-#define PLANEVISUALIZER_H
+#ifndef CTL_PLANEVISUALIZER_H
+#define CTL_PLANEVISUALIZER_H
 
 #include "img/voxelvolume.h"
 #include <QWidget>
@@ -77,4 +77,4 @@ private:
     void redraw();
 };
 
-#endif // PLANEVISUALIZER_H
+#endif // CTL_PLANEVISUALIZER_H

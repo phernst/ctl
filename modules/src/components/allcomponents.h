@@ -1,5 +1,5 @@
-#ifndef ALLCOMPONENTS_H
-#define ALLCOMPONENTS_H
+#ifndef CTL_ALLCOMPONENTS_H
+#define CTL_ALLCOMPONENTS_H
 
 #include "components/allgenerictypes.h"
 
@@ -11,4 +11,4 @@
 #include "components/xraylaser.h"
 #include "components/xraytube.h"
 
-#endif // ALLCOMPONENTS_H
+#endif // CTL_ALLCOMPONENTS_H

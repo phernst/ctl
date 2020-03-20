@@ -1,5 +1,5 @@
-#ifndef RAYCASTER_H
-#define RAYCASTER_H
+#ifndef CTL_RAYCASTER_H
+#define CTL_RAYCASTER_H
 
 #define __CL_ENABLE_EXCEPTIONS
 #define CL_USE_DEPRECATED_OPENCL_1_1_APIS
@@ -47,4 +47,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // RAYCASTER_H
+#endif // CTL_RAYCASTER_H

@@ -1,5 +1,5 @@
-#ifndef PREPARESTEPS_H
-#define PREPARESTEPS_H
+#ifndef CTL_PREPARESTEPS_H
+#define CTL_PREPARESTEPS_H
 
 #include "abstractpreparestep.h"
 #include "simplectsystem.h"
@@ -194,4 +194,4 @@ private:
 } // namespace prepare
 } // namespace CTL
 
-#endif // PREPARESTEPS_H
+#endif // CTL_PREPARESTEPS_H

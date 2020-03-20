@@ -1,5 +1,5 @@
-#ifndef JSONSERIALIZER_H
-#define JSONSERIALIZER_H
+#ifndef CTL_JSONSERIALIZER_H
+#define CTL_JSONSERIALIZER_H
 
 #include "abstractserializer.h"
 
@@ -32,4 +32,4 @@ private:
 ///@{
 ///@}
 
-#endif // JSONSERIALIZER_H
+#endif // CTL_JSONSERIALIZER_H

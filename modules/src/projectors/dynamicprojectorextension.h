@@ -1,5 +1,5 @@
-#ifndef DYNAMICPROJECTOREXTENSION_H
-#define DYNAMICPROJECTOREXTENSION_H
+#ifndef CTL_DYNAMICPROJECTOREXTENSION_H
+#define CTL_DYNAMICPROJECTOREXTENSION_H
 
 #include "projectorextension.h"
 #include "acquisition/acquisitionsetup.h"
@@ -42,4 +42,4 @@ private:
 
 } // namespace CTL
 
-#endif // DYNAMICPROJECTOREXTENSION_H
+#endif // CTL_DYNAMICPROJECTOREXTENSION_H

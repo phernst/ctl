@@ -1,5 +1,5 @@
-#ifndef SPECTRALVOLUMEDATA_H
-#define SPECTRALVOLUMEDATA_H
+#ifndef CTL_SPECTRALVOLUMEDATA_H
+#define CTL_SPECTRALVOLUMEDATA_H
 
 #include "voxelvolume.h"
 #include "models/abstractdatamodel.h"
@@ -117,4 +117,4 @@ private:
 
 }
 
-#endif // SPECTRALVOLUMEDATA_H
+#endif // CTL_SPECTRALVOLUMEDATA_H

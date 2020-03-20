@@ -1,5 +1,5 @@
-#ifndef IMAGEPROCESSING_H
-#define IMAGEPROCESSING_H
+#ifndef CTL_IMAGEPROCESSING_H
+#define CTL_IMAGEPROCESSING_H
 
 /*
  * Wrapping header that provides all symbols from the `CTL::imgproc` namespace.
@@ -22,4 +22,4 @@ namespace imgproc
 } // namespace imgproc
 } // namespace CTL
 
-#endif // IMAGEPROCESSING_H
+#endif // CTL_IMAGEPROCESSING_H

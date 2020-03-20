@@ -1,5 +1,5 @@
-#ifndef MATRIX_ALGORITHM_H
-#define MATRIX_ALGORITHM_H
+#ifndef CTL_MATRIX_ALGORITHM_H
+#define CTL_MATRIX_ALGORITHM_H
 
 #include "matrix_types.h"
 
@@ -27,4 +27,4 @@ mat::Matrix<3, 1> orthonormalTo(const mat::Matrix<3, 1>& v);
 } // namespace mat
 } // namespace CTL
 
-#endif // MATRIX_ALGORITHM_H
+#endif // CTL_MATRIX_ALGORITHM_H

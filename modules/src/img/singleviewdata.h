@@ -1,5 +1,5 @@
-#ifndef SINGLEVIEWDATA_H
-#define SINGLEVIEWDATA_H
+#ifndef CTL_SINGLEVIEWDATA_H
+#define CTL_SINGLEVIEWDATA_H
 
 #include "chunk2d.h"
 #include "modulelayout.h"
@@ -103,4 +103,4 @@ private:
 
 /*! \file */
 
-#endif // SINGLEVIEWDATA_H
+#endif // CTL_SINGLEVIEWDATA_H

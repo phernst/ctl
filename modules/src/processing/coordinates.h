@@ -1,5 +1,5 @@
-#ifndef COORDINATES_H
-#define COORDINATES_H
+#ifndef CTL_COORDINATES_H
+#define CTL_COORDINATES_H
 
 #include <algorithm>
 #include <vector>
@@ -89,4 +89,4 @@ typedef Range<float> SamplingRange;
 
 } // namespace CTL
 
-#endif // COORDINATES_H
+#endif // CTL_COORDINATES_H

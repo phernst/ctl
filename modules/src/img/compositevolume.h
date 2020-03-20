@@ -1,5 +1,5 @@
-#ifndef COMPOSITEVOLUME_H
-#define COMPOSITEVOLUME_H
+#ifndef CTL_COMPOSITEVOLUME_H
+#define CTL_COMPOSITEVOLUME_H
 
 #include "abstractdynamicvolumedata.h"
 #include <deque>
@@ -244,4 +244,4 @@ CompositeVolume::CompositeVolume(const CompositeVolume& volume, Volumes&&... oth
 
 } // namespace CTL
 
-#endif // COMPOSITEVOLUME_H
+#endif // CTL_COMPOSITEVOLUME_H

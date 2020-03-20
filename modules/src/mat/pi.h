@@ -1,5 +1,5 @@
-#ifndef PI_H
-#define PI_H
+#ifndef CTL_PI_H
+#define CTL_PI_H
 
 /*
  * Global numeric constants for pi, pi/2 and pi/4.
@@ -10,4 +10,4 @@ constexpr double PI       = 3.14159265358979323846; // pi
 constexpr double PI_2     = 1.57079632679489661923; // pi/2
 constexpr double PI_4     = 0.78539816339744830962; // pi/4
 
-#endif // PI_H
+#endif // CTL_PI_H

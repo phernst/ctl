@@ -1,5 +1,5 @@
-#ifndef BINARYSERIALIZER_H
-#define BINARYSERIALIZER_H
+#ifndef CTL_BINARYSERIALIZER_H
+#define CTL_BINARYSERIALIZER_H
 
 #include "abstractserializer.h"
 
@@ -28,4 +28,4 @@ private:
 
 } // namespace CTL
 
-#endif // BINARYSERIALIZER_H
+#endif // CTL_BINARYSERIALIZER_H

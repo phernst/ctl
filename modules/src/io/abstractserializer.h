@@ -1,5 +1,5 @@
-#ifndef ABSTRACTSERIALIZER_H
-#define ABSTRACTSERIALIZER_H
+#ifndef CTL_ABSTRACTSERIALIZER_H
+#define CTL_ABSTRACTSERIALIZER_H
 
 #include "acquisition/abstractpreparestep.h"
 #include "acquisition/acquisitionsetup.h"
@@ -170,4 +170,4 @@ std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QStrin
 
 } // namespace CTL
 
-#endif // ABSTRACTSERIALIZER_H
+#endif // CTL_ABSTRACTSERIALIZER_H

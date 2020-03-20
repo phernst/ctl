@@ -1,5 +1,5 @@
-#ifndef ABSTRACTSOURCE_H
-#define ABSTRACTSOURCE_H
+#ifndef CTL_ABSTRACTSOURCE_H
+#define CTL_ABSTRACTSOURCE_H
 #include "mat/matrix_types.h"
 #include "models/intervaldataseries.h"
 #include "models/abstractxrayspectrummodel.h"
@@ -483,4 +483,4 @@ inline void AbstractSource::setFluxModifier(double modifier) { _fluxModifier = m
 
 } // namespace CTL
 
-#endif // ABSTRACTSOURCE_H
+#endif // CTL_ABSTRACTSOURCE_H

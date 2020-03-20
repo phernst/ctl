@@ -1,5 +1,5 @@
-#ifndef MESSAGEHANDLER_H
-#define MESSAGEHANDLER_H
+#ifndef CTL_MESSAGEHANDLER_H
+#define CTL_MESSAGEHANDLER_H
 
 #include <QMessageLogContext>
 #include <QObject>
@@ -95,4 +95,4 @@ private:
 
 } // namespace CTL
 
-#endif // MESSAGEHANDLER_H
+#endif // CTL_MESSAGEHANDLER_H

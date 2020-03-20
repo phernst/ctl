@@ -1,5 +1,5 @@
-#ifndef WINDOWINGWIDGET_H
-#define WINDOWINGWIDGET_H
+#ifndef CTL_WINDOWINGWIDGET_H
+#define CTL_WINDOWINGWIDGET_H
 
 #include <QWidget>
 
@@ -41,4 +41,4 @@ private slots:
     void checkToValid();
 };
 
-#endif // WINDOWINGWIDGET_H
+#endif // CTL_WINDOWINGWIDGET_H

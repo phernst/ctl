@@ -1,5 +1,5 @@
-#ifndef CARMGANTRY_H
-#define CARMGANTRY_H
+#ifndef CTL_CARMGANTRY_H
+#define CTL_CARMGANTRY_H
 
 #include "abstractgantry.h"
 
@@ -63,4 +63,4 @@ private:
 
 /*! \file */
 
-#endif // CARMGANTRY_H
+#endif // CTL_CARMGANTRY_H

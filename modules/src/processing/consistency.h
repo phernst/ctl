@@ -1,5 +1,5 @@
-#ifndef CONSISTENCY_H
-#define CONSISTENCY_H
+#ifndef CTL_CONSISTENCY_H
+#define CTL_CONSISTENCY_H
 
 #include "img/chunk2d.h"
 #include "img/voxelvolume.h"
@@ -295,4 +295,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // CONSISTENCY_H
+#endif // CTL_CONSISTENCY_H

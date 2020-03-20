@@ -1,5 +1,5 @@
-#ifndef GENERICGANTRY_H
-#define GENERICGANTRY_H
+#ifndef CTL_GENERICGANTRY_H
+#define CTL_GENERICGANTRY_H
 
 #include "abstractgantry.h"
 #include "mat/matrix_utils.h"
@@ -70,4 +70,4 @@ private:
 /*! \file */
 
 
-#endif // GENERICGANTRY_H
+#endif // CTL_GENERICGANTRY_H

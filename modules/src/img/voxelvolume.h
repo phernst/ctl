@@ -1,5 +1,5 @@
-#ifndef VOXELVOLUME_H
-#define VOXELVOLUME_H
+#ifndef CTL_VOXELVOLUME_H
+#define CTL_VOXELVOLUME_H
 
 #include "chunk2d.h"
 
@@ -173,4 +173,4 @@ private:
 
 /*! \file */
 
-#endif // VOXELVOLUME_H
+#endif // CTL_VOXELVOLUME_H

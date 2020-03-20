@@ -1,5 +1,5 @@
-#ifndef ABSTRACTGANTRY_H
-#define ABSTRACTGANTRY_H
+#ifndef CTL_ABSTRACTGANTRY_H
+#define CTL_ABSTRACTGANTRY_H
 
 #include "mat/matrix_utils.h"
 #include "systemcomponent.h"
@@ -458,4 +458,4 @@ inline QVariant AbstractGantry::toVariant() const
 ///@{
 ///@}
 
-#endif // ABSTRACTGANTRY_H
+#endif // CTL_ABSTRACTGANTRY_H

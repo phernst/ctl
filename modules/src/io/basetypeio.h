@@ -1,5 +1,5 @@
-#ifndef BASETYPEIO_H
-#define BASETYPEIO_H
+#ifndef CTL_BASETYPEIO_H
+#define CTL_BASETYPEIO_H
 
 #include "abstractbasetypeio.h"
 #include <memory>
@@ -181,4 +181,4 @@ private:
 
 ///@}
 
-#endif // BASETYPEIO_H
+#endif // CTL_BASETYPEIO_H

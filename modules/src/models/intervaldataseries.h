@@ -1,5 +1,5 @@
-#ifndef INTERVALDATASERIES_H
-#define INTERVALDATASERIES_H
+#ifndef CTL_INTERVALDATASERIES_H
+#define CTL_INTERVALDATASERIES_H
 
 #include "pointseriesbase.h"
 #include "abstractdatamodel.h"
@@ -31,4 +31,4 @@ private:
 };
 
 }
-#endif // INTERVALDATASERIES_H
+#endif // CTL_INTERVALDATASERIES_H

@@ -1,5 +1,5 @@
-#ifndef GRANGEATREGISTRATION2D3D_H
-#define GRANGEATREGISTRATION2D3D_H
+#ifndef CTL_GRANGEATREGISTRATION2D3D_H
+#define CTL_GRANGEATREGISTRATION2D3D_H
 
 #include "img/chunk2d.h"
 #include "mat/homography.h"
@@ -35,4 +35,4 @@ private:
     float _subSamplingLevel = 1.0f;
 };
 
-#endif // GRANGEATREGISTRATION2D3D_H
+#endif // CTL_GRANGEATREGISTRATION2D3D_H

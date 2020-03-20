@@ -1,5 +1,5 @@
-#ifndef VOLUMERESAMPLER_H
-#define VOLUMERESAMPLER_H
+#ifndef CTL_VOLUMERESAMPLER_H
+#define CTL_VOLUMERESAMPLER_H
 
 #include "img/voxelvolume.h"
 #include "ocl/openclconfig.h"
@@ -59,4 +59,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // VOLUMERESAMPLER_H
+#endif // CTL_VOLUMERESAMPLER_H

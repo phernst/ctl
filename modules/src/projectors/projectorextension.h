@@ -1,5 +1,5 @@
-#ifndef PROJECTOREXTENSION_H
-#define PROJECTOREXTENSION_H
+#ifndef CTL_PROJECTOREXTENSION_H
+#define CTL_PROJECTOREXTENSION_H
 
 #include "abstractprojector.h"
 #include <memory>
@@ -161,4 +161,4 @@ typename std::enable_if<std::is_convertible<ProjectorExtensionType*, ProjectorEx
  */
 ///@}
 
-#endif // PROJECTOREXTENSION_H
+#endif // CTL_PROJECTOREXTENSION_H

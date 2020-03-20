@@ -1,5 +1,5 @@
-#ifndef CTSYSTEMBUILDER_H
-#define CTSYSTEMBUILDER_H
+#ifndef CTL_CTSYSTEMBUILDER_H
+#define CTL_CTSYSTEMBUILDER_H
 
 #include "components/allgenerictypes.h"
 #include "acquisition/ctsystem.h"
@@ -37,4 +37,4 @@ public:
 
 } // namespace CTL
 
-#endif // CTSYSTEMBUILDER_H
+#endif // CTL_CTSYSTEMBUILDER_H

@@ -1,5 +1,5 @@
-#ifndef SERIALIZATIONHELPER_H
-#define SERIALIZATIONHELPER_H
+#ifndef CTL_SERIALIZATIONHELPER_H
+#define CTL_SERIALIZATIONHELPER_H
 
 #include <QMap>
 
@@ -152,4 +152,4 @@ SerializationHelper::RegisterWithSerializationHelper<SerializableType>::Register
     SERIALIZATION_HELPER_KNOWS_ ## className_woNamespace;
 ///@}
 
-#endif // SERIALIZATIONHELPER_H
+#endif // CTL_SERIALIZATIONHELPER_H

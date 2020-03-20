@@ -1,5 +1,5 @@
-#ifndef CTLDATABASEHANDLER_H
-#define CTLDATABASEHANDLER_H
+#ifndef CTL_CTLDATABASEHANDLER_H
+#define CTL_CTLDATABASEHANDLER_H
 
 #include "jsonserializer.h"
 #include "models/abstractdatamodel.h"
@@ -210,4 +210,4 @@ private:
     #endif
 #endif
 
-#endif // CTLDATABASEHANDLER_H
+#endif // CTL_CTLDATABASEHANDLER_H

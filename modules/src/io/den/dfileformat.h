@@ -80,8 +80,8 @@
 **
 ******************************************************************************/
 
-#ifndef DFILEFORMAT_H
-#define DFILEFORMAT_H
+#ifndef CTL_DFILEFORMAT_H
+#define CTL_DFILEFORMAT_H
 
 #include "den_header.h"
 #include <vector>
@@ -181,4 +181,4 @@ typedef DFileFormat<QVector> QDFile;
 
 #include "dfileformat.tpp"
 
-#endif // DFILEFORMAT_H
+#endif // CTL_DFILEFORMAT_H

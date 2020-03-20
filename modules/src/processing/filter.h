@@ -1,5 +1,5 @@
-#ifndef FILTER_H
-#define FILTER_H
+#ifndef CTL_FILTER_H
+#define CTL_FILTER_H
 
 typedef unsigned int uint; //!< Alias for unsigned int
 
@@ -55,4 +55,4 @@ extern template void filter<1u>(Chunk2D<double>& image, FiltMethod m);
 
 ///@}
 
-#endif // FILTER_H
+#endif // CTL_FILTER_H

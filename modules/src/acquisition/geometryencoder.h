@@ -1,5 +1,5 @@
-#ifndef GEOMETRYENCODER_H
-#define GEOMETRYENCODER_H
+#ifndef CTL_GEOMETRYENCODER_H
+#define CTL_GEOMETRYENCODER_H
 
 #include "acquisitionsetup.h"
 #include "viewgeometry.h"
@@ -90,4 +90,4 @@ private:
 
 /*! \file */
 
-#endif // GEOMETRYENCODER_H
+#endif // CTL_GEOMETRYENCODER_H

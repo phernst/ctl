@@ -1,5 +1,5 @@
-#ifndef CTSYSTEM_H
-#define CTSYSTEM_H
+#ifndef CTL_CTSYSTEM_H
+#define CTL_CTSYSTEM_H
 
 #include "components/systemcomponent.h"
 
@@ -139,4 +139,4 @@ private:
 
 /*! \file */
 
-#endif // CTSYSTEM_H
+#endif // CTL_CTSYSTEM_H

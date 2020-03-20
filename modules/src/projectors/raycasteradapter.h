@@ -1,5 +1,5 @@
-#ifndef RAYCASTERADAPTER_H
-#define RAYCASTERADAPTER_H
+#ifndef CTL_RAYCASTERADAPTER_H
+#define CTL_RAYCASTERADAPTER_H
 
 #include "abstractprojector.h"
 #include "mat/mat.h"
@@ -32,4 +32,4 @@ protected:
 } // namespace OCL
 } // namespace CTL
 
-#endif // RAYCASTERADAPTER_H
+#endif // CTL_RAYCASTERADAPTER_H

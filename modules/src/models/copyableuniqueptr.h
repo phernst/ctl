@@ -1,5 +1,5 @@
-#ifndef COPYABLEUNIQUEPTR_H
-#define COPYABLEUNIQUEPTR_H
+#ifndef CTL_COPYABLEUNIQUEPTR_H
+#define CTL_COPYABLEUNIQUEPTR_H
 
 #include <memory>
 
@@ -103,4 +103,4 @@ const std::unique_ptr<T>& CopyableUniquePtr<T>::wrapped() const noexcept
 
 } // namespace CTL
 
-#endif // COPYABLEUNIQUEPTR_H
+#endif // CTL_COPYABLEUNIQUEPTR_H

@@ -1,5 +1,5 @@
-#ifndef RADIATIONENCODER_H
-#define RADIATIONENCODER_H
+#ifndef CTL_RADIATIONENCODER_H
+#define CTL_RADIATIONENCODER_H
 
 #include "acquisitionsetup.h"
 #include "models/intervaldataseries.h"
@@ -67,4 +67,4 @@ private:
 
 } // namespace CTL
 
-#endif // RADIATIONENCODER_H
+#endif // CTL_RADIATIONENCODER_H

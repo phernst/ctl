@@ -1,5 +1,5 @@
-#ifndef TUBULARGANTRY_H
-#define TUBULARGANTRY_H
+#ifndef CTL_TUBULARGANTRY_H
+#define CTL_TUBULARGANTRY_H
 
 #include "abstractgantry.h"
 
@@ -81,4 +81,4 @@ private:
 
 /*! \file */
 
-#endif // TUBULARGANTRY_H
+#endif // CTL_TUBULARGANTRY_H

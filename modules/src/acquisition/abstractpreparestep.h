@@ -1,5 +1,5 @@
-#ifndef ABSTRACTPREPARESTEP_H
-#define ABSTRACTPREPARESTEP_H
+#ifndef CTL_ABSTRACTPREPARESTEP_H
+#define CTL_ABSTRACTPREPARESTEP_H
 
 #include "io/serializationinterface.h"
 #include <QDebug>
@@ -202,4 +202,4 @@ inline QVariant AbstractPrepareStep::toVariant() const
 
 } // namespace CTL
 
-#endif // ABSTRACTPREPARESTEP_H
+#endif // CTL_ABSTRACTPREPARESTEP_H

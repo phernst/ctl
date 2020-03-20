@@ -1,5 +1,5 @@
-#ifndef DETECTORSATURATIONEXTENSION_H
-#define DETECTORSATURATIONEXTENSION_H
+#ifndef CTL_DETECTORSATURATIONEXTENSION_H
+#define CTL_DETECTORSATURATIONEXTENSION_H
 
 #include "acquisition/acquisitionsetup.h"
 #include "projectorextension.h"
@@ -89,4 +89,4 @@ private:
 
 } // namespace CTL
 
-#endif // DETECTORSATURATIONEXTENSION_H
+#endif // CTL_DETECTORSATURATIONEXTENSION_H

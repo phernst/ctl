@@ -1,5 +1,5 @@
-#ifndef ABSTRACTDYNAMICVOLUMEDATA_H
-#define ABSTRACTDYNAMICVOLUMEDATA_H
+#ifndef CTL_ABSTRACTDYNAMICVOLUMEDATA_H
+#define CTL_ABSTRACTDYNAMICVOLUMEDATA_H
 
 #include "spectralvolumedata.h"
 
@@ -49,4 +49,4 @@ inline double AbstractDynamicVolumeData::time() const { return _time; }
 
 } // namespace CTL
 
-#endif // ABSTRACTDYNAMICVOLUMEDATA_H
+#endif // CTL_ABSTRACTDYNAMICVOLUMEDATA_H

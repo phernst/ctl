@@ -1,5 +1,5 @@
-#ifndef EXTENSIONCHAINWIDGET_H
-#define EXTENSIONCHAINWIDGET_H
+#ifndef CTL_EXTENSIONCHAINWIDGET_H
+#define CTL_EXTENSIONCHAINWIDGET_H
 
 #include <QWidget>
 #include <array>
@@ -65,4 +65,4 @@ private:
     void initExtensionList();
 };
 
-#endif // EXTENSIONCHAINWIDGET_H
+#endif // CTL_EXTENSIONCHAINWIDGET_H

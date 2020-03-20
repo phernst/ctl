@@ -1,5 +1,5 @@
-#ifndef QTTYPE_UTILS_H
-#define QTTYPE_UTILS_H
+#ifndef CTL_QTTYPE_UTILS_H
+#define CTL_QTTYPE_UTILS_H
 
 #include "mat/matrix_types.h"
 #include <QQuaternion>
@@ -32,4 +32,4 @@ inline QQuaternion toQQuaternion(const CTL::Matrix3x3& matrix)
     return QQuaternion::fromRotationMatrix(toQMatrix3x3(matrix));
 }
 
-#endif // QTTYPE_UTILS_H
+#endif // CTL_QTTYPE_UTILS_H

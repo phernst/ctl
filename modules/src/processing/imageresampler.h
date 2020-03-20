@@ -1,5 +1,5 @@
-#ifndef IMAGERESAMPLER_H
-#define IMAGERESAMPLER_H
+#ifndef CTL_IMAGERESAMPLER_H
+#define CTL_IMAGERESAMPLER_H
 
 #include "img/chunk2d.h"
 #include "ocl/openclconfig.h"
@@ -48,4 +48,4 @@ private:
 } // namespace OCL
 } // namespace CTL
 
-#endif // IMAGERESAMPLER_H
+#endif // CTL_IMAGERESAMPLER_H

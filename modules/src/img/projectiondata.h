@@ -1,5 +1,5 @@
-#ifndef PROJECTIONDATA_H
-#define PROJECTIONDATA_H
+#ifndef CTL_PROJECTIONDATA_H
+#define CTL_PROJECTIONDATA_H
 
 #include "singleviewdata.h"
 
@@ -106,4 +106,4 @@ private:
 
 /*! \file */
 
-#endif // PROJECTIONDATA_H
+#endif // CTL_PROJECTIONDATA_H

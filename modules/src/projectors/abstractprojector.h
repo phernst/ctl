@@ -1,5 +1,5 @@
-#ifndef ABSTRACTPROJECTOR_H
-#define ABSTRACTPROJECTOR_H
+#ifndef CTL_ABSTRACTPROJECTOR_H
+#define CTL_ABSTRACTPROJECTOR_H
 
 #include "img/compositevolume.h"
 #include "img/projectiondata.h"
@@ -304,4 +304,4 @@ inline ProjectorNotifier* AbstractProjector::notifier() { return &_notifier; }
  */
 ///@}
 
-#endif // ABSTRACTPROJECTOR_H
+#endif // CTL_ABSTRACTPROJECTOR_H

@@ -1,5 +1,5 @@
-#ifndef TRIVIALDYNAMICVOLUME_H
-#define TRIVIALDYNAMICVOLUME_H
+#ifndef CTL_TRIVIALDYNAMICVOLUME_H
+#define CTL_TRIVIALDYNAMICVOLUME_H
 
 #include "abstractdynamicvolumedata.h"
 #include <cmath>
@@ -31,4 +31,4 @@ inline void TrivialDynamicVolume::updateVolume() { *this *= float(std::abs(0.01 
 
 } // namespace CTL
 
-#endif // TRIVIALDYNAMICVOLUME_H
+#endif // CTL_TRIVIALDYNAMICVOLUME_H

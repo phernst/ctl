@@ -1,5 +1,5 @@
-#ifndef CHUNK2D_H
-#define CHUNK2D_H
+#ifndef CTL_CHUNK2D_H
+#define CTL_CHUNK2D_H
 
 #include <QtGlobal>
 #include <algorithm>
@@ -113,4 +113,4 @@ private:
 
 /*! \file */
 
-#endif // CHUNK2D_H
+#endif // CTL_CHUNK2D_H

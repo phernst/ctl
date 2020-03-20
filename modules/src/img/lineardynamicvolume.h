@@ -1,5 +1,5 @@
-#ifndef LINEARDYNAMICVOLUME_H
-#define LINEARDYNAMICVOLUME_H
+#ifndef CTL_LINEARDYNAMICVOLUME_H
+#define CTL_LINEARDYNAMICVOLUME_H
 
 #include "abstractdynamicvolumedata.h"
 #include <cmath>
@@ -53,4 +53,4 @@ private:
 
 } // namespace CTL
 
-#endif // LINEARDYNAMICVOLUME_H
+#endif // CTL_LINEARDYNAMICVOLUME_H

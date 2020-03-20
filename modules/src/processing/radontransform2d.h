@@ -1,5 +1,5 @@
-#ifndef RADONTRANSFORM2D_H
-#define RADONTRANSFORM2D_H
+#ifndef CTL_RADONTRANSFORM2D_H
+#define CTL_RADONTRANSFORM2D_H
 
 #include <img/chunk2d.h>
 #include <mat/matrix.h>
@@ -85,4 +85,4 @@ std::vector<Generic2DCoord> toGeneric2DCoord(const std::vector<Radon2DCoord>& ra
 } // namespace OCL
 } // namespace CTL
 
-#endif // RADONTRANSFORM2D_H
+#endif // CTL_RADONTRANSFORM2D_H
