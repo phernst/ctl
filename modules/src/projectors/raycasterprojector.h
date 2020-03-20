@@ -58,8 +58,8 @@ private:
 };
 
 /*!
- * \class RayCasterProjector::Config
- * \brief Holds the configuration for RayCasterProjector objects.
+ * \class RayCasterProjector::Settings
+ * \brief Hold the settings for the `RayCasterProjector`.
  */
 
 } // namespace OCL
