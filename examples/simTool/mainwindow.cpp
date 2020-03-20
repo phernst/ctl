@@ -205,6 +205,7 @@ void MainWindow::on__PB_simulateScan_clicked()
     projector->configure(acqSetup);
 
     QObject::connect(projector->notifier(), &ProjectorNotifier::projectionFinished, this, &MainWindow::showProjectionDone);
+    QObject::connect(projector->notifier(), SIGNAL(information(QString)), ui->_statusBar, SLOT(showMessage(QString)));
 
     if(ui->_RB_hounsfield->isChecked())
     {        
