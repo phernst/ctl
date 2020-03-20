@@ -3,7 +3,7 @@
 
 namespace CTL {
 
-namespace details{
+namespace details {
     template<typename T> void grindBall(VoxelVolume<T>& volume, float radius);
     template<typename T> void grindCylinderX(VoxelVolume<T>& volume, float radius);
     template<typename T> void grindCylinderY(VoxelVolume<T>& volume, float radius);
@@ -1013,10 +1013,10 @@ namespace details {
         const auto rSquaredInVoxel = (radius / voxSize) * (radius / voxSize);
 
         // erase exterior space
-        for(auto x = 0u; x < nbVoxHeight; ++x)
-            for(auto y = 0u; y < nbVoxCircle; ++y)
-                for(auto z = 0u; z < nbVoxCircle; ++z)
-                    if(dist2Center(y, z) > rSquaredInVoxel)
+        for(auto y = 0u; y < nbVoxCircle; ++y)
+            for(auto z = 0u; z < nbVoxCircle; ++z)
+                if(dist2Center(y, z) > rSquaredInVoxel)
+                    for(auto x = 0u; x < nbVoxHeight; ++x)
                         volume(x, y, z) = 0.0f;
     }
 
@@ -1039,9 +1039,9 @@ namespace details {
 
         // erase exterior space
         for(auto x = 0u; x < nbVoxCircle; ++x)
-            for(auto y = 0u; y < nbVoxHeight; ++y)
-                for(auto z = 0u; z < nbVoxCircle; ++z)
-                    if(dist2Center(x, z) > rSquaredInVoxel)
+            for(auto z = 0u; z < nbVoxCircle; ++z)
+                if(dist2Center(x, z) > rSquaredInVoxel)
+                    for(auto y = 0u; y < nbVoxHeight; ++y)
                         volume(x, y, z) = 0.0f;
     }
 
@@ -1065,8 +1065,8 @@ namespace details {
         // erase exterior space
         for(auto x = 0u; x < nbVoxCircle; ++x)
             for(auto y = 0u; y < nbVoxCircle; ++y)
-                for(auto z = 0u; z < nbVoxHeight; ++z)
-                    if(dist2Center(x, y) > rSquaredInVoxel)
+                if(dist2Center(x, y) > rSquaredInVoxel)
+                    for(auto z = 0u; z < nbVoxHeight; ++z)
                         volume(x, y, z) = 0.0f;
     }
 }
