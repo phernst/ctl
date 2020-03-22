@@ -73,6 +73,10 @@ LinearDynamicVolume::LinearDynamicVolume(float slope, float offset,
  * \f$ \mu(x,y,z) = t \cdot slope(x,y,z) + offset(x,y,z) \f$, where \f$t\f$ denotes the time point
  * set via setTime() in milliseconds.
  */
-void LinearDynamicVolume::updateVolume() { setData((_slope * float(time()) + _lag).data()); }
+void LinearDynamicVolume::updateVolume()
+{
+    auto updatedVol = _slope * float(time()) + _lag;
+    setData(std::move(updatedVol.data()));
+}
 
 } // namespace CTL
