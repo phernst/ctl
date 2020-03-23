@@ -30,6 +30,9 @@ public:
     QPair<double, double> windowFromTo() const;
     QPair<double, double> windowCenterWidth() const;
 
+    void setMouseWindowingScaling(double centerScale, double widthScale);
+    void setWheelZoomScaling(double scaling);
+
 public slots:
     void autoResize();
     void setWindowMinMax();
@@ -40,8 +43,11 @@ public slots:
 protected:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
-    //void mouseReleaseEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
+
+signals:
+    void windowingChanged(double from, double to);
+    void zoomChanged(double zoom);
 
 private:
     Ui::Chunk2DView *ui;
@@ -52,9 +58,13 @@ private:
     QPoint _mouseDragStart;
     QPair<double, double> _windowDragStartValue;
 
+    QPair<double, double> _mouseWindowingScaling = {1.0, 1.0};
+    double _wheelZoomScaling = 0.25; // i.e 0.25 zoom per 15.0 deg;
+
     double _zoom = 1.0;
 
     void setGrayscaleColorTable();
+    void setAutoMouseWindowScaling();
     void updateImage();
 };
 

@@ -54,6 +54,7 @@ void Chunk2DView::plot(Chunk2D<float> data, QPair<double, double> windowing, dou
 
     viewer->setData(std::move(data));
     viewer->autoResize();
+    viewer->setAutoMouseWindowScaling();
     viewer->setAttribute(Qt::WA_DeleteOnClose);
 
     viewer->show();
@@ -72,6 +73,17 @@ QPair<double, double> Chunk2DView::windowCenterWidth() const
     return qMakePair(center, width);
 }
 
+void Chunk2DView::setMouseWindowingScaling(double centerScale, double widthScale)
+{
+    _mouseWindowingScaling.first  = centerScale;
+    _mouseWindowingScaling.second = widthScale;
+}
+
+void Chunk2DView::setWheelZoomScaling(double scaling)
+{
+    _wheelZoomScaling = scaling;
+}
+
 void Chunk2DView::autoResize()
 {
     static const auto maxSize = QSize(1000, 800);
@@ -84,8 +96,8 @@ void Chunk2DView::autoResize()
 
 void Chunk2DView::setWindowMinMax()
 {
-    auto dataMin = static_cast<double>(_data.min());
-    auto dataMax = static_cast<double>(_data.max());
+    const auto dataMin = static_cast<double>(_data.min());
+    const auto dataMax = static_cast<double>(_data.max());
 
     setWindow(dataMin, dataMax);
 }
@@ -100,23 +112,33 @@ void Chunk2DView::setZoom(double zoom)
 
     _zoom = zoom;
 
+    emit zoomChanged(zoom);
+
     updateImage();
 }
 
 void Chunk2DView::setWindow(double from, double to)
 {
+    if(from > to)
+    {
+        qWarning() << "Windowing start must not be larger that its end.";
+        return;
+    }
+
     _window.first  = from;
     _window.second = to;
+
+    emit windowingChanged(from, to);
 
     updateImage();
 }
 
 void Chunk2DView::setWindowCenterWidth(double center, double width)
 {
-    _window.first  = center - width / 2.0;
-    _window.second = center + width / 2.0;
+    const auto from  = center - width / 2.0;
+    const auto to = center + width / 2.0;
 
-    updateImage();
+    setWindow(from, to);
 }
 
 void Chunk2DView::mouseMoveEvent(QMouseEvent* event)
@@ -125,11 +147,8 @@ void Chunk2DView::mouseMoveEvent(QMouseEvent* event)
     {
         const auto dragVector = event->pos() - _mouseDragStart;
 
-        qInfo() << dragVector;
-        static const auto scaling = 1.0;
-
-        auto widthAdjust = dragVector.x() * scaling;
-        auto centerAdjust = dragVector.y() * scaling;
+        auto centerAdjust = dragVector.y() * _mouseWindowingScaling.first;
+        auto widthAdjust = dragVector.x() * _mouseWindowingScaling.second;
 
         setWindowCenterWidth(_windowDragStartValue.first + centerAdjust,
                              _windowDragStartValue.second + widthAdjust);
@@ -155,11 +174,8 @@ void Chunk2DView::wheelEvent(QWheelEvent* event)
 {
     if(event->modifiers() == Qt::CTRL)
     {
-        static const auto zoomStep = 0.25;
-        const QPoint numDegrees = event->angleDelta();
-
-        auto zoomAdjust = numDegrees.y() > 0.0 ? zoomStep
-                                               : -zoomStep;
+        const QPoint numDegrees = event->angleDelta() / 120.0; // in steps of 15 deg
+        auto zoomAdjust = numDegrees.y() * _wheelZoomScaling;
         setZoom(_zoom + zoomAdjust);
     }
 
@@ -172,6 +188,19 @@ void Chunk2DView::setGrayscaleColorTable()
 
     for(int i = 0; i <= 255; ++i)
         _colorTable[i] = qRgb(i,i,i);
+}
+
+void Chunk2DView::setAutoMouseWindowScaling()
+{
+    static const auto percentageOfFull = 0.01;
+
+    const auto dataMin = static_cast<double>(_data.min());
+    const auto dataMax = static_cast<double>(_data.max());
+
+    const auto dataWidth = dataMax - dataMin;
+    const auto dataCenter = dataMin + dataWidth / 2.0;
+
+    setMouseWindowingScaling(percentageOfFull * dataCenter, percentageOfFull * dataWidth);
 }
 
 void Chunk2DView::updateImage()
