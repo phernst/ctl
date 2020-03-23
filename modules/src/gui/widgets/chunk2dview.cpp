@@ -40,7 +40,7 @@ void Chunk2DView::setData(Chunk2D<float> data)
     _data = std::move(data);
 
     if(_window.first == 0 && _window.second == 0) // still default values -> window min/max
-        setWindowMinMax();
+        setWindowingMinMax();
     else
         updateImage(); // keep previous window
 }
@@ -49,7 +49,7 @@ void Chunk2DView::plot(Chunk2D<float> data, QPair<double, double> windowing, dou
 {
     auto viewer = new Chunk2DView;
 
-    viewer->setWindow(windowing.first, windowing.second);
+    viewer->setWindowing(windowing.first, windowing.second);
     viewer->setZoom(zoom);
 
     viewer->setData(std::move(data));
@@ -60,17 +60,32 @@ void Chunk2DView::plot(Chunk2D<float> data, QPair<double, double> windowing, dou
     viewer->show();
 }
 
-QPair<double, double> Chunk2DView::windowFromTo() const
+const Chunk2D<float>& Chunk2DView::data() const
+{
+    return _data;
+}
+
+const QPixmap* Chunk2DView::pixmap() const
+{
+    return ui->_L_image->pixmap();
+}
+
+QPair<double, double> Chunk2DView::windowingFromTo() const
 {
     return _window;
 }
 
-QPair<double, double> Chunk2DView::windowCenterWidth() const
+QPair<double, double> Chunk2DView::windowingCenterWidth() const
 {
     const auto width = _window.second - _window.first;
     const auto center = _window.first + width / 2.0;
 
     return qMakePair(center, width);
+}
+
+double Chunk2DView::zoom() const
+{
+    return _zoom;
 }
 
 void Chunk2DView::setMouseWindowingScaling(double centerScale, double widthScale)
@@ -94,12 +109,12 @@ void Chunk2DView::autoResize()
     resize(imgSize.boundedTo(maxSize));
 }
 
-void Chunk2DView::setWindowMinMax()
+void Chunk2DView::setWindowingMinMax()
 {
     const auto dataMin = static_cast<double>(_data.min());
     const auto dataMax = static_cast<double>(_data.max());
 
-    setWindow(dataMin, dataMax);
+    setWindowing(dataMin, dataMax);
 }
 
 void Chunk2DView::setZoom(double zoom)
@@ -117,7 +132,7 @@ void Chunk2DView::setZoom(double zoom)
     updateImage();
 }
 
-void Chunk2DView::setWindow(double from, double to)
+void Chunk2DView::setWindowing(double from, double to)
 {
     if(from > to)
     {
@@ -133,12 +148,12 @@ void Chunk2DView::setWindow(double from, double to)
     updateImage();
 }
 
-void Chunk2DView::setWindowCenterWidth(double center, double width)
+void Chunk2DView::setWindowingCenterWidth(double center, double width)
 {
     const auto from  = center - width / 2.0;
     const auto to = center + width / 2.0;
 
-    setWindow(from, to);
+    setWindowing(from, to);
 }
 
 void Chunk2DView::mouseMoveEvent(QMouseEvent* event)
@@ -150,10 +165,10 @@ void Chunk2DView::mouseMoveEvent(QMouseEvent* event)
         auto centerAdjust = dragVector.y() * _mouseWindowingScaling.first;
         auto widthAdjust = dragVector.x() * _mouseWindowingScaling.second;
 
-        setWindowCenterWidth(_windowDragStartValue.first + centerAdjust,
+        setWindowingCenterWidth(_windowDragStartValue.first + centerAdjust,
                              _windowDragStartValue.second + widthAdjust);
 
-        qInfo() << windowCenterWidth();
+        qInfo() << windowingCenterWidth();
     }
 
     QWidget::mousePressEvent(event);
@@ -164,7 +179,7 @@ void Chunk2DView::mousePressEvent(QMouseEvent* event)
     if(event->button() == Qt::LeftButton)
     {
         _mouseDragStart = event->pos();
-        _windowDragStartValue = windowCenterWidth();
+        _windowDragStartValue = windowingCenterWidth();
     }
 
     QWidget::mousePressEvent(event);
