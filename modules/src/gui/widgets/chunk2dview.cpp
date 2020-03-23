@@ -59,6 +59,19 @@ void Chunk2DView::plot(Chunk2D<float> data, QPair<double, double> windowing, dou
     viewer->show();
 }
 
+QPair<double, double> Chunk2DView::windowFromTo() const
+{
+    return _window;
+}
+
+QPair<double, double> Chunk2DView::windowCenterWidth() const
+{
+    const auto width = _window.second - _window.first;
+    const auto center = _window.first + width / 2.0;
+
+    return qMakePair(center, width);
+}
+
 void Chunk2DView::autoResize()
 {
     static const auto maxSize = QSize(1000, 800);
@@ -96,6 +109,46 @@ void Chunk2DView::setWindow(double from, double to)
     _window.second = to;
 
     updateImage();
+}
+
+void Chunk2DView::setWindowCenterWidth(double center, double width)
+{
+    _window.first  = center - width / 2.0;
+    _window.second = center + width / 2.0;
+
+    updateImage();
+}
+
+void Chunk2DView::mouseMoveEvent(QMouseEvent* event)
+{
+    if(event->buttons() == Qt::LeftButton)
+    {
+        const auto dragVector = event->pos() - _mouseDragStart;
+
+        qInfo() << dragVector;
+        static const auto scaling = 1.0;
+
+        auto widthAdjust = dragVector.x() * scaling;
+        auto centerAdjust = dragVector.y() * scaling;
+
+        setWindowCenterWidth(_windowDragStartValue.first + centerAdjust,
+                             _windowDragStartValue.second + widthAdjust);
+
+        qInfo() << windowCenterWidth();
+    }
+
+    QWidget::mousePressEvent(event);
+}
+
+void Chunk2DView::mousePressEvent(QMouseEvent* event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        _mouseDragStart = event->pos();
+        _windowDragStartValue = windowCenterWidth();
+    }
+
+    QWidget::mousePressEvent(event);
 }
 
 void Chunk2DView::wheelEvent(QWheelEvent* event)

@@ -27,13 +27,20 @@ public:
     static void plot(Chunk2D<float> data,
                      QPair<double,double> windowing = qMakePair(0.0, 0.0), double zoom = 1.0);
 
+    QPair<double, double> windowFromTo() const;
+    QPair<double, double> windowCenterWidth() const;
+
 public slots:
     void autoResize();
     void setWindowMinMax();
     void setZoom(double zoom);
     void setWindow(double from, double to);
+    void setWindowCenterWidth(double center, double width);
 
 protected:
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    //void mouseReleaseEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
 
 private:
@@ -42,6 +49,8 @@ private:
     Chunk2D<float> _data = Chunk2D<float>(0,0);
     QVector<QRgb> _colorTable;
     QPair<double, double> _window;
+    QPoint _mouseDragStart;
+    QPair<double, double> _windowDragStartValue;
 
     double _zoom = 1.0;
 
