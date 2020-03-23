@@ -3,7 +3,7 @@
 
 #include <qevent.h>
 #include <QDebug>
-
+#include <cmath>
 
 namespace CTL {
 namespace gui {
