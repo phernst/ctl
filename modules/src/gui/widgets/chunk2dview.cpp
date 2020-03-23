@@ -15,6 +15,8 @@ Chunk2DView::Chunk2DView(QWidget* parent) :
     setGrayscaleColorTable();
 
     ui->setupUi(this);
+    connect(ui->scrollArea, &details::ZoomableScrollArea::zoomRequested,
+            this, &Chunk2DView::zoomFromScrollArea);
 }
 
 Chunk2DView::Chunk2DView(Chunk2D<float> data, QWidget* parent)
@@ -94,9 +96,9 @@ void Chunk2DView::setMouseWindowingScaling(double centerScale, double widthScale
     _mouseWindowingScaling.second = widthScale;
 }
 
-void Chunk2DView::setWheelZoomScaling(double scaling)
+void Chunk2DView::setWheelZoomPerTurn(double zoomPerTurn)
 {
-    _wheelZoomScaling = scaling;
+    _wheelZoomPerTurn = zoomPerTurn;
 }
 
 void Chunk2DView::autoResize()
@@ -185,18 +187,6 @@ void Chunk2DView::mousePressEvent(QMouseEvent* event)
     QWidget::mousePressEvent(event);
 }
 
-void Chunk2DView::wheelEvent(QWheelEvent* event)
-{
-    if(event->modifiers() == Qt::CTRL)
-    {
-        const QPoint numDegrees = event->angleDelta() / 120.0; // in steps of 15 deg
-        auto zoomAdjust = numDegrees.y() * _wheelZoomScaling;
-        setZoom(_zoom + zoomAdjust);
-    }
-
-    QWidget::wheelEvent(event);
-}
-
 void Chunk2DView::setGrayscaleColorTable()
 {
     _colorTable = QVector<QRgb>(256);
@@ -216,6 +206,11 @@ void Chunk2DView::setAutoMouseWindowScaling()
     const auto dataCenter = dataMin + dataWidth / 2.0;
 
     setMouseWindowingScaling(percentageOfFull * dataCenter, percentageOfFull * dataWidth);
+}
+
+void Chunk2DView::zoomFromScrollArea(double turns)
+{
+    setZoom(_zoom + turns * _wheelZoomPerTurn);
 }
 
 void Chunk2DView::updateImage()
@@ -248,6 +243,22 @@ void Chunk2DView::updateImage()
     ui->_L_image->setPixmap(pixmap);
 }
 
+details::ZoomableScrollArea::ZoomableScrollArea(QWidget* parent)
+    : QScrollArea(parent)
+{
+}
+
+void details::ZoomableScrollArea::wheelEvent(QWheelEvent* event)
+{
+    if(event->modifiers() == Qt::CTRL)
+    {
+        const QPoint numTurns = event->angleDelta() / 120.0; // in steps of 15 deg
+        emit zoomRequested(numTurns.y());
+        event->accept();
+    }
+    else
+        QScrollArea::wheelEvent(event);
+}
 
 } // namespace gui
 } // namespace CTL

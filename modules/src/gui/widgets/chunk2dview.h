@@ -2,6 +2,7 @@
 #define CTL_CHUNK2DVIEW_H
 
 #include <QWidget>
+#include <QScrollArea>
 
 #include "img/chunk2d.h"
 
@@ -11,6 +12,22 @@ class Chunk2DView;
 
 namespace CTL {
 namespace gui {
+
+namespace details {
+    class ZoomableScrollArea : public QScrollArea
+    {
+        Q_OBJECT
+
+    public:
+        explicit ZoomableScrollArea(QWidget* parent = nullptr);
+
+    protected:
+        void wheelEvent(QWheelEvent* event) override;
+
+    signals:
+        void zoomRequested(double turns);
+    };
+}
 
 class Chunk2DView : public QWidget
 {
@@ -36,7 +53,7 @@ public:
     void setColorTable(const QVector<QRgb>& colorTable);
     void setData(Chunk2D<float> data);
     void setMouseWindowingScaling(double centerScale, double widthScale);
-    void setWheelZoomScaling(double scaling);
+    void setWheelZoomPerTurn(double zoomPerTurn);
 
 public slots:
     void autoResize();
@@ -48,7 +65,6 @@ public slots:
 protected:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
-    void wheelEvent(QWheelEvent* event) override;
 
 signals:
     void windowingChanged(double from, double to);
@@ -66,10 +82,11 @@ private:
     QPoint _mouseDragStart;
     QPair<double, double> _windowDragStartValue;
     QPair<double, double> _mouseWindowingScaling = {1.0, 1.0};
-    double _wheelZoomScaling = 0.25; // i.e 0.25 zoom per 15.0 deg;
+    double _wheelZoomPerTurn = 0.25; // i.e 0.25 zoom per 15.0 deg;
 
     void setGrayscaleColorTable();
     void setAutoMouseWindowScaling();
+    void zoomFromScrollArea(double turns);
     void updateImage();
 };
 
