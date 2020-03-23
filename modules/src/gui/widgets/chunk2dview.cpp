@@ -98,6 +98,21 @@ void Chunk2DView::setWindow(double from, double to)
     updateImage();
 }
 
+void Chunk2DView::wheelEvent(QWheelEvent* event)
+{
+    if(event->modifiers() == Qt::CTRL)
+    {
+        static const auto zoomStep = 0.25;
+        const QPoint numDegrees = event->angleDelta();
+
+        auto zoomAdjust = numDegrees.y() > 0.0 ? zoomStep
+                                               : -zoomStep;
+        setZoom(_zoom + zoomAdjust);
+    }
+
+    QWidget::wheelEvent(event);
+}
+
 void Chunk2DView::setGrayscaleColorTable()
 {
     _colorTable = QVector<QRgb>(256);

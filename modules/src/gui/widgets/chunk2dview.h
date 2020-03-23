@@ -33,6 +33,9 @@ public slots:
     void setZoom(double zoom);
     void setWindow(double from, double to);
 
+protected:
+    void wheelEvent(QWheelEvent* event) override;
+
 private:
     Ui::Chunk2DView *ui;
 
