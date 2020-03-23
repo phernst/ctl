@@ -1,5 +1,5 @@
-#ifndef CHUNK2DVIEW_H
-#define CHUNK2DVIEW_H
+#ifndef CTL_CHUNK2DVIEW_H
+#define CTL_CHUNK2DVIEW_H
 
 #include <QWidget>
 
@@ -52,4 +52,4 @@ private:
 } // namespace gui
 } // namespace CTL
 
-#endif // CHUNK2DVIEW_H
+#endif // CTL_CHUNK2DVIEW_H
