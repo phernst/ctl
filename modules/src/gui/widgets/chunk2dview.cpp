@@ -198,7 +198,8 @@ void Chunk2DView::wheelEvent(QWheelEvent* event)
 
 QPoint Chunk2DView::pixelIdxFromPos(const QPoint& pos)
 {
-    return (pos - widget()->pos())/ _zoom;
+    static const QPointF halfPixel = {0.5, 0.5};
+    return (QPointF(pos - widget()->pos()) / _zoom - halfPixel).toPoint();
 }
 
 void Chunk2DView::setAutoMouseWindowScaling()
