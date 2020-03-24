@@ -178,7 +178,8 @@ class CTLDatabaseHandler
 public:
     static CTLDatabaseHandler& instance();
 
-    void setDataBaseRoot(const QString& path);
+    bool isComplete() const;
+    bool setDataBaseRoot(const QString& path);
 
     std::shared_ptr<AbstractIntegrableDataModel>
     loadAttenuationModel(database::Composite composite);
@@ -194,12 +195,13 @@ private:
     CTLDatabaseHandler(const CTLDatabaseHandler&) = delete;
     CTLDatabaseHandler& operator=(const CTLDatabaseHandler&) = delete;
 
-    void makeFileMap();
+    bool makeFileMap();
 
     QDir _dbRoot;
 
     JsonSerializer _serializer;
     QMap<int, QString> _fileMap;
+    bool _isComplete{ false };
 };
 
 } // namespace CTL

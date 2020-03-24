@@ -7,7 +7,9 @@ CTLDatabaseHandler::CTLDatabaseHandler()
 {
     auto fileWithDatabasePath = []
     {
-        QString ret = QCoreApplication::applicationDirPath();
+        QString ret = QCoreApplication::instance()
+                ? QCoreApplication::applicationDirPath()
+                : QString{ };
         if(!ret.isEmpty() &&
            !ret.endsWith(QStringLiteral("/")) &&
            !ret.endsWith(QStringLiteral("\\")))
@@ -19,7 +21,7 @@ CTLDatabaseHandler::CTLDatabaseHandler()
     QFile file(fileWithDatabasePath());
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qWarning() << "cannot open 'database.path'";
+        // qWarning() << "cannot open 'database.path'";
         return;
     }
 
@@ -34,16 +36,22 @@ CTLDatabaseHandler& CTLDatabaseHandler::instance()
     return theInstance;
 }
 
-void CTLDatabaseHandler::setDataBaseRoot(const QString& path)
+bool CTLDatabaseHandler::isComplete() const
+{
+    return _isComplete;
+}
+
+bool CTLDatabaseHandler::setDataBaseRoot(const QString& path)
 {
     if(!QFile::exists(path))
     {
         qWarning() << "Directory " << path << " does not exist.";
-        return;
+        return _isComplete = false;
     }
     _dbRoot.setPath(path);
+    _isComplete = makeFileMap();
 
-    makeFileMap();
+    return _isComplete;
 }
 
 std::shared_ptr<AbstractIntegrableDataModel>
@@ -80,7 +88,7 @@ float CTLDatabaseHandler::loadDensity(database::Element element)
         .toFloat();
 }
 
-void CTLDatabaseHandler::makeFileMap()
+bool CTLDatabaseHandler::makeFileMap()
 {
     auto elementFiles = {
         "z01", "z02", "z03", "z04", "z05", "z06", "z07", "z08", "z09", "z10", "z11", "z12",
@@ -108,11 +116,12 @@ void CTLDatabaseHandler::makeFileMap()
 
     QString folder;
     int mapPos;
+    auto isComplete = true;
 
     auto insertInFileMap = [&](const QString& fn) {
         const auto path = folder + fn + ".json";
         if(!QFile::exists(path))
-            qWarning() << "Database is missing expected file:\n" + path;
+            isComplete = false;
 
         _fileMap.insert(mapPos++, path);
     };
@@ -127,6 +136,8 @@ void CTLDatabaseHandler::makeFileMap()
     folder = _dbRoot.absolutePath() + "/xray_spectra/";
     mapPos = 2001;
     std::for_each(xraySpectraFiles.begin(), xraySpectraFiles.end(), insertInFileMap);
+
+    return isComplete;
 }
 
 namespace database {
