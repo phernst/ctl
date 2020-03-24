@@ -38,6 +38,7 @@ public:
 
 public slots:
     void autoResize();
+    void setAutoMouseWindowScaling();
     void setLivePixelDataEnabled(bool enabled);
     void setWindowing(double from, double to);
     void setWindowingCenterWidth(double center, double width);
@@ -69,7 +70,6 @@ private:
     double _wheelZoomPerTurn = 0.25; // i.e 0.25 zoom per 15.0 deg;
 
     void setGrayscaleColorTable();
-    void setAutoMouseWindowScaling();
     void updateImage();
     QPoint pixelIdxFromPos(const QPoint& pos);
 };
