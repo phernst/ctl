@@ -1,42 +1,23 @@
 #ifndef CTL_CHUNK2DVIEW_H
 #define CTL_CHUNK2DVIEW_H
 
-#include <QWidget>
 #include <QScrollArea>
 
 #include "img/chunk2d.h"
 
-namespace Ui {
-class Chunk2DView;
-}
+class QLabel;
 
 namespace CTL {
 namespace gui {
 
-namespace details {
-    class ZoomableScrollArea : public QScrollArea
-    {
-        Q_OBJECT
-
-    public:
-        explicit ZoomableScrollArea(QWidget* parent = nullptr);
-
-    protected:
-        void wheelEvent(QWheelEvent* event) override;
-
-    signals:
-        void zoomRequested(double turns);
-    };
-}
-
-class Chunk2DView : public QWidget
+class Chunk2DView : public QScrollArea
 {
     Q_OBJECT
 
 public:
     explicit Chunk2DView(QWidget* parent = nullptr);
     Chunk2DView(Chunk2D<float> data, QWidget* parent = nullptr);
-    ~Chunk2DView();
+    //~Chunk2DView();
 
     // factory
     static void plot(Chunk2D<float> data,
@@ -57,6 +38,7 @@ public:
 
 public slots:
     void autoResize();
+    void setLivePixelDataEnabled(bool enabled);
     void setWindowing(double from, double to);
     void setWindowingCenterWidth(double center, double width);
     void setWindowingMinMax();
@@ -65,13 +47,15 @@ public slots:
 protected:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
 
 signals:
+    void pixelInfoUnderCursor(int x, int y, float value);
     void windowingChanged(double from, double to);
     void zoomChanged(double zoom);
 
 private:
-    Ui::Chunk2DView *ui;
+    QLabel* _imageLabel;
 
     Chunk2D<float> _data = Chunk2D<float>(0,0);
     QVector<QRgb> _colorTable;
@@ -86,8 +70,8 @@ private:
 
     void setGrayscaleColorTable();
     void setAutoMouseWindowScaling();
-    void zoomFromScrollArea(double turns);
     void updateImage();
+    QPoint pixelIdxFromPos(const QPoint& pos);
 };
 
 } // namespace gui

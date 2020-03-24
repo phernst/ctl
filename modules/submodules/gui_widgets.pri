@@ -24,7 +24,6 @@ SOURCES += \
     $$PWD/../src/gui/widgets/extensionchainwidget.cpp
 
 FORMS += \
-    $$PWD/../src/gui/widgets/chunk2dview.ui \
     $$PWD/../src/gui/widgets/projectionview.ui \
     $$PWD/../src/gui/widgets/projectionviewer.ui \
     $$PWD/../src/gui/widgets/voxelvolumeview.ui \
