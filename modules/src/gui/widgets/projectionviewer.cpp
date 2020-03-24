@@ -1,6 +1,8 @@
 #include "projectionviewer.h"
 #include "ui_projectionviewer.h"
 
+#include <QDebug>
+
 namespace CTL {
 namespace gui {
 
@@ -14,8 +16,22 @@ ProjectionViewer::ProjectionViewer(QWidget *parent) :
     connect(ui->_W_windowing, &WindowingWidget::windowingChanged, this, &ProjectionViewer::windowingUpdate);
     connect(ui->_W_windowing, &WindowingWidget::autoWindowingRequested, ui->_W_dataView, &Chunk2DView::setWindowingMinMax);
     connect(ui->_W_dataView, &Chunk2DView::zoomChanged, this, &ProjectionViewer::setZoomValueSilent);
-    connect(ui->_W_dataView, SIGNAL(windowingChanged(double, double)), ui->_W_windowing, SLOT(setWindowDataSilent(double, double)));
-    connect(ui->_SB_zoom, SIGNAL(valueChanged(double)), ui->_W_dataView, SLOT(setZoom(double)));
+    connect(ui->_W_dataView, &Chunk2DView::windowingChanged, ui->_W_windowing, &WindowingWidget::setWindowDataSilent);
+    connect(ui->_SB_zoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), ui->_W_dataView, &Chunk2DView::setZoom);
+    connect(ui->_W_dataView, &Chunk2DView::pixelInfoUnderCursor, this, &ProjectionViewer::updatePixelInfo);
+
+    resize(1000, 800);
+    setWindowTitle("Projection Viewer");
+}
+
+ProjectionViewer::ProjectionViewer(ProjectionData projections, QWidget* parent)
+    : ProjectionViewer(parent)
+{
+    setData(projections);
+
+    ui->_W_dataView->setLivePixelDataEnabled(true);
+
+    autoResize();
 }
 
 ProjectionViewer::~ProjectionViewer()
@@ -33,7 +49,7 @@ void ProjectionViewer::setData(ProjectionData projections)
         showView(0);
 }
 
-void ProjectionViewer::setModuleLayout(const CTL::ModuleLayout &layout)
+void ProjectionViewer::setModuleLayout(const ModuleLayout &layout)
 {
     _modLayout = layout;
     showView(currentView()); // recompute data due to changed layout
@@ -42,6 +58,13 @@ void ProjectionViewer::setModuleLayout(const CTL::ModuleLayout &layout)
 int ProjectionViewer::currentView() const
 {
     return ui->_VS_projection->value();
+}
+
+void ProjectionViewer::autoResize()
+{
+    static const auto margin = QSize(110, 110);
+    ui->_W_dataView->autoResize();
+    resize(ui->_W_dataView->size() + margin);
 }
 
 void ProjectionViewer::showView(int view)
@@ -53,6 +76,12 @@ void ProjectionViewer::showView(int view)
 void ProjectionViewer::updateSliderRange()
 {
     ui->_VS_projection->setMaximum(_data.dimensions().nbViews- 1);
+}
+
+void ProjectionViewer::updatePixelInfo(int x, int y, float value)
+{
+    ui->_L_pixelInfo->setText("(" + QString::number(x) + " , " + QString::number(y) + "): "
+                              + QString::number(value));
 }
 
 void ProjectionViewer::windowingUpdate()

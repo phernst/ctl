@@ -18,24 +18,27 @@ class ProjectionViewer : public QWidget
 
 public:
     explicit ProjectionViewer(QWidget *parent = nullptr);
+    ProjectionViewer(ProjectionData projections, QWidget *parent = nullptr);
     ~ProjectionViewer();
 
-    void setData(CTL::ProjectionData projections);
-    void setModuleLayout(const CTL::ModuleLayout& layout);
+    void setData(ProjectionData projections);
+    void setModuleLayout(const ModuleLayout& layout);
 
     int currentView() const;
 
 public slots:
+    void autoResize();
     void showView(int view);
 
 private:
     Ui::ProjectionViewer *ui;
 
-    CTL::ProjectionData _data = CTL::ProjectionData(0,0,0);
-    CTL::ModuleLayout _modLayout;
+    ProjectionData _data = ProjectionData(0,0,0);
+    ModuleLayout _modLayout;
 
 private slots:
     void updateSliderRange();
+    void updatePixelInfo(int x, int y, float value);
     void windowingUpdate();
     void setZoomValueSilent(double zoom);
 };
