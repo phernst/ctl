@@ -4,19 +4,26 @@
 
 #include <QMouseEvent>
 #include <QDebug>
-#include <QLabel>
+#include <QGraphicsLineItem>
+#include <QGraphicsPixmapItem>
 
 namespace CTL {
 namespace gui {
 
 Chunk2DView::Chunk2DView(QWidget* parent)
-    : QScrollArea(parent)
-    , _imageLabel(new QLabel)
+    : QGraphicsView(parent)
+    , _imageItem(new QGraphicsPixmapItem)
+    , _contrastLineItem(new QGraphicsLineItem)
 {
     setGrayscaleColorTable();
 
-    _imageLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
-    setWidget(_imageLabel);
+    setScene(&_scene);
+    _scene.addItem(_imageItem);
+    _scene.addItem(_contrastLineItem);
+    _contrastLineItem->setPen(QPen(Qt::red));
+    _contrastLineItem->hide();
+
+    setMinimumSize({10, 10});
 }
 
 Chunk2DView::Chunk2DView(Chunk2D<float> data, QWidget* parent)
@@ -75,7 +82,7 @@ void Chunk2DView::setWheelZoomPerTurn(double zoomPerTurn)
 
 const Chunk2D<float>& Chunk2DView::data() const { return _data; }
 
-const QPixmap* Chunk2DView::pixmap() const { return _imageLabel->pixmap(); }
+QPixmap Chunk2DView::pixmap() const { return _imageItem->pixmap(); }
 
 QPair<double, double> Chunk2DView::windowingFromTo() const { return _window; }
 
@@ -93,7 +100,7 @@ double Chunk2DView::zoom() const { return _zoom; }
 void Chunk2DView::autoResize()
 {
     static const auto maxSize = QSize(1000, 800);
-    static const auto margins = QSize(10, 10);
+    static const auto margins = QSize(2, 2);
 
     const auto imgSize = QSize(_data.width(), _data.height()) + margins;
 
@@ -161,10 +168,13 @@ void Chunk2DView::mouseMoveEvent(QMouseEvent* event)
         setWindowingCenterWidth(_windowDragStartValue.first + centerAdjust,
                                 _windowDragStartValue.second + widthAdjust);
     }
-    else if(widget()->contentsRect().contains(event->pos()))
+    if(event->buttons() == Qt::RightButton)
+    {
+        _contrastLineItem->setLine( { mapToScene(_mouseDragStart), mapToScene(event->pos()) } );
+    }
+    else if(itemAt(event->pos()) == _imageItem)
     {
         const auto pixel = pixelIdxFromPos(event->pos());
-        qInfo() << pixel.x() << pixel.y() << _data(pixel.x(), pixel.y());
         emit pixelInfoUnderCursor(pixel.x(), pixel.y(), _data(pixel.x(), pixel.y()));
     }
 
@@ -177,6 +187,11 @@ void Chunk2DView::mousePressEvent(QMouseEvent* event)
     {
         _mouseDragStart = event->pos();
         _windowDragStartValue = windowingCenterWidth();
+    }
+    else if(event->button() == Qt::RightButton)
+    {
+        _mouseDragStart = event->pos();
+        _contrastLineItem->show();
     }
 
     QWidget::mousePressEvent(event);
@@ -191,7 +206,7 @@ void Chunk2DView::wheelEvent(QWheelEvent* event)
         event->accept();
     }
     else
-        QScrollArea::wheelEvent(event);
+        QGraphicsView::wheelEvent(event);
 }
 
 // private methods
@@ -199,7 +214,7 @@ void Chunk2DView::wheelEvent(QWheelEvent* event)
 QPoint Chunk2DView::pixelIdxFromPos(const QPoint& pos)
 {
     static const QPointF halfPixel = {0.5, 0.5};
-    return (QPointF(pos - widget()->pos()) / _zoom - halfPixel).toPoint();
+    return (mapToScene(pos) / _zoom - halfPixel).toPoint();
 }
 
 void Chunk2DView::setAutoMouseWindowScaling()
@@ -250,8 +265,8 @@ void Chunk2DView::updateImage()
     }
 
     auto pixmap = QPixmap::fromImage(image).scaledToHeight(qRound(imgHeight * _zoom));
-    _imageLabel->setPixmap(pixmap);
-    _imageLabel->resize(pixmap.size());
+    _imageItem->setPixmap(pixmap);
+    _scene.setSceneRect(QRectF({0, 0}, pixmap.size()));
 }
 
 } // namespace gui

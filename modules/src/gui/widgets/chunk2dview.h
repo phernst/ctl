@@ -1,7 +1,7 @@
 #ifndef CTL_CHUNK2DVIEW_H
 #define CTL_CHUNK2DVIEW_H
 
-#include <QScrollArea>
+#include <QGraphicsView>
 
 #include "img/chunk2d.h"
 
@@ -10,7 +10,7 @@ class QLabel;
 namespace CTL {
 namespace gui {
 
-class Chunk2DView : public QScrollArea
+class Chunk2DView : public QGraphicsView
 {
     Q_OBJECT
 
@@ -25,7 +25,7 @@ public:
 
     // getter methods
     const Chunk2D<float>& data() const;
-    const QPixmap* pixmap() const;
+    QPixmap pixmap() const;
     QPair<double, double> windowingFromTo() const;
     QPair<double, double> windowingCenterWidth() const;
     double zoom() const;
@@ -56,7 +56,9 @@ signals:
     void zoomChanged(double zoom);
 
 private:
-    QLabel* _imageLabel;
+    QGraphicsScene _scene;
+    QGraphicsPixmapItem* _imageItem;
+    QGraphicsLineItem* _contrastLineItem;
 
     Chunk2D<float> _data = Chunk2D<float>(0,0);
     QVector<QRgb> _colorTable;
