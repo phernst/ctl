@@ -74,6 +74,7 @@ private:
     void setGrayscaleColorTable();
     void updateImage();
     QPoint pixelIdxFromPos(const QPoint& pos);
+    QPixmap checkerboard() const;
 };
 
 } // namespace gui

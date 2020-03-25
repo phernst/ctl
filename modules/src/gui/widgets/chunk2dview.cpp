@@ -23,6 +23,8 @@ Chunk2DView::Chunk2DView(QWidget* parent)
     _contrastLineItem->setPen(QPen(Qt::red));
     _contrastLineItem->hide();
 
+    setBackgroundBrush(QBrush(checkerboard()));
+
     setMinimumSize({10, 10});
 }
 
@@ -215,6 +217,34 @@ QPoint Chunk2DView::pixelIdxFromPos(const QPoint& pos)
 {
     static const QPointF halfPixel = {0.5, 0.5};
     return (mapToScene(pos) / _zoom - halfPixel).toPoint();
+}
+
+QPixmap Chunk2DView::checkerboard() const
+{
+    auto colorTable = QVector<QRgb>(256);
+
+    for(int i = 0; i <= 255; ++i)
+        colorTable[i] = qRgb(i,i,i);
+
+    QImage img(20, 20, QImage::Format_Indexed8);
+    img.setColorTable(colorTable);
+
+    for(int i = 0; i < 10; ++i)
+    {
+        for(int j = 0; j < 10; ++j)
+            img.setPixel(i, j, 100);
+        for(int j = 10; j < 20; ++j)
+            img.setPixel(i, j, 150);
+    }
+    for(int i = 10; i < 20; ++i)
+    {
+        for(int j = 0; j < 10; ++j)
+            img.setPixel(i, j, 150);
+        for(int j = 10; j < 20; ++j)
+            img.setPixel(i, j, 100);
+    }
+
+    return QPixmap::fromImage(img);
 }
 
 void Chunk2DView::setAutoMouseWindowScaling()
