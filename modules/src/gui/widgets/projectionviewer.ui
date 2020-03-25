@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>782</width>
-    <height>536</height>
+    <width>941</width>
+    <height>679</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -97,50 +97,7 @@
       </spacer>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QLabel" name="_L_zoomLabelText">
-         <property name="text">
-          <string>Zoom</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDoubleSpinBox" name="_SB_zoom">
-         <property name="suffix">
-          <string>x</string>
-         </property>
-         <property name="minimum">
-          <double>0.100000000000000</double>
-         </property>
-         <property name="maximum">
-          <double>25.000000000000000</double>
-         </property>
-         <property name="singleStep">
-          <double>0.100000000000000</double>
-         </property>
-         <property name="value">
-          <double>1.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>10</width>
-           <height>10</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
+      <widget class="CTL::gui::ZoomControlWidget" name="_W_zoomControl" native="true"/>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -164,7 +121,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string> </string>
+        <string/>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -186,6 +143,12 @@
    <class>CTL::gui::WindowingWidget</class>
    <extends>QWidget</extends>
    <header>gui/widgets/windowingwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>CTL::gui::ZoomControlWidget</class>
+   <extends>QWidget</extends>
+   <header>gui/widgets/zoomcontrolwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

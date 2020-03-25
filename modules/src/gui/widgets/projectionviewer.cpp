@@ -13,12 +13,17 @@ ProjectionViewer::ProjectionViewer(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->_VS_projection, &QSlider::valueChanged, this, &ProjectionViewer::showView);
+    // connections for windowing
     connect(ui->_W_windowing, &WindowingWidget::windowingChanged, this, &ProjectionViewer::windowingUpdate);
     connect(ui->_W_windowing, &WindowingWidget::autoWindowingRequested, ui->_W_dataView, &Chunk2DView::setWindowingMinMax);
-    connect(ui->_W_dataView, &Chunk2DView::zoomChanged, this, &ProjectionViewer::setZoomValueSilent);
     connect(ui->_W_dataView, &Chunk2DView::windowingChanged, ui->_W_windowing, &WindowingWidget::setWindowDataSilent);
-    connect(ui->_SB_zoom, QOverload<double>::of(&QDoubleSpinBox::valueChanged), ui->_W_dataView, &Chunk2DView::setZoom);
+    // connections for zoom
+    connect(ui->_W_zoomControl, &ZoomControlWidget::zoomRequested, ui->_W_dataView, &Chunk2DView::setZoom);
+    connect(ui->_W_dataView, &Chunk2DView::zoomChanged, ui->_W_zoomControl, &ZoomControlWidget::setZoomValueSilent);
+    // connections for live pixel info
     connect(ui->_W_dataView, &Chunk2DView::pixelInfoUnderCursor, this, &ProjectionViewer::updatePixelInfo);
+
+    ui->_W_dataView->setLivePixelDataEnabled(true);
 
     resize(1000, 800);
     setWindowTitle("Projection Viewer");
@@ -28,15 +33,22 @@ ProjectionViewer::ProjectionViewer(ProjectionData projections, QWidget* parent)
     : ProjectionViewer(parent)
 {
     setData(projections);
-
-    ui->_W_dataView->setLivePixelDataEnabled(true);
-
-    autoResize();
 }
 
 ProjectionViewer::~ProjectionViewer()
 {
     delete ui;
+}
+
+void ProjectionViewer::plot(ProjectionData projections, const ModuleLayout& layout)
+{
+    auto viewer = new ProjectionViewer(projections);
+    viewer->setAttribute(Qt::WA_DeleteOnClose);
+    viewer->setModuleLayout(layout);
+    viewer->autoResize();
+    viewer->ui->_W_dataView->setAutoMouseWindowScaling();
+
+    viewer->show();
 }
 
 void ProjectionViewer::setData(ProjectionData projections)
@@ -88,13 +100,6 @@ void ProjectionViewer::windowingUpdate()
 {
     auto newWindowing = ui->_W_windowing->windowFromTo();
     ui->_W_dataView->setWindowing(newWindowing.first, newWindowing.second);
-}
-
-void ProjectionViewer::setZoomValueSilent(double zoom)
-{
-    ui->_SB_zoom->blockSignals(true);
-    ui->_SB_zoom->setValue(zoom);
-    ui->_SB_zoom->blockSignals(false);
 }
 
 } // namespace gui

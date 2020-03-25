@@ -21,6 +21,8 @@ public:
     ProjectionViewer(ProjectionData projections, QWidget *parent = nullptr);
     ~ProjectionViewer();
 
+    static void plot(ProjectionData projections, const ModuleLayout& layout = {});
+
     void setData(ProjectionData projections);
     void setModuleLayout(const ModuleLayout& layout);
 
@@ -40,7 +42,6 @@ private slots:
     void updateSliderRange();
     void updatePixelInfo(int x, int y, float value);
     void windowingUpdate();
-    void setZoomValueSilent(double zoom);
 };
 
 } // namespace gui
