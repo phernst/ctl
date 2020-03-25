@@ -32,6 +32,9 @@ public slots:
     void autoResize();
     void showView(int view);
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     Ui::ProjectionViewer *ui;
 

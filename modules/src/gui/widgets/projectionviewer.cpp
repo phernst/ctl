@@ -1,7 +1,11 @@
 #include "projectionviewer.h"
 #include "ui_projectionviewer.h"
 
+#include <QKeyEvent>
 #include <QDebug>
+#ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
+    #include "gui/widgets/lineseriesview.h"
+#endif
 
 namespace CTL {
 namespace gui {
@@ -83,6 +87,18 @@ void ProjectionViewer::showView(int view)
 {
     ui->_L_view->setText(QString::number(view));
     ui->_W_dataView->setData(_data.view(view).combined(_modLayout));
+}
+
+void ProjectionViewer::keyPressEvent(QKeyEvent* event)
+{
+    if(event->key() == Qt::Key_K)
+    {
+        qInfo() << ui->_W_dataView->contrastLine();
+
+    #ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
+        LineSeriesView::plot(ui->_W_dataView->contrastLine(), "Distance on line", "Extinction");
+    #endif
+    }
 }
 
 void ProjectionViewer::updateSliderRange()

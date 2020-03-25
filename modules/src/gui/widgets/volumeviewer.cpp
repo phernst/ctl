@@ -1,6 +1,12 @@
 #include "volumeviewer.h"
 #include "ui_volumeviewer.h"
 
+#ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
+    #include "gui/widgets/lineseriesview.h"
+#endif
+
+#include <QKeyEvent>
+
 namespace CTL {
 namespace gui {
 
@@ -96,6 +102,18 @@ void VolumeViewer::showSlice(int slice)
     else if(ui->_RB_directionZ->isChecked())
         ui->_W_dataView->setData(selectedVolume().sliceZ(static_cast<uint>(slice)));
 
+}
+
+void VolumeViewer::keyPressEvent(QKeyEvent* event)
+{
+    if(event->key() == Qt::Key_K)
+    {
+        qInfo() << ui->_W_dataView->contrastLine();
+
+    #ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
+        LineSeriesView::plot(ui->_W_dataView->contrastLine(), "Distance on line", "Attenuation");
+    #endif
+    }
 }
 
 const SpectralVolumeData& VolumeViewer::selectedVolume() const

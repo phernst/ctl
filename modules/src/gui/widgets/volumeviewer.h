@@ -30,6 +30,9 @@ public slots:
     void autoResize();
     void showSlice(int slice);
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     Ui::VolumeViewer *ui;
 
