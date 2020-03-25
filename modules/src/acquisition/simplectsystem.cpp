@@ -62,38 +62,50 @@ SimpleCTsystem::SimpleCTsystem(CTsystem&& system)
  * object if \a system is not simple (isEmpty() of the returned object will return true).
  * If \a ok is nonnull \a *ok will be set to true if the conversion to a SimpleCTsystem was
  * successful, i.e. \a system is simple, otherwise \a *ok will be set to false.
+ * If \a ok is a nullptr and the \a system is not simple, an exception will be thrown.
  */
 SimpleCTsystem SimpleCTsystem::fromCTsystem(const CTsystem& system, bool* ok)
 {
     // check if 'system' has a simple configuration (i.e. only one source, detector, and gantry)
     if(system.isSimple())
     {
-        if(ok) *ok = true;
-        return SimpleCTsystem(system);
+        if(ok)
+            *ok = true;
+        return { system };
     }
     else
     {
-        if(ok) *ok = false;
-        return SimpleCTsystem();
+        if(ok)
+            *ok = false;
+        else
+            throw std::runtime_error("SimpleCTsystem::fromCTsystem(const CTsystem&): "
+                                     "System is not simple.");
+        return { };
     }
 }
 
 /*!
  * Overload of SimpleCTsystem::fromCTsystem(const CTsystem& system, bool* ok) that binds to a
  * \a system passed as a rvalue.
+ * An exception will be thrown if \a system is not simple and \a ok is a nullptr.
  */
 SimpleCTsystem SimpleCTsystem::fromCTsystem(CTsystem&& system, bool* ok)
 {
     // check if 'system' has a simple configuration (i.e. only one source, detector, and gantry)
     if(system.isSimple())
     {
-        if(ok) *ok = true;
-        return SimpleCTsystem(std::move(system));
+        if(ok)
+            *ok = true;
+        return { std::move(system) };
     }
     else
     {
-        if(ok) *ok = false;
-        return SimpleCTsystem();
+        if(ok)
+            *ok = false;
+        else
+            throw std::runtime_error("SimpleCTsystem::fromCTsystem(CTsystem&&): "
+                                     "System is not simple.");
+        return { };
     }
 }
 
