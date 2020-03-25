@@ -11,7 +11,6 @@ HEADERS += \
     $$PWD/../src/gui/widgets/chunk2dview.h \
     $$PWD/../src/gui/widgets/projectionview.h \
     $$PWD/../src/gui/widgets/projectionviewer.h \
-    $$PWD/../src/gui/widgets/volumeviewer.h \
     $$PWD/../src/gui/widgets/voxelvolumeview.h \
     $$PWD/../src/gui/widgets/windowingwidget.h \
     $$PWD/../src/gui/widgets/extensionchainwidget.h \
@@ -21,7 +20,6 @@ SOURCES += \
     $$PWD/../src/gui/widgets/chunk2dview.cpp \
     $$PWD/../src/gui/widgets/projectionview.cpp \
     $$PWD/../src/gui/widgets/projectionviewer.cpp \
-    $$PWD/../src/gui/widgets/volumeviewer.cpp \
     $$PWD/../src/gui/widgets/voxelvolumeview.cpp \
     $$PWD/../src/gui/widgets/windowingwidget.cpp \
     $$PWD/../src/gui/widgets/extensionchainwidget.cpp \
@@ -30,7 +28,6 @@ SOURCES += \
 FORMS += \
     $$PWD/../src/gui/widgets/projectionview.ui \
     $$PWD/../src/gui/widgets/projectionviewer.ui \
-    $$PWD/../src/gui/widgets/volumeviewer.ui \
     $$PWD/../src/gui/widgets/voxelvolumeview.ui \
     $$PWD/../src/gui/widgets/windowingwidget.ui \
     $$PWD/../src/gui/widgets/extensionchainwidget.ui \
