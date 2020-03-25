@@ -27,7 +27,7 @@ CTLDatabaseHandler::CTLDatabaseHandler()
 
     auto dbRoot = file.readLine();
     dbRoot.chop(1);
-    this->setDataBaseRoot(dbRoot);
+    this->setDatabaseRoot(dbRoot);
 }
 
 CTLDatabaseHandler& CTLDatabaseHandler::instance()
@@ -36,12 +36,12 @@ CTLDatabaseHandler& CTLDatabaseHandler::instance()
     return theInstance;
 }
 
-bool CTLDatabaseHandler::isComplete() const
+bool CTLDatabaseHandler::hasAllNecessaryFiles() const
 {
     return _isComplete;
 }
 
-bool CTLDatabaseHandler::setDataBaseRoot(const QString& path)
+bool CTLDatabaseHandler::setDatabaseRoot(const QString& path)
 {
     if(!QFile::exists(path))
     {

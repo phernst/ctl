@@ -178,8 +178,8 @@ class CTLDatabaseHandler
 public:
     static CTLDatabaseHandler& instance();
 
-    bool isComplete() const;
-    bool setDataBaseRoot(const QString& path);
+    bool hasAllNecessaryFiles() const;
+    bool setDatabaseRoot(const QString& path);
 
     std::shared_ptr<AbstractIntegrableDataModel>
     loadAttenuationModel(database::Composite composite);
