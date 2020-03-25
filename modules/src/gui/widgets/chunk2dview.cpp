@@ -79,6 +79,27 @@ void Chunk2DView::setWheelZoomPerTurn(double zoomPerTurn)
     _wheelZoomPerTurn = zoomPerTurn;
 }
 
+QList<QPointF> Chunk2DView::contrastLine() const
+{
+    QList<QPointF> ret;
+
+    auto line = _contrastLineItem->line();
+    const int nbSteps = qRound(line.length() + 0.5);
+    const double step = 1.0 / double(nbSteps);
+
+    const auto imageRect = QRect(0, 0, _data.width(), _data.height());
+    for(int s = 0; s < nbSteps; ++s)
+    {
+        const auto par = s*step;
+        const auto pixel = (line.pointAt(par) / _zoom).toPoint();
+        const auto value = imageRect.contains(pixel) ? _data(pixel.x(), pixel.y())
+                                                     : 0.0f;
+        ret.append( { par, value });
+    }
+
+    return ret;
+}
+
 
 // getter
 

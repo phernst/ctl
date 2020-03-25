@@ -36,6 +36,8 @@ public:
     void setMouseWindowingScaling(double centerScale, double widthScale);
     void setWheelZoomPerTurn(double zoomPerTurn);
 
+    QList<QPointF> contrastLine() const;
+
 public slots:
     void autoResize();
     void setAutoMouseWindowScaling();
