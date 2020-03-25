@@ -35,13 +35,10 @@ VolumeViewer::VolumeViewer(QWidget* parent)
     setWindowTitle("Volume Viewer");
 }
 
-VolumeViewer::VolumeViewer(VoxelVolume<float> volume, QWidget *parent)
+VolumeViewer::VolumeViewer(CompositeVolume volume, QWidget *parent)
     : VolumeViewer(parent)
 {
     setData(std::move(volume));
-
-    autoResize();
-    ui->_W_dataView->setAutoMouseWindowScaling();
 }
 
 VolumeViewer::~VolumeViewer()
@@ -66,11 +63,27 @@ void VolumeViewer::setData(CompositeVolume data)
         ui->_TW_volumeOverview->selectRow(0);
 }
 
+void VolumeViewer::plot(CompositeVolume data)
+{
+    auto viewer = new VolumeViewer(std::move(data));
+    viewer->setAttribute(Qt::WA_DeleteOnClose);
+    viewer->autoResize();
+    viewer->ui->_W_dataView->setAutoMouseWindowScaling();
+
+    viewer->show();
+}
+
+void VolumeViewer::plot(SpectralVolumeData data)
+{
+    plot(CompositeVolume(std::move(data)));
+}
+
 void VolumeViewer::autoResize()
 {
-    static const auto margin = QSize(110, 110);
+    static const auto minimumSize = QSize(850, 400);
+    static const auto margin = QSize(300, 100);
     ui->_W_dataView->autoResize();
-    resize(ui->_W_dataView->size() + margin);
+    resize((ui->_W_dataView->size() + margin).expandedTo(minimumSize));
 }
 
 void VolumeViewer::showSlice(int slice)
