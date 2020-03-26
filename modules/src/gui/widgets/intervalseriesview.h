@@ -21,8 +21,13 @@ public:
 
     void setData(const IntervalDataSeries& intervalSeries);
 
+public slots:
+    void autoZoom() const;
+
+protected:
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+
 private:
-    QBarSeries* _data;
     QAreaSeries* _areaSeries;
     QLineSeries* _upper;
     QLineSeries* _lower;

@@ -7,7 +7,6 @@ namespace gui {
 
 IntervalSeriesView::IntervalSeriesView(QWidget* parent)
     : QChartView(parent)
-    , _data(new QBarSeries)
     , _areaSeries(new QAreaSeries)
     , _upper(new QLineSeries)
     , _lower(new QLineSeries)
@@ -64,6 +63,29 @@ void IntervalSeriesView::setData(const IntervalDataSeries& intervalSeries)
 
     _chart->axisX(_areaSeries)->setRange(xRange.start(), xRange.end());
     _chart->axisY(_areaSeries)->setRange(intervalSeries.min(), 1.05 * intervalSeries.max());
+}
+
+void IntervalSeriesView::autoZoom() const
+{
+    auto compareX = [] (const QPointF& a, const QPointF& b) { return a.x()<b.x(); };
+    auto compareY = [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); };
+
+    const auto dataPts = _areaSeries->upperSeries()->pointsVector();
+    QPair<double, double> xRange(std::min_element(dataPts.cbegin(), dataPts.cend(), compareX)->x(),
+                                 std::max_element(dataPts.cbegin(), dataPts.cend(), compareX)->x());
+    QPair<double, double> yRange(std::min_element(dataPts.cbegin(), dataPts.cend(), compareY)->y(),
+                                 std::max_element(dataPts.cbegin(), dataPts.cend(), compareY)->y());
+
+    _chart->axisX(_areaSeries)->setRange(xRange.first, xRange.second);
+    _chart->axisY(_areaSeries)->setRange(yRange.first, 1.05 * yRange.second);
+}
+
+void IntervalSeriesView::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    if(event->button() == Qt::LeftButton)
+        autoZoom();
+
+    event->accept();
 }
 
 } // namespace gui
