@@ -313,6 +313,12 @@ AbstractDataModel* HeuristicCubicSpectrumModel::clone() const
 
 AbstractDataModel* TASMIPSpectrumModel::clone() const { return new TASMIPSpectrumModel(*this); }
 
+TASMIPSpectrumModel::TASMIPSpectrumModel()
+{
+    setName("TASMIP model");
+    setLookupTable(TASMIPtable(_energy));
+}
+
 void TASMIPSpectrumModel::setParameter(const QVariant& parameter)
 {
     if(parameter.toFloat() > 140.0f)

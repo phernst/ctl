@@ -89,7 +89,7 @@ class TASMIPSpectrumModel : public FixedXraySpectrumModel
     public: AbstractDataModel* clone() const override;
 
 public:
-    TASMIPSpectrumModel() = default;
+    TASMIPSpectrumModel();
 
     void setParameter(const QVariant& parameter) override;
 
