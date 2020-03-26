@@ -6,8 +6,7 @@
 #   mkdir build
 #   cd build
 #   cmake ..
-#   make
-#   sudo make install
+#   cmake --build . --target install
 #
 # Install OpenCL (platform dependent):
 #   sudo apt install nvidia-opencl-dev opencl-headers
