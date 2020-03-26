@@ -9,11 +9,15 @@ DEFINES += GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
 QT += charts
 
 HEADERS += \
+    $$PWD/../src/gui/widgets/intervalseriesview.h \
     $$PWD/../src/gui/widgets/lineseriesview.h
 
 
 SOURCES += \
+    $$PWD/../src/gui/widgets/intervalseriesview.cpp \
     $$PWD/../src/gui/widgets/lineseriesview.cpp
 
 
 FORMS += \
+
+
