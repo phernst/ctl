@@ -26,7 +26,11 @@ public:
     void setData(const QList<QPointF>& lineSeries);
 
 public slots:
+    void autoZoom() const;
     void setShowPoints(bool enabled = true);
+
+protected:
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
     QLineSeries* _data;

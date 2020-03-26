@@ -58,9 +58,32 @@ void LineSeriesView::setData(const QList<QPointF>& lineSeries)
     setData(XYDataSeries(lineSeries));
 }
 
+void LineSeriesView::autoZoom() const
+{
+    auto compareX = [] (const QPointF& a, const QPointF& b) { return a.x()<b.x(); };
+    auto compareY = [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); };
+
+    const auto dataPts = _data->pointsVector();
+    QPair<double, double> xRange(std::min_element(dataPts.cbegin(), dataPts.cend(), compareX)->x(),
+                                 std::max_element(dataPts.cbegin(), dataPts.cend(), compareX)->x());
+    QPair<double, double> yRange(std::min_element(dataPts.cbegin(), dataPts.cend(), compareY)->y(),
+                                 std::max_element(dataPts.cbegin(), dataPts.cend(), compareY)->y());
+
+    _chart->axisX(_data)->setRange(xRange.first, xRange.second);
+    _chart->axisY(_data)->setRange(yRange.first, 1.05 * yRange.second);
+}
+
 void LineSeriesView::setShowPoints(bool enabled)
 {
     _data->setPointsVisible(enabled);
+}
+
+void LineSeriesView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton)
+        autoZoom();
+
+    event->accept();
 }
 
 } // namespace gui
