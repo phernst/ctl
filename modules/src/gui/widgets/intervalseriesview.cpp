@@ -81,7 +81,23 @@ void IntervalSeriesView::setData(const IntervalDataSeries& intervalSeries)
     autoRange();
 }
 
-void IntervalSeriesView::autoRange() const
+QImage IntervalSeriesView::image(const QSize& renderSize)
+{
+    QSize imgSize = renderSize.isValid() ? renderSize : size();
+
+    QImage ret(imgSize, QImage::Format_RGB32);
+    QPainter painter(&ret);
+
+    auto bgBrush = backgroundBrush();
+
+    setBackgroundBrush(QBrush(Qt::white));
+    render(&painter);
+    setBackgroundBrush(bgBrush);
+
+    return ret;
+}
+
+void IntervalSeriesView::autoRange()
 {
     auto compareX = [] (const QPointF& a, const QPointF& b) { return a.x()<b.x(); };
     auto compareY = [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); };
@@ -95,20 +111,8 @@ void IntervalSeriesView::autoRange() const
     const auto xRange = qMakePair(minMaxX.first->x(), minMaxX.second->x());
     const auto yRange = qMakePair(minMaxY.first->y(), minMaxY.second->y());
 
-    if(yAxisIsLinear())
-    {
-        _chart->axisX(_areaSeries)->setRange(xRange.first, xRange.second);
-        _chart->axisY(_areaSeries)->setRange(yRange.first, 1.05 * yRange.second);
-        if(_useNiceX)
-            qobject_cast<QValueAxis*>(_chart->axisX(_areaSeries))->applyNiceNumbers();
-    }
-    else
-    {
-        _chart->axisX(_areaSeriesLog)->setRange(xRange.first, xRange.second);
-        _chart->axisY(_areaSeriesLog)->setRange(yRange.first, 1.05 * yRange.second);
-        if(_useNiceX)
-            qobject_cast<QValueAxis*>(_chart->axisX(_areaSeriesLog))->applyNiceNumbers();
-    }
+    setRangeX(xRange.first, xRange.second);
+    setRangeY(yRange.first, 1.05 * yRange.second);
 }
 
 void IntervalSeriesView::mouseDoubleClickEvent(QMouseEvent* event)
@@ -117,6 +121,21 @@ void IntervalSeriesView::mouseDoubleClickEvent(QMouseEvent* event)
         autoRange();
 
     event->accept();
+}
+
+void IntervalSeriesView::keyPressEvent(QKeyEvent *event)
+{
+    if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
+        saveDialog();
+}
+
+void IntervalSeriesView::saveDialog()
+{
+    auto fn = QFileDialog::getSaveFileName(this, "Save plot", "", "Images (*.png *.jpg *.bmp)");
+    if(fn.isEmpty())
+        return;
+
+    image().save(fn);
 }
 
 void IntervalSeriesView::setLabelX(const QString& label)
@@ -150,6 +169,30 @@ double IntervalSeriesView::suitableLogMinVal(const IntervalDataSeries& intervalS
 void IntervalSeriesView::setLogAxisY(bool enabled)
 {
     enabled ? switchToLogAxisY() : switchToLinAxisY();
+}
+
+void IntervalSeriesView::setRangeX(double from, double to)
+{
+    if(yAxisIsLinear())
+    {
+        _chart->axisX(_areaSeries)->setRange(from, to);
+        if(_useNiceX)
+            qobject_cast<QValueAxis*>(_chart->axisX(_areaSeries))->applyNiceNumbers();
+    }
+    else
+    {
+        _chart->axisX(_areaSeriesLog)->setRange(from, to);
+        if(_useNiceX)
+            qobject_cast<QValueAxis*>(_chart->axisX(_areaSeriesLog))->applyNiceNumbers();
+    }
+}
+
+void IntervalSeriesView::setRangeY(double from, double to)
+{
+    if(yAxisIsLinear())
+        _chart->axisY(_areaSeries)->setRange(from, to);
+    else
+        _chart->axisY(_areaSeriesLog)->setRange(from, to);
 }
 
 void IntervalSeriesView::setUseNiceX(bool enabled) { _useNiceX = enabled; }

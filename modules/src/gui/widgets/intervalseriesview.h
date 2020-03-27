@@ -18,21 +18,25 @@ public:
     static void plot(const IntervalDataSeries& intervalSeries,
                      const QString& labelX = "x",
                      const QString& labelY = "y",
-                     bool logAxisY = false
-            );
+                     bool logAxisY = false);
 
     void setData(const IntervalDataSeries& intervalSeries);
 
+    QImage image(const QSize& renderSize = QSize());
+
 public slots:
-    void autoRange() const;
+    void autoRange();
     void setLabelX(const QString& label);
     void setLabelY(const QString& label);
     void setLogAxisY(bool enabled);
+    void setRangeX(double from, double to);
+    void setRangeY(double from, double to);
     void setUseNiceX(bool enabled);
     void toggleLinLogY();
 
 protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
 private:
     QAreaSeries* _areaSeries;
@@ -42,6 +46,7 @@ private:
     QChart* _chart;
     bool _useNiceX = false;
 
+    void saveDialog();
     void setSeriesShow(QAbstractSeries* series, bool shown);
     double suitableLogMinVal(const IntervalDataSeries& intervalSeries);
     void switchToLinAxisY();

@@ -68,7 +68,19 @@ void LineSeriesView::setData(const QList<QPointF>& lineSeries)
     setData(XYDataSeries(lineSeries));
 }
 
-void LineSeriesView::autoRange() const
+QImage LineSeriesView::image(const QSize& renderSize)
+{
+    QSize imgSize = renderSize.isValid() ? renderSize : size();
+
+    QImage ret(imgSize, QImage::Format_ARGB32);
+    QPainter painter(&ret);
+
+    render(&painter);
+
+    return ret;
+}
+
+void LineSeriesView::autoRange()
 {
     auto compareX = [] (const QPointF& a, const QPointF& b) { return a.x()<b.x(); };
     auto compareY = [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); };
@@ -110,6 +122,30 @@ void LineSeriesView::setLabelY(const QString& label)
     _chart->axisY(_dataSeriesLog)->setTitleText(label);
 }
 
+void LineSeriesView::setRangeX(double from, double to)
+{
+    if(yAxisIsLinear())
+    {
+        _chart->axisX(_dataSeries)->setRange(from, to);
+        if(_useNiceX)
+            qobject_cast<QValueAxis*>(_chart->axisX(_dataSeries))->applyNiceNumbers();
+    }
+    else
+    {
+        _chart->axisX(_dataSeriesLog)->setRange(from, to);
+        if(_useNiceX)
+            qobject_cast<QValueAxis*>(_chart->axisX(_dataSeriesLog))->applyNiceNumbers();
+    }
+}
+
+void LineSeriesView::setRangeY(double from, double to)
+{
+    if(yAxisIsLinear())
+        _chart->axisY(_dataSeries)->setRange(from, to);
+    else
+        _chart->axisY(_dataSeriesLog)->setRange(from, to);
+}
+
 void LineSeriesView::setShowPoints(bool enabled)
 {
     _dataSeries->setPointsVisible(enabled);
@@ -136,6 +172,21 @@ void LineSeriesView::mouseDoubleClickEvent(QMouseEvent *event)
         autoRange();
 
     event->accept();
+}
+
+void LineSeriesView::keyPressEvent(QKeyEvent *event)
+{
+    if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
+        saveDialog();
+}
+
+void LineSeriesView::saveDialog()
+{
+    auto fn = QFileDialog::getSaveFileName(this, "Save plot", "", "Images (*.png *.jpg *.bmp)");
+    if(fn.isEmpty())
+        return;
+
+    image().save(fn);
 }
 
 bool LineSeriesView::yAxisIsLinear() const { return _dataSeries->isVisible(); }

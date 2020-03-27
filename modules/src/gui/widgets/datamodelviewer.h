@@ -40,6 +40,9 @@ public slots:
     void setLabelY(const QString& label);
     void toggleLogY();
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 private:
     LineSeriesView* _lineView;
     IntervalSeriesView* _intervalView;
@@ -47,6 +50,7 @@ private:
 
     std::shared_ptr<AbstractDataModel> _model;
 
+    void saveDialog();
     void setNumberSamplesSilent(int val);
     void setModelParameter(QVariant parameter);
 };

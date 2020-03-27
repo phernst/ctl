@@ -140,6 +140,24 @@ void DataModelViewer::toggleLogY()
     }
 }
 
+void DataModelViewer::keyPressEvent(QKeyEvent *event)
+{
+    if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
+        saveDialog();
+}
+
+void DataModelViewer::saveDialog()
+{
+    auto fn = QFileDialog::getSaveFileName(this, "Save plot", "", "Images (*.png *.jpg *.bmp)");
+    if(fn.isEmpty())
+        return;
+
+    if(ui->_stackedWidget->currentWidget() == _lineView)
+        _lineView->image().save(fn);
+    else
+        _intervalView->image().save(fn);
+}
+
 void DataModelViewer::setModelParameter(QVariant parameter)
 {
     _model->setParameter(parameter);

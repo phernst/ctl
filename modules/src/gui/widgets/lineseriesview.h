@@ -27,17 +27,22 @@ public:
     void setData(const XYDataSeries& lineSeries);
     void setData(const QList<QPointF>& lineSeries);
 
+    QImage image(const QSize& renderSize = QSize());
+
 public slots:
-    void autoRange() const;
+    void autoRange();
     void setLabelX(const QString& label);
     void setLabelY(const QString& label);
     void setLogAxisY(bool enabled);
+    void setRangeX(double from, double to);
+    void setRangeY(double from, double to);
     void setUseNiceX(bool enabled);
     void setShowPoints(bool enabled = true);
     void toggleLinLogY();
 
 protected:
-    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
 
 private:
     QLineSeries* _dataSeries;
@@ -45,6 +50,7 @@ private:
     QChart* _chart;
     bool _useNiceX = false;
 
+    void saveDialog();
     void setSeriesShow(QAbstractSeries* series, bool shown);
     void switchToLinAxisY();
     void switchToLogAxisY();
