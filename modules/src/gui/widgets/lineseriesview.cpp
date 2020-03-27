@@ -149,6 +149,7 @@ void LineSeriesView::setRangeY(double from, double to)
 void LineSeriesView::setShowPoints(bool enabled)
 {
     _dataSeries->setPointsVisible(enabled);
+    _dataSeriesLog->setPointsVisible(enabled);
 }
 
 void LineSeriesView::setLogAxisY(bool enabled)
