@@ -22,16 +22,29 @@ public:
     void setData(const IntervalDataSeries& intervalSeries);
 
 public slots:
-    void autoZoom() const;
+    void autoRange() const;
+    void setLabelX(const QString& label);
+    void setLabelY(const QString& label);
+    void setLogAxisY(bool enabled);
+    void setUseNiceX(bool enabled);
+    void toggleLinLogY();
 
 protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private:
     QAreaSeries* _areaSeries;
+    QAreaSeries* _areaSeriesLog;
     QLineSeries* _upper;
-    QLineSeries* _lower;
+    QLineSeries* _upperLog;
     QChart* _chart;
+    bool _useNiceX = false;
+
+    void setSeriesShow(QAbstractSeries* series, bool shown);
+    double suitableLogMinVal(const IntervalDataSeries& intervalSeries);
+    void turnOnLinAxisY();
+    void turnOnLogAxisY();
+    bool yAxisIsLinear() const;
 };
 
 } // namespace gui
