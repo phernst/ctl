@@ -25,6 +25,8 @@ Moreover, you may find useful information in the
 [Wiki](https://gitlab.com/tpfeiffe/ctl/wikis/home),
 especially if you want to contribute to the project as a developer.
 
+In case you are looking for some Python bindings check out [PyCTL](https://github.com/phernst/pyctl) by Philipp Ernst.
+
 The following installation guide has been tested with Kubuntu 18.04 LTS.  
 You may also try a preconfigured Docker image. In this case, you can skip the 
 following three steps and go directly to *Use a Docker image*.
