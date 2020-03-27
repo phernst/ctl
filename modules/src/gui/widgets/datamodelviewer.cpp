@@ -30,6 +30,9 @@ DataModelViewer::DataModelViewer(QWidget *parent)
     connect(ui->_PB_increaseSampling, &QPushButton::clicked, this, &DataModelViewer::increaseSamplingDensity);
     connect(ui->_SB_nbSamples, QOverload<int>::of(&QSpinBox::valueChanged), this, &DataModelViewer::updatePlot);
     connect(ui->_W_parameterEditor, &details::ParameterConfigWidget::parameterChanged, this, &DataModelViewer::setModelParameter);
+    connect(ui->_PB_linLogY, &QToolButton::clicked, this, &DataModelViewer::toggleLogY);
+    connect(ui->_CB_niceX, &QCheckBox::toggled, _lineView, &LineSeriesView::setUseNiceX);
+    connect(ui->_CB_niceX, &QCheckBox::toggled, _intervalView, &IntervalSeriesView::setUseNiceX);
 
     setWindowTitle("Data Model Viewer");
 }
@@ -67,8 +70,8 @@ void DataModelViewer::plot(std::shared_ptr<AbstractDataModel> model,
 
     viewer->setData(std::move(model));
 
-    viewer->setXLabel(labelX);
-    viewer->setYLabel(labelY);
+    viewer->setLabelX(labelX);
+    viewer->setLabelY(labelY);
 
     viewer->resize(800, 600);
     viewer->show();
@@ -112,16 +115,29 @@ void DataModelViewer::reduceSamplingDensity()
     setNumberOfSamples(qCeil(ui->_SB_nbSamples->value() * 0.8));
 }
 
-void DataModelViewer::setXLabel(const QString& label)
+void DataModelViewer::setLabelX(const QString& label)
 {
-    _lineView->chart()->axisX()->setTitleText(label);
-    _intervalView->chart()->axisX()->setTitleText(label);
+    _lineView->setLabelX(label);
+    _intervalView->setLabelX(label);
 }
 
-void DataModelViewer::setYLabel(const QString& label)
+void DataModelViewer::setLabelY(const QString& label)
 {
-    _lineView->chart()->axisY()->setTitleText(label);
-    _intervalView->chart()->axisY()->setTitleText(label);
+    _lineView->setLabelY(label);
+    _intervalView->setLabelY(label);
+}
+
+void DataModelViewer::toggleLogY()
+{
+    _lineView->toggleLinLogY();
+    _intervalView->toggleLinLogY();
+
+    if(QObject::sender() != ui->_PB_linLogY)
+    {
+        ui->_PB_linLogY->blockSignals(true);
+        ui->_PB_linLogY->toggle();
+        ui->_PB_linLogY->blockSignals(false);
+    }
 }
 
 void DataModelViewer::setModelParameter(QVariant parameter)

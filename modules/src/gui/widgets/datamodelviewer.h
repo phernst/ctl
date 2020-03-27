@@ -36,8 +36,9 @@ public slots:
     void setNumberOfSamples(int nbSamples);
     void increaseSamplingDensity();
     void reduceSamplingDensity();
-    void setXLabel(const QString& label);
-    void setYLabel(const QString& label);
+    void setLabelX(const QString& label);
+    void setLabelY(const QString& label);
+    void toggleLogY();
 
 private:
     LineSeriesView* _lineView;
