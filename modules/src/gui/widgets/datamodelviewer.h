@@ -59,6 +59,8 @@ class ParameterConfigWidget : public QWidget
 public:
     ParameterConfigWidget(QWidget* parent = nullptr);
 
+    bool isEmpty() const;
+
 public slots:
     void updateInterface(QVariant templateParameter);
 

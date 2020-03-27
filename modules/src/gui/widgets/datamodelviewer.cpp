@@ -54,6 +54,7 @@ void DataModelViewer::setData(std::shared_ptr<AbstractDataModel> model)
     _intervalView->chart()->setTitle(_model->name());
 
     ui->_W_parameterEditor->updateInterface(_model->parameter());
+    ui->_W_parameterEditor->isEmpty() ? ui->_GB_parameter->hide() : ui->_GB_parameter->show();
 
     updatePlot();
 }
@@ -137,6 +138,11 @@ ParameterConfigWidget::ParameterConfigWidget(QWidget* parent)
     , _layout(new QGridLayout)
 {
     this->setLayout(_layout);
+}
+
+bool ParameterConfigWidget::isEmpty() const
+{
+    return !static_cast<bool>(_layout->count());
 }
 
 void ParameterConfigWidget::updateInterface(QVariant templateParameter)
