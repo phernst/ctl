@@ -4,6 +4,7 @@
 
 #include <QMouseEvent>
 #include <QDebug>
+#include <QFileDialog>
 #include <QGraphicsLineItem>
 #include <QGraphicsPixmapItem>
 
@@ -100,6 +101,18 @@ QList<QPointF> Chunk2DView::contrastLine() const
     return ret;
 }
 
+QImage Chunk2DView::image(const QSize& renderSize)
+{
+    QSize imgSize = renderSize.isValid() ? renderSize : size();
+
+    QImage ret(imgSize, QImage::Format_ARGB32);
+    QPainter painter(&ret);
+
+    render(&painter);
+
+    return ret;
+}
+
 
 // getter
 
@@ -177,7 +190,20 @@ void Chunk2DView::setZoom(double zoom)
     emit zoomChanged(zoom);
 }
 
+
 // event handling
+
+void Chunk2DView::keyPressEvent(QKeyEvent *event)
+{
+    if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
+    {
+        saveDialog();
+        event->accept();
+        return;
+    }
+
+    QWidget::keyPressEvent(event);
+}
 
 void Chunk2DView::mouseMoveEvent(QMouseEvent* event)
 {   
@@ -266,6 +292,20 @@ QPixmap Chunk2DView::checkerboard() const
     }
 
     return QPixmap::fromImage(img);
+}
+
+bool Chunk2DView::save(const QString& fileName)
+{
+    return image().save(fileName);
+}
+
+void Chunk2DView::saveDialog()
+{
+    auto fn = QFileDialog::getSaveFileName(this, "Save plot", "", "Images (*.png *.jpg *.bmp)");
+    if(fn.isEmpty())
+        return;
+
+    save(fn);
 }
 
 void Chunk2DView::setAutoMouseWindowScaling()

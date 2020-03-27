@@ -93,12 +93,18 @@ void ProjectionViewer::keyPressEvent(QKeyEvent* event)
 {
     if(event->key() == Qt::Key_K)
     {
-        qInfo() << ui->_W_dataView->contrastLine();
-
     #ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
         LineSeriesView::plot(ui->_W_dataView->contrastLine(), "Distance on line", "Extinction");
+        event->accept();
     #endif
     }
+    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
+    {
+        ui->_W_dataView->saveDialog();
+        event->accept();
+    }
+
+    QWidget::keyPressEvent(event);
 }
 
 void ProjectionViewer::updateSliderRange()

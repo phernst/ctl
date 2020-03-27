@@ -37,9 +37,12 @@ public:
     void setWheelZoomPerTurn(double zoomPerTurn);
 
     QList<QPointF> contrastLine() const;
+    QImage image(const QSize& renderSize = QSize());
 
 public slots:
     void autoResize();
+    bool save(const QString& fileName);
+    void saveDialog();
     void setAutoMouseWindowScaling();
     void setLivePixelDataEnabled(bool enabled);
     void setWindowing(double from, double to);
@@ -48,6 +51,7 @@ public slots:
     void setZoom(double zoom);
 
 protected:
+    void keyPressEvent(QKeyEvent *event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
@@ -73,10 +77,10 @@ private:
     QPair<double, double> _mouseWindowingScaling = {1.0, 1.0};
     double _wheelZoomPerTurn = 0.25; // i.e 0.25 zoom per 15.0 deg;
 
+    QPixmap checkerboard() const;
+    QPoint pixelIdxFromPos(const QPoint& pos);
     void setGrayscaleColorTable();
     void updateImage();
-    QPoint pixelIdxFromPos(const QPoint& pos);
-    QPixmap checkerboard() const;
 };
 
 } // namespace gui
