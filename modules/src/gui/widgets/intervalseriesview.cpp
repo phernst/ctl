@@ -40,10 +40,13 @@ IntervalSeriesView::IntervalSeriesView(QWidget* parent)
 }
 
 void IntervalSeriesView::plot(const IntervalDataSeries& intervalSeries,
-                         const QString& labelX, const QString& labelY)
+                         const QString& labelX, const QString& labelY, bool logAxisY)
 {
     auto viewer = new IntervalSeriesView;
     viewer->setAttribute(Qt::WA_DeleteOnClose);
+
+    if(logAxisY)
+        viewer->switchToLogAxisY();
 
     viewer->setData(intervalSeries);
 
@@ -146,7 +149,7 @@ double IntervalSeriesView::suitableLogMinVal(const IntervalDataSeries& intervalS
 
 void IntervalSeriesView::setLogAxisY(bool enabled)
 {
-    enabled ? turnOnLogAxisY() : turnOnLinAxisY();
+    enabled ? switchToLogAxisY() : switchToLinAxisY();
 }
 
 void IntervalSeriesView::setUseNiceX(bool enabled) { _useNiceX = enabled; }
@@ -154,9 +157,9 @@ void IntervalSeriesView::setUseNiceX(bool enabled) { _useNiceX = enabled; }
 void IntervalSeriesView::toggleLinLogY()
 {
     if(yAxisIsLinear())
-        turnOnLogAxisY();
+        switchToLogAxisY();
     else
-        turnOnLinAxisY();
+        switchToLinAxisY();
 }
 
 void IntervalSeriesView::setSeriesShow(QAbstractSeries* series, bool shown)
@@ -177,7 +180,7 @@ void IntervalSeriesView::setSeriesShow(QAbstractSeries* series, bool shown)
 
 bool IntervalSeriesView::yAxisIsLinear() const { return _areaSeries->isVisible(); }
 
-void IntervalSeriesView::turnOnLinAxisY()
+void IntervalSeriesView::switchToLinAxisY()
 {
     const auto logAxisX = qobject_cast<QValueAxis*>(_chart->axisX(_areaSeriesLog));
     const auto logAxisY = qobject_cast<QLogValueAxis*>(_chart->axisY(_areaSeriesLog));
@@ -192,7 +195,7 @@ void IntervalSeriesView::turnOnLinAxisY()
     _chart->axisY(_areaSeries)->setRange(rangeY.first, rangeY.second);
 }
 
-void IntervalSeriesView::turnOnLogAxisY()
+void IntervalSeriesView::switchToLogAxisY()
 {
     const auto linAxisX = qobject_cast<QValueAxis*>(_chart->axisX(_areaSeries));
     const auto linAxisY = qobject_cast<QValueAxis*>(_chart->axisY(_areaSeries));

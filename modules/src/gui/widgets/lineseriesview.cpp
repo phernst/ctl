@@ -34,12 +34,13 @@ void LineSeriesView::plot(const XYDataSeries& lineSeries,
     auto viewer = new LineSeriesView;
     viewer->setAttribute(Qt::WA_DeleteOnClose);
 
+    if(logAxisY)
+        viewer->switchToLogAxisY();
+
     viewer->setData(lineSeries);
 
     viewer->setLabelX(labelX);
     viewer->setLabelY(labelY);
-
-    viewer->setLogAxisY(logAxisY);
 
     viewer->resize(500,400);
     viewer->show();

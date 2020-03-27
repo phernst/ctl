@@ -17,7 +17,9 @@ public:
 
     static void plot(const IntervalDataSeries& intervalSeries,
                      const QString& labelX = "x",
-                     const QString& labelY = "y");
+                     const QString& labelY = "y",
+                     bool logAxisY = false
+            );
 
     void setData(const IntervalDataSeries& intervalSeries);
 
@@ -42,8 +44,8 @@ private:
 
     void setSeriesShow(QAbstractSeries* series, bool shown);
     double suitableLogMinVal(const IntervalDataSeries& intervalSeries);
-    void turnOnLinAxisY();
-    void turnOnLogAxisY();
+    void switchToLinAxisY();
+    void switchToLogAxisY();
     bool yAxisIsLinear() const;
 };
 
