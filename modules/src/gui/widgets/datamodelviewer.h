@@ -50,7 +50,6 @@ private:
 
     std::shared_ptr<AbstractDataModel> _model;
 
-    void saveDialog();
     void setNumberSamplesSilent(int val);
     void setModelParameter(QVariant parameter);
 };

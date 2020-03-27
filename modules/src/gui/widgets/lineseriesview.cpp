@@ -177,7 +177,18 @@ void LineSeriesView::mouseDoubleClickEvent(QMouseEvent *event)
 void LineSeriesView::keyPressEvent(QKeyEvent *event)
 {
     if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
+    {
         saveDialog();
+        event->accept();
+        return;
+    }
+
+    QWidget::keyPressEvent(event);
+}
+
+bool LineSeriesView::save(const QString& fileName)
+{
+    return image().save(fileName);
 }
 
 void LineSeriesView::saveDialog()
@@ -186,7 +197,7 @@ void LineSeriesView::saveDialog()
     if(fn.isEmpty())
         return;
 
-    image().save(fn);
+    save(fn);
 }
 
 bool LineSeriesView::yAxisIsLinear() const { return _dataSeries->isVisible(); }

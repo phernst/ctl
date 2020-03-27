@@ -126,7 +126,18 @@ void IntervalSeriesView::mouseDoubleClickEvent(QMouseEvent* event)
 void IntervalSeriesView::keyPressEvent(QKeyEvent *event)
 {
     if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
+    {
         saveDialog();
+        event->accept();
+        return;
+    }
+
+    QWidget::keyPressEvent(event);
+}
+
+bool IntervalSeriesView::save(const QString& fileName)
+{
+    return image().save(fileName);
 }
 
 void IntervalSeriesView::saveDialog()
@@ -135,7 +146,7 @@ void IntervalSeriesView::saveDialog()
     if(fn.isEmpty())
         return;
 
-    image().save(fn);
+    save(fn);
 }
 
 void IntervalSeriesView::setLabelX(const QString& label)

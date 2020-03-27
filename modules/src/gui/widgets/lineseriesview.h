@@ -31,6 +31,8 @@ public:
 
 public slots:
     void autoRange();
+    bool save(const QString& fileName);
+    void saveDialog();
     void setLabelX(const QString& label);
     void setLabelY(const QString& label);
     void setLogAxisY(bool enabled);
@@ -50,7 +52,6 @@ private:
     QChart* _chart;
     bool _useNiceX = false;
 
-    void saveDialog();
     void setSeriesShow(QAbstractSeries* series, bool shown);
     void switchToLinAxisY();
     void switchToLogAxisY();
