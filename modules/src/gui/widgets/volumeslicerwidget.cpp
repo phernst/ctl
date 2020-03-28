@@ -16,6 +16,8 @@ VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
     ui->_w_3dViewer->setPlaneSize( { 0.0 , 0.0 } );
     ui->_w_3dViewer->setVolumeDim(volume);
 
+#ifdef OCL_CONFIG_MODULE_AVAILABLE
+
     // connections for windowing
     connect(ui->_W_windowing, &WindowingWidget::windowingChanged, this, &VolumeSlicerWidget::windowingUpdate);
     connect(ui->_W_windowing, &WindowingWidget::autoWindowingRequested, ui->_w_sliceView, &Chunk2DView::setWindowingMinMax);
@@ -28,14 +30,11 @@ VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
 
     ui->_w_sliceView->setLivePixelDataEnabled(true);
 
-    resize(1200, 800);
-    setWindowTitle("Volume Slicer");
-
-#ifdef OCL_CONFIG_MODULE_AVAILABLE
     connect(ui->_SB_azimuth, SIGNAL(valueChanged(double)), SLOT(planeChange()));
     connect(ui->_SB_polar, SIGNAL(valueChanged(double)), SLOT(planeChange()));
     connect(ui->_SB_distance, SIGNAL(valueChanged(double)), SLOT(planeChange()));
     connect(ui->_PB_resetCamera, SIGNAL(clicked()), ui->_w_3dViewer, SLOT(resetCamera()));
+
 #endif
 
 #ifndef OCL_CONFIG_MODULE_AVAILABLE
@@ -43,6 +42,9 @@ VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
                   "VolumeSlicerWidget needs OpenCL to compute sliced images."
                   "No functionality will be available";
 #endif
+
+    resize(1200, 800);
+    setWindowTitle("Volume Slicer");
 }
 
 VolumeSlicerWidget::~VolumeSlicerWidget()
@@ -117,7 +119,8 @@ void VolumeSlicerWidget::windowingUpdate()
     ui->_w_sliceView->setWindowing(newWindowing.first, newWindowing.second);
 }
 
+#endif // OCL_CONFIG_MODULE_AVAILABLE
+
 } // namespace gui
 } // namespace CTL
 
-#endif
