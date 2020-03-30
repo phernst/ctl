@@ -1,6 +1,11 @@
 #include "volumeslicerwidget.h"
 #include "ui_volumeslicerwidget.h"
 #include "img/compositevolume.h"
+#ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
+#include "gui/widgets/planevisualizer.h"
+#endif
+
+#include <QKeyEvent>
 #include <qmath.h>
 
 namespace CTL {
@@ -13,10 +18,24 @@ VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
     ui->setupUi(this);
 
     CTL::VoxelVolume<float> volume(0, 0, 0);
-    ui->_w_3dViewer->setPlaneSize( { 0.0 , 0.0 } );
-    ui->_w_3dViewer->setVolumeDim(volume);
 
-#ifdef OCL_CONFIG_MODULE_AVAILABLE
+#ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
+    _3dViewer = new PlaneVisualizer;
+    ui->_w_3dViewer->addWidget(_3dViewer);
+    ui->_w_3dViewer->setCurrentWidget(_3dViewer);
+    _3dViewer->setPlaneSize( { 0.0 , 0.0 } );
+    _3dViewer->setVolumeDim(volume);
+
+    connect(ui->_PB_resetCamera, SIGNAL(clicked()), _3dViewer, SLOT(resetCamera()));
+#else // no 3D viewer (for plane visualization) available
+    auto label = new QLabel("3D Viewer not available. \n"
+                            "(Requires 'gui_widgets_3d.pri' submodule.)");
+    label->setAlignment(Qt::AlignCenter);
+    ui->_w_3dViewer->addWidget(label);
+    ui->_w_3dViewer->setCurrentWidget(label);
+    ui->_w_3dViewer->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Minimum);
+    ui->_PB_resetCamera->setEnabled(false);
+#endif
 
     // connections for windowing
     connect(ui->_W_windowing, &WindowingWidget::windowingChanged, this, &VolumeSlicerWidget::windowingUpdate);
@@ -27,23 +46,13 @@ VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
     connect(ui->_w_sliceView, &Chunk2DView::zoomChanged, ui->_W_zoomControl, &ZoomControlWidget::setZoomValueSilent);
     // connections for live pixel info
     connect(ui->_w_sliceView, &Chunk2DView::pixelInfoUnderCursor, this, &VolumeSlicerWidget::updatePixelInfo);
-
     ui->_w_sliceView->setLivePixelDataEnabled(true);
 
     connect(ui->_SB_azimuth, SIGNAL(valueChanged(double)), SLOT(planeChange()));
     connect(ui->_SB_polar, SIGNAL(valueChanged(double)), SLOT(planeChange()));
     connect(ui->_SB_distance, SIGNAL(valueChanged(double)), SLOT(planeChange()));
-    connect(ui->_PB_resetCamera, SIGNAL(clicked()), ui->_w_3dViewer, SLOT(resetCamera()));
 
-#endif
-
-#ifndef OCL_CONFIG_MODULE_AVAILABLE
-    qWarning() << "OCL_CONFIG_MODULE is required!"
-                  "VolumeSlicerWidget needs OpenCL to compute sliced images."
-                  "No functionality will be available";
-#endif
-
-    resize(1200, 800);
+    resize(1400, 800);
     setWindowTitle("Volume Slicer");
 }
 
@@ -52,7 +61,6 @@ VolumeSlicerWidget::~VolumeSlicerWidget()
     delete ui;
 }
 
-#ifdef OCL_CONFIG_MODULE_AVAILABLE
 void VolumeSlicerWidget::setData(const CTL::VoxelVolume<float>& volume)
 {
     _slicer.reset(new CTL::OCL::VolumeSlicer(volume));
@@ -62,18 +70,22 @@ void VolumeSlicerWidget::setData(const CTL::VoxelVolume<float>& volume)
 
 void VolumeSlicerWidget::dataChange()
 {
-    ui->_w_3dViewer->setVolumeDim(_slicer->volDim(), _slicer->volOffset(), _slicer->volVoxSize());
-    ui->_w_3dViewer->setPlaneSize( { _slicer->sliceDimensions().width * _slicer->sliceResolution(),
-                                     _slicer->sliceDimensions().height * _slicer->sliceResolution() } );
+    #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
+    _3dViewer->setVolumeDim(_slicer->volDim(), _slicer->volOffset(), _slicer->volVoxSize());
+    _3dViewer->setPlaneSize( { _slicer->sliceDimensions().width * _slicer->sliceResolution(),
+                             _slicer->sliceDimensions().height * _slicer->sliceResolution() } );
+    #endif // GUI_WIDGETS_3D_MODULE_AVAILABLE
 
     recomputeSlice();
 }
 
 void VolumeSlicerWidget::planeChange()
 {
-    ui->_w_3dViewer->setPlaneParameter(qDegreesToRadians(ui->_SB_azimuth->value()),
-                                       qDegreesToRadians(ui->_SB_polar->value()),
-                                       ui->_SB_distance->value());
+    #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
+    _3dViewer->setPlaneParameter(qDegreesToRadians(ui->_SB_azimuth->value()),
+                                 qDegreesToRadians(ui->_SB_polar->value()),
+                                 ui->_SB_distance->value());
+    #endif // GUI_WIDGETS_3D_MODULE_AVAILABLE
 
     recomputeSlice();
 }
@@ -118,8 +130,6 @@ void VolumeSlicerWidget::windowingUpdate()
     auto newWindowing = ui->_W_windowing->windowFromTo();
     ui->_w_sliceView->setWindowing(newWindowing.first, newWindowing.second);
 }
-
-#endif // OCL_CONFIG_MODULE_AVAILABLE
 
 } // namespace gui
 } // namespace CTL

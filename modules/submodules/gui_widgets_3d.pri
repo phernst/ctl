@@ -4,20 +4,16 @@
 
 # declare module
 CONFIG += GUI_WIDGETS_3D_MODULE
+DEFINES += GUI_WIDGETS_3D_MODULE_AVAILABLE
 
 QT += 3dcore 3drender 3dextras
 
 HEADERS += \
     $$PWD/../src/gui/widgets/acquisitionvisualizerwidget.h \
     $$PWD/../src/gui/widgets/planevisualizer.h \
-    $$PWD/../src/gui/widgets/volumeslicerwidget.h \
     $$PWD/../src/gui/widgets/systemvisualizerwidget.h
 
 SOURCES += \
     $$PWD/../src/gui/widgets/acquisitionvisualizerwidget.cpp \
     $$PWD/../src/gui/widgets/planevisualizer.cpp \
-    $$PWD/../src/gui/widgets/volumeslicerwidget.cpp \
     $$PWD/../src/gui/widgets/systemvisualizerwidget.cpp
-
-FORMS += \
-    $$PWD/../src/gui/widgets/volumeslicerwidget.ui

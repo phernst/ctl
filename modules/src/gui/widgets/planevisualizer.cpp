@@ -17,6 +17,9 @@
 #include <Qt3DRender/QCamera>
 #include <Qt3DRender/QFrameGraphNode>
 
+namespace CTL {
+namespace gui {
+
 PlaneVisualizer::PlaneVisualizer(QWidget* parent)
     : QWidget(parent)
     , _mainLayout(new QGridLayout(this))
@@ -300,3 +303,6 @@ void PlaneVisualizer::redraw()
     addVolume();
     addPlane();
 }
+
+} // namespace gui
+} // namespace CTL

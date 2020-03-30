@@ -8,10 +8,13 @@
 CONFIG += GUI_WIDGETS_OCL
 
 HEADERS += \
-    $$PWD/../src/gui/widgets/pipelinecomposerwidget.h
+    $$PWD/../src/gui/widgets/pipelinecomposerwidget.h \
+    $$PWD/../src/gui/widgets/volumeslicerwidget.h
 
 SOURCES += \
-    $$PWD/../src/gui/widgets/pipelinecomposerwidget.cpp
+    $$PWD/../src/gui/widgets/pipelinecomposerwidget.cpp \
+    $$PWD/../src/gui/widgets/volumeslicerwidget.cpp
 
 FORMS += \
-    $$PWD/../src/gui/widgets/pipelinecomposerwidget.ui
+    $$PWD/../src/gui/widgets/pipelinecomposerwidget.ui \
+    $$PWD/../src/gui/widgets/volumeslicerwidget.ui

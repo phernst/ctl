@@ -27,6 +27,9 @@ class QCamera;
 class QMaterial;
 } // namespace Qt3DRender
 
+namespace CTL {
+namespace gui {
+
 class PlaneVisualizer : public QWidget
 {
     Q_OBJECT
@@ -76,5 +79,8 @@ private:
 
     void redraw();
 };
+
+} // namespace gui
+} // namespace CTL
 
 #endif // CTL_PLANEVISUALIZER_H
