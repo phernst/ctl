@@ -94,6 +94,11 @@ void VolumeViewer::autoResize()
     resize((ui->_W_dataView->size() + margin).expandedTo(minimumSize));
 }
 
+void VolumeViewer::hideCompositeOverview(bool hide)
+{
+    ui->_TW_volumeOverview->setVisible(!hide);
+}
+
 void VolumeViewer::showSlice(int slice)
 {
     ui->_L_slice->setNum(slice);
