@@ -1,12 +1,18 @@
 #include "chunk2dview.h"
 
-#include <cmath>
+#ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
+#include "gui/widgets/lineseriesview.h"
+#else
+#include <QMessageBox>
+#endif
 
-#include <QMouseEvent>
+#include <cmath>
 #include <QDebug>
 #include <QFileDialog>
 #include <QGraphicsLineItem>
 #include <QGraphicsPixmapItem>
+#include <QKeyEvent>
+#include <QMouseEvent>
 
 namespace CTL {
 namespace gui {
@@ -113,6 +119,22 @@ QImage Chunk2DView::image(const QSize& renderSize)
     return ret;
 }
 
+void Chunk2DView::setContrastLinePlotLabels(const QString& labelX, const QString& labelY)
+{
+    _contrLineLabelX = labelX;
+    _contrLineLabelY = labelY;
+}
+
+void Chunk2DView::showContrastLinePlot()
+{
+#ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
+    LineSeriesView::plot(contrastLine(), _contrLineLabelX, _contrLineLabelY);
+#else
+    QMessageBox::information(this, "Contrast line plot", "Contrast line plot not available.\n"
+                                                         "(Requires 'gui_widgets_charts.pri' submodule.)");
+#endif
+}
+
 
 // getter
 
@@ -195,7 +217,13 @@ void Chunk2DView::setZoom(double zoom)
 
 void Chunk2DView::keyPressEvent(QKeyEvent *event)
 {
-    if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
+    if(event->key() == Qt::Key_K)
+    {
+        showContrastLinePlot();
+        event->accept();
+        return;
+    }
+    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
     {
         saveDialog();
         event->accept();
@@ -219,6 +247,7 @@ void Chunk2DView::mouseMoveEvent(QMouseEvent* event)
     }
     if(event->buttons() == Qt::RightButton)
     {
+        _contrastLineItem->show();
         _contrastLineItem->setLine( { mapToScene(_mouseDragStart), mapToScene(event->pos()) } );
     }
     else if(itemAt(event->pos()) == _imageItem)
@@ -240,7 +269,8 @@ void Chunk2DView::mousePressEvent(QMouseEvent* event)
     else if(event->button() == Qt::RightButton)
     {
         _mouseDragStart = event->pos();
-        _contrastLineItem->show();
+        _contrastLineItem->setLine( { mapToScene(_mouseDragStart), mapToScene(_mouseDragStart) } );
+        _contrastLineItem->hide();
     }
 
     QWidget::mousePressEvent(event);

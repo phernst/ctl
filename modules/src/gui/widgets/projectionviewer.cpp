@@ -3,11 +3,6 @@
 
 #include <QKeyEvent>
 #include <QDebug>
-#ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
-#include "gui/widgets/lineseriesview.h"
-#else
-#include <QMessageBox>
-#endif
 
 namespace CTL {
 namespace gui {
@@ -30,6 +25,7 @@ ProjectionViewer::ProjectionViewer(QWidget *parent) :
     connect(ui->_W_dataView, &Chunk2DView::pixelInfoUnderCursor, this, &ProjectionViewer::updatePixelInfo);
 
     ui->_W_dataView->setLivePixelDataEnabled(true);
+    ui->_W_dataView->setContrastLinePlotLabels("Position on line", "Extinction");
 
     resize(1000, 800);
     setWindowTitle("Projection Viewer");
@@ -97,13 +93,7 @@ void ProjectionViewer::keyPressEvent(QKeyEvent* event)
 {
     if(event->key() == Qt::Key_K)
     {
-    #ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
-        LineSeriesView::plot(ui->_W_dataView->contrastLine(), "Distance on line", "Extinction");
-        event->accept();
-    #else
-        QMessageBox::information(this, "Contrast line plot", "Contrast line plot not available.\n"
-                                                             "(Requires 'gui_widgets_charts.pri' submodule.)");
-    #endif
+        ui->_W_dataView->showContrastLinePlot();
     }
     else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
     {

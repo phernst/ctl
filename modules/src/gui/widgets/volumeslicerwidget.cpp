@@ -52,6 +52,7 @@ VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
     // connections for live pixel info
     connect(ui->_w_sliceView, &Chunk2DView::pixelInfoUnderCursor, this, &VolumeSlicerWidget::updatePixelInfo);
     ui->_w_sliceView->setLivePixelDataEnabled(true);
+    ui->_w_sliceView->setContrastLinePlotLabels("Position on line", "Attenuation");
 
     connect(ui->_SB_azimuth, SIGNAL(valueChanged(double)), SLOT(planeChange()));
     connect(ui->_SB_polar, SIGNAL(valueChanged(double)), SLOT(planeChange()));
@@ -99,13 +100,7 @@ void VolumeSlicerWidget::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_K)
     {
-    #ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
-        LineSeriesView::plot(ui->_w_sliceView->contrastLine(), "Distance on line", "Attenuation");
-        event->accept();
-    #else
-        QMessageBox::information(this, "Contrast line plot", "Contrast line plot not available.\n"
-                                                             "(Requires 'gui_widgets_charts.pri' submodule.)");
-    #endif
+        ui->_w_sliceView->showContrastLinePlot();
     }
     else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
     {

@@ -1,12 +1,6 @@
 #include "volumeviewer.h"
 #include "ui_volumeviewer.h"
 
-#ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
-#include "gui/widgets/lineseriesview.h"
-#else
-#include <QMessageBox>
-#endif
-
 #include <QKeyEvent>
 
 namespace CTL {
@@ -37,6 +31,7 @@ VolumeViewer::VolumeViewer(QWidget* parent)
     // connections for subvolume selection
     connect(ui->_TW_volumeOverview, &QTableWidget::itemSelectionChanged, this, &VolumeViewer::volumeSelectionChanged);
 
+    ui->_W_dataView->setContrastLinePlotLabels("Position on line", "Attenuation");
     ui->_W_dataView->setLivePixelDataEnabled(true);
 
     resize(900, 600);
@@ -115,13 +110,7 @@ void VolumeViewer::keyPressEvent(QKeyEvent* event)
 {
     if(event->key() == Qt::Key_K)
     {
-    #ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
-        LineSeriesView::plot(ui->_W_dataView->contrastLine(), "Distance on line", "Attenuation");
-        event->accept();
-    #else
-        QMessageBox::information(this, "Contrast line plot", "Contrast line plot not available.\n"
-                                                             "(Requires 'gui_widgets_charts.pri' submodule.)");
-    #endif
+        ui->_W_dataView->showContrastLinePlot();
     }
     else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
     {

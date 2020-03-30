@@ -38,6 +38,8 @@ public:
 
     QList<QPointF> contrastLine() const;
     QImage image(const QSize& renderSize = QSize());
+    void setContrastLinePlotLabels(const QString& labelX, const QString& labelY);
+    void showContrastLinePlot();
 
 public slots:
     void autoResize();
@@ -70,6 +72,8 @@ private:
     QVector<QRgb> _colorTable;
     QPair<double, double> _window;
     double _zoom = 1.0;
+    QString _contrLineLabelX = QStringLiteral("Position on line");
+    QString _contrLineLabelY = QStringLiteral("Value");
 
     // event handling
     QPoint _mouseDragStart;
