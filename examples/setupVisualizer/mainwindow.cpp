@@ -9,7 +9,7 @@
 #include "components/flatpaneldetector.h"
 #include "components/tubulargantry.h"
 #include "components/xraylaser.h"
-#include "gui/widgets/acquisitionvisualizerwidget.h"
+#include "gui/widgets/acquisitionsetupview.h"
 #include "img/voxelvolume.h"
 #include "io/den/denfileio.h"
 #include "mat/mat.h"

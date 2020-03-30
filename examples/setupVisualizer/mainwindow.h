@@ -12,7 +12,7 @@ class AbstractDetector;
 class AbstractSource;
 class AbstractGantry;
 namespace gui {
-class AcquisitionVisualizerWidget;
+class AcquisitionSetupView;
 }
 }
 
@@ -46,7 +46,7 @@ private slots:
 private:
     Ui::MainWindow* ui;
 
-    CTL::gui::AcquisitionVisualizerWidget* _avWid;
+    CTL::gui::AcquisitionSetupView* _avWid;
 
     CTL::AbstractDetector* _flatPanel;
     CTL::AbstractDetector* _curvedDetector;

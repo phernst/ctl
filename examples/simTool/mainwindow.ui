@@ -221,7 +221,7 @@
         </layout>
        </item>
        <item row="1" column="1">
-        <widget class="CTL::gui::AcquisitionVisualizerWidget" name="_W_geometryPreview" native="true">
+        <widget class="CTL::gui::AcquisitionSetupView" name="_W_geometryPreview" native="true">
          <property name="minimumSize">
           <size>
            <width>400</width>
@@ -637,9 +637,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>CTL::gui::AcquisitionVisualizerWidget</class>
+   <class>CTL::gui::AcquisitionSetupView</class>
    <extends>QWidget</extends>
-   <header>gui/widgets/acquisitionvisualizerwidget.h</header>
+   <header>gui/widgets/acquisitionsetupview.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

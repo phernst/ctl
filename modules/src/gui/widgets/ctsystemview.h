@@ -1,9 +1,7 @@
-#ifndef CTL_SYSTEMVISUALIZERWIDGET_H
-#define CTL_SYSTEMVISUALIZERWIDGET_H
+#ifndef CTL_CTSYSTEMVIEW_H
+#define CTL_CTSYSTEMVIEW_H
 
 #include <QWidget>
-
-const float VIS_SCALE = 50.0f;
 
 // forward delcarations
 namespace CTL {
@@ -30,25 +28,23 @@ class QMaterial;
 namespace CTL {
 namespace gui {
 
-class SystemVisualizerWidget : public QWidget
+class CTSystemView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SystemVisualizerWidget(QWidget* parent = nullptr);
+    explicit CTSystemView(QWidget* parent = nullptr, float visualScale = 50.0f);
 
-signals:
+    void setCTSystem(const SimpleCTsystem& system);
+
+    static void plot(SimpleCTsystem system, float visualScale = 50.0f);
+
+    void addSystemVisualization(const SimpleCTsystem& system);
+    void addVolume(const VoxelVolume<uchar>& volume);
 
 public slots:
     void clearScene();
     void resetCamera();
     void resetView();
-
-    void visualizeSystem(const CTL::SimpleCTsystem& system);
-
-    void addSystemVisualization(const CTL::SimpleCTsystem& system);
-    void addDetectorComponent(CTL::AbstractGantry* gantry, CTL::AbstractDetector* detector);
-    void addSourceComponent(CTL::AbstractGantry* gantry, CTL::AbstractSource* source);
-    void addVolume(const CTL::VoxelVolume<uchar>& volume);
 
 protected:
     QGridLayout* _mainLayout;
@@ -60,18 +56,22 @@ protected:
                       const QVector3D& translation,
                       const QQuaternion& rotation,
                       Qt3DRender::QMaterial* material = nullptr);
+    void addDetectorComponent(AbstractGantry* gantry, AbstractDetector* detector);
+    void addSourceComponent(AbstractGantry* gantry, AbstractSource* source);
 
 private:
     Qt3DRender::QCamera* _camera;
     Qt3DExtras::QOrbitCameraController* _camController;
     Qt3DRender::QMaterial* _defaultMaterial;
 
+    float _visualScale = 50.0f;
+
     void initializeView();
-    void addAxis(Qt::Axis axis, float lineLength = 10.0f * VIS_SCALE);
+    void addAxis(Qt::Axis axis, float lineLength = 10.0f);
     void addCoordinateSystem();
 };
 
 } // namespace gui
 } // namespace CTL
 
-#endif // CTL_SYSTEMVISUALIZERWIDGET_H
+#endif // CTL_CTSYSTEMVIEW_H

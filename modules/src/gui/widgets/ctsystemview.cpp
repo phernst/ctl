@@ -1,4 +1,4 @@
-#include "systemvisualizerwidget.h"
+#include "ctsystemview.h"
 #include "components/genericdetector.h"
 #include "components/genericgantry.h"
 #include "components/genericsource.h"
@@ -22,7 +22,7 @@
 namespace CTL {
 namespace gui {
 
-SystemVisualizerWidget::SystemVisualizerWidget(QWidget* parent)
+CTSystemView::CTSystemView(QWidget* parent, float visualScale)
     : QWidget(parent)
     , _mainLayout(new QGridLayout(this))
     , _view(new Qt3DExtras::Qt3DWindow())
@@ -30,25 +30,38 @@ SystemVisualizerWidget::SystemVisualizerWidget(QWidget* parent)
     , _camera(_view->camera())
     , _camController(new Qt3DExtras::QOrbitCameraController(_rootEntity))
     , _defaultMaterial(new Qt3DExtras::QPhongMaterial(_rootEntity))
+    , _visualScale(visualScale)
 {
     initializeView();
     resetView();
     addCoordinateSystem();
+
+    resize(800, 600);
+    setWindowTitle("CT system view");
 }
 
-void SystemVisualizerWidget::visualizeSystem(const CTL::SimpleCTsystem& system)
+void CTSystemView::setCTSystem(const SimpleCTsystem& system)
 {
     clearScene();
     addSystemVisualization(system);
 }
 
-void SystemVisualizerWidget::addSystemVisualization(const CTL::SimpleCTsystem& system)
+void CTSystemView::plot(SimpleCTsystem system, float visualScale)
+{
+    auto viewer = new CTSystemView(nullptr, visualScale);
+    viewer->setAttribute(Qt::WA_DeleteOnClose);
+    viewer->setCTSystem(std::move(system));
+
+    viewer->show();
+}
+
+void CTSystemView::addSystemVisualization(const SimpleCTsystem& system)
 {
     addDetectorComponent(system.gantry(), system.detector());
     addSourceComponent(system.gantry(), system.source());
 }
 
-void SystemVisualizerWidget::initializeView()
+void CTSystemView::initializeView()
 {
     // define permanent objects
     _defaultMaterial->setObjectName("permanent");
@@ -56,7 +69,7 @@ void SystemVisualizerWidget::initializeView()
 
     // initialize camera
     _camera->lens()->setPerspectiveProjection(45.0f, 1.0, 0.1f, 10000.0f);
-    _camController->setLinearSpeed(50.0f * VIS_SCALE);
+    _camController->setLinearSpeed(50.0f * _visualScale);
     _camController->setLookSpeed(180.0f);
     _camController->setCamera(_camera);
     qDebug() << "camera set up";
@@ -68,21 +81,21 @@ void SystemVisualizerWidget::initializeView()
     qDebug() << "widget set";
 }
 
-void SystemVisualizerWidget::resetCamera()
+void CTSystemView::resetCamera()
 {
-    static const QVector3D startPos(10.0f * VIS_SCALE, -10.0f * VIS_SCALE, -40.0f * VIS_SCALE);
+    static const QVector3D startPos(10.0f * _visualScale, -10.0f * _visualScale, -40.0f * _visualScale);
     _camera->setPosition(startPos);
     _camera->setViewCenter(QVector3D(0.0f, 0.0f, 0.0f));
     _camera->setUpVector(QVector3D(0, -1, 0));
 }
 
-void SystemVisualizerWidget::resetView()
+void CTSystemView::resetView()
 {
     clearScene();
     resetCamera();
 }
 
-void SystemVisualizerWidget::clearScene()
+void CTSystemView::clearScene()
 {
     QList<QObject*> deleteList;
 
@@ -94,7 +107,7 @@ void SystemVisualizerWidget::clearScene()
         delete obj;
 }
 
-void SystemVisualizerWidget::addCoordinateSystem()
+void CTSystemView::addCoordinateSystem()
 {
     // Lines
     addAxis(Qt::XAxis);
@@ -102,10 +115,10 @@ void SystemVisualizerWidget::addCoordinateSystem()
     addAxis(Qt::ZAxis);
 }
 
-void SystemVisualizerWidget::addBoxObject(const QVector3D& dimensions,
-                                          const QVector3D& translation,
-                                          const QQuaternion& rotation,
-                                          Qt3DRender::QMaterial *material)
+void CTSystemView::addBoxObject(const QVector3D& dimensions,
+                                const QVector3D& translation,
+                                const QQuaternion& rotation,
+                                Qt3DRender::QMaterial *material)
 {
     auto boxEntity = new Qt3DCore::QEntity(_rootEntity);
     auto boxMesh = new Qt3DExtras::QCuboidMesh;
@@ -128,8 +141,7 @@ void SystemVisualizerWidget::addBoxObject(const QVector3D& dimensions,
     boxEntity->addComponent(material);
 }
 
-void SystemVisualizerWidget::addDetectorComponent(CTL::AbstractGantry* gantry,
-                                                  CTL::AbstractDetector* detector)
+void CTSystemView::addDetectorComponent(AbstractGantry* gantry, AbstractDetector* detector)
 {
     static constexpr float MOD_THICKNESS = 0.1f;
 
@@ -137,7 +149,7 @@ void SystemVisualizerWidget::addDetectorComponent(CTL::AbstractGantry* gantry,
     const auto detRot = gantry->detectorRotation();
 
     const auto modSize = detector->moduleDimensions();
-    const QVector3D moduleBoxSize(modSize.width(), modSize.height(), MOD_THICKNESS * VIS_SCALE);
+    const QVector3D moduleBoxSize(modSize.width(), modSize.height(), MOD_THICKNESS * _visualScale);
 
     for(uint mod = 0; mod < detector->nbDetectorModules(); ++mod)
     {
@@ -156,12 +168,11 @@ void SystemVisualizerWidget::addDetectorComponent(CTL::AbstractGantry* gantry,
     }
 }
 
-void SystemVisualizerWidget::addSourceComponent(CTL::AbstractGantry* gantry,
-                                                CTL::AbstractSource* )
+void CTSystemView::addSourceComponent(AbstractGantry* gantry, AbstractSource* )
 {
     static constexpr float SRC_LENGTH = 1.0f;
 
-    const QVector3D srcBoxSize(0.25f * VIS_SCALE, 0.25f * VIS_SCALE, SRC_LENGTH * VIS_SCALE);
+    const QVector3D srcBoxSize(0.25f * _visualScale, 0.25f * _visualScale, SRC_LENGTH * _visualScale);
 
     auto srcPos = gantry->sourcePosition();
     auto srcRot = gantry->sourceRotation();
@@ -175,7 +186,7 @@ void SystemVisualizerWidget::addSourceComponent(CTL::AbstractGantry* gantry,
     addBoxObject(srcBoxSize, srcPosQVector + boxExtentCompensation, srcRotQuaternion);
 }
 
-void SystemVisualizerWidget::addVolume(const CTL::VoxelVolume<uchar>& volume)
+void CTSystemView::addVolume(const VoxelVolume<uchar>& volume)
 {
     const QQuaternion identityQuaternion;
     const QVector3D voxelSize(volume.voxelSize().x, volume.voxelSize().y, volume.voxelSize().z);
@@ -201,8 +212,10 @@ void SystemVisualizerWidget::addVolume(const CTL::VoxelVolume<uchar>& volume)
                 }
 }
 
-void SystemVisualizerWidget::addAxis(Qt::Axis axis, float lineLength)
+void CTSystemView::addAxis(Qt::Axis axis, float lineLength)
 {
+    lineLength *= _visualScale;
+
     const float LINE_THICKNESS = 0.05f;
     const float RELATIVE_TEXT_SIZE = 0.666f;
 
@@ -218,16 +231,16 @@ void SystemVisualizerWidget::addAxis(Qt::Axis axis, float lineLength)
     auto coneMesh = new Qt3DExtras::QConeMesh;
     auto textMesh = new Qt3DExtras::QExtrudedTextMesh;
 
-    lineMesh->setRadius(LINE_THICKNESS * VIS_SCALE);
+    lineMesh->setRadius(LINE_THICKNESS * _visualScale);
     lineMesh->setLength(lineLength);
 
-    coneMesh->setLength(1.0f * VIS_SCALE);
-    coneMesh->setBottomRadius(2.0f * LINE_THICKNESS * VIS_SCALE);
+    coneMesh->setLength(1.0f * _visualScale);
+    coneMesh->setBottomRadius(2.0f * LINE_THICKNESS * _visualScale);
 
     auto fnt = textMesh->font();
-    fnt.setPixelSize(int(RELATIVE_TEXT_SIZE * VIS_SCALE) + 1);
+    fnt.setPixelSize(int(RELATIVE_TEXT_SIZE * _visualScale) + 1);
     textMesh->setFont(fnt);
-    textMesh->setDepth(0.1f * VIS_SCALE);
+    textMesh->setDepth(0.1f * _visualScale);
 
     // compute tranformations depending on chosen axis
     const float lineCenterOffset = lineLength / 2.0f;
