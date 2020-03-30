@@ -53,10 +53,7 @@ namespace CTL {
  * ProjectionData projections = extension->project(volume);    // (compute and) get the final (noisy) projections
  *
  * // visualization (optional, requires 'ctl_qtgui' submodule):
- *     // auto viewer = new ProjectionView();
- *     // viewer->resize(800, 600);
- *     // viewer->show();
- *     // viewer->setData(projections);
+ *     // gui::ProjectionViewer::plot(projections);
  * \endcode
  *
  * The difference between the projections with and without noise in the example above is shown here:
