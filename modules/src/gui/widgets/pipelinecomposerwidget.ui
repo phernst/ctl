@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1014</width>
-    <height>574</height>
+    <height>575</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -103,7 +103,7 @@
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="ExtensionChainWidget" name="_w_extensions" native="true">
+    <widget class="CTL::gui::ExtensionChainWidget" name="_w_extensions" native="true">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -119,7 +119,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="ExtensionConfigWidget" name="_W_propertyManager" native="true">
+       <widget class="CTL::gui::ExtensionConfigWidget" name="_W_propertyManager" native="true">
         <property name="minimumSize">
          <size>
           <width>300</width>
@@ -148,13 +148,13 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ExtensionConfigWidget</class>
+   <class>CTL::gui::ExtensionConfigWidget</class>
    <extends>QWidget</extends>
    <header>gui/widgets/pipelinecomposerwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>ExtensionChainWidget</class>
+   <class>CTL::gui::ExtensionChainWidget</class>
    <extends>QWidget</extends>
    <header>gui/widgets/extensionchainwidget.h</header>
    <container>1</container>

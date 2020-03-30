@@ -18,6 +18,9 @@ class ProjectorExtension;
 class AbstractProjector;
 }
 
+namespace CTL {
+namespace gui {
+
 class PipelineComposerWidget : public QWidget
 {
     Q_OBJECT
@@ -28,9 +31,9 @@ public:
     explicit PipelineComposerWidget(QWidget *parent = 0);
     ~PipelineComposerWidget();
 
-    std::unique_ptr<CTL::ProjectionPipeline> pipeline() const;
+    std::unique_ptr<ProjectionPipeline> pipeline() const;
 
-    static std::unique_ptr<CTL::ProjectionPipeline> fromDialog();
+    static std::unique_ptr<ProjectionPipeline> fromDialog();
 
 private slots:
     void on__LW_projectorProto_itemDoubleClicked(QListWidgetItem *item);
@@ -40,10 +43,9 @@ private:
 
     void initializeExtensionPrototypes();
     void initializeProjectorPrototypes();
-    std::unique_ptr<CTL::ProjectorExtension> createExtension(int type) const;
-    std::unique_ptr<CTL::AbstractProjector> createProjector(int type) const;
+    std::unique_ptr<ProjectorExtension> createExtension(int type) const;
+    std::unique_ptr<AbstractProjector> createProjector(int type) const;
 };
-
 
 class ExtensionConfigWidget : public QWidget
 {
@@ -68,5 +70,7 @@ private slots:
     void somethingChanged();
 };
 
+} // namespace gui
+} // namespace CTL
 
 #endif // CTL_PIPELINECOMPOSERWIDGET_H

@@ -8,8 +8,10 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class ExtensionChainWidget; }
 QT_END_NAMESPACE
 
-class ExtensionConfigWidget;
 class QListWidgetItem;
+
+namespace CTL {
+namespace gui {
 
 class ExtensionChainWidget : public QWidget
 {
@@ -64,5 +66,8 @@ private:
 
     void initExtensionList();
 };
+
+} // namespace gui
+} // namespace CTL
 
 #endif // CTL_EXTENSIONCHAINWIDGET_H

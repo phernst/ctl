@@ -6,6 +6,9 @@ static QString firstLine()
     return QStringLiteral("auto myProjector = CTL::makeProjector<CTL::OCL::RayCasterProjector>()");
 }
 
+namespace CTL {
+namespace gui {
+
 ExtensionChainWidget::ExtensionChainWidget(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::ExtensionChainWidget)
@@ -197,4 +200,5 @@ void ExtensionChainWidget::initExtensionList()
     }
 }
 
-
+} // namespace gui
+} // namespace CTL

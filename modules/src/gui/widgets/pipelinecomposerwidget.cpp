@@ -20,6 +20,9 @@
 #include <QSpinBox>
 #include <QCheckBox>
 
+namespace CTL {
+namespace gui {
+
 PipelineComposerWidget::PipelineComposerWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PipelineComposerWidget)
@@ -40,9 +43,9 @@ PipelineComposerWidget::~PipelineComposerWidget()
     delete ui;
 }
 
-std::unique_ptr<CTL::ProjectionPipeline> PipelineComposerWidget::pipeline() const
+std::unique_ptr<ProjectionPipeline> PipelineComposerWidget::pipeline() const
 {
-    std::unique_ptr<CTL::ProjectionPipeline> pipe(new CTL::ProjectionPipeline);
+    std::unique_ptr<ProjectionPipeline> pipe(new ProjectionPipeline);
 
     auto projectorItem = ui->_LW_selectedProjector->item(0);
     int projectorType = -1;
@@ -70,7 +73,7 @@ std::unique_ptr<CTL::ProjectionPipeline> PipelineComposerWidget::pipeline() cons
     return pipe;
 }
 
-std::unique_ptr<CTL::ProjectionPipeline> PipelineComposerWidget::fromDialog()
+std::unique_ptr<ProjectionPipeline> PipelineComposerWidget::fromDialog()
 {
     QDialog dialog;
     auto layout = new QVBoxLayout;
@@ -99,10 +102,10 @@ void PipelineComposerWidget::initializeExtensionPrototypes()
                                 "DetectorSaturationExtension" };
 
     QVector<CTL::ProjectorExtension*> dummyExtensions;
-    dummyExtensions.append(new CTL::ArealFocalSpotExtension);
-    dummyExtensions.append(new CTL::PoissonNoiseExtension);
-    dummyExtensions.append(new CTL::SpectralEffectsExtension);
-    dummyExtensions.append(new CTL::DetectorSaturationExtension);
+    dummyExtensions.append(new ArealFocalSpotExtension);
+    dummyExtensions.append(new PoissonNoiseExtension);
+    dummyExtensions.append(new SpectralEffectsExtension);
+    dummyExtensions.append(new DetectorSaturationExtension);
 
     for(int ext = 0; ext < extensionNames.size(); ++ext)
     {
@@ -127,8 +130,8 @@ void PipelineComposerWidget::initializeProjectorPrototypes()
 {
     QStringList projectorNames{ "RayCasterProjector" };
 
-    QVector<CTL::AbstractProjector*> dummyProjectors;
-    dummyProjectors.append(new CTL::OCL::RayCasterProjector);
+    QVector<AbstractProjector*> dummyProjectors;
+    dummyProjectors.append(new OCL::RayCasterProjector);
 
     for(int proj = 0; proj < projectorNames.size(); ++proj)
     {
@@ -149,35 +152,35 @@ void PipelineComposerWidget::initializeProjectorPrototypes()
         delete dummy;
 }
 
-std::unique_ptr<CTL::ProjectorExtension> PipelineComposerWidget::createExtension(int type) const
+std::unique_ptr<ProjectorExtension> PipelineComposerWidget::createExtension(int type) const
 {
-    std::unique_ptr<CTL::ProjectorExtension> ret;
+    std::unique_ptr<ProjectorExtension> ret;
     switch (type)
     {
     case ExtensionChainWidget::ArealFocalSpotExtension:
-        ret.reset(new CTL::ArealFocalSpotExtension);
+        ret.reset(new ArealFocalSpotExtension);
         break;
     case ExtensionChainWidget::PoissonNoiseExtension:
-        ret.reset(new CTL::PoissonNoiseExtension);
+        ret.reset(new PoissonNoiseExtension);
         break;
     case ExtensionChainWidget::SpectralEffectsExtension:
-        ret.reset(new CTL::SpectralEffectsExtension);
+        ret.reset(new SpectralEffectsExtension);
         break;
     case ExtensionChainWidget::DetectorSaturationExtension:
-        ret.reset(new CTL::DetectorSaturationExtension);
+        ret.reset(new DetectorSaturationExtension);
         break;
     }
 
     return ret;
 }
 
-std::unique_ptr<CTL::AbstractProjector> PipelineComposerWidget::createProjector(int type) const
+std::unique_ptr<AbstractProjector> PipelineComposerWidget::createProjector(int type) const
 {
-    std::unique_ptr<CTL::AbstractProjector> ret;
+    std::unique_ptr<AbstractProjector> ret;
     switch (type)
     {
     case 0:
-        ret.reset(new CTL::OCL::RayCasterProjector);
+        ret.reset(new OCL::RayCasterProjector);
         break;
     }
 
@@ -292,3 +295,6 @@ void PipelineComposerWidget::on__LW_projectorProto_itemDoubleClicked(QListWidget
     newItem->setData(Qt::UserRole, item->data(Qt::UserRole));
     ui->_W_propertyManager->updateInterface(newItem);
 }
+
+} // namespace gui
+} // namespace CTL
