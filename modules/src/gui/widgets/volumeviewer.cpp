@@ -2,7 +2,9 @@
 #include "ui_volumeviewer.h"
 
 #ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
-    #include "gui/widgets/lineseriesview.h"
+#include "gui/widgets/lineseriesview.h"
+#else
+#include <QMessageBox>
 #endif
 
 #include <QKeyEvent>
@@ -111,6 +113,9 @@ void VolumeViewer::keyPressEvent(QKeyEvent* event)
     #ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
         LineSeriesView::plot(ui->_W_dataView->contrastLine(), "Distance on line", "Attenuation");
         event->accept();
+    #else
+        QMessageBox::information(this, "Contrast line plot", "Contrast line plot not available.\n"
+                                                             "(Requires 'gui_widgets_charts.pri' submodule.)");
     #endif
     }
     else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
