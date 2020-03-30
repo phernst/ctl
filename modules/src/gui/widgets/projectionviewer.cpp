@@ -70,7 +70,9 @@ void ProjectionViewer::setData(ProjectionData projections)
 void ProjectionViewer::setModuleLayout(const ModuleLayout &layout)
 {
     _modLayout = layout;
-    showView(currentView()); // recompute data due to changed layout
+
+    if(_data.nbViews() > 0)
+        showView(currentView()); // recompute data due to changed layout (if data is available)
 }
 
 int ProjectionViewer::currentView() const
