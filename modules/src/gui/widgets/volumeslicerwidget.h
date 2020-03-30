@@ -3,9 +3,6 @@
 
 #include "img/voxelvolume.h"
 #include "processing/volumeslicer.h"
-#ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
-    #include "gui/widgets/lineseriesview.h"
-#endif
 
 #include <QWidget>
 

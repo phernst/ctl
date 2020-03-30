@@ -4,6 +4,9 @@
 #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
 #include "gui/widgets/planevisualizer.h"
 #endif
+#ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
+#include "gui/widgets/lineseriesview.h"
+#endif
 
 #include <QKeyEvent>
 #include <qmath.h>
