@@ -1,4 +1,4 @@
-#include "planevisualizer.h"
+#include "intersectionplaneview.h"
 #include "mat/mat.h"
 
 #include "gui/util/qttype_utils.h"
@@ -20,7 +20,7 @@
 namespace CTL {
 namespace gui {
 
-PlaneVisualizer::PlaneVisualizer(QWidget* parent)
+IntersectionPlaneView::IntersectionPlaneView(QWidget* parent, float visualScale)
     : QWidget(parent)
     , _mainLayout(new QGridLayout(this))
     , _view(new Qt3DExtras::Qt3DWindow())
@@ -28,13 +28,17 @@ PlaneVisualizer::PlaneVisualizer(QWidget* parent)
     , _camera(_view->camera())
     , _camController(new Qt3DExtras::QOrbitCameraController(_rootEntity))
     , _defaultMaterial(new Qt3DExtras::QPhongMaterial(_rootEntity))
+    , _visualScale(visualScale)
 {
     initializeView();
     resetView();
     addCoordinateSystem();
+
+    resize(800, 600);
+    setWindowTitle("Intersection plane view");
 }
 
-void PlaneVisualizer::setPlaneParameter(double azimuth, double polar, double distance)
+void IntersectionPlaneView::setPlaneParameter(double azimuth, double polar, double distance)
 {
     using namespace CTL;
     mat::Matrix<3, 1> planeNormal{ std::sin(polar) * std::cos(azimuth),
@@ -58,14 +62,14 @@ void PlaneVisualizer::setPlaneParameter(double azimuth, double polar, double dis
     redraw();
 }
 
-void PlaneVisualizer::setPlaneSize(const QSizeF &size)
+void IntersectionPlaneView::setPlaneSize(const QSizeF& size)
 {
     _planeSize = size;
 
     redraw();
 }
 
-void PlaneVisualizer::setVolumeDim(const CTL::VoxelVolume<float> &volume)
+void IntersectionPlaneView::setVolumeDim(const VoxelVolume<float>& volume)
 {
     _volDim = volume.dimensions();
     _volOffset = volume.offset();
@@ -74,9 +78,9 @@ void PlaneVisualizer::setVolumeDim(const CTL::VoxelVolume<float> &volume)
     redraw();
 }
 
-void PlaneVisualizer::setVolumeDim(const CTL::VoxelVolume<float>::Dimensions &dimensions,
-                                   const CTL::VoxelVolume<float>::Offset &offset,
-                                   const CTL::VoxelVolume<float>::VoxelSize &voxelSize)
+void IntersectionPlaneView::setVolumeDim(const VoxelVolume<float>::Dimensions& dimensions,
+                                         const VoxelVolume<float>::Offset& offset,
+                                         const VoxelVolume<float>::VoxelSize& voxelSize)
 {
     _volDim = dimensions;
     _volOffset = offset;
@@ -85,7 +89,22 @@ void PlaneVisualizer::setVolumeDim(const CTL::VoxelVolume<float>::Dimensions &di
     redraw();
 }
 
-void PlaneVisualizer::initializeView()
+void IntersectionPlaneView::plot(const VoxelVolume<float>& volume,
+                                 double azimuth, double polar, double distance, float visualScale)
+{
+    const auto maxDim = std::max(std::max(volume.dimensions().x, volume.dimensions().y),
+                                 volume.dimensions().z);
+
+    auto viewer = new IntersectionPlaneView(nullptr, visualScale);
+    viewer->setAttribute(Qt::WA_DeleteOnClose);
+    viewer->setVolumeDim(volume);
+    viewer->setPlaneSize( { double(maxDim) * std::sqrt(3.0), double(maxDim) * std::sqrt(3.0) } );
+    viewer->setPlaneParameter(azimuth, polar, distance);
+
+    viewer->show();
+}
+
+void IntersectionPlaneView::initializeView()
 {
     // define permanent objects
     _defaultMaterial->setObjectName("permanent");
@@ -93,7 +112,7 @@ void PlaneVisualizer::initializeView()
 
     // initialize camera
     _camera->lens()->setPerspectiveProjection(45.0f, 1.0, 0.1f, 10000.0f);
-    _camController->setLinearSpeed(50.0f * PLANEVIS_VIS_SCALE);
+    _camController->setLinearSpeed(50.0f * _visualScale);
     _camController->setLookSpeed(180.0f);
     _camController->setCamera(_camera);
     qDebug() << "camera set up";
@@ -116,23 +135,23 @@ void PlaneVisualizer::initializeView()
     qDebug() << "widget set";
 }
 
-void PlaneVisualizer::resetCamera()
+void IntersectionPlaneView::resetCamera()
 {
-    static const QVector3D startPos( 10.0f * PLANEVIS_VIS_SCALE,
-                                    -10.0f * PLANEVIS_VIS_SCALE,
-                                    -40.0f * PLANEVIS_VIS_SCALE);
+    static const QVector3D startPos( 5.0f * _visualScale,
+                                    -5.0f * _visualScale,
+                                    -20.0f * _visualScale);
     _camera->setPosition(startPos);
     _camera->setViewCenter(QVector3D(0.0f, 0.0f, 0.0f));
     _camera->setUpVector(QVector3D(0, -1, 0));
 }
 
-void PlaneVisualizer::resetView()
+void IntersectionPlaneView::resetView()
 {
     clearScene();
     resetCamera();
 }
 
-void PlaneVisualizer::clearScene()
+void IntersectionPlaneView::clearScene()
 {
     QList<QObject*> deleteList;
 
@@ -144,7 +163,7 @@ void PlaneVisualizer::clearScene()
         delete obj;
 }
 
-void PlaneVisualizer::addCoordinateSystem()
+void IntersectionPlaneView::addCoordinateSystem()
 {
     // Lines
     addAxis(Qt::XAxis);
@@ -152,7 +171,7 @@ void PlaneVisualizer::addCoordinateSystem()
     addAxis(Qt::ZAxis);
 }
 
-void PlaneVisualizer::addBoxObject(const QVector3D& dimensions,
+void IntersectionPlaneView::addBoxObject(const QVector3D& dimensions,
                                           const QVector3D& translation,
                                           const QQuaternion& rotation,
                                           Qt3DRender::QMaterial *material)
@@ -178,8 +197,10 @@ void PlaneVisualizer::addBoxObject(const QVector3D& dimensions,
     boxEntity->addComponent(material);
 }
 
-void PlaneVisualizer::addAxis(Qt::Axis axis, float lineLength)
+void IntersectionPlaneView::addAxis(Qt::Axis axis, float lineLength)
 {
+    lineLength *= _visualScale;
+
     const float LINE_THICKNESS = 0.05f;
     const float RELATIVE_TEXT_SIZE = 0.666f;
 
@@ -195,16 +216,16 @@ void PlaneVisualizer::addAxis(Qt::Axis axis, float lineLength)
     auto coneMesh = new Qt3DExtras::QConeMesh;
     auto textMesh = new Qt3DExtras::QExtrudedTextMesh;
 
-    lineMesh->setRadius(LINE_THICKNESS * PLANEVIS_VIS_SCALE);
+    lineMesh->setRadius(LINE_THICKNESS * _visualScale);
     lineMesh->setLength(lineLength);
 
-    coneMesh->setLength(1.0f * PLANEVIS_VIS_SCALE);
-    coneMesh->setBottomRadius(2.0f * LINE_THICKNESS * PLANEVIS_VIS_SCALE);
+    coneMesh->setLength(1.0f * _visualScale);
+    coneMesh->setBottomRadius(2.0f * LINE_THICKNESS * _visualScale);
 
     auto fnt = textMesh->font();
-    fnt.setPixelSize(int(RELATIVE_TEXT_SIZE * PLANEVIS_VIS_SCALE) + 1);
+    fnt.setPixelSize(int(RELATIVE_TEXT_SIZE * _visualScale) + 1);
     textMesh->setFont(fnt);
-    textMesh->setDepth(0.1f * PLANEVIS_VIS_SCALE);
+    textMesh->setDepth(0.1f * _visualScale);
 
     // compute tranformations depending on chosen axis
     const float lineCenterOffset = lineLength / 2.0f;
@@ -264,7 +285,7 @@ void PlaneVisualizer::addAxis(Qt::Axis axis, float lineLength)
     coneEntity->addComponent(axisMaterial);
 }
 
-void PlaneVisualizer::addVolume()
+void IntersectionPlaneView::addVolume()
 {
     const QQuaternion identityQuaternion;
     const uint X = _volDim.x, Y = _volDim.y, Z = _volDim.z;
@@ -282,7 +303,7 @@ void PlaneVisualizer::addVolume()
     addBoxObject(volumeSize, translation, identityQuaternion, material);
 }
 
-void PlaneVisualizer::addPlane()
+void IntersectionPlaneView::addPlane()
 {
     const float PLANE_THICKNESS_RATIO = 0.01f;
 
@@ -296,7 +317,7 @@ void PlaneVisualizer::addPlane()
     addBoxObject(planeSize, _planeTranslation, _planeRotation, material);
 }
 
-void PlaneVisualizer::redraw()
+void IntersectionPlaneView::redraw()
 {
     clearScene();
     addPlane();

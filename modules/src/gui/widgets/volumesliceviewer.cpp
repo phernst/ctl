@@ -1,8 +1,8 @@
-#include "volumeslicerwidget.h"
-#include "ui_volumeslicerwidget.h"
+#include "volumesliceviewer.h"
+#include "ui_volumesliceviewer.h"
 #include "img/compositevolume.h"
 #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
-#include "gui/widgets/planevisualizer.h"
+#include "gui/widgets/intersectionplaneview.h"
 #endif
 #ifdef GUI_WIDGETS_CHARTS_MODULE_AVAILABLE
 #include "gui/widgets/lineseriesview.h"
@@ -16,16 +16,16 @@
 namespace CTL {
 namespace gui {
 
-VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
+VolumeSliceViewer::VolumeSliceViewer(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::VolumeSlicerWidget)
+    ui(new Ui::VolumeSliceViewer)
 {
     ui->setupUi(this);
 
-    CTL::VoxelVolume<float> volume(0, 0, 0);
+    VoxelVolume<float> volume(0, 0, 0);
 
 #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
-    _3dViewer = new PlaneVisualizer;
+    _3dViewer = new IntersectionPlaneView;
     ui->_w_3dViewer->addWidget(_3dViewer);
     ui->_w_3dViewer->setCurrentWidget(_3dViewer);
     _3dViewer->setPlaneSize( { 0.0 , 0.0 } );
@@ -43,14 +43,14 @@ VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
 #endif
 
     // connections for windowing
-    connect(ui->_W_windowing, &WindowingWidget::windowingChanged, this, &VolumeSlicerWidget::windowingUpdate);
+    connect(ui->_W_windowing, &WindowingWidget::windowingChanged, this, &VolumeSliceViewer::windowingUpdate);
     connect(ui->_W_windowing, &WindowingWidget::autoWindowingRequested, ui->_w_sliceView, &Chunk2DView::setWindowingMinMax);
     connect(ui->_w_sliceView, &Chunk2DView::windowingChanged, ui->_W_windowing, &WindowingWidget::setWindowDataSilent);
     // connections for zoom
     connect(ui->_W_zoomControl, &ZoomControlWidget::zoomRequested, ui->_w_sliceView, &Chunk2DView::setZoom);
     connect(ui->_w_sliceView, &Chunk2DView::zoomChanged, ui->_W_zoomControl, &ZoomControlWidget::setZoomValueSilent);
     // connections for live pixel info
-    connect(ui->_w_sliceView, &Chunk2DView::pixelInfoUnderCursor, this, &VolumeSlicerWidget::updatePixelInfo);
+    connect(ui->_w_sliceView, &Chunk2DView::pixelInfoUnderCursor, this, &VolumeSliceViewer::updatePixelInfo);
     ui->_w_sliceView->setLivePixelDataEnabled(true);
     ui->_w_sliceView->setContrastLinePlotLabels("Position on line", "Attenuation");
 
@@ -62,19 +62,19 @@ VolumeSlicerWidget::VolumeSlicerWidget(QWidget *parent) :
     setWindowTitle("Volume Slicer");
 }
 
-VolumeSlicerWidget::~VolumeSlicerWidget()
+VolumeSliceViewer::~VolumeSliceViewer()
 {
     delete ui;
 }
 
-void VolumeSlicerWidget::setData(const CTL::VoxelVolume<float>& volume)
+void VolumeSliceViewer::setData(const VoxelVolume<float>& volume)
 {
-    _slicer.reset(new CTL::OCL::VolumeSlicer(volume));
+    _slicer.reset(new OCL::VolumeSlicer(volume));
 
     dataChange();
 }
 
-void VolumeSlicerWidget::dataChange()
+void VolumeSliceViewer::dataChange()
 {
     #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
     _3dViewer->setVolumeDim(_slicer->volDim(), _slicer->volOffset(), _slicer->volVoxSize());
@@ -85,7 +85,7 @@ void VolumeSlicerWidget::dataChange()
     recomputeSlice();
 }
 
-void VolumeSlicerWidget::planeChange()
+void VolumeSliceViewer::planeChange()
 {
     #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
     _3dViewer->setPlaneParameter(qDegreesToRadians(ui->_SB_azimuth->value()),
@@ -96,7 +96,7 @@ void VolumeSlicerWidget::planeChange()
     recomputeSlice();
 }
 
-void VolumeSlicerWidget::keyPressEvent(QKeyEvent *event)
+void VolumeSliceViewer::keyPressEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_K)
     {
@@ -111,7 +111,7 @@ void VolumeSlicerWidget::keyPressEvent(QKeyEvent *event)
     QWidget::keyPressEvent(event);
 }
 
-void VolumeSlicerWidget::recomputeSlice()
+void VolumeSliceViewer::recomputeSlice()
 {
     auto slice = _slicer->slice(qDegreesToRadians(ui->_SB_azimuth->value()),
                                 qDegreesToRadians(ui->_SB_polar->value()),
@@ -120,7 +120,7 @@ void VolumeSlicerWidget::recomputeSlice()
     ui->_w_sliceView->setData(slice);
 }
 
-void VolumeSlicerWidget::updatePixelInfo(int x, int y, float value)
+void VolumeSliceViewer::updatePixelInfo(int x, int y, float value)
 {
     QString info = QStringLiteral("(") + QString::number(x) + QStringLiteral(" , ")
                                        + QString::number(y) + QStringLiteral("): ")
@@ -128,7 +128,7 @@ void VolumeSlicerWidget::updatePixelInfo(int x, int y, float value)
     ui->_L_pixelInfo->setText(info);
 }
 
-void VolumeSlicerWidget::windowingUpdate()
+void VolumeSliceViewer::windowingUpdate()
 {
     auto newWindowing = ui->_W_windowing->windowFromTo();
     ui->_w_sliceView->setWindowing(newWindowing.first, newWindowing.second);

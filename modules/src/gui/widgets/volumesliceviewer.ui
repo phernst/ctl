@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>VolumeSlicerWidget</class>
- <widget class="QWidget" name="VolumeSlicerWidget">
+ <class>VolumeSliceViewer</class>
+ <widget class="QWidget" name="VolumeSliceViewer">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -22,7 +22,7 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <widget class="QWidget" name="_w_3dViewerPage1" native="true"/>
+     <widget class="QWidget" name="_w_3dViewerPage1"/>
     </widget>
    </item>
    <item row="0" column="2" rowspan="2">

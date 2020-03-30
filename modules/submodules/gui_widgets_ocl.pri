@@ -8,13 +8,13 @@
 CONFIG += GUI_WIDGETS_OCL
 
 HEADERS += \
-    $$PWD/../src/gui/widgets/pipelinecomposerwidget.h \
-    $$PWD/../src/gui/widgets/volumeslicerwidget.h
+    $$PWD/../src/gui/widgets/pipelinecomposer.h \
+    $$PWD/../src/gui/widgets/volumesliceviewer.h
 
 SOURCES += \
-    $$PWD/../src/gui/widgets/pipelinecomposerwidget.cpp \
-    $$PWD/../src/gui/widgets/volumeslicerwidget.cpp
+    $$PWD/../src/gui/widgets/pipelinecomposer.cpp \
+    $$PWD/../src/gui/widgets/volumesliceviewer.cpp
 
 FORMS += \
-    $$PWD/../src/gui/widgets/pipelinecomposerwidget.ui \
-    $$PWD/../src/gui/widgets/volumeslicerwidget.ui
+    $$PWD/../src/gui/widgets/pipelinecomposer.ui \
+    $$PWD/../src/gui/widgets/volumesliceviewer.ui

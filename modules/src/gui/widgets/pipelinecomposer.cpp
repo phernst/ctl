@@ -1,5 +1,5 @@
-#include "pipelinecomposerwidget.h"
-#include "ui_pipelinecomposerwidget.h"
+#include "pipelinecomposer.h"
+#include "ui_pipelinecomposer.h"
 
 #include "projectors/projectionpipeline.h"
 // projectors
@@ -23,9 +23,9 @@
 namespace CTL {
 namespace gui {
 
-PipelineComposerWidget::PipelineComposerWidget(QWidget *parent) :
+PipelineComposer::PipelineComposer(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PipelineComposerWidget)
+    ui(new Ui::PipelineComposer)
 {
     ui->setupUi(this);
 
@@ -36,14 +36,16 @@ PipelineComposerWidget::PipelineComposerWidget(QWidget *parent) :
 
     initializeExtensionPrototypes();
     initializeProjectorPrototypes();
+
+    setWindowTitle("Pipeline composer");
 }
 
-PipelineComposerWidget::~PipelineComposerWidget()
+PipelineComposer::~PipelineComposer()
 {
     delete ui;
 }
 
-std::unique_ptr<ProjectionPipeline> PipelineComposerWidget::pipeline() const
+std::unique_ptr<ProjectionPipeline> PipelineComposer::pipeline() const
 {
     std::unique_ptr<ProjectionPipeline> pipe(new ProjectionPipeline);
 
@@ -73,17 +75,18 @@ std::unique_ptr<ProjectionPipeline> PipelineComposerWidget::pipeline() const
     return pipe;
 }
 
-std::unique_ptr<ProjectionPipeline> PipelineComposerWidget::fromDialog()
+std::unique_ptr<ProjectionPipeline> PipelineComposer::fromDialog()
 {
     QDialog dialog;
     auto layout = new QVBoxLayout;
-    auto composer = new PipelineComposerWidget(&dialog);
+    auto composer = new PipelineComposer(&dialog);
     auto buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, &dialog);
     connect(buttonBox->button(QDialogButtonBox::Ok), SIGNAL(clicked()), &dialog, SLOT(accept()));
     connect(buttonBox->button(QDialogButtonBox::Cancel), SIGNAL(clicked()), &dialog, SLOT(reject()));
     layout->addWidget(composer);
     layout->addWidget(buttonBox);
     dialog.setLayout(layout);
+    dialog.setWindowTitle("Pipeline composer");
     dialog.resize(1000,600);
 
     if(dialog.exec())
@@ -92,7 +95,7 @@ std::unique_ptr<ProjectionPipeline> PipelineComposerWidget::fromDialog()
         return nullptr;
 }
 
-void PipelineComposerWidget::initializeExtensionPrototypes()
+void PipelineComposer::initializeExtensionPrototypes()
 {
     QVector<QListWidgetItem*> prototypes;
 
@@ -126,7 +129,7 @@ void PipelineComposerWidget::initializeExtensionPrototypes()
     ui->_w_extensions->setExtensionPrototypes(prototypes);
 }
 
-void PipelineComposerWidget::initializeProjectorPrototypes()
+void PipelineComposer::initializeProjectorPrototypes()
 {
     QStringList projectorNames{ "RayCasterProjector" };
 
@@ -152,7 +155,7 @@ void PipelineComposerWidget::initializeProjectorPrototypes()
         delete dummy;
 }
 
-std::unique_ptr<ProjectorExtension> PipelineComposerWidget::createExtension(int type) const
+std::unique_ptr<ProjectorExtension> PipelineComposer::createExtension(int type) const
 {
     std::unique_ptr<ProjectorExtension> ret;
     switch (type)
@@ -174,7 +177,7 @@ std::unique_ptr<ProjectorExtension> PipelineComposerWidget::createExtension(int 
     return ret;
 }
 
-std::unique_ptr<AbstractProjector> PipelineComposerWidget::createProjector(int type) const
+std::unique_ptr<AbstractProjector> PipelineComposer::createProjector(int type) const
 {
     std::unique_ptr<AbstractProjector> ret;
     switch (type)
@@ -288,7 +291,7 @@ QVariant ExtensionConfigWidget::parsedInputWidget(QWidget *widget)
     return ret;
 }
 
-void PipelineComposerWidget::on__LW_projectorProto_itemDoubleClicked(QListWidgetItem *item)
+void PipelineComposer::on__LW_projectorProto_itemDoubleClicked(QListWidgetItem *item)
 {
     ui->_LW_selectedProjector->clear();
     auto newItem = new QListWidgetItem(item->text(), ui->_LW_selectedProjector, item->type());

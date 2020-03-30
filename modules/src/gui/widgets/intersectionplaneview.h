@@ -5,8 +5,6 @@
 #include <QWidget>
 #include <QQuaternion>
 
-constexpr float PLANEVIS_VIS_SCALE = 50.0f;
-
 // forward delcarations
 namespace CTL {
 class AbstractDetector;
@@ -30,24 +28,27 @@ class QMaterial;
 namespace CTL {
 namespace gui {
 
-class PlaneVisualizer : public QWidget
+class IntersectionPlaneView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit PlaneVisualizer(QWidget* parent = nullptr);
+    explicit IntersectionPlaneView(QWidget* parent = nullptr,
+                                   float visualScale = 50.0f);
 
-    void setPlaneParameter(double azimuth, double polar, double distance);
     void setPlaneSize(const QSizeF& size);
+    void setVolumeDim(const VoxelVolume<float>& volume);
+    void setVolumeDim(const VoxelVolume<float>::Dimensions& dimensions,
+                      const VoxelVolume<float>::Offset& offset,
+                      const VoxelVolume<float>::VoxelSize& voxelSize);
 
-    void setVolumeDim(const CTL::VoxelVolume<float>& volume);
-    void setVolumeDim(const CTL::VoxelVolume<float>::Dimensions& dimensions,
-                      const CTL::VoxelVolume<float>::Offset& offset,
-                      const CTL::VoxelVolume<float>::VoxelSize& voxelSize);
+    static void plot(const VoxelVolume<float>& volume,
+                     double azimuth, double polar, double distance, float visualScale = 50.0f);
 
 public slots:
     void clearScene();
     void resetCamera();
     void resetView();
+    void setPlaneParameter(double azimuth, double polar, double distance);
 
 private:
     QGridLayout* _mainLayout;
@@ -58,15 +59,17 @@ private:
     Qt3DExtras::QOrbitCameraController* _camController;
     Qt3DRender::QMaterial* _defaultMaterial;
 
-    CTL::VoxelVolume<float>::Dimensions _volDim;
-    CTL::VoxelVolume<float>::Offset _volOffset;
-    CTL::VoxelVolume<float>::VoxelSize _volVoxSize;
+    VoxelVolume<float>::Dimensions _volDim;
+    VoxelVolume<float>::Offset _volOffset;
+    VoxelVolume<float>::VoxelSize _volVoxSize;
 
     QSizeF _planeSize;
     QVector3D _planeTranslation;
     QQuaternion _planeRotation;
 
-    void addAxis(Qt::Axis axis, float lineLength = 10.0f * PLANEVIS_VIS_SCALE);
+    float _visualScale = 50.0f;
+
+    void addAxis(Qt::Axis axis, float lineLength = 10.0f);
     void addBoxObject(const QVector3D& dimensions,
                       const QVector3D& translation,
                       const QQuaternion& rotation,
@@ -74,9 +77,7 @@ private:
     void addCoordinateSystem();
     void addPlane();
     void addVolume();
-
     void initializeView();
-
     void redraw();
 };
 

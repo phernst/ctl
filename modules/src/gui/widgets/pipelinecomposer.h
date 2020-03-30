@@ -1,5 +1,5 @@
-#ifndef CTL_PIPELINECOMPOSERWIDGET_H
-#define CTL_PIPELINECOMPOSERWIDGET_H
+#ifndef CTL_PIPELINECOMPOSER_H
+#define CTL_PIPELINECOMPOSER_H
 
 #include <memory>
 
@@ -8,7 +8,7 @@
 #include <QGridLayout>
 
 namespace Ui {
-class PipelineComposerWidget;
+class PipelineComposer;
 }
 
 namespace CTL
@@ -21,15 +21,15 @@ class AbstractProjector;
 namespace CTL {
 namespace gui {
 
-class PipelineComposerWidget : public QWidget
+class PipelineComposer : public QWidget
 {
     Q_OBJECT
 
 public:
     static constexpr int ProjectorTypeOffset = 1000;
 
-    explicit PipelineComposerWidget(QWidget *parent = 0);
-    ~PipelineComposerWidget();
+    explicit PipelineComposer(QWidget *parent = 0);
+    ~PipelineComposer();
 
     std::unique_ptr<ProjectionPipeline> pipeline() const;
 
@@ -39,7 +39,7 @@ private slots:
     void on__LW_projectorProto_itemDoubleClicked(QListWidgetItem *item);
 
 private:
-    Ui::PipelineComposerWidget *ui;
+    Ui::PipelineComposer *ui;
 
     void initializeExtensionPrototypes();
     void initializeProjectorPrototypes();

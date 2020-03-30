@@ -11,9 +11,9 @@ QT += 3dcore 3drender 3dextras
 HEADERS += \
     $$PWD/../src/gui/widgets/acquisitionsetupview.h \
     $$PWD/../src/gui/widgets/ctsystemview.h \
-    $$PWD/../src/gui/widgets/planevisualizer.h
+    $$PWD/../src/gui/widgets/intersectionplaneview.h
 
 SOURCES += \
     $$PWD/../src/gui/widgets/acquisitionsetupview.cpp \
     $$PWD/../src/gui/widgets/ctsystemview.cpp \
-    $$PWD/../src/gui/widgets/planevisualizer.cpp
+    $$PWD/../src/gui/widgets/intersectionplaneview.cpp

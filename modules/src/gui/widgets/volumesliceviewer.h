@@ -1,5 +1,5 @@
-#ifndef CTL_VOLUMESLICERWIDGET_H
-#define CTL_VOLUMESLICERWIDGET_H
+#ifndef CTL_VOLUMESLICEVIEWER_H
+#define CTL_VOLUMESLICEVIEWER_H
 
 #include "img/voxelvolume.h"
 #include "processing/volumeslicer.h"
@@ -7,23 +7,23 @@
 #include <QWidget>
 
 namespace Ui {
-class VolumeSlicerWidget;
+class VolumeSliceViewer;
 }
 
 namespace CTL {
 namespace gui {
 
-class PlaneVisualizer;
+class IntersectionPlaneView;
 
-class VolumeSlicerWidget : public QWidget
+class VolumeSliceViewer : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit VolumeSlicerWidget(QWidget *parent = nullptr);
-    ~VolumeSlicerWidget();
+    explicit VolumeSliceViewer(QWidget *parent = nullptr);
+    ~VolumeSliceViewer();
 
-    void setData(const CTL::VoxelVolume<float>& volume);
+    void setData(const VoxelVolume<float>& volume);
 
 public slots:
     void dataChange();
@@ -33,11 +33,11 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private:
-    Ui::VolumeSlicerWidget *ui;
+    Ui::VolumeSliceViewer *ui;
 
     void recomputeSlice();
-    std::unique_ptr<CTL::OCL::VolumeSlicer> _slicer;
-    PlaneVisualizer* _3dViewer = nullptr;
+    std::unique_ptr<OCL::VolumeSlicer> _slicer;
+    IntersectionPlaneView* _3dViewer = nullptr;
 
 private slots:
     void updatePixelInfo(int x, int y, float value);
@@ -47,4 +47,4 @@ private slots:
 } // namespace gui
 } // namespace CTL
 
-#endif // CTL_VOLUMESLICERWIDGET_H
+#endif // CTL_VOLUMESLICEVIEWER_H
