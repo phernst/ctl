@@ -19,6 +19,9 @@
 #include <Qt3DRender/QCamera>
 #include <Qt3DRender/QFrameGraphNode>
 
+namespace CTL {
+namespace gui {
+
 SystemVisualizerWidget::SystemVisualizerWidget(QWidget* parent)
     : QWidget(parent)
     , _mainLayout(new QGridLayout(this))
@@ -283,3 +286,6 @@ void SystemVisualizerWidget::addAxis(Qt::Axis axis, float lineLength)
     coneEntity->addComponent(transformCone);
     coneEntity->addComponent(axisMaterial);
 }
+
+} // namespace gui
+} // namespace CTL

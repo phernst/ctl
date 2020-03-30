@@ -1,13 +1,19 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "components/allgenerictypes.h"
-#include "gui/widgets/acquisitionvisualizerwidget.h"
-
 #include <QMainWindow>
 
 namespace Ui {
 class MainWindow;
+}
+
+namespace CTL {
+class AbstractDetector;
+class AbstractSource;
+class AbstractGantry;
+namespace gui {
+class AcquisitionVisualizerWidget;
+}
 }
 
 class MainWindow : public QMainWindow
@@ -40,7 +46,7 @@ private slots:
 private:
     Ui::MainWindow* ui;
 
-    AcquisitionVisualizerWidget* _avWid;
+    CTL::gui::AcquisitionVisualizerWidget* _avWid;
 
     CTL::AbstractDetector* _flatPanel;
     CTL::AbstractDetector* _curvedDetector;

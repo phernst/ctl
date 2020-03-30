@@ -2,6 +2,9 @@
 #include "acquisition/acquisitionsetup.h"
 #include <QTimer>
 
+namespace CTL {
+namespace gui {
+
 AcquisitionVisualizerWidget::AcquisitionVisualizerWidget(QWidget* parent)
     : SystemVisualizerWidget(parent)
     , _animationTimer(new QTimer(this))
@@ -103,4 +106,5 @@ void AcquisitionVisualizerWidget::updateAnimation()
     ++_currentView;
 }
 
-
+} // namespace gui
+} // namespace CTL

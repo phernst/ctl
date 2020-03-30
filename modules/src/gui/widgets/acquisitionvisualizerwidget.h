@@ -7,6 +7,9 @@
 // forward declarations
 class QTimer;
 
+namespace CTL {
+namespace gui {
+
 class AcquisitionVisualizerWidget : public SystemVisualizerWidget
 {
     Q_OBJECT
@@ -36,5 +39,8 @@ private:
 private slots:
     void updateAnimation();
 };
+
+} // namespace gui
+} // namespace CTL
 
 #endif // CTL_ACQUISITIONVISUALIZERWIDGET_H

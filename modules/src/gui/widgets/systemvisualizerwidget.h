@@ -27,6 +27,9 @@ class QCamera;
 class QMaterial;
 } // namespace Qt3DRender
 
+namespace CTL {
+namespace gui {
+
 class SystemVisualizerWidget : public QWidget
 {
     Q_OBJECT
@@ -67,5 +70,8 @@ private:
     void addAxis(Qt::Axis axis, float lineLength = 10.0f * VIS_SCALE);
     void addCoordinateSystem();
 };
+
+} // namespace gui
+} // namespace CTL
 
 #endif // CTL_SYSTEMVISUALIZERWIDGET_H

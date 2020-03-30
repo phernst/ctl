@@ -1,14 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "acquisition/acquisitionsetup.h"
+#include "acquisition/geometrydecoder.h"
+#include "acquisition/trajectories.h"
 #include "components/carmgantry.h"
 #include "components/cylindricaldetector.h"
 #include "components/flatpaneldetector.h"
 #include "components/tubulargantry.h"
 #include "components/xraylaser.h"
-#include "acquisition/acquisitionsetup.h"
-#include "acquisition/geometrydecoder.h"
-#include "acquisition/trajectories.h"
+#include "gui/widgets/acquisitionvisualizerwidget.h"
 #include "img/voxelvolume.h"
 #include "io/den/denfileio.h"
 #include "mat/mat.h"
@@ -26,11 +27,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 
     setWindowTitle("Visualizer");
-    _avWid = new AcquisitionVisualizerWidget();
+    _avWid = ui->widget;
 
     constructDefaultComponents();
 
-    ui->gridLayout_2->addWidget(_avWid, 0, 1, -1, -1);
     _avWid->setFocus();
 }
 

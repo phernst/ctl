@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     updateGeometryPreview();
 
+    ui->_W_volumeView->hideCompositeOverview();
+
     // linear arrangement of detector modules
     ui->_W_projectionViewer->setModuleLayout(
                 ModuleLayout::canonicLayout(1, _CTSystem.detector()->nbDetectorModules()));
@@ -110,7 +112,7 @@ void MainWindow::loadDenFile(const QString &fileName)
      }
     }
 
-    ui->_W_volumeView->setVolumeData(_volumeData);
+    ui->_W_volumeView->setData(_volumeData);
     setDimensionLabelText(_volumeData.nbVoxels().x,
                           _volumeData.nbVoxels().y,
                           _volumeData.nbVoxels().z);
