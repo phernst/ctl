@@ -33,6 +33,7 @@ Chunk2DView::Chunk2DView(QWidget* parent)
     setBackgroundBrush(QBrush(checkerboard()));
 
     setMinimumSize({10, 10});
+    setWindowTitle("Chunk2D view");
 }
 
 Chunk2DView::Chunk2DView(Chunk2D<float> data, QWidget* parent)
