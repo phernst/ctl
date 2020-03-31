@@ -29,7 +29,7 @@ public:
     void setData(std::shared_ptr<AbstractDataModel> model);
 
     static void plot(std::shared_ptr<AbstractDataModel> model,
-                     const QString& labelX, const QString& labelY);
+                     const QString& labelX = "x", const QString& labelY = "y");
 
 public slots:
     void updatePlot();
