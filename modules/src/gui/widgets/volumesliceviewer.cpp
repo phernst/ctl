@@ -59,7 +59,7 @@ VolumeSliceViewer::VolumeSliceViewer(QWidget *parent) :
     connect(ui->_SB_distance, SIGNAL(valueChanged(double)), SLOT(planeChange()));
 
     resize(1400, 800);
-    setWindowTitle("Volume Slicer");
+    setWindowTitle("Volume slice viewer");
 }
 
 VolumeSliceViewer::~VolumeSliceViewer()
@@ -72,6 +72,15 @@ void VolumeSliceViewer::setData(const VoxelVolume<float>& volume)
     _slicer.reset(new OCL::VolumeSlicer(volume));
 
     dataChange();
+}
+
+void VolumeSliceViewer::plot(const VoxelVolume<float>& volume)
+{
+    auto viewer = new VolumeSliceViewer;
+    viewer->setAttribute(Qt::WA_DeleteOnClose);
+    viewer->setData(volume);
+
+    viewer->show();
 }
 
 void VolumeSliceViewer::dataChange()

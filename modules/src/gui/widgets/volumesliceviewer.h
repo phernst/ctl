@@ -25,6 +25,8 @@ public:
 
     void setData(const VoxelVolume<float>& volume);
 
+    static void plot(const VoxelVolume<float>& volume);
+
 public slots:
     void dataChange();
     void planeChange();
