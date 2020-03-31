@@ -90,6 +90,7 @@ class TASMIPSpectrumModel : public FixedXraySpectrumModel
 
 public:
     TASMIPSpectrumModel();
+    TASMIPSpectrumModel(float tubeVoltage);
 
     void setParameter(const QVariant& parameter) override;
 

@@ -319,6 +319,13 @@ TASMIPSpectrumModel::TASMIPSpectrumModel()
     setLookupTable(TASMIPtable(_energy));
 }
 
+TASMIPSpectrumModel::TASMIPSpectrumModel(float tubeVoltage)
+{
+    setName("TASMIP model");
+    setParameter(tubeVoltage);
+    setLookupTable(TASMIPtable(_energy));
+}
+
 void TASMIPSpectrumModel::setParameter(const QVariant& parameter)
 {
     if(parameter.toFloat() > 140.0f)
