@@ -44,11 +44,6 @@ LinearDynamicVolume::LinearDynamicVolume(VoxelVolume<float> slope, VoxelVolume<f
         throw std::domain_error("LinearDynamicVolume: Passed offset and slope volumes have different sizes!");
 }
 
-SpectralVolumeData* LinearDynamicVolume::clone() const
-{
-    return new LinearDynamicVolume(*this);
-}
-
 /*!
  * Constructs a LinearDynamicVolume with \a \nbVoxel voxels in each dimension (size: \a voxelSize)
  * and assigns an identical linear relation for the attenuation coefficients of all voxels
@@ -67,6 +62,110 @@ LinearDynamicVolume::LinearDynamicVolume(float slope, float offset,
     _slope.fill(slope);
 
     setTime(0.0); // initial time point 0ms
+}
+
+/*!
+ * Constructs a LinearDynamicVolume volume with voxels of isotropic dimensions \a voxelSize (in mm)
+ * All voxels inside a ball of radius \a radius (in mm) around the center of the volume will follow
+ * a linear relation for their attenuation values of:
+ *
+ * \f$ \mu(x,y,z) = t \cdot slope + offset \f$, where \f$t\f$ denotes the time point
+ * set via setTime() in milliseconds.
+ *
+ * The voxels surrounding the ball are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * each dimension.
+ */
+LinearDynamicVolume LinearDynamicVolume::ball(float radius, float voxelSize,
+                                              float slope, float offset)
+{
+
+    return LinearDynamicVolume(VoxelVolume<float>::ball(radius, voxelSize, slope),
+                               VoxelVolume<float>::ball(radius, voxelSize, offset));
+}
+
+/*!
+ * Constructs a cubic LinearDynamicVolume volume with \a nbVoxel x \a nbVoxel x \a nbVoxel voxels
+ * (voxel dimension: \a voxelSize x \a voxelSize x \a voxelSize). All voxels will follow a linear
+ * relation for their attenuation values of:
+ *
+ * \f$ \mu(x,y,z) = t \cdot slope + offset \f$, where \f$t\f$ denotes the time point
+ * set via setTime() in milliseconds.
+ */
+LinearDynamicVolume LinearDynamicVolume::cube(uint nbVoxel, float voxelSize,
+                                              float slope, float offset)
+{
+    return LinearDynamicVolume(VoxelVolume<float>::cube(nbVoxel, voxelSize, slope),
+                               VoxelVolume<float>::cube(nbVoxel, voxelSize, offset));
+}
+
+/*!
+ * Constructs a LinearDynamicVolume volume with voxels of isotropic dimensions \a voxelSize (in mm)
+ * All voxels inside a cylinder of radius \a radius (in mm) and height \a height (in mm) aligned
+ * with the *x*-axis  will follow
+ * a linear relation for their attenuation values of:
+ *
+ * \f$ \mu(x,y,z) = t \cdot slope + offset \f$, where \f$t\f$ denotes the time point
+ * set via setTime() in milliseconds.
+ *
+ * The voxels surrounding the ball are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *y*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *x*-direction.
+ */
+LinearDynamicVolume LinearDynamicVolume::cylinderX(float radius, float height, float voxelSize,
+                                                   float slope, float offset)
+{
+    return LinearDynamicVolume(VoxelVolume<float>::cylinderX(radius, height, voxelSize, slope),
+                               VoxelVolume<float>::cylinderX(radius, height, voxelSize, offset));
+}
+
+/*!
+ * Constructs a LinearDynamicVolume volume with voxels of isotropic dimensions \a voxelSize (in mm)
+ * All voxels inside a cylinder of radius \a radius (in mm) and height \a height (in mm) aligned
+ * with the *y*-axis  will follow
+ * a linear relation for their attenuation values of:
+ *
+ * \f$ \mu(x,y,z) = t \cdot slope + offset \f$, where \f$t\f$ denotes the time point
+ * set via setTime() in milliseconds.
+ *
+ * The voxels surrounding the ball are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *x*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *y*-direction.
+ */
+LinearDynamicVolume LinearDynamicVolume::cylinderY(float radius, float height, float voxelSize,
+                                                   float slope, float offset)
+{
+    return LinearDynamicVolume(VoxelVolume<float>::cylinderY(radius, height, voxelSize, slope),
+                               VoxelVolume<float>::cylinderY(radius, height, voxelSize, offset));
+}
+
+/*!
+ * Constructs a LinearDynamicVolume volume with voxels of isotropic dimensions \a voxelSize (in mm)
+ * All voxels inside a cylinder of radius \a radius (in mm) and height \a height (in mm) aligned
+ * with the *z*-axis  will follow
+ * a linear relation for their attenuation values of:
+ *
+ * \f$ \mu(x,y,z) = t \cdot slope + offset \f$, where \f$t\f$ denotes the time point
+ * set via setTime() in milliseconds.
+ *
+ * The voxels surrounding the ball are filled with zeros.
+ *
+ * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
+ * *x*- and *y*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *z*-direction.
+ */
+LinearDynamicVolume LinearDynamicVolume::cylinderZ(float radius, float height, float voxelSize,
+                                                   float slope, float offset)
+{
+    return LinearDynamicVolume(VoxelVolume<float>::cylinderZ(radius, height, voxelSize, slope),
+                               VoxelVolume<float>::cylinderZ(radius, height, voxelSize, offset));
+}
+
+SpectralVolumeData* LinearDynamicVolume::clone() const
+{
+    return new LinearDynamicVolume(*this);
 }
 
 /*!
