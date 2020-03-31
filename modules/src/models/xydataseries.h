@@ -25,7 +25,7 @@ public:
                                          float from,
                                          float to,
                                          uint nbSamples,
-                                         Sampling samplingPattern);
+                                         Sampling samplingPattern = Linear);
 
     // setter methods
     void append(const QPointF& sample);
