@@ -16,10 +16,10 @@ LineSeriesView::LineSeriesView(QWidget* parent)
     setChart(_chart);
     _chart->addSeries(_dataSeries);
     _chart->addSeries(_dataSeriesLog);
-    _chart->setAxisX(new QValueAxis, _dataSeries);
-    _chart->setAxisY(new QValueAxis, _dataSeries);
-    _chart->setAxisX(new QValueAxis, _dataSeriesLog);
-    _chart->setAxisY(new QLogValueAxis, _dataSeriesLog);
+    mySetAxisX(new QValueAxis, _dataSeries);
+    mySetAxisY(new QValueAxis, _dataSeries);
+    mySetAxisX(new QValueAxis, _dataSeriesLog);
+    mySetAxisY(new QLogValueAxis, _dataSeriesLog);
 
     setSeriesShow(_dataSeriesLog, false);
 
@@ -96,17 +96,17 @@ void LineSeriesView::autoRange()
 
     if(yAxisIsLinear())
     {
-        _chart->axisX(_dataSeries)->setRange(xRange.first, xRange.second);
-        _chart->axisY(_dataSeries)->setRange(yRange.first, 1.05 * yRange.second);
+        myAxisX(_dataSeries)->setRange(xRange.first, xRange.second);
+        myAxisY(_dataSeries)->setRange(yRange.first, 1.05 * yRange.second);
         if(_useNiceX)
-            qobject_cast<QValueAxis*>(_chart->axisX(_dataSeries))->applyNiceNumbers();
+            qobject_cast<QValueAxis*>(myAxisX(_dataSeries))->applyNiceNumbers();
     }
     else
     {
-        _chart->axisX(_dataSeriesLog)->setRange(xRange.first, xRange.second);
-        _chart->axisY(_dataSeriesLog)->setRange(yRange.first, 1.05 * yRange.second);
+        myAxisX(_dataSeriesLog)->setRange(xRange.first, xRange.second);
+        myAxisY(_dataSeriesLog)->setRange(yRange.first, 1.05 * yRange.second);
         if(_useNiceX)
-            qobject_cast<QValueAxis*>(_chart->axisX(_dataSeriesLog))->applyNiceNumbers();
+            qobject_cast<QValueAxis*>(myAxisX(_dataSeriesLog))->applyNiceNumbers();
     }
 }
 
@@ -126,24 +126,24 @@ void LineSeriesView::setRangeX(double from, double to)
 {
     if(yAxisIsLinear())
     {
-        _chart->axisX(_dataSeries)->setRange(from, to);
+        myAxisX(_dataSeries)->setRange(from, to);
         if(_useNiceX)
-            qobject_cast<QValueAxis*>(_chart->axisX(_dataSeries))->applyNiceNumbers();
+            qobject_cast<QValueAxis*>(myAxisX(_dataSeries))->applyNiceNumbers();
     }
     else
     {
-        _chart->axisX(_dataSeriesLog)->setRange(from, to);
+        myAxisX(_dataSeriesLog)->setRange(from, to);
         if(_useNiceX)
-            qobject_cast<QValueAxis*>(_chart->axisX(_dataSeriesLog))->applyNiceNumbers();
+            qobject_cast<QValueAxis*>(myAxisX(_dataSeriesLog))->applyNiceNumbers();
     }
 }
 
 void LineSeriesView::setRangeY(double from, double to)
 {
     if(yAxisIsLinear())
-        _chart->axisY(_dataSeries)->setRange(from, to);
+        myAxisY(_dataSeries)->setRange(from, to);
     else
-        _chart->axisY(_dataSeriesLog)->setRange(from, to);
+        myAxisY(_dataSeriesLog)->setRange(from, to);
 }
 
 void LineSeriesView::setShowPoints(bool enabled)
@@ -203,10 +203,32 @@ void LineSeriesView::saveDialog()
 
 bool LineSeriesView::yAxisIsLinear() const { return _dataSeries->isVisible(); }
 
+void LineSeriesView::mySetAxisX(QAbstractAxis* axisX, QAbstractSeries* series)
+{
+    _chart->addAxis(axisX, Qt::AlignBottom);
+    series->attachAxis(axisX);
+}
+
+void LineSeriesView::mySetAxisY(QAbstractAxis* axisY, QAbstractSeries* series)
+{
+    _chart->addAxis(axisY, Qt::AlignLeft);
+    series->attachAxis(axisY);
+}
+
+QAbstractAxis* LineSeriesView::myAxisX(QAbstractSeries* series)
+{
+    return _chart->axes(Qt::Horizontal, series).first();
+}
+
+QAbstractAxis* LineSeriesView::myAxisY(QAbstractSeries* series)
+{
+    return _chart->axes(Qt::Vertical, series).first();
+}
+
 void LineSeriesView::switchToLinAxisY()
 {
-    const auto logAxisX = qobject_cast<QValueAxis*>(_chart->axisX(_dataSeriesLog));
-    const auto logAxisY = qobject_cast<QLogValueAxis*>(_chart->axisY(_dataSeriesLog));
+    const auto logAxisX = qobject_cast<QValueAxis*>(myAxisX(_dataSeriesLog));
+    const auto logAxisY = qobject_cast<QLogValueAxis*>(myAxisY(_dataSeriesLog));
 
     const auto rangeX = qMakePair(logAxisX->min(), logAxisX->max());
     const auto rangeY = qMakePair(logAxisY->min(), logAxisY->max());
@@ -214,14 +236,14 @@ void LineSeriesView::switchToLinAxisY()
     setSeriesShow(_dataSeriesLog, false);
     setSeriesShow(_dataSeries, true);
 
-    _chart->axisX(_dataSeries)->setRange(rangeX.first, rangeX.second);
-    _chart->axisY(_dataSeries)->setRange(rangeY.first, rangeY.second);
+    myAxisX(_dataSeries)->setRange(rangeX.first, rangeX.second);
+    myAxisY(_dataSeries)->setRange(rangeY.first, rangeY.second);
 }
 
 void LineSeriesView::switchToLogAxisY()
 {
-    const auto linAxisX = qobject_cast<QValueAxis*>(_chart->axisX(_dataSeries));
-    const auto linAxisY = qobject_cast<QValueAxis*>(_chart->axisY(_dataSeries));
+    const auto linAxisX = qobject_cast<QValueAxis*>(myAxisX(_dataSeries));
+    const auto linAxisY = qobject_cast<QValueAxis*>(myAxisY(_dataSeries));
 
     const auto rangeX = qMakePair(linAxisX->min(), linAxisX->max());
     const auto rangeY = qMakePair(linAxisY->min(), linAxisY->max());
@@ -231,9 +253,9 @@ void LineSeriesView::switchToLogAxisY()
     setSeriesShow(_dataSeries, false);
     setSeriesShow(_dataSeriesLog, true);
 
-    _chart->axisX(_dataSeriesLog)->setRange(rangeX.first, rangeX.second);
-    _chart->axisY(_dataSeriesLog)->setRange(std::max( { rangeY.first,  0.01 } ),
-                                         std::max( { rangeY.second, 0.01 } ));
+    myAxisX(_dataSeriesLog)->setRange(rangeX.first, rangeX.second);
+    myAxisY(_dataSeriesLog)->setRange(std::max( { rangeY.first,  0.01 } ),
+                                      std::max( { rangeY.second, 0.01 } ));
 }
 
 void LineSeriesView::updateLogData()
@@ -249,14 +271,14 @@ void LineSeriesView::setSeriesShow(QAbstractSeries* series, bool shown)
     if(shown)
     {
         series->show();
-        _chart->axisX(series)->show();
-        _chart->axisY(series)->show();
+        myAxisX(series)->show();
+        myAxisY(series)->show();
     }
     else
     {
         series->hide();
-        _chart->axisX(series)->hide();
-        _chart->axisY(series)->hide();
+        myAxisX(series)->hide();
+        myAxisY(series)->hide();
     }
 }
 

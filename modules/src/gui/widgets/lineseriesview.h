@@ -57,6 +57,11 @@ private:
     void switchToLogAxisY();
     void updateLogData();
     bool yAxisIsLinear() const;
+
+    void mySetAxisX(QAbstractAxis* axisX, QAbstractSeries* series);
+    void mySetAxisY(QAbstractAxis* axisY, QAbstractSeries* series);
+    QAbstractAxis* myAxisX(QAbstractSeries* series);
+    QAbstractAxis* myAxisY(QAbstractSeries* series);
 };
 
 } // namespace gui
