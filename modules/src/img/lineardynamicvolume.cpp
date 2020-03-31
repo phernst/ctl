@@ -65,6 +65,8 @@ LinearDynamicVolume::LinearDynamicVolume(float slope, float offset,
 {
     _lag.fill(offset);
     _slope.fill(slope);
+
+    setTime(0.0); // initial time point 0ms
 }
 
 /*!
