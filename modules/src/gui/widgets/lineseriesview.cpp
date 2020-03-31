@@ -112,14 +112,14 @@ void LineSeriesView::autoRange()
 
 void LineSeriesView::setLabelX(const QString& label)
 {
-    _chart->axisX(_dataSeries)->setTitleText(label);
-    _chart->axisX(_dataSeriesLog)->setTitleText(label);
+    myAxisX(_dataSeries)->setTitleText(label);
+    myAxisX(_dataSeriesLog)->setTitleText(label);
 }
 
 void LineSeriesView::setLabelY(const QString& label)
 {
-    _chart->axisY(_dataSeries)->setTitleText(label);
-    _chart->axisY(_dataSeriesLog)->setTitleText(label);
+    myAxisY(_dataSeries)->setTitleText(label);
+    myAxisY(_dataSeriesLog)->setTitleText(label);
 }
 
 void LineSeriesView::setRangeX(double from, double to)
