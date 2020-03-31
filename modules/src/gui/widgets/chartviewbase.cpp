@@ -11,14 +11,26 @@ namespace gui {
 
 ChartViewBase::ChartViewBase(QWidget* parent)
     : QChartView(parent)
+    , _chart(new QChart)
     , _dataSeries(new QLineSeries)
     , _dataSeriesLog(new QLineSeries)
-    , _chart(new QChart)
 {
     setChart(_chart);
     _chart->legend()->hide();
 
     setRubberBand(QChartView::RectangleRubberBand);
+}
+
+QImage ChartViewBase::image(const QSize& renderSize)
+{
+    QSize imgSize = renderSize.isValid() ? renderSize : size();
+
+    QImage ret(imgSize, QImage::Format_ARGB32);
+    QPainter painter(&ret);
+
+    render(&painter);
+
+    return ret;
 }
 
 void ChartViewBase::autoRange()
@@ -80,10 +92,18 @@ void ChartViewBase::setRangeX(double from, double to)
     }
     else
     {
-        myAxisX(_plottableSeries)->setRange(from, to);
+        myAxisX(_plottableSeriesLog)->setRange(from, to);
         if(_useNiceX)
-            qobject_cast<QValueAxis*>(myAxisX(_plottableSeries))->applyNiceNumbers();
+            qobject_cast<QValueAxis*>(myAxisX(_plottableSeriesLog))->applyNiceNumbers();
     }
+}
+
+void ChartViewBase::setRangeY(double from, double to)
+{
+    if(yAxisIsLinear())
+        myAxisY(_plottableSeries)->setRange(from, to);
+    else
+        myAxisY(_plottableSeriesLog)->setRange(from, to);
 }
 
 void ChartViewBase::setUseNiceX(bool enabled) { _useNiceX = enabled; }
