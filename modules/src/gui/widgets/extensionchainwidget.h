@@ -27,12 +27,14 @@ public:
         PoissonNoiseExtension,
         SpectralEffectsExtension,
         DetectorSaturationExtension,
+        DynamicProjectorExtension,
         Count
     };
 
     enum class PhysicalCompatibility
     {
         False,  //!< unphysical
+        Undef,  //!< undefined, can depend on context
         Approx, //!< physical approximation
         Ineff,  //!< physically correct but inefficient to compute
         True    //!< physically correct

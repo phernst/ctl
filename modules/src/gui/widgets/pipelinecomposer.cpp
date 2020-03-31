@@ -9,6 +9,7 @@
 #include "projectors/detectorsaturationextension.h"
 #include "projectors/poissonnoiseextension.h"
 #include "projectors/spectraleffectsextension.h"
+#include "projectors/dynamicprojectorextension.h"
 
 
 #include <QDialog>
@@ -102,13 +103,15 @@ void PipelineComposer::initializeExtensionPrototypes()
     QStringList extensionNames{ "ArealFocalSpotExtension",
                                 "PoissonNoiseExtension",
                                 "SpectralEffectsExtension",
-                                "DetectorSaturationExtension" };
+                                "DetectorSaturationExtension",
+                                "DynamicProjectorExtension"};
 
     QVector<CTL::ProjectorExtension*> dummyExtensions;
     dummyExtensions.append(new ArealFocalSpotExtension);
     dummyExtensions.append(new PoissonNoiseExtension);
     dummyExtensions.append(new SpectralEffectsExtension);
     dummyExtensions.append(new DetectorSaturationExtension);
+    dummyExtensions.append(new DynamicProjectorExtension);
 
     for(int ext = 0; ext < extensionNames.size(); ++ext)
     {
@@ -171,6 +174,9 @@ std::unique_ptr<ProjectorExtension> PipelineComposer::createExtension(int type) 
         break;
     case ExtensionChainWidget::DetectorSaturationExtension:
         ret.reset(new DetectorSaturationExtension);
+        break;
+    case ExtensionChainWidget::DynamicProjectorExtension:
+        ret.reset(new DynamicProjectorExtension);
         break;
     }
 

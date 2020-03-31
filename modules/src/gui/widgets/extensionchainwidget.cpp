@@ -36,6 +36,7 @@ const ExtensionChainWidget::ExtensionNames& ExtensionChainWidget::extensionNames
         "PoissonNoiseExtension",
         "SpectralEffectsExtension",
         "DetectorSaturationExtension",
+        "DynamicProjectorExtension",
     };
     return ret;
 }
@@ -44,11 +45,12 @@ const ExtensionChainWidget::CompatibilityMatrix& ExtensionChainWidget::compatibi
 {
     using Physical = PhysicalCompatibility;
     static constexpr CompatibilityMatrix ret {
-         // SecondExtenion: ArealFocalSpot    PoissonNoise      SpectralEffects   DetectorSaturation
-    /*AFS*/ FirstExtension{ Physical::Approx, Physical::True,   Physical::True,   Physical::True  },
-    /*PN*/  FirstExtension{ Physical::Ineff,  Physical::Approx, Physical::True,   Physical::True  },
-    /*SE*/  FirstExtension{ Physical::Ineff,  Physical::Approx, Physical::Ineff,  Physical::True  },
-    /*DS*/  FirstExtension{ Physical::False,  Physical::False,  Physical::False,  Physical::False },
+         // SecondExtenion: ArealFocalSpot    PoissonNoise      SpectralEffects   DetectorSaturation  DynamicProjector
+    /*AFS*/ FirstExtension{ Physical::Approx, Physical::True,   Physical::True,   Physical::True,     Physical::True  },
+    /*PN*/  FirstExtension{ Physical::Ineff,  Physical::Approx, Physical::True,   Physical::True,     Physical::True  },
+    /*SE*/  FirstExtension{ Physical::Ineff,  Physical::Approx, Physical::Ineff,  Physical::True,     Physical::True  },
+    /*DS*/  FirstExtension{ Physical::False,  Physical::False,  Physical::False,  Physical::False,    Physical::True  },
+    /*DP*/  FirstExtension{ Physical::Ineff,  Physical::True,   Physical::Undef, Physical::True,     Physical::False },
     };
     return ret;
 }
@@ -81,26 +83,31 @@ QString ExtensionChainWidget::compatibilityReport2String(
     auto extNb = 0u;
     for(const auto& ext : extensions)
     {
-        ret += "- " + QString(nameLU[ext]) + ": ";
+        ret += QStringLiteral("- ") + QString(nameLU[ext]) + QStringLiteral(": ");
         const auto currentExtType = report[extNb];
         switch (currentExtType.second) {
         case PhysicalCompatibility::True:
-            ret += "ok";
+            ret += QStringLiteral("ok");
             break;
         case PhysicalCompatibility::False:
-            ret += "unphysical before ";
+            ret += QStringLiteral("unphysical before ");
             ret += nameLU[currentExtType.first];
             break;
         case PhysicalCompatibility::Approx:
-            ret += "approximation before ";
+            ret += QStringLiteral("approximation before ");
             ret += nameLU[currentExtType.first];
             break;
         case PhysicalCompatibility::Ineff:
-            ret += "correct but inefficient before ";
+            ret += QStringLiteral("correct but inefficient before ");
             ret += nameLU[currentExtType.first];
             break;
+        case PhysicalCompatibility::Undef:
+            ret += QStringLiteral("has undefined outcome before ");
+            ret += nameLU[currentExtType.first];
+            ret += QStringLiteral("\nCorrectness of the result may depend on the context.");
+            break;
         }
-        ret += "\n";
+        ret += QStringLiteral("\n");
 
         ++extNb;
     }
