@@ -183,27 +183,9 @@ void ExtensionChainWidget::initExtensionList()
 
     for(uint ext = 0; ext < nbExt; ++ext)
     {
-        auto newItem = new QListWidgetItem(extensionNames().at(ext),
-                                           ui->extensionList,
-                                           int(QListWidgetItem::UserType) + ext);
-        QVariantMap initialData;
-        switch (ext) {
-        case ArealFocalSpotExtension:
-            initialData.insert("Discretization X", 1);
-            initialData.insert("Discretization Y", 1);
-            break;
-        case PoissonNoiseExtension:
-            initialData.insert("Use Fixed Seed", false);
-            initialData.insert("Fixed Seed", 42);
-            break;
-        case SpectralEffectsExtension:
-            initialData.insert("Energy Bin Width", 10.0);
-            break;
-        case DetectorSaturationExtension:
-            break;
-        }
-
-        newItem->setData(Qt::UserRole, initialData);
+        new QListWidgetItem(extensionNames().at(ext),
+                            ui->extensionList,
+                            int(QListWidgetItem::UserType) + ext);
     }
 }
 
