@@ -1,5 +1,5 @@
-#ifndef LINESERIESVIEW_H
-#define LINESERIESVIEW_H
+#ifndef CTL_LINESERIESVIEW_H
+#define CTL_LINESERIESVIEW_H
 
 #include "chartviewbase.h"
 
@@ -39,4 +39,4 @@ private:
 } // namespace gui
 } // namespace CTL
 
-#endif // LINESERIESVIEW_H
+#endif // CTL_LINESERIESVIEW_H

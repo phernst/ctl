@@ -1,5 +1,5 @@
-#ifndef CHARTVIEWBASE_H
-#define CHARTVIEWBASE_H
+#ifndef CTL_CHARTVIEWBASE_H
+#define CTL_CHARTVIEWBASE_H
 
 #include <QChartView>
 
@@ -57,4 +57,4 @@ private:
 } // namespace gui
 } // namespace CTL
 
-#endif // CHARTVIEWBASE_H
+#endif // CTL_CHARTVIEWBASE_H
