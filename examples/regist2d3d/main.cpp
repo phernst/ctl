@@ -9,7 +9,7 @@
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QTime>
+#include <QElapsedTimer>
 
 static std::unique_ptr<CTL::io::AbstractProjectionMatrixIO> projMatIO(const QString& fn);
 static std::unique_ptr<CTL::io::AbstractProjectionDataIO> projDataIO(const QString& fn);
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     // Optimization
     qInfo("Start optimization...");
     QVector<double> rot, transl;
-    QTime time; time.start();
+    QElapsedTimer time; time.start();
 
     for(uint v = 0; v < nbViews; ++v)
     {
