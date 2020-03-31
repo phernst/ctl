@@ -30,7 +30,7 @@ DataModelViewer::DataModelViewer(QWidget *parent)
     connect(ui->_PB_increaseSampling, &QPushButton::clicked, this, &DataModelViewer::increaseSamplingDensity);
     connect(ui->_SB_nbSamples, QOverload<int>::of(&QSpinBox::valueChanged), this, &DataModelViewer::updatePlot);
     connect(ui->_W_parameterEditor, &details::ParameterConfigWidget::parameterChanged, this, &DataModelViewer::setModelParameter);
-    connect(ui->_PB_linLogY, &QToolButton::clicked, this, &DataModelViewer::toggleLogY);
+    connect(ui->_PB_linLogY, &QPushButton::clicked, this, &DataModelViewer::toggleLogY);
     connect(ui->_CB_niceX, &QCheckBox::toggled, _lineView, &LineSeriesView::setUseNiceX);
     connect(ui->_CB_niceX, &QCheckBox::toggled, _intervalView, &IntervalSeriesView::setUseNiceX);
 

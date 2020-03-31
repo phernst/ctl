@@ -2,41 +2,45 @@
 
 #include "models/intervaldataseries.h"
 
+#include <QAreaSeries>
+#include <QLineSeries>
+#include <QValueAxis>
+#include <QLogValueAxis>
 #include <limits>
+
+using namespace QtCharts;
 
 namespace CTL {
 namespace gui {
 
 IntervalSeriesView::IntervalSeriesView(QWidget* parent)
-    : QChartView(parent)
-    , _areaSeries(new QAreaSeries)
-    , _areaSeriesLog(new QAreaSeries)
-    , _upper(new QLineSeries)
-    , _upperLog(new QLineSeries)
-    , _chart(new QChart)
+    : ChartViewBase(parent)
 {
-    _areaSeries->setUpperSeries(_upper);
-    _areaSeries->setColor(Qt::lightGray);
-    _areaSeries->setBorderColor(Qt::darkGray);
+    setWindowTitle("Bar Series View");
 
-    _areaSeriesLog->setUpperSeries(_upperLog);
-    _areaSeriesLog->setColor(Qt::lightGray);
-    _areaSeriesLog->setBorderColor(Qt::darkGray);
+    auto areaSeries = new QAreaSeries;
+    auto areaSeriesLog = new QAreaSeries;
+    areaSeries->setUpperSeries(_dataSeries);
+    areaSeries->setColor(Qt::lightGray);
+    areaSeries->setBorderColor(Qt::darkGray);
 
-    _chart->addSeries(_areaSeries);
-    _chart->addSeries(_areaSeriesLog);
+    areaSeriesLog->setUpperSeries(_dataSeriesLog);
+    areaSeriesLog->setColor(Qt::lightGray);
+    areaSeriesLog->setBorderColor(Qt::darkGray);
+
+    _plottableSeries = areaSeries;
+    _plottableSeriesLog = areaSeriesLog;
+
+    _chart->addSeries(areaSeries);
+    _chart->addSeries(areaSeriesLog);
     _chart->legend()->hide();
 
-    mySetAxisX(new QValueAxis, _areaSeries);
-    mySetAxisY(new QValueAxis, _areaSeries);
-    mySetAxisX(new QValueAxis, _areaSeriesLog);
-    mySetAxisY(new QLogValueAxis, _areaSeriesLog);
+    mySetAxisX(new QValueAxis, areaSeries);
+    mySetAxisY(new QValueAxis, areaSeries);
+    mySetAxisX(new QValueAxis, areaSeriesLog);
+    mySetAxisY(new QLogValueAxis, areaSeriesLog);
 
-    setSeriesShow(_areaSeriesLog, false);
-
-    setChart(_chart);
-    setRubberBand(QChartView::RectangleRubberBand);
-    setWindowTitle("Bar Series View");
+    setSeriesShow(_plottableSeriesLog, false);
 }
 
 void IntervalSeriesView::plot(const IntervalDataSeries& intervalSeries,
@@ -59,8 +63,8 @@ void IntervalSeriesView::plot(const IntervalDataSeries& intervalSeries,
 
 void IntervalSeriesView::setData(const IntervalDataSeries& intervalSeries)
 {
-    _upper->clear();
-    _upperLog->clear();
+    _dataSeries->clear();
+    _dataSeriesLog->clear();
 
     static const auto eps = 0.0001;
     const auto binWidth = intervalSeries.binWidth();
@@ -68,97 +72,17 @@ void IntervalSeriesView::setData(const IntervalDataSeries& intervalSeries)
 
     for(const auto& pt : intervalSeries.data())
     {
-        _upper->append(pt.x() - (0.5 - eps) * binWidth, pt.y());
-        _upper->append(pt.x() + 0.5 * binWidth, pt.y());
-        _upper->append(pt.x() + (0.5 + eps) * binWidth, 0.0);
+        _dataSeries->append(pt.x() - (0.5 - eps) * binWidth, pt.y());
+        _dataSeries->append(pt.x() + 0.5 * binWidth, pt.y());
+        _dataSeries->append(pt.x() + (0.5 + eps) * binWidth, 0.0);
 
         const auto clampedLogVal = std::max( { pt.y(), logMinVal } );
-        _upperLog->append(pt.x() - (0.5 - eps) * binWidth, clampedLogVal);
-        _upperLog->append(pt.x() + 0.5 * binWidth, clampedLogVal);
-        _upperLog->append(pt.x() + (0.5 + eps) * binWidth, logMinVal);
+        _dataSeriesLog->append(pt.x() - (0.5 - eps) * binWidth, clampedLogVal);
+        _dataSeriesLog->append(pt.x() + 0.5 * binWidth, clampedLogVal);
+        _dataSeriesLog->append(pt.x() + (0.5 + eps) * binWidth, logMinVal);
     }
 
     autoRange();
-}
-
-QImage IntervalSeriesView::image(const QSize& renderSize)
-{
-    QSize imgSize = renderSize.isValid() ? renderSize : size();
-
-    QImage ret(imgSize, QImage::Format_RGB32);
-    QPainter painter(&ret);
-
-    auto bgBrush = backgroundBrush();
-
-    setBackgroundBrush(QBrush(Qt::white));
-    render(&painter);
-    setBackgroundBrush(bgBrush);
-
-    return ret;
-}
-
-void IntervalSeriesView::autoRange()
-{
-    auto compareX = [] (const QPointF& a, const QPointF& b) { return a.x()<b.x(); };
-    auto compareY = [] (const QPointF& a, const QPointF& b) { return a.y()<b.y(); };
-
-    const auto dataPts = yAxisIsLinear() ? _upper->pointsVector()
-                                         : _upperLog->pointsVector();
-
-    const auto minMaxX = std::minmax_element(dataPts.cbegin(), dataPts.cend(), compareX);
-    const auto minMaxY = std::minmax_element(dataPts.cbegin(), dataPts.cend(), compareY);
-
-    const auto xRange = qMakePair(minMaxX.first->x(), minMaxX.second->x());
-    const auto yRange = qMakePair(minMaxY.first->y(), minMaxY.second->y());
-
-    setRangeX(xRange.first, xRange.second);
-    setRangeY(yRange.first, 1.05 * yRange.second);
-}
-
-void IntervalSeriesView::mouseDoubleClickEvent(QMouseEvent* event)
-{
-    if(event->button() == Qt::LeftButton)
-        autoRange();
-
-    event->accept();
-}
-
-void IntervalSeriesView::keyPressEvent(QKeyEvent *event)
-{
-    if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
-    {
-        saveDialog();
-        event->accept();
-        return;
-    }
-
-    QWidget::keyPressEvent(event);
-}
-
-bool IntervalSeriesView::save(const QString& fileName)
-{
-    return image().save(fileName);
-}
-
-void IntervalSeriesView::saveDialog()
-{
-    auto fn = QFileDialog::getSaveFileName(this, "Save plot", "", "Images (*.png *.jpg *.bmp)");
-    if(fn.isEmpty())
-        return;
-
-    save(fn);
-}
-
-void IntervalSeriesView::setLabelX(const QString& label)
-{
-    myAxisX(_areaSeries)->setTitleText(label);
-    myAxisX(_areaSeriesLog)->setTitleText(label);
-}
-
-void IntervalSeriesView::setLabelY(const QString& label)
-{
-    myAxisY(_areaSeries)->setTitleText(label);
-    myAxisY(_areaSeriesLog)->setTitleText(label);
 }
 
 double IntervalSeriesView::suitableLogMinVal(const IntervalDataSeries& intervalSeries)
@@ -175,116 +99,6 @@ double IntervalSeriesView::suitableLogMinVal(const IntervalDataSeries& intervalS
     const auto minVal = *std::min_element(tmp.cbegin(), tmp.cend());
 
     return std::max(bottomScale * minVal, std::numeric_limits<double>::min());
-}
-
-void IntervalSeriesView::setLogAxisY(bool enabled)
-{
-    enabled ? switchToLogAxisY() : switchToLinAxisY();
-}
-
-void IntervalSeriesView::setRangeX(double from, double to)
-{
-    if(yAxisIsLinear())
-    {
-        myAxisX(_areaSeries)->setRange(from, to);
-        if(_useNiceX)
-            qobject_cast<QValueAxis*>(myAxisX(_areaSeries))->applyNiceNumbers();
-    }
-    else
-    {
-        myAxisX(_areaSeriesLog)->setRange(from, to);
-        if(_useNiceX)
-            qobject_cast<QValueAxis*>(myAxisX(_areaSeriesLog))->applyNiceNumbers();
-    }
-}
-
-void IntervalSeriesView::setRangeY(double from, double to)
-{
-    if(yAxisIsLinear())
-        myAxisY(_areaSeries)->setRange(from, to);
-    else
-        myAxisY(_areaSeriesLog)->setRange(from, to);
-}
-
-void IntervalSeriesView::setUseNiceX(bool enabled) { _useNiceX = enabled; }
-
-void IntervalSeriesView::toggleLinLogY()
-{
-    if(yAxisIsLinear())
-        switchToLogAxisY();
-    else
-        switchToLinAxisY();
-}
-
-void IntervalSeriesView::setSeriesShow(QAbstractSeries* series, bool shown)
-{
-    if(shown)
-    {
-        series->show();
-        myAxisX(series)->show();
-        myAxisY(series)->show();
-    }
-    else
-    {
-        series->hide();
-        myAxisX(series)->hide();
-        myAxisY(series)->hide();
-    }
-}
-
-bool IntervalSeriesView::yAxisIsLinear() const { return _areaSeries->isVisible(); }
-
-void IntervalSeriesView::switchToLinAxisY()
-{
-    const auto logAxisX = qobject_cast<QValueAxis*>(myAxisX(_areaSeriesLog));
-    const auto logAxisY = qobject_cast<QLogValueAxis*>(myAxisY(_areaSeriesLog));
-
-    const auto rangeX = qMakePair(logAxisX->min(), logAxisX->max());
-    const auto rangeY = qMakePair(logAxisY->min(), logAxisY->max());
-
-    setSeriesShow(_areaSeriesLog, false);
-    setSeriesShow(_areaSeries, true);
-
-    myAxisX(_areaSeries)->setRange(rangeX.first, rangeX.second);
-    myAxisY(_areaSeries)->setRange(rangeY.first, rangeY.second);
-}
-
-void IntervalSeriesView::switchToLogAxisY()
-{
-    const auto linAxisX = qobject_cast<QValueAxis*>(myAxisX(_areaSeries));
-    const auto linAxisY = qobject_cast<QValueAxis*>(myAxisY(_areaSeries));
-
-    const auto rangeX = qMakePair(linAxisX->min(), linAxisX->max());
-    const auto rangeY = qMakePair(linAxisY->min(), linAxisY->max());
-
-    setSeriesShow(_areaSeries, false);
-    setSeriesShow(_areaSeriesLog, true);
-
-    myAxisX(_areaSeriesLog)->setRange(rangeX.first, rangeX.second);
-    myAxisY(_areaSeriesLog)->setRange(std::max( { rangeY.first,  0.01 } ),
-                                      std::max( { rangeY.second, 0.01 } ));
-}
-
-void IntervalSeriesView::mySetAxisX(QAbstractAxis* axisX, QAbstractSeries* series)
-{
-    _chart->addAxis(axisX, Qt::AlignBottom);
-    series->attachAxis(axisX);
-}
-
-void IntervalSeriesView::mySetAxisY(QAbstractAxis* axisY, QAbstractSeries* series)
-{
-    _chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
-}
-
-QAbstractAxis* IntervalSeriesView::myAxisX(QAbstractSeries* series)
-{
-    return _chart->axes(Qt::Horizontal, series).first();
-}
-
-QAbstractAxis* IntervalSeriesView::myAxisY(QAbstractSeries* series)
-{
-    return _chart->axes(Qt::Vertical, series).first();
 }
 
 } // namespace gui
