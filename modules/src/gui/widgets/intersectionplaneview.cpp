@@ -137,9 +137,7 @@ void IntersectionPlaneView::initializeView()
 
 void IntersectionPlaneView::resetCamera()
 {
-    static const QVector3D startPos( 5.0f * _visualScale,
-                                    -5.0f * _visualScale,
-                                    -20.0f * _visualScale);
+    static const QVector3D startPos( 750.0f, -300.0f, -750.0f );
     _camera->setPosition(startPos);
     _camera->setViewCenter(QVector3D(0.0f, 0.0f, 0.0f));
     _camera->setUpVector(QVector3D(0, -1, 0));
