@@ -83,7 +83,7 @@ void VolumeViewer::plot(SpectralVolumeData data)
 
 void VolumeViewer::autoResize()
 {
-    static const auto minimumSize = QSize(850, 400);
+    static const auto minimumSize = QSize(800, 400);
     static const auto margin = QSize(300, 100);
     ui->_W_dataView->autoResize();
     resize((ui->_W_dataView->size() + margin).expandedTo(minimumSize));
