@@ -25,6 +25,8 @@ public:
 
     void setData(ProjectionData projections);
     void setModuleLayout(const ModuleLayout& layout);
+    void setWindowPresets(QPair<QString, QPair<double, double>> preset1,
+                          QPair<QString, QPair<double, double>> preset2);
 
     int currentView() const;
 

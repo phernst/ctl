@@ -27,6 +27,9 @@ ProjectionViewer::ProjectionViewer(QWidget *parent) :
     ui->_W_dataView->setLivePixelDataEnabled(true);
     ui->_W_dataView->setContrastLinePlotLabels("Position on line", "Extinction");
 
+    setWindowPresets(qMakePair(QStringLiteral("Narrow"), qMakePair(0.0,  2.0)),
+                     qMakePair(QStringLiteral("Wide"),   qMakePair(0.0, 10.0)));
+
     resize(1000, 800);
     setWindowTitle("Projection Viewer");
 }
@@ -69,6 +72,12 @@ void ProjectionViewer::setModuleLayout(const ModuleLayout &layout)
 
     if(_data.nbViews() > 0)
         showView(currentView()); // recompute data due to changed layout (if data is available)
+}
+
+void ProjectionViewer::setWindowPresets(QPair<QString, QPair<double, double> > preset1,
+                                        QPair<QString, QPair<double, double> > preset2)
+{
+    ui->_W_windowing->setPresets(preset1, preset2);
 }
 
 int ProjectionViewer::currentView() const
