@@ -176,7 +176,7 @@ SOURCES += \
     $$PWD/../src/mat/matrix.tpp
 
 # create a file that contains the absolute path to database
-DATABASE_ROOT = $$PWD/../../database
+DATABASE_ROOT = $$clean_path($$PWD/../../database)
 QMAKE_SUBSTITUTES += indirect
 indirect.input = $$PWD/../.database.path.in
 indirect.output = $$DESTDIR/database.path
