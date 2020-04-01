@@ -29,6 +29,7 @@ public:
 public slots:
     void autoResize();
     void hideCompositeOverview(bool hide = true);
+    void setAutoMouseWindowScaling();
     void showSlice(int slice);
 
 protected:

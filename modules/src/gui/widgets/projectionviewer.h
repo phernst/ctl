@@ -30,6 +30,7 @@ public:
 
 public slots:
     void autoResize();
+    void setAutoMouseWindowScaling();
     void showView(int view);
 
 protected:

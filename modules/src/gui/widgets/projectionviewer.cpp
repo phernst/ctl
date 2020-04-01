@@ -83,6 +83,11 @@ void ProjectionViewer::autoResize()
     resize(ui->_W_dataView->size() + margin);
 }
 
+void ProjectionViewer::setAutoMouseWindowScaling()
+{
+    ui->_W_dataView->setAutoMouseWindowScaling();
+}
+
 void ProjectionViewer::showView(int view)
 {
     ui->_L_view->setText(QString::number(view));

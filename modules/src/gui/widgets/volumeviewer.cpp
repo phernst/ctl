@@ -94,6 +94,11 @@ void VolumeViewer::hideCompositeOverview(bool hide)
     ui->_TW_volumeOverview->setVisible(!hide);
 }
 
+void VolumeViewer::setAutoMouseWindowScaling()
+{
+    ui->_W_dataView->setAutoMouseWindowScaling();
+}
+
 void VolumeViewer::showSlice(int slice)
 {
     ui->_L_slice->setNum(slice);
