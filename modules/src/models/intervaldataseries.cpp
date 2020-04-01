@@ -21,6 +21,12 @@ IntervalDataSeries IntervalDataSeries::sampledFromModel(const AbstractIntegrable
     return ret;
 }
 
+IntervalDataSeries IntervalDataSeries::sampledFromModel(
+        std::shared_ptr<AbstractIntegrableDataModel> dataModel, float from, float to, uint nbSamples)
+{
+    return sampledFromModel(*dataModel, from, to, nbSamples);
+}
+
 float IntervalDataSeries::integral() const
 {
     return std::accumulate(
