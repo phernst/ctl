@@ -23,6 +23,8 @@ public:
 
     void setWindowFromTo(const QPair<double, double>& window);
     void setWindowCenterWidth(const QPair<double, double> &window);
+    void setZoomPresets(QPair<QString, QPair<double, double>> preset1,
+                        QPair<QString, QPair<double, double>> preset2);
 
 public slots:
     void setWindowDataSilent(double from, double to);
@@ -34,6 +36,9 @@ signals:
 private:
     Ui::WindowingWidget *ui;
 
+    QPair<QString, QPair<double, double>> _preset1 = { QStringLiteral("Preset 1"), qMakePair(0.0, 1.0) };
+    QPair<QString, QPair<double, double>> _preset2 = { QStringLiteral("Preset 2"), qMakePair(-1.0, 1.0) };
+
     void addInvalidEffect(QWidget* reciever);
     void removeInvalidEffects();
     void blockSignalsTopBottom();
@@ -44,13 +49,16 @@ private:
     void updateCenterWidthValues();
 
 private slots:
-    void fromChanged();
-    void toChanged();
     void centerChanged();
-    void widthChanged();
-
     bool checkFromValid();
     bool checkToValid();
+    void fromChanged();
+    void setPreset1();
+    void setPreset2();
+    void toChanged();
+    void updatePresetButtonText();
+    void widthChanged();
+
 };
 
 }

@@ -18,6 +18,10 @@ WindowingWidget::WindowingWidget(QWidget *parent) :
     connect(ui->_SB_windowWidth, SIGNAL(valueChanged(double)), SLOT(widthChanged()));
 
     connect(ui->_PB_autoWindow, SIGNAL(clicked(bool)), SIGNAL(autoWindowingRequested()));
+    connect(ui->_PB_preset1, &QPushButton::clicked, this, &WindowingWidget::setPreset1);
+    connect(ui->_PB_preset2, &QPushButton::clicked, this, &WindowingWidget::setPreset2);
+
+    updatePresetButtonText();
 }
 
 WindowingWidget::~WindowingWidget()
@@ -54,6 +58,30 @@ void WindowingWidget::setWindowCenterWidth(const QPair<double, double>& window)
                         window.first + 0.5 * (window.second - window.first));
 
     emit windowingChanged();
+}
+
+void WindowingWidget::setZoomPresets(QPair<QString, QPair<double, double>> preset1,
+                                     QPair<QString, QPair<double, double>> preset2)
+{
+    _preset1 = preset1;
+    _preset2 = preset2;
+
+    updatePresetButtonText();
+}
+
+void WindowingWidget::updatePresetButtonText()
+{
+    auto toolTipText = [] (const QPair<double, double>& window)
+    {
+        return QStringLiteral("(") + QString::number(window.first) + QStringLiteral(",")
+                + QString::number(window.second) + QStringLiteral(")");
+    };
+
+    ui->_PB_preset1->setText(_preset1.first);
+    ui->_PB_preset2->setText(_preset2.first);
+
+    ui->_PB_preset1->setToolTip(toolTipText(_preset1.second));
+    ui->_PB_preset2->setToolTip(toolTipText(_preset2.second));
 }
 
 void WindowingWidget::setWindowDataSilent(double from, double to)
@@ -141,6 +169,16 @@ void WindowingWidget::fromChanged()
 
     if(checkFromValid())
         emit windowingChanged();
+}
+
+void WindowingWidget::setPreset1()
+{
+    setWindowFromTo(_preset1.second);
+}
+
+void WindowingWidget::setPreset2()
+{
+    setWindowFromTo(_preset2.second);
 }
 
 void WindowingWidget::toChanged()

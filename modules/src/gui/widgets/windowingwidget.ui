@@ -53,6 +53,26 @@
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
+     <item row="1" column="3">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Width:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QDoubleSpinBox" name="_SB_windowBottom">
+       <property name="decimals">
+        <number>4</number>
+       </property>
+       <property name="minimum">
+        <double>-9999.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>99999.000000000000000</double>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0" rowspan="2">
       <widget class="Line" name="line">
        <property name="orientation">
@@ -60,15 +80,21 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>From:</string>
+     <item row="0" column="4">
+      <widget class="QDoubleSpinBox" name="_SB_windowCenter">
+       <property name="decimals">
+        <number>4</number>
+       </property>
+       <property name="minimum">
+        <double>-9999.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>99999.000000000000000</double>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QDoubleSpinBox" name="_SB_windowBottom">
+     <item row="1" column="2">
+      <widget class="QDoubleSpinBox" name="_SB_windowTop">
        <property name="decimals">
         <number>4</number>
        </property>
@@ -87,23 +113,10 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
-      <widget class="QDoubleSpinBox" name="_SB_windowCenter">
-       <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="minimum">
-        <double>-9999.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>99999.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="5" rowspan="2">
-      <widget class="QPushButton" name="_PB_autoWindow">
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Auto</string>
+        <string>From:</string>
        </property>
       </widget>
      </item>
@@ -114,26 +127,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QDoubleSpinBox" name="_SB_windowTop">
-       <property name="decimals">
-        <number>4</number>
-       </property>
-       <property name="minimum">
-        <double>-9999.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>99999.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Width:</string>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="4">
       <widget class="QDoubleSpinBox" name="_SB_windowWidth">
        <property name="decimals">
@@ -141,6 +134,57 @@
        </property>
        <property name="maximum">
         <double>99999.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="6">
+      <widget class="QPushButton" name="_PB_preset2">
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>2</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="6">
+      <widget class="QPushButton" name="_PB_preset1">
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>1</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="5" rowspan="2">
+      <widget class="QPushButton" name="_PB_autoWindow">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>35</width>
+         <height>46</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>35</width>
+         <height>52</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Auto</string>
        </property>
       </widget>
      </item>
