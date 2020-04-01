@@ -27,7 +27,8 @@ XYDataSeries::XYDataSeries(const QVector<float>& x, const QVector<float>& y)
         append(QPointF(x.at(smpPt), y.at(smpPt)));
 }
 
-XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, const QVector<float>& samplingPoints)
+XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel,
+                                            const QVector<float>& samplingPoints)
 {
     XYDataSeries ret;
 
@@ -37,7 +38,14 @@ XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, 
     return ret;
 }
 
-XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, const std::vector<float>& samplingPoints)
+XYDataSeries XYDataSeries::sampledFromModel(std::shared_ptr<AbstractDataModel> dataModel,
+                                            const QVector<float>& samplingPoints)
+{
+    return sampledFromModel(*dataModel, samplingPoints);
+}
+
+XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel,
+                                            const std::vector<float>& samplingPoints)
 {
     XYDataSeries ret;
 
@@ -47,7 +55,14 @@ XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, 
     return ret;
 }
 
-XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, float from, float to, uint nbSamples, Sampling samplingPattern)
+XYDataSeries XYDataSeries::sampledFromModel(std::shared_ptr<AbstractDataModel> dataModel,
+                                            const std::vector<float>& samplingPoints)
+{
+    return sampledFromModel(*dataModel, samplingPoints);
+}
+
+XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, float from,
+                                            float to, uint nbSamples, Sampling samplingPattern)
 {
     switch (samplingPattern) {
     case Linear:
@@ -57,6 +72,12 @@ XYDataSeries XYDataSeries::sampledFromModel(const AbstractDataModel& dataModel, 
     }
 
     return XYDataSeries();
+}
+
+XYDataSeries XYDataSeries::sampledFromModel(std::shared_ptr<AbstractDataModel> dataModel, float from,
+                                            float to, uint nbSamples, Sampling samplingPattern)
+{
+    return sampledFromModel(*dataModel, from, to, nbSamples, samplingPattern);
 }
 
 QVector<float> XYDataSeries::linSpace(float from, float to, uint nbSamples)
