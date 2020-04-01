@@ -78,7 +78,7 @@ int ProjectionViewer::currentView() const
 
 void ProjectionViewer::autoResize()
 {
-    static const auto margin = QSize(110, 110);
+    static const auto margin = QSize(90, 115);
     ui->_W_dataView->autoResize();
     resize(ui->_W_dataView->size() + margin);
 }
