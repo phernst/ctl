@@ -16,6 +16,15 @@ class VolumeViewer : public QWidget
     Q_OBJECT
 
 public:
+    enum class WindowPreset {
+        Abdomen,
+        Angio,
+        Bone,
+        Brain,
+        Chest,
+        Lungs
+    };
+
     explicit VolumeViewer(QWidget *parent = nullptr);
     VolumeViewer(CompositeVolume volume, QWidget *parent = nullptr);
     ~VolumeViewer();
@@ -25,6 +34,11 @@ public:
 
     static void plot(CompositeVolume data);
     static void plot(SpectralVolumeData data);
+
+    void setWindowPresets(WindowPreset preset1, WindowPreset preset2);
+    void setWindowPresetsInMu(WindowPreset preset1, WindowPreset preset2, float referenceEnergy);
+    void setWindowPresets(QPair<QString, QPair<double, double>> preset1,
+                          QPair<QString, QPair<double, double>> preset2);
 
 public slots:
     void autoResize();

@@ -1,10 +1,22 @@
 #include "volumeviewer.h"
 #include "ui_volumeviewer.h"
 
+#include "io/ctldatabase.h"
+
 #include <QKeyEvent>
 
 namespace CTL {
 namespace gui {
+
+static const QVector<QPair<QString, QPair<double, double>>> WINDOW_PRESETS {
+    qMakePair(QStringLiteral("Abdomen"), qMakePair( -140.0,  260.0)),
+    qMakePair(QStringLiteral("Angio"),   qMakePair(    0.0,  600.0)),
+    qMakePair(QStringLiteral("Bone"),    qMakePair( -450.0, 1050.0)),
+    qMakePair(QStringLiteral("Brain"),   qMakePair(    0.0,   80.0)),
+    qMakePair(QStringLiteral("Chest"),   qMakePair( -160.0,  240.0)),
+    qMakePair(QStringLiteral("Lungs"),   qMakePair(-1150.0,  350.0))
+};
+
 
 VolumeViewer::VolumeViewer(QWidget* parent)
     : QWidget(parent)
@@ -79,6 +91,34 @@ void VolumeViewer::plot(CompositeVolume data)
 void VolumeViewer::plot(SpectralVolumeData data)
 {
     plot(CompositeVolume(std::move(data)));
+}
+
+void VolumeViewer::setWindowPresets(QPair<QString, QPair<double, double> > preset1,
+                                    QPair<QString, QPair<double, double> > preset2)
+{
+    ui->_W_windowing->setPresets(preset1, preset2);
+}
+
+void VolumeViewer::setWindowPresets(WindowPreset preset1, WindowPreset preset2)
+{
+    setWindowPresets(WINDOW_PRESETS.at(int(preset1)), WINDOW_PRESETS.at(int(preset2)));
+}
+
+void VolumeViewer::setWindowPresetsInMu(WindowPreset preset1, WindowPreset preset2,
+                                        float referenceEnergy)
+{
+    auto HUtoMu =  [ referenceEnergy ] (const QPair<double, double>& windowInHU)
+    {
+        const auto muWater = attenuationModel(database::Composite::Water)->valueAt(referenceEnergy);
+        return qMakePair((windowInHU.first / 1000.0 * muWater) + muWater,
+                         (windowInHU.second / 1000.0 * muWater) + muWater);
+    };
+
+    const auto preset1HU = WINDOW_PRESETS.at(int(preset1));
+    const auto preset2HU = WINDOW_PRESETS.at(int(preset2));
+
+    setWindowPresets(qMakePair(preset1HU.first, HUtoMu(preset1HU.second)),
+                     qMakePair(preset2HU.first, HUtoMu(preset2HU.second)));
 }
 
 void VolumeViewer::autoResize()
