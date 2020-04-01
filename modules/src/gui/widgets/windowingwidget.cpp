@@ -60,8 +60,8 @@ void WindowingWidget::setWindowCenterWidth(const QPair<double, double>& window)
     emit windowingChanged();
 }
 
-void WindowingWidget::setZoomPresets(QPair<QString, QPair<double, double>> preset1,
-                                     QPair<QString, QPair<double, double>> preset2)
+void WindowingWidget::setPresets(QPair<QString, QPair<double, double>> preset1,
+                                 QPair<QString, QPair<double, double>> preset2)
 {
     _preset1 = preset1;
     _preset2 = preset2;

@@ -23,8 +23,8 @@ public:
 
     void setWindowFromTo(const QPair<double, double>& window);
     void setWindowCenterWidth(const QPair<double, double> &window);
-    void setZoomPresets(QPair<QString, QPair<double, double>> preset1,
-                        QPair<QString, QPair<double, double>> preset2);
+    void setPresets(QPair<QString, QPair<double, double>> preset1,
+                    QPair<QString, QPair<double, double>> preset2);
 
 public slots:
     void setWindowDataSilent(double from, double to);
