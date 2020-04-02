@@ -57,7 +57,7 @@ std::vector<float> GeometryEncoder::effectivePixelAreas() const
  *
  * This instance does not take ownership of \a system.
  */
-void GeometryEncoder::assignSystem(const SimpleCTsystem *system)
+void GeometryEncoder::assignSystem(const SimpleCTsystem* system)
 {
     _system = system;
 }

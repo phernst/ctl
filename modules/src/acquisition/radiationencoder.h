@@ -45,6 +45,7 @@ class RadiationEncoder
 public:
     RadiationEncoder(const SimpleCTsystem* system);
 
+    void assignSystem(const SimpleCTsystem* system);
     IntervalDataSeries finalSpectrum(uint nbSamples) const;
     IntervalDataSeries finalSpectrum(EnergyRange range, uint nbSamples) const;
     double finalPhotonFlux() const;

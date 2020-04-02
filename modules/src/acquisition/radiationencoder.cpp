@@ -13,6 +13,16 @@ RadiationEncoder::RadiationEncoder(const SimpleCTsystem* system)
 }
 
 /*!
+ * Assignes \a system to this instance.
+ *
+ * This instance does not take ownership of \a system.
+ */
+void RadiationEncoder::assignSystem(const SimpleCTsystem* system)
+{
+    _system = system;
+}
+
+/*!
  * Returns the final radiation spectrum of the system. This considers the original spectrum emitted
  * by the source component as well as all modifications caused by beam modifiers (e.g. filters).
  *
