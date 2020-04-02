@@ -7,9 +7,9 @@ namespace CTL {
 
 class BasisFunctionVolume : public AbstractDynamicVolumeData
 {
+public:
     using CoeffVolumes = std::vector<VoxelVolume<float>>;
-    using SampledFunction = std::vector<float>;
-    using SampledFunctions = std::vector<SampledFunction>;
+    using SampledFunctions = std::vector<std::vector<float>>;
 
     // abstract interface
     protected: void updateVolume() override;
@@ -19,7 +19,7 @@ public:
     BasisFunctionVolume(CoeffVolumes coeffVolumes, SampledFunctions basisFunctions);
 
     XYDataSeries timeCurveNativeSampling(uint x, uint y, uint z) const;
-    auto timeCurveValuesNativeSampling(uint x, uint y, uint z) const -> SampledFunction;
+    std::vector<float> timeCurveValuesNativeSampling(uint x, uint y, uint z) const;
 
     float sample2Time(size_t sample) const;
     size_t time2Sample(double time) const;

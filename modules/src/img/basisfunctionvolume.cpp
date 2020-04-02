@@ -21,7 +21,7 @@ void BasisFunctionVolume::updateVolume()
             return v1 + v2;
         },
         // the "*" operation
-        [discreteTime](const VoxelVolume<float>& v, const SampledFunction& f) {
+        [discreteTime](const VoxelVolume<float>& v, const std::vector<float>& f) {
             return v * f[discreteTime];
         }
     );
@@ -53,9 +53,9 @@ BasisFunctionVolume::BasisFunctionVolume(BasisFunctionVolume::CoeffVolumes coeff
         throw std::runtime_error("BasisFunctionVolume::BasisFunctionVolume: Inconsistent voxel "
                                  "size or dimensions of coefficient volumes.");
 
-    if(std::any_of(std::next(_basisFcts.cbegin()), _basisFcts.cend(), [this](const SampledFunction& t) {
-           return t.size() != _basisFcts.at(0).size();
-       }))
+    if(std::any_of(
+           std::next(_basisFcts.cbegin()), _basisFcts.cend(),
+           [this](const std::vector<float>& t) { return t.size() != _basisFcts.at(0).size(); }))
         throw std::runtime_error("BasisFunctionVolume::BasisFunctionVolume: Inconsistent length "
                                  "of basis functions.");
 
@@ -75,22 +75,21 @@ XYDataSeries BasisFunctionVolume::timeCurveNativeSampling(uint x, uint y, uint z
     return ret;
 }
 
-auto BasisFunctionVolume::timeCurveValuesNativeSampling(uint x, uint y, uint z) const
-    -> SampledFunction
+std::vector<float> BasisFunctionVolume::timeCurveValuesNativeSampling(uint x, uint y, uint z) const
 {
     auto tac = std::inner_product(
         // iterate over all basis functions/coefficients
         _basisFcts.cbegin(), _basisFcts.cend(), _coeffVolumes.cbegin(),
         // init TAC function (zero function)
-        SampledFunction(_basisFcts.front().size(), 0.0f),
+        std::vector<float>(_basisFcts.front().size(), 0.0f),
         // the "+" operation
-        [](SampledFunction f1, const SampledFunction& f2) {
+        [](std::vector<float> f1, const std::vector<float>& f2) {
             std::transform(f1.cbegin(), f1.cend(), f2.cbegin(), f1.begin(),
                            [](float val1, float val2) { return val1 + val2; });
             return f1;
         },
         // the "*" operation
-        [x, y, z](SampledFunction f, const VoxelVolume<float>& v) {
+        [x, y, z](std::vector<float> f, const VoxelVolume<float>& v) {
             const auto coeff = v(x, y, z);
             std::transform(f.cbegin(), f.cend(), f.begin(),
                            [coeff](float val) { return coeff * val; });
