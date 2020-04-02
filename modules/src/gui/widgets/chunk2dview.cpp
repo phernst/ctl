@@ -234,6 +234,17 @@ void Chunk2DView::keyPressEvent(QKeyEvent *event)
     QWidget::keyPressEvent(event);
 }
 
+void Chunk2DView::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        setWindowingMinMax();
+        event->accept();
+    }
+
+    QWidget::mouseDoubleClickEvent(event);
+}
+
 void Chunk2DView::mouseMoveEvent(QMouseEvent* event)
 {   
     if(event->buttons() == Qt::LeftButton)
