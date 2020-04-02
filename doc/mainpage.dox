@@ -52,6 +52,7 @@
      - ctl_qtgui
          + gui_widgets.pri: widgets for visualization purposes
          + gui_widgets_3d.pri: widgets for 3d visualization purposes
+         + gui_widgets_charts.pri: widgets for plotting x-y-dataseries and models
      - ctl_nlopt
          + grangeat_2d3d_regist.pri: Grangeat-based 2D/3D registration using NLopt
          + ocl_config.pri (see above)
