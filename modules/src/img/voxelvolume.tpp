@@ -508,7 +508,7 @@ VoxelVolume<T>& VoxelVolume<T>::operator+=(const VoxelVolume<T>& other)
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '+=' operation.");
 
     std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
-                   [](const T& a, const T& b) { return a + b; });
+                   std::plus<T>());
 
     return *this;
 }
@@ -528,7 +528,7 @@ VoxelVolume<T>& VoxelVolume<T>::operator-=(const VoxelVolume<T>& other)
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '-=' operation.");
 
     std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
-                   [](const T& a, const T& b) { return a - b; });
+                   std::minus<T>());
 
     return *this;
 }
