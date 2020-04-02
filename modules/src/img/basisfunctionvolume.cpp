@@ -1,6 +1,20 @@
 #include "basisfunctionvolume.h"
+#if __cplusplus >= 201703L
+#include <numeric>
+#include <execution>
+#endif
 
 namespace CTL {
+
+template<class... Args>
+auto innerProduct(Args&&... args) -> decltype(std::inner_product(std::forward<Args>(args)...))
+{
+#if __cplusplus >= 201703L
+    return std::transform_reduce(std::execution::par, std::forward<Args>(args)...);
+#else
+    return std::inner_product(std::forward<Args>(args)...);
+#endif
+}
 
 void BasisFunctionVolume::updateVolume()
 {
@@ -11,7 +25,7 @@ void BasisFunctionVolume::updateVolume()
     if(discreteTime >= _basisFcts.front().size())
         return;
 
-    auto updatedVol = std::inner_product(
+    auto updatedVol = innerProduct(
         // iterate over all coefficients/basis functions
         _coeffVolumes.cbegin(), _coeffVolumes.cend(), _basisFcts.cbegin(),
         // init volume (zero initialized, see above)
