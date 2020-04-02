@@ -46,6 +46,7 @@ HEADERS += \
     $$PWD/../src/components/tubulargantry.h \
     $$PWD/../src/components/xraylaser.h \
     $$PWD/../src/components/xraytube.h \
+    $$PWD/../src/img/basisfunctionvolume.h \
     $$PWD/../src/img/chunk2d.h \
     $$PWD/../src/img/compositevolume.h \
     $$PWD/../src/img/modulelayout.h \
@@ -124,6 +125,7 @@ SOURCES += \
     $$PWD/../src/components/tubulargantry.cpp \
     $$PWD/../src/components/xraylaser.cpp \
     $$PWD/../src/components/xraytube.cpp \
+    $$PWD/../src/img/basisfunctionvolume.cpp \
     $$PWD/../src/img/chunk2d.tpp \
     $$PWD/../src/img/compositevolume.cpp \
     $$PWD/../src/img/projectiondata.cpp \

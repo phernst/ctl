@@ -20,7 +20,7 @@ class AbstractDynamicVolumeData : public SpectralVolumeData
 public:
     AbstractDynamicVolumeData(const SpectralVolumeData& other);
 
-    virtual XYDataSeries timeCurve(uint x, uint y, uint z, const std::vector<float> &timePoints);
+    virtual XYDataSeries timeCurve(uint x, uint y, uint z, const std::vector<float>& timePoints);
 
     void setTime(double seconds);
     double time() const;
