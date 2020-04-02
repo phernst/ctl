@@ -166,7 +166,6 @@ LinearDynamicVolume LinearDynamicVolume::cylinderZ(float radius, float height, f
 XYDataSeries LinearDynamicVolume::timeCurve(uint x, uint y, uint z,
                                             const std::vector<float>& timePoints)
 {
-    qInfo("efficient");
     XYDataSeries ret;
 
     for(const auto& smp : timePoints)

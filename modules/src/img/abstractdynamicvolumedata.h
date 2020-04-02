@@ -49,12 +49,16 @@ inline XYDataSeries AbstractDynamicVolumeData::timeCurve(uint x, uint y, uint z,
                                                          const std::vector<float>& timePoints)
 {
     XYDataSeries ret;
+    const auto timePtCache = time();
 
     for(const auto& smp : timePoints)
     {
         setTime(smp);
         ret.append(smp, this->operator()(x,y,z));
     }
+
+    // reset time point to initial value
+    setTime(timePtCache);
 
     return ret;
 }
