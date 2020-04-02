@@ -17,3 +17,6 @@ OCL_ROUTINES_MODULE {
 } else {
     message("No OpenCL-dependent submodules will be included. Include the OpenCL module in advance to change this behavior.")
 }
+
+HEADERS += \
+    $$PWD/src/gui/widgets/allwidgets.h
