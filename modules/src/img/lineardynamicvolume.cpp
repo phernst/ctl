@@ -163,6 +163,12 @@ LinearDynamicVolume LinearDynamicVolume::cylinderZ(float radius, float height, f
                                VoxelVolume<float>::cylinderZ(radius, height, voxelSize, offset));
 }
 
+/*!
+ * Returns the data series containing the data of voxel (\a x, \a y, \a z) at the time points
+ * specified in \a timePoints (to be specified in ms):
+ *
+ * \f$ \mu(x,y,z;t) = t \cdot slope(x,y,z) + offset(x,y,z) \quad \forall t \in timePoints\f$
+ */
 XYDataSeries LinearDynamicVolume::timeCurve(uint x, uint y, uint z,
                                             const std::vector<float>& timePoints)
 {

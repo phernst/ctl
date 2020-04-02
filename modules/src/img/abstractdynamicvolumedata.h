@@ -45,6 +45,15 @@ inline AbstractDynamicVolumeData::AbstractDynamicVolumeData(const SpectralVolume
 {
 }
 
+/*!
+ * Returns the data series containing the data of voxel (\a x, \a y, \a z) at the time points
+ * specified in \a timePoints (to be specified in ms).
+ *
+ * Note that this is a highly inefficient implementation that requires updating the entire volume
+ * for each requested time point using updateVolume(). Make sure to override this method in sub-
+ * classes to use more efficient ways of evaluating values of the requested voxel alone, if
+ * possible.
+ */
 inline XYDataSeries AbstractDynamicVolumeData::timeCurve(uint x, uint y, uint z,
                                                          const std::vector<float>& timePoints)
 {
@@ -71,12 +80,26 @@ inline void AbstractDynamicVolumeData::setTime(double seconds)
 
 inline double AbstractDynamicVolumeData::time() const { return _time; }
 
+/*!
+ * Convenience alternative of timeCurve(uint, uint, uint, const std::vector<float>&).
+ *
+ * Returns the time series sampled at \a nbSamples equally-spaced positions within the interval
+ * [\a tStart, \a tEnd] (in ms).
+ */
 inline XYDataSeries AbstractDynamicVolumeData::timeCurve(uint x, uint y, uint z,
                                                          float tStart, float tEnd, uint nbSamples)
 {
     return timeCurve(x, y, z, SamplingRange(tStart, tEnd).linspace(nbSamples));
 }
 
+/*!
+ * Convenience alternative of timeCurve(uint, uint, uint, const std::vector<float>&).
+ *
+ * Returns the time series sampled at \a nbSamples equally-spaced positions within the interval
+ * specified by \a timeRange.
+ *
+ * Same as: \code timeCurve(x, y, z, timeRange.linspace(nbSamples)); \endcode
+ */
 inline XYDataSeries AbstractDynamicVolumeData::timeCurve(uint x, uint y, uint z,
                                                          SamplingRange timeRange, uint nbSamples)
 {
