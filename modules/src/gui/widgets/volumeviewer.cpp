@@ -43,6 +43,8 @@ VolumeViewer::VolumeViewer(QWidget* parent)
     // connections for subvolume selection
     connect(ui->_TW_volumeOverview, &QTableWidget::itemSelectionChanged, this, &VolumeViewer::volumeSelectionChanged);
 
+    ui->_TW_volumeOverview->horizontalHeaderItem(2)->setToolTip(QStringLiteral("Density/Attenuation"));
+
     ui->_W_dataView->setContrastLinePlotLabels("Position on line", "Attenuation");
     ui->_W_dataView->setLivePixelDataEnabled(true);
 
@@ -193,10 +195,15 @@ void VolumeViewer::updateVolumeOverview()
     {
         auto nameItem = new QTableWidgetItem(subvol->materialName());
         auto dimItem  = new QTableWidgetItem(QString::fromStdString(subvol->dimensions().info()));
+        auto densAttItem = new QTableWidgetItem(subvol->isDensityVolume() ? QStringLiteral("D")
+                                                                          : QStringLiteral("A"));
         ui->_TW_volumeOverview->setItem(row, 0, nameItem);
         ui->_TW_volumeOverview->setItem(row, 1, dimItem);
+        ui->_TW_volumeOverview->setItem(row, 2, densAttItem);
         ++row;
     }
+
+    ui->_TW_volumeOverview->resizeColumnsToContents();
 }
 
 void VolumeViewer::updateSliderRange()
