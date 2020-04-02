@@ -17,9 +17,7 @@ void BasisFunctionVolume::updateVolume()
         // init volume (zero initialized, see above)
         VoxelVolume<float>(*this),
         // the "+" operation
-        [](const VoxelVolume<float>& v1, const VoxelVolume<float>& v2) {
-            return v1 + v2;
-        },
+        std::plus<VoxelVolume<float>>(),
         // the "*" operation
         [discreteTime](const VoxelVolume<float>& v, const std::vector<float>& f) {
             return v * f[discreteTime];
