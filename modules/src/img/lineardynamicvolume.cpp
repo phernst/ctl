@@ -163,6 +163,18 @@ LinearDynamicVolume LinearDynamicVolume::cylinderZ(float radius, float height, f
                                VoxelVolume<float>::cylinderZ(radius, height, voxelSize, offset));
 }
 
+XYDataSeries LinearDynamicVolume::timeCurve(uint x, uint y, uint z,
+                                            const std::vector<float>& timePoints)
+{
+    qInfo("efficient");
+    XYDataSeries ret;
+
+    for(const auto& smp : timePoints)
+        ret.append(smp, _slope(x, y, z) * smp + _lag(x, y, z));
+
+    return ret;
+}
+
 SpectralVolumeData* LinearDynamicVolume::clone() const
 {
     return new LinearDynamicVolume(*this);

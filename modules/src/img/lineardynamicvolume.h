@@ -49,6 +49,10 @@ public:
     static LinearDynamicVolume cylinderY(float radius, float height, float voxelSize, float slope, float offset);
     static LinearDynamicVolume cylinderZ(float radius, float height, float voxelSize, float slope, float offset);
 
+    XYDataSeries timeCurve(uint x, uint y, uint z, const std::vector<float>& timePoints) override;
+
+    using AbstractDynamicVolumeData::timeCurve;
+
 private:
     VoxelVolume<float> _lag;
     VoxelVolume<float> _slope;
