@@ -32,8 +32,6 @@ public:
 public slots:
     void setShowPoints(bool enabled = true);
 
-private:
-    void updateLogData();
 };
 
 } // namespace gui

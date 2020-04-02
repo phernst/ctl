@@ -58,8 +58,10 @@ void LineSeriesView::setData(const XYDataSeries& lineSeries)
     _dataSeries->clear();
     _dataSeries->append(lineSeries.data());
 
-    if(!yAxisIsLinear())
-        updateLogData();
+    _dataSeriesLog->clear();
+    for(const auto& pt : _dataSeries->pointsVector())
+        if(pt.y() > 0.0)
+            _dataSeriesLog->append(pt);
 
     autoRange();
 }
@@ -74,15 +76,6 @@ void LineSeriesView::setShowPoints(bool enabled)
     _dataSeries->setPointsVisible(enabled);
     _dataSeriesLog->setPointsVisible(enabled);
 }
-
-void LineSeriesView::updateLogData()
-{
-    _dataSeriesLog->clear();
-    for(const auto& pt : _dataSeries->pointsVector())
-        if(pt.y() > 0.0)
-            _dataSeriesLog->append(pt);
-}
-
 
 } // namespace gui
 } // namespace CTL
