@@ -58,6 +58,10 @@ project.
     ```
     If you are on another platform, note that a Qt3D version is needed that 
     requires a Qt version >= 5.9.
+3. QtCharts (optional, for [chart-based widgets](https://gitlab.com/tpfeiffe/ctl/blob/dev_v0.3.2/modules/submodules/gui_widgets_charts.pri))
+    ```console
+    sudo apt install libqt5charts5-dev
+    ```
 
 Install OpenCL 1.1/1.2
 ----------------------
