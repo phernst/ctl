@@ -44,11 +44,23 @@ void ChartViewBase::autoRange()
     const auto minMaxX = std::minmax_element(dataPts.cbegin(), dataPts.cend(), compareX);
     const auto minMaxY = std::minmax_element(dataPts.cbegin(), dataPts.cend(), compareY);
 
-    const auto xRange = qMakePair(minMaxX.first->x(), minMaxX.second->x());
-    const auto yRange = qMakePair(minMaxY.first->y(), minMaxY.second->y());
+    auto xRange = qMakePair(minMaxX.first->x(), minMaxX.second->x());
+    auto yRange = qMakePair(minMaxY.first->y(), 1.05 * minMaxY.second->y());
+
+    // avoid zero-ranges
+    if(qFuzzyCompare(xRange.first, xRange.second))
+    {
+        xRange.first  -= 1.0;
+        xRange.second += 1.0;
+    }
+    if(qFuzzyCompare(yRange.first, yRange.second))
+    {
+        yRange.first  -= 1.0;
+        yRange.second += 1.0;
+    }
 
     setRangeX(xRange.first, xRange.second);
-    setRangeY(yRange.first, 1.05 * yRange.second);
+    setRangeY(yRange.first, yRange.second);
 }
 
 bool ChartViewBase::save(const QString& fileName)
