@@ -10,6 +10,74 @@ class QLabel;
 namespace CTL {
 namespace gui {
 
+/*!
+ * \class Chunk2DView
+ *
+ * \brief The Chunk2DView class provides basic visualization of Chunk2D data.
+ *
+ * This class can be used to visualize data stored in a Chunk2D. For convenience, the plot() method
+ * can be used to achieve a one-line solution, creating a widget that will be destroyed once it is
+ * closed by the user.
+ *
+ * Data will be visualized in 256 discrete value steps - according to the current window - using the
+ * colormap specified by setColorTable(). By default, a grayscale colormap is used.
+ *
+ * The following IO operations are supported by this class:
+ * - Zooming:
+ *    - Hold CRTL + scroll mouse wheel up/down to zoom in/out.
+ * - Data windowing:
+ *    - Hold left mouse button + move up/down to raise/lower the center (or level) of the window.
+ *    - Hold left mouse button + move left/right to narrow/broaden the width of the window.
+ *    - Double-click left to request automatic windowing (ie. min/max-window).
+ * - Plotting a contrast line:
+ *    - Hold right mouse button + drag mouse to draw a line.
+ *    - Press 'K' button to create a contrast line plot of the current line (requires
+ * ctl_gui_charts.pri submodule).
+ * - Save to image:
+ *    - Press CRTL + S to open a dialog for saving the current figure to a file.
+ * - Read-out live pixel data under cursor:
+ *    - Can be enabled with setLivePixelDataEnabled(true); if enabled, emits a signal with pixel
+ * information that can be catched elsewhere.
+ *
+ * Sensitivity of mouse gestures (move, wheel) can be controlled with setMouseWindowingScaling() and
+ * setWheelZoomPerTurn(). For windowing, a convenience method setAutoMouseWindowScaling() exists to
+ * set a sensitivity suited for the current data.
+ *
+ * The following example shows how to visualize a single slice from a VoxelVolume data object using
+ * the Chunk2DView:
+ * \code
+ * // create a ball volume, filled with value 1.0
+ * auto volume = VoxelVolume<float>::ball(100.0f, 1.0f, 1.0f);
+ * // select slice 11 in *z*-direction
+ * auto slice = volume.sliceZ(10);
+ *
+ * // (static version) using the plot() command
+ * gui::Chunk2DView::plot(slice);
+ *
+ * // (property-based version)
+ * auto viewer = new gui::Chunk2DView; // needs to be deleted at an appropriate time
+ * viewer->setData(slice);
+ * viewer->autoResize();
+ * viewer->show();
+ * \endcode
+ *
+ * The property-based version provides more flexibility as it gives access to the full set of
+ * methods to configure the Chunk2DView. The following example shows, how we can use this approach
+ * to create a visualization that uses a black-red colormap:
+ * \code
+ * // create colormap
+ * QVector<QRgb> blackRedMap(256);
+ *  for(int i = 0; i <= 255; ++i)
+ *      blackRedMap[i] = qRgb(i,0,0);
+ *
+ * auto viewer = new gui::Chunk2DView; // needs to be deleted at an appropriate time
+ * viewer->setData(slice);             // see above example for 'slice'
+ * viewer->autoResize();
+ * viewer->setColorTable(blackRedMap);
+ * viewer->show();
+ * \endcode
+ */
+
 class Chunk2DView : public QGraphicsView
 {
     Q_OBJECT
