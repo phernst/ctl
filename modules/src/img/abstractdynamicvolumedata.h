@@ -2,6 +2,8 @@
 #define CTL_ABSTRACTDYNAMICVOLUMEDATA_H
 
 #include "spectralvolumedata.h"
+#include "models/xydataseries.h"
+#include "processing/coordinates.h" // for Range<T>
 
 /*
  * NOTE: This is header only.
@@ -18,8 +20,12 @@ class AbstractDynamicVolumeData : public SpectralVolumeData
 public:
     AbstractDynamicVolumeData(const SpectralVolumeData& other);
 
+    virtual XYDataSeries timeCurve(uint x, uint y, uint z, const std::vector<float> &timePoints);
+
     void setTime(double seconds);
     double time() const;
+    XYDataSeries timeCurve(uint x, uint y, uint z, float tStart, float tEnd, uint nbSamples);
+    XYDataSeries timeCurve(uint x, uint y, uint z, SamplingRange timeRange, uint nbSamples);
 
 protected:
     AbstractDynamicVolumeData(const AbstractDynamicVolumeData&) = default;
@@ -39,6 +45,20 @@ inline AbstractDynamicVolumeData::AbstractDynamicVolumeData(const SpectralVolume
 {
 }
 
+inline XYDataSeries AbstractDynamicVolumeData::timeCurve(uint x, uint y, uint z,
+                                                         const std::vector<float>& timePoints)
+{
+    XYDataSeries ret;
+
+    for(const auto& smp : timePoints)
+    {
+        setTime(smp);
+        ret.append(smp, this->operator()(x,y,z));
+    }
+
+    return ret;
+}
+
 inline void AbstractDynamicVolumeData::setTime(double seconds)
 {
     _time = seconds;
@@ -46,6 +66,18 @@ inline void AbstractDynamicVolumeData::setTime(double seconds)
 }
 
 inline double AbstractDynamicVolumeData::time() const { return _time; }
+
+inline XYDataSeries AbstractDynamicVolumeData::timeCurve(uint x, uint y, uint z,
+                                                         float tStart, float tEnd, uint nbSamples)
+{
+    return timeCurve(x, y, z, SamplingRange(tStart, tEnd).linspace(nbSamples));
+}
+
+inline XYDataSeries AbstractDynamicVolumeData::timeCurve(uint x, uint y, uint z,
+                                                         SamplingRange timeRange, uint nbSamples)
+{
+    return timeCurve(x, y, z, timeRange.linspace(nbSamples));
+}
 
 } // namespace CTL
 
