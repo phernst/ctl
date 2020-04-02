@@ -4,10 +4,9 @@
 #include <execution>
 #endif
 
-namespace CTL {
-
-template<class... Args>
-auto innerProduct(Args&&... args) -> decltype(std::inner_product(std::forward<Args>(args)...))
+template <class... Args>
+static auto innerProduct(Args&&... args)
+    -> decltype(std::inner_product(std::forward<Args>(args)...))
 {
 #if __cplusplus >= 201703L
     return std::transform_reduce(std::execution::par, std::forward<Args>(args)...);
@@ -15,6 +14,8 @@ auto innerProduct(Args&&... args) -> decltype(std::inner_product(std::forward<Ar
     return std::inner_product(std::forward<Args>(args)...);
 #endif
 }
+
+namespace CTL {
 
 void BasisFunctionVolume::updateVolume()
 {
