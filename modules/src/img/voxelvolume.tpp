@@ -1,13 +1,14 @@
 #include "voxelvolume.h"
+#include "processing/threadpool.h"
 #include <cmath>
 
 namespace CTL {
 
 namespace details {
-    template<typename T> void grindBall(VoxelVolume<T>& volume, float radius);
-    template<typename T> void grindCylinderX(VoxelVolume<T>& volume, float radius);
-    template<typename T> void grindCylinderY(VoxelVolume<T>& volume, float radius);
-    template<typename T> void grindCylinderZ(VoxelVolume<T>& volume, float radius);
+    template <typename T> void grindBall(VoxelVolume<T>& volume, float radius);
+    template <typename T> void grindCylinderX(VoxelVolume<T>& volume, float radius);
+    template <typename T> void grindCylinderY(VoxelVolume<T>& volume, float radius);
+    template <typename T> void grindCylinderZ(VoxelVolume<T>& volume, float radius);
 }
 
 /*!
@@ -177,7 +178,7 @@ VoxelVolume<T> VoxelVolume<T>::fromChunk2DStack(const std::vector<Chunk2D<T>>& s
  * Constructs a cubic voxelized volume with \a nbVoxel x \a nbVoxel x \a nbVoxel voxels (voxel
  * dimension: \a voxelSize x \a voxelSize x \a voxelSize), filled with \a fillValue.
  */
-template<typename T>
+template <typename T>
 VoxelVolume<T> VoxelVolume<T>::cube(uint nbVoxel, float voxelSize, const T& fillValue)
 {
     const Dimensions dim{ nbVoxel, nbVoxel, nbVoxel };
@@ -194,7 +195,7 @@ VoxelVolume<T> VoxelVolume<T>::cube(uint nbVoxel, float voxelSize, const T& fill
  * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
  * each dimension.
  */
-template<typename T>
+template <typename T>
 VoxelVolume<T> VoxelVolume<T>::ball(float radius, float voxelSize, const T& fillValue)
 {
     const auto nbVox = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
@@ -217,7 +218,7 @@ VoxelVolume<T> VoxelVolume<T>::ball(float radius, float voxelSize, const T& fill
  * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
  * *y*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *x*-direction.
  */
-template<typename T>
+template <typename T>
 VoxelVolume<T> VoxelVolume<T>::cylinderX(float radius, float height, float voxelSize, const T& fillValue)
 {
     const auto nbVoxCircle = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
@@ -241,7 +242,7 @@ VoxelVolume<T> VoxelVolume<T>::cylinderX(float radius, float height, float voxel
  * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
  * *x*- and *z*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *y*-direction.
  */
-template<typename T>
+template <typename T>
 VoxelVolume<T> VoxelVolume<T>::cylinderY(float radius, float height, float voxelSize, const T& fillValue)
 {
     const auto nbVoxCircle = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
@@ -265,7 +266,7 @@ VoxelVolume<T> VoxelVolume<T>::cylinderY(float radius, float height, float voxel
  * The resulting volume will have \f$ \left\lceil 2\cdot radius/voxelSize\right\rceil \f$ voxels in
  * *x*- and *y*-dimension and \f$ \left\lceil height/voxelSize\right\rceil \f$ in *z*-direction.
  */
-template<typename T>
+template <typename T>
 VoxelVolume<T> VoxelVolume<T>::cylinderZ(float radius, float height, float voxelSize, const T& fillValue)
 {
     const auto nbVoxCircle = static_cast<uint>(std::ceil(2.0f * radius / voxelSize));
@@ -284,7 +285,7 @@ VoxelVolume<T> VoxelVolume<T>::cylinderZ(float radius, float height, float voxel
 /*!
  * Sets an isotropic voxels size of \a isotropicSize (in mm).
  */
-template<typename T>
+template <typename T>
 void VoxelVolume<T>::setVoxelSize(float isotropicSize)
 {
     _size = { isotropicSize, isotropicSize, isotropicSize };
@@ -295,7 +296,7 @@ void VoxelVolume<T>::setVoxelSize(float isotropicSize)
  *
  * \sa allocateMemory()
  */
-template<typename T>
+template <typename T>
 void VoxelVolume<T>::freeMemory()
 {
     _data.clear();
@@ -471,7 +472,7 @@ VoxelVolume<T> VoxelVolume<T>::reslicedByZ(bool reverse) const
 /*!
  * Returns the highest value in this volume. Returns zero for empty VoxelVolume objects.
  */
-template<typename T>
+template <typename T>
 T VoxelVolume<T>::max() const
 {
     if(allocatedElements() == 0)
@@ -483,7 +484,7 @@ T VoxelVolume<T>::max() const
 /*!
  * Returns the smallest value in this volume. Returns zero for empty VoxelVolume objects.
  */
-template<typename T>
+template <typename T>
 T VoxelVolume<T>::min() const
 {
     if(allocatedElements() == 0)
@@ -507,8 +508,16 @@ VoxelVolume<T>& VoxelVolume<T>::operator+=(const VoxelVolume<T>& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '+=' operation.");
 
-    std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
-                   std::plus<T>());
+    const auto dataIt = _data.begin();
+    const auto otherDataIt = other._data.cbegin();
+
+    auto threadTask = [dataIt, otherDataIt](size_t begin, size_t end)
+    {
+        std::transform(dataIt + begin, dataIt + end, otherDataIt + begin, dataIt + begin,
+                       std::plus<T>());
+    };
+
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -527,8 +536,16 @@ VoxelVolume<T>& VoxelVolume<T>::operator-=(const VoxelVolume<T>& other)
     if(dimensions() != other.dimensions())
         throw std::domain_error("Inconsistent dimensions of VoxelVolumes in '-=' operation.");
 
-    std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
-                   std::minus<T>());
+    const auto dataIt = _data.begin();
+    const auto otherDataIt = other._data.cbegin();
+
+    auto threadTask = [dataIt, otherDataIt](size_t begin, size_t end)
+    {
+        std::transform(dataIt + begin, dataIt + end, otherDataIt + begin, dataIt + begin,
+                       std::minus<T>());
+    };
+
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -536,11 +553,18 @@ VoxelVolume<T>& VoxelVolume<T>::operator-=(const VoxelVolume<T>& other)
 /*!
  * Adds \a additiveShift to all voxel values in this volume and returns a reference to this instance.
  */
-template<typename T>
+template <typename T>
 VoxelVolume<T>& VoxelVolume<T>::operator+=(const T& additiveShift)
 {
-    for(auto& vox : _data)
-        vox += additiveShift;
+    const auto dataIt = _data.begin();
+
+    auto threadTask = [dataIt, additiveShift](size_t begin, size_t end)
+    {
+        std::transform(dataIt + begin, dataIt + end, dataIt + begin,
+                       [additiveShift](const T& voxVal) { return voxVal + additiveShift; });
+    };
+
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -549,11 +573,18 @@ VoxelVolume<T>& VoxelVolume<T>::operator+=(const T& additiveShift)
  * Subtracts \a subtractiveShift from all voxel values in this volume and returns a reference to
  * this instance.
  */
-template<typename T>
+template <typename T>
 VoxelVolume<T>& VoxelVolume<T>::operator-=(const T& subtractiveShift)
 {
-    for(auto& vox : _data)
-        vox -= subtractiveShift;
+    const auto dataIt = _data.begin();
+
+    auto threadTask = [dataIt, subtractiveShift](size_t begin, size_t end)
+    {
+        std::transform(dataIt + begin, dataIt + end, dataIt + begin,
+                       [subtractiveShift](const T& voxVal) { return voxVal - subtractiveShift; });
+    };
+
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -564,8 +595,15 @@ VoxelVolume<T>& VoxelVolume<T>::operator-=(const T& subtractiveShift)
 template <typename T>
 VoxelVolume<T>& VoxelVolume<T>::operator*=(const T& factor)
 {
-    for(auto& vox : _data)
-        vox *= factor;
+    const auto dataIt = _data.begin();
+
+    auto threadTask = [dataIt, factor](size_t begin, size_t end)
+    {
+        std::transform(dataIt + begin, dataIt + end, dataIt + begin,
+                       [factor](const T& voxVal) { return voxVal * factor; });
+    };
+
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -576,8 +614,15 @@ VoxelVolume<T>& VoxelVolume<T>::operator*=(const T& factor)
 template <typename T>
 VoxelVolume<T>& VoxelVolume<T>::operator/=(const T& divisor)
 {
-    for(auto& vox : _data)
-        vox /= divisor;
+    const auto dataIt = _data.begin();
+
+    auto threadTask = [dataIt, divisor](size_t begin, size_t end)
+    {
+        std::transform(dataIt + begin, dataIt + end, dataIt + begin,
+                       [divisor](const T& voxVal) { return voxVal / divisor; });
+    };
+
+    this->parallelExecution(threadTask);
 
     return *this;
 }
@@ -645,7 +690,7 @@ VoxelVolume<T> VoxelVolume<T>::operator-(const T& subtractiveShift) const
 /*!
  * Returns a copy of this volume with all its voxel values multiplied by \a factor.
  */
-template<typename T>
+template <typename T>
 VoxelVolume<T> VoxelVolume<T>::operator*(const T& factor) const
 {
     VoxelVolume<T> ret(*this);
@@ -656,7 +701,7 @@ VoxelVolume<T> VoxelVolume<T>::operator*(const T& factor) const
 /*!
  * Returns a copy of this volume with all its voxel values divided by \a divisor.
  */
-template<typename T>
+template <typename T>
 VoxelVolume<T> VoxelVolume<T>::operator/(const T& divisor) const
 {
     VoxelVolume<T> ret(*this);
@@ -668,7 +713,7 @@ VoxelVolume<T> VoxelVolume<T>::operator/(const T& divisor) const
 /*!
  * Returns true if all three dimensions of this instance and \a other are equal.
  */
-template<typename T>
+template <typename T>
 bool VoxelVolume<T>::Dimensions::operator==(const Dimensions& other) const
 {
     return (x == other.x) && (y == other.y) && (z == other.z);
@@ -677,7 +722,7 @@ bool VoxelVolume<T>::Dimensions::operator==(const Dimensions& other) const
 /*!
  * Returns true if any of the three dimensions of this instance and \a other differ.
  */
-template<typename T>
+template <typename T>
 bool VoxelVolume<T>::Dimensions::operator!=(const Dimensions& other) const
 {
     return (x != other.x) || (y != other.y) || (z != other.z);
@@ -686,7 +731,7 @@ bool VoxelVolume<T>::Dimensions::operator!=(const Dimensions& other) const
 /*!
  * Returns a string that contains the dimensions joined with " x ".
  */
-template<typename T>
+template <typename T>
 std::string VoxelVolume<T>::Dimensions::info() const
 {
     return std::to_string(x) + " x " + std::to_string(y) + " x " + std::to_string(z);
@@ -704,7 +749,7 @@ size_t VoxelVolume<T>::Dimensions::totalNbElements() const
 /*!
  * Returns true if the voxel sizes of this instance and \a other are equal (in all three dimensions).
  */
-template<typename T>
+template <typename T>
 bool VoxelVolume<T>::VoxelSize::operator==(const VoxelSize& other) const
 {
     return qFuzzyCompare(x, other.x) && qFuzzyCompare(y, other.y) && qFuzzyCompare(z, other.z);
@@ -765,7 +810,7 @@ void VoxelVolume<T>::allocateMemory()
  *
  * \sa allocatedElements(), allocateMemory(), fill().
  */
-template<typename T>
+template <typename T>
 void VoxelVolume<T>::allocateMemory(const T& initValue)
 {
     _data.resize(totalVoxelCount(), initValue);
@@ -936,7 +981,7 @@ void VoxelVolume<T>::setVoxelSize(float xSize, float ySize, float zSize)
  *
  * Same as nbVoxels().
  */
-template<typename T>
+template <typename T>
 const typename VoxelVolume<T>::Dimensions& VoxelVolume<T>::dimensions() const
 {
     return _dim;
@@ -978,8 +1023,27 @@ bool VoxelVolume<T>::hasEqualSizeAs(const std::vector<T>& other) const
     return totalVoxelCount() == other.size();
 }
 
+/*!
+ * Helper function for running tasks in parallel over voxels.
+ */
+template <typename T>
+template <class Function>
+void VoxelVolume<T>::parallelExecution(const Function& f) const
+{
+    ThreadPool tp;
+    const auto nbThreads = tp.nbThreads();
+    const auto nbVoxels = this->totalVoxelCount();
+    const auto voxelPerThread = nbVoxels / nbThreads;
+    size_t t = 0;
+
+    for(; t < nbThreads; ++t)
+        tp.enqueueThread(f, t * voxelPerThread, (t + 1) * voxelPerThread);
+    // last thread does the rest (voxelPerThread + x, with x < nbThreads)
+    tp.enqueueThread(f, t * voxelPerThread, nbVoxels);
+}
+
 namespace details {
-    template<typename T>
+    template <typename T>
     void grindBall(VoxelVolume<T>& volume, float radius)
     {
         const auto nbVox = volume.dimensions().x;
@@ -1004,7 +1068,7 @@ namespace details {
                         volume(x, y, z) = 0.0f;
     }
 
-    template<typename T>
+    template <typename T>
     void grindCylinderX(VoxelVolume<T>& volume, float radius)
     {
         const auto nbVoxCircle = volume.dimensions().y;
@@ -1029,7 +1093,7 @@ namespace details {
                         volume(x, y, z) = 0.0f;
     }
 
-    template<typename T>
+    template <typename T>
     void grindCylinderY(VoxelVolume<T>& volume, float radius)
     {
         const auto nbVoxCircle = volume.dimensions().x;
@@ -1054,7 +1118,7 @@ namespace details {
                         volume(x, y, z) = 0.0f;
     }
 
-    template<typename T>
+    template <typename T>
     void grindCylinderZ(VoxelVolume<T>& volume, float radius)
     {
         const auto nbVoxCircle = volume.dimensions().x;

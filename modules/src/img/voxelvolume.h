@@ -152,6 +152,9 @@ protected:
 
 private:
     bool hasEqualSizeAs(const std::vector<T>& other) const;
+
+    template <class Function>
+    void parallelExecution(const Function& f) const;
 };
 
 /*!
