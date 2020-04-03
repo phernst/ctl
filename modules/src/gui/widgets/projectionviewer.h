@@ -25,6 +25,7 @@ public:
 
     static void plot(ProjectionData projections, const ModuleLayout& layout = {});
 
+    const ProjectionData& data() const;
     Chunk2DView* dataView() const;
     void setData(ProjectionData projections);
     void setModuleLayout(const ModuleLayout& layout);

@@ -56,8 +56,23 @@ void ProjectionViewer::plot(ProjectionData projections, const ModuleLayout& layo
     viewer->show();
 }
 
+/*!
+ * Returns a (constant) reference to the data currently managed by this instance.
+ */
+const ProjectionData& ProjectionViewer::data() const { return _data; }
+
+/*!
+ * Returns the viewport for displaying the actual projection data. Use this to configure the
+ * specific settings of the viewport.
+ *
+ * \sa Chunk2DView.
+ */
 Chunk2DView* ProjectionViewer::dataView() const { return ui->_W_dataView; }
 
+/*!
+ * Sets the visualized data to \a projections. Data is copied, so consider moving if it is no
+ * longer required.
+ */
 void ProjectionViewer::setData(ProjectionData projections)
 {
     _data = std::move(projections);
