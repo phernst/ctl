@@ -44,12 +44,12 @@ void BasisFunctionVolume::updateVolume()
 
     const auto discreteTime = time2Sample(this->time());
 
-    if(discreteTime >= _basisFcts.front().size())
+    if(discreteTime >= _model->basisFcts.front().size())
         return;
 
     auto updatedVol = _innerProduct(
         // iterate over all coefficients/basis functions
-        _coeffVolumes.cbegin(), _coeffVolumes.cend(), _basisFcts.cbegin(),
+        _model->coeffVolumes.cbegin(), _model->coeffVolumes.cend(), _model->basisFcts.cbegin(),
         // init volume (zero initialized, see above)
         VoxelVolume<float>(*this),
         // the "+" operation
@@ -70,26 +70,26 @@ SpectralVolumeData* BasisFunctionVolume::clone() const
 
 BasisFunctionVolume::BasisFunctionVolume(BasisFunctionVolume::CoeffVolumes coeffVolumes,
                                          SampledFunctions basisFunctions)
-    : AbstractDynamicVolumeData(VoxelVolume<float>(coeffVolumes.at(0).nbVoxels(),
-                                                   coeffVolumes.at(0).voxelSize()))
-    , _coeffVolumes(std::move(coeffVolumes))
-    , _basisFcts(std::move(basisFunctions))
+    : AbstractDynamicVolumeData(
+        VoxelVolume<float>(coeffVolumes.at(0).nbVoxels(), coeffVolumes.at(0).voxelSize()))
+    , _model(std::make_shared<const ModelParameters>(
+          ModelParameters{ std::move(coeffVolumes), std::move(basisFunctions) }))
 {
     // check for consistent sizes
-    if(_basisFcts.size() != _coeffVolumes.size())
+    if(_model->basisFcts.size() != _model->coeffVolumes.size())
         throw std::runtime_error("BasisFunctionVolume::BasisFunctionVolume: Number of coefficient "
                                  "volumes does not match the number of basis functions.");
 
     if(std::any_of(
-           std::next(_coeffVolumes.cbegin()), _coeffVolumes.cend(), [this](const VoxelVolume& c) {
+           std::next(_model->coeffVolumes.cbegin()), _model->coeffVolumes.cend(), [this](const VoxelVolume& c) {
                return c.nbVoxels() != this->nbVoxels() || c.voxelSize() != this->voxelSize();
            }))
         throw std::runtime_error("BasisFunctionVolume::BasisFunctionVolume: Inconsistent voxel "
                                  "size or dimensions of coefficient volumes.");
 
     if(std::any_of(
-           std::next(_basisFcts.cbegin()), _basisFcts.cend(),
-           [this](const std::vector<float>& t) { return t.size() != _basisFcts.at(0).size(); }))
+           std::next(_model->basisFcts.cbegin()), _model->basisFcts.cend(),
+           [this](const std::vector<float>& t) { return t.size() != _model->basisFcts.at(0).size(); }))
         throw std::runtime_error("BasisFunctionVolume::BasisFunctionVolume: Inconsistent length "
                                  "of basis functions.");
 
@@ -113,9 +113,9 @@ std::vector<float> BasisFunctionVolume::timeCurveValuesNativeSampling(uint x, ui
 {
     auto tac = std::inner_product(
         // iterate over all basis functions/coefficients
-        _basisFcts.cbegin(), _basisFcts.cend(), _coeffVolumes.cbegin(),
+        _model->basisFcts.cbegin(), _model->basisFcts.cend(), _model->coeffVolumes.cbegin(),
         // init TAC function (zero function)
-        std::vector<float>(_basisFcts.front().size(), 0.0f),
+        std::vector<float>(_model->basisFcts.front().size(), 0.0f),
         // the "+" operation
         [](std::vector<float> f1, const std::vector<float>& f2) {
             _transform(f1.cbegin(), f1.cend(), f2.cbegin(), f1.begin(), std::plus<float>());

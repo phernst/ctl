@@ -29,8 +29,14 @@ public:
     //XYDataSeries timeCurve(uint x, uint y, uint z, const std::vector<float>& timePoints) override;
 
 private:
-    CoeffVolumes _coeffVolumes;
-    SampledFunctions _basisFcts;
+
+    struct ModelParameters
+    {
+        CoeffVolumes coeffVolumes;
+        SampledFunctions basisFcts;
+    };
+
+    std::shared_ptr<const ModelParameters> _model;
 };
 
 } // namespace CTL
