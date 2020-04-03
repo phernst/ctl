@@ -56,6 +56,8 @@ void ProjectionViewer::plot(ProjectionData projections, const ModuleLayout& layo
     viewer->show();
 }
 
+Chunk2DView* ProjectionViewer::dataView() const { return ui->_W_dataView; }
+
 void ProjectionViewer::setData(ProjectionData projections)
 {
     _data = std::move(projections);

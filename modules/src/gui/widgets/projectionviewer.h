@@ -23,6 +23,7 @@ public:
 
     static void plot(ProjectionData projections, const ModuleLayout& layout = {});
 
+    Chunk2DView* dataView() const;
     void setData(ProjectionData projections);
     void setModuleLayout(const ModuleLayout& layout);
     void setWindowPresets(QPair<QString, QPair<double, double>> preset1,
