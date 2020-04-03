@@ -24,11 +24,7 @@ template <class... Args>
 auto _transform(Args&&... args) -> decltype(std::transform(std::forward<Args>(args)...))
 {
 #if __cplusplus >= 201703L
-    #ifdef _MSC_VER
     return std::transform(std::execution::par_unseq, std::forward<Args>(args)...);
-    #else
-    return std::transform(std::execution::unseq, std::forward<Args>(args)...);
-    #endif
 #else
     return std::transform(std::forward<Args>(args)...);
 #endif
