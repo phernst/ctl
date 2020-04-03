@@ -714,10 +714,19 @@ bool VoxelVolume<T>::VoxelSize::operator==(const VoxelSize& other) const
  * Returns true if voxel sizes of this instance and \a other differ (in any of the three
  * dimensions).
  */
-template<typename T>
+template <typename T>
 bool VoxelVolume<T>::VoxelSize::operator!=(const VoxelSize& other) const
 {
     return !qFuzzyCompare(x, other.x) || !qFuzzyCompare(y, other.y) || !qFuzzyCompare(z, other.z);
+}
+
+/*!
+ * Returns a formatted string that contains the voxel size joined with " x " and unit "mm".
+ */
+template <typename T>
+std::string VoxelVolume<T>::VoxelSize::info() const
+{
+    return std::to_string(x) + "mm x " + std::to_string(y) + "mm x " + std::to_string(z) + "mm";
 }
 
 

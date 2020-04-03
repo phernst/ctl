@@ -46,6 +46,8 @@ public:
 
         bool operator==(const VoxelSize& other) const;
         bool operator!=(const VoxelSize& other) const;
+
+        std::string info() const;
     };
     struct Offset
     {
