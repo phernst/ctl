@@ -12,6 +12,8 @@ class ProjectionViewer;
 namespace CTL {
 namespace gui {
 
+class Chunk2DView;
+
 class ProjectionViewer : public QWidget
 {
     Q_OBJECT
