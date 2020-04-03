@@ -95,6 +95,10 @@ void VolumeViewer::plot(SpectralVolumeData data)
     plot(CompositeVolume(std::move(data)));
 }
 
+const CompositeVolume& VolumeViewer::data() const { return _compData; }
+
+Chunk2DView* VolumeViewer::dataView() const { return ui->_W_dataView; }
+
 void VolumeViewer::setWindowPresets(QPair<QString, QPair<double, double> > preset1,
                                     QPair<QString, QPair<double, double> > preset2)
 {
@@ -153,6 +157,11 @@ void VolumeViewer::showSlice(int slice)
 
 }
 
+void VolumeViewer::showSubvolume(int subvolume)
+{
+    ui->_TW_volumeOverview->selectRow(subvolume);
+}
+
 void VolumeViewer::keyPressEvent(QKeyEvent* event)
 {
     if(event->key() == Qt::Key_K)
@@ -187,8 +196,10 @@ void VolumeViewer::volumeSelectionChanged()
 
 void VolumeViewer::updateVolumeOverview()
 {
-    ui->_TW_volumeOverview->clearContents();
+    constexpr int MAX_NAME_WIDTH = 150;
+    constexpr int MAX_TOTAL_WIDTH = 300;
 
+    ui->_TW_volumeOverview->clearContents();
     ui->_TW_volumeOverview->setRowCount(_compData.nbSubVolumes());
     uint row = 0;
     for(const auto& subvol : _compData.data())
@@ -204,6 +215,16 @@ void VolumeViewer::updateVolumeOverview()
     }
 
     ui->_TW_volumeOverview->resizeColumnsToContents();
+
+    // adjust width
+    ui->_TW_volumeOverview->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    const auto reqWidth = ui->_TW_volumeOverview->horizontalHeader()->length() +
+                          ui->_TW_volumeOverview->verticalHeader()->width() +
+                          ui->_TW_volumeOverview->frameWidth()*2;
+    ui->_TW_volumeOverview->setFixedWidth(std::min(reqWidth, MAX_TOTAL_WIDTH));
+    if(ui->_TW_volumeOverview->columnWidth(0) > MAX_NAME_WIDTH)
+        ui->_TW_volumeOverview->setColumnWidth(0, MAX_NAME_WIDTH);
+    ui->_TW_volumeOverview->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 }
 
 void VolumeViewer::updateSliderRange()

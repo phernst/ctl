@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="gridLayout_2" columnstretch="0,0,0">
    <item row="2" column="0">
     <layout class="QGridLayout" name="gridLayout" rowstretch="0,1" columnstretch="0,0,0,0,1" rowminimumheight="0,0">
      <item row="1" column="0">
@@ -122,6 +122,12 @@
    </item>
    <item row="0" column="2">
     <widget class="QTableWidget" name="_TW_volumeOverview">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
      </property>
@@ -137,6 +143,9 @@
      <property name="showGrid">
       <bool>false</bool>
      </property>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>false</bool>
+     </attribute>
      <column>
       <property name="text">
        <string>Name</string>

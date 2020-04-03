@@ -11,6 +11,8 @@ class VolumeViewer;
 namespace CTL {
 namespace gui {
 
+class Chunk2DView;
+
 class VolumeViewer : public QWidget
 {
     Q_OBJECT
@@ -29,12 +31,13 @@ public:
     VolumeViewer(CompositeVolume volume, QWidget *parent = nullptr);
     ~VolumeViewer();
 
-    void setData(SpectralVolumeData data);
-    void setData(CompositeVolume data);
-
     static void plot(CompositeVolume data);
     static void plot(SpectralVolumeData data);
 
+    const CompositeVolume& data() const;
+    Chunk2DView* dataView() const;
+    void setData(SpectralVolumeData data);
+    void setData(CompositeVolume data);
     void setWindowPresets(WindowPreset preset1, WindowPreset preset2);
     void setWindowPresetsInMu(WindowPreset preset1, WindowPreset preset2, float referenceEnergy);
     void setWindowPresets(QPair<QString, QPair<double, double>> preset1,
@@ -45,6 +48,7 @@ public slots:
     void hideCompositeOverview(bool hide = true);
     void setAutoMouseWindowScaling();
     void showSlice(int slice);
+    void showSubvolume(int subvolume);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
