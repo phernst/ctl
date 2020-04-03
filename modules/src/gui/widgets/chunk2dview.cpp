@@ -18,7 +18,10 @@ namespace CTL {
 namespace gui {
 
 /*!
- * Creates a Chunk2DView and sets its parent widget to \a parent.
+ * Creates a Chunk2DView and sets its parent widget to \a parent. Note that you need to call show()
+ * to display the window.
+ *
+ * The static method plot() can be used as a convenience alternative for quick visualization.
  */
 Chunk2DView::Chunk2DView(QWidget* parent)
     : QGraphicsView(parent)
@@ -40,7 +43,10 @@ Chunk2DView::Chunk2DView(QWidget* parent)
 }
 
 /*!
- * Creates a Chunk2DView and with parent widget \a parent and sets its data to \a data.
+ * Creates a Chunk2DView with parent widget \a parent and sets its data to \a data. Note that you
+ * need to call show() to display the window.
+ *
+ * The static method plot() can be used as a convenience alternative for quick visualization.
  */
 Chunk2DView::Chunk2DView(Chunk2D<float> data, QWidget* parent)
     : Chunk2DView(parent)
