@@ -19,6 +19,8 @@ namespace gui {
  * can be used to achieve a one-line solution, creating a widget that will be destroyed once it is
  * closed by the user.
  *
+ * ![A Chunk2DView window showing a projection image of two balls and a cylinder.](gui/Chunk2DView.png)
+ *
  * Data will be visualized in 256 discrete value steps - according to the current window - using the
  * colormap specified by setColorTable(). By default, a grayscale colormap is used.
  *
