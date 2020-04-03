@@ -41,8 +41,8 @@ ProjectionViewer::ProjectionViewer(QWidget *parent) :
 }
 
 /*!
- * Creates a ProjectionViewer with parent widget \a parent and sets its data to \a data. Note that
- * you need to call show() to display the window.
+ * Creates a ProjectionViewer with parent widget \a parent and sets its data to \a projections. Note
+ * that you need to call show() to display the window.
  *
  * The static method plot() can be used as a convenience alternative for quick visualization.
  */
