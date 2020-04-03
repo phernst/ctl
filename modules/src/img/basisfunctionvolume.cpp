@@ -4,9 +4,14 @@
 #include <execution>
 #endif
 
+namespace {
+
+// make use of C++17 parallel algorithms
+// NOTE: for using the parallel algorithms with gcc/clang you may have to link the TBB library:
+// LIBS += -ltbb
+
 template <class... Args>
-static auto innerProduct(Args&&... args)
-    -> decltype(std::inner_product(std::forward<Args>(args)...))
+auto _innerProduct(Args&&... args) -> decltype(std::inner_product(std::forward<Args>(args)...))
 {
 #if __cplusplus >= 201703L
     return std::transform_reduce(std::execution::par, std::forward<Args>(args)...);
@@ -16,15 +21,20 @@ static auto innerProduct(Args&&... args)
 }
 
 template <class... Args>
-static auto transform(Args&&... args)
-    -> decltype(std::transform(std::forward<Args>(args)...))
+auto _transform(Args&&... args) -> decltype(std::transform(std::forward<Args>(args)...))
 {
 #if __cplusplus >= 201703L
+    #ifdef _MSC_VER
     return std::transform(std::execution::par_unseq, std::forward<Args>(args)...);
+    #else
+    return std::transform(std::execution::unseq, std::forward<Args>(args)...);
+    #endif
 #else
     return std::transform(std::forward<Args>(args)...);
 #endif
 }
+
+} // unnamed namespace
 
 namespace CTL {
 
@@ -37,7 +47,7 @@ void BasisFunctionVolume::updateVolume()
     if(discreteTime >= _basisFcts.front().size())
         return;
 
-    auto updatedVol = innerProduct(
+    auto updatedVol = _innerProduct(
         // iterate over all coefficients/basis functions
         _coeffVolumes.cbegin(), _coeffVolumes.cend(), _basisFcts.cbegin(),
         // init volume (zero initialized, see above)
@@ -108,13 +118,13 @@ std::vector<float> BasisFunctionVolume::timeCurveValuesNativeSampling(uint x, ui
         std::vector<float>(_basisFcts.front().size(), 0.0f),
         // the "+" operation
         [](std::vector<float> f1, const std::vector<float>& f2) {
-            transform(f1.cbegin(), f1.cend(), f2.cbegin(), f1.begin(), std::plus<float>());
+            _transform(f1.cbegin(), f1.cend(), f2.cbegin(), f1.begin(), std::plus<float>());
             return f1;
         },
         // the "*" operation
         [x, y, z](std::vector<float> f, const VoxelVolume<float>& v) {
             const auto coeff = v(x, y, z);
-            transform(f.cbegin(), f.cend(), f.begin(), [coeff](float val) { return coeff * val; });
+            _transform(f.cbegin(), f.cend(), f.begin(), [coeff](float val) { return coeff * val; });
             return f;
         });
 
