@@ -127,14 +127,31 @@ void VolumeViewer::setWindowPresetsInMu(WindowPreset preset1, WindowPreset prese
                      qMakePair(preset2HU.first, HUtoMu(preset2HU.second)));
 }
 
+/*!
+ * Requests an automatic resizing of this widget's window size. The window is tried to fit to the
+ * size of the shown data, bounded between a minimum size of 800 x 400 pixels and a maximum size of
+ * 1300 x 900 pixels.
+ */
 void VolumeViewer::autoResize()
 {
-    static const auto minimumSize = QSize(800, 400);
-    static const auto margin = QSize(300, 100);
+    static const auto staticMinSize = QSize(500, 400);
+    static const auto staticMargin = QSize(108, 100);
+
+    QSize minimumSize = staticMinSize;
+    QSize totalMargin = staticMargin;
+    if(!ui->_TW_volumeOverview->isHidden())
+    {
+        totalMargin.rwidth() += (ui->_TW_volumeOverview->width() - 14);
+        minimumSize.rwidth() += 200;
+    }
+
     ui->_W_dataView->autoResize();
-    resize((ui->_W_dataView->size() + margin).expandedTo(minimumSize));
+    resize((ui->_W_dataView->size() + totalMargin).expandedTo(minimumSize));
 }
 
+/*!
+ * Hides the composite overview table if \a hide = \c true (or makes it visible again if \c false).
+ */
 void VolumeViewer::hideCompositeOverview(bool hide)
 {
     ui->_TW_volumeOverview->setVisible(!hide);
@@ -197,7 +214,7 @@ void VolumeViewer::volumeSelectionChanged()
 void VolumeViewer::updateVolumeOverview()
 {
     constexpr int MAX_NAME_WIDTH = 150;
-    constexpr int MAX_TOTAL_WIDTH = 300;
+    constexpr int MAX_TOTAL_WIDTH = 306;
 
     ui->_TW_volumeOverview->clearContents();
     ui->_TW_volumeOverview->setRowCount(_compData.nbSubVolumes());
