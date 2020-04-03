@@ -7,6 +7,12 @@
 namespace CTL {
 namespace gui {
 
+/*!
+ * Creates a ProjectionViewer object with \a parent as a parent widget. Note that you need to call
+ * show() to display the window.
+ *
+ * The static method plot() can be used as a convenience alternative for quick visualization.
+ */
 ProjectionViewer::ProjectionViewer(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ProjectionViewer)
@@ -34,17 +40,37 @@ ProjectionViewer::ProjectionViewer(QWidget *parent) :
     setWindowTitle("Projection Viewer");
 }
 
+/*!
+ * Creates a ProjectionViewer with parent widget \a parent and sets its data to \a data. Note that
+ * you need to call show() to display the window.
+ *
+ * The static method plot() can be used as a convenience alternative for quick visualization.
+ */
 ProjectionViewer::ProjectionViewer(ProjectionData projections, QWidget* parent)
     : ProjectionViewer(parent)
 {
     setData(projections);
 }
 
+/*!
+ * Deletes the object.
+ */
 ProjectionViewer::~ProjectionViewer()
 {
     delete ui;
 }
 
+/*!
+ * Creates a ProjectionViewer for \a data and shows the window. If a specific ModuleLayout is passed
+ * by \a layout, the data will be combined according to this layout for the purpose of displaying.
+ * Otherwise, all modules in \a data are assumed to be arranged in a line next to each other in a
+ * horizontal manner.
+ *
+ * Sensitivity of windowing using mouse gestures is adapted automatically to \a data (see
+ * setAutoMouseWindowScaling()).
+ *
+ * The widget will be deleted automatically if the window is closed.
+ */
 void ProjectionViewer::plot(ProjectionData projections, const ModuleLayout& layout)
 {
     auto viewer = new ProjectionViewer(projections);
@@ -72,6 +98,9 @@ Chunk2DView* ProjectionViewer::dataView() const { return ui->_W_dataView; }
 /*!
  * Sets the visualized data to \a projections. Data is copied, so consider moving if it is no
  * longer required.
+ *
+ * Applies a min/max windowing if no specific windowing has been set (ie. the current window is
+ * [0,0]).
  */
 void ProjectionViewer::setData(ProjectionData projections)
 {
@@ -83,7 +112,14 @@ void ProjectionViewer::setData(ProjectionData projections)
         showView(0);
 }
 
-void ProjectionViewer::setModuleLayout(const ModuleLayout &layout)
+/*!
+ * Sets the module layout used to combine data from individual detector modules to \a layout. Data
+ * can only be shown on the basis of one combined block of data (Chunk2D).
+ *
+ * Calling this method after data has been set will update the visualization with respect to the new
+ * layout. Note that the passed layout needs to be compatible with the projection data.
+ */
+void ProjectionViewer::setModuleLayout(const ModuleLayout& layout)
 {
     _modLayout = layout;
 
@@ -91,17 +127,45 @@ void ProjectionViewer::setModuleLayout(const ModuleLayout &layout)
         showView(currentView()); // recompute data due to changed layout (if data is available)
 }
 
+/*!
+ * Sets the presets of the two preset buttons in the windowing GUI block to \a preset1 and
+ * \a preset2. Presets must contain the text that shall be shown on the button and the pair of
+ * values, specifying start and end of the data window, as a QPair.
+ *
+ * The window range will be shown as a tooltip when hovering the cursor over the corresponding
+ * button.
+ *
+ * Example:
+ * \code
+ * auto viewer = new ProjectionViewer;
+ * // ...
+ *
+ * //                         Button label      Window: ( start ,  end   )
+ * auto myPreset1 = qMakePair(QString("High"), qMakePair(1000.0, 100000.0));
+ * auto myPreset2 = qMakePair(QString("Low"), qMakePair(-10.0, 10.0));
+ *
+ * viewer->setWindowPresets(myPreset1, myPreset2);
+ * viewer->show();
+ * \endcode
+ */
 void ProjectionViewer::setWindowPresets(QPair<QString, QPair<double, double> > preset1,
                                         QPair<QString, QPair<double, double> > preset2)
 {
     ui->_W_windowing->setPresets(preset1, preset2);
 }
 
+/*!
+ * Returns the index of the view currently shown in the viewer.
+ */
 int ProjectionViewer::currentView() const
 {
     return ui->_VS_projection->value();
 }
 
+/*!
+ * Requests an automatic resizing of this widget's window size. The window is tried to fit to the
+ * size of the shown data, bounded to a maximum size of 1090 x 915 pixels.
+ */
 void ProjectionViewer::autoResize()
 {
     static const auto margin = QSize(90, 115);
@@ -109,11 +173,23 @@ void ProjectionViewer::autoResize()
     resize(ui->_W_dataView->size() + margin);
 }
 
+/*!
+ * Convenience method to set automatically determined values for the sensitvity of windowing using
+ * mouse gestures.
+ *
+ * Same as: \code dataView()->setAutoMouseWindowScaling(); \endcode
+ *
+ * \sa Chunk2DView::setAutoMouseWindowScaling().
+ */
 void ProjectionViewer::setAutoMouseWindowScaling()
 {
     ui->_W_dataView->setAutoMouseWindowScaling();
 }
 
+/*!
+ * Shows view number \a view from the currently managed data; \a view must be a valid index, ie.
+ * 0 <= \a view < data().nbViews().
+ */
 void ProjectionViewer::showView(int view)
 {
     ui->_L_view->setText(QString::number(view));
@@ -137,7 +213,7 @@ void ProjectionViewer::keyPressEvent(QKeyEvent* event)
 
 void ProjectionViewer::updateSliderRange()
 {
-    ui->_VS_projection->setMaximum(_data.dimensions().nbViews- 1);
+    ui->_VS_projection->setMaximum(_data.dimensions().nbViews - 1);
 }
 
 void ProjectionViewer::updatePixelInfo(int x, int y, float value)
