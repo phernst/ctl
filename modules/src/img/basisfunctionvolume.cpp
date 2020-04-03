@@ -1,5 +1,4 @@
 #include "basisfunctionvolume.h"
-#include <QDebug>
 
 namespace CTL {
 
@@ -43,10 +42,7 @@ BasisFunctionVolume::BasisFunctionVolume(BasisFunctionVolume::CoeffVolumes coeff
     // check for consistent sizes
     if(_model->basisFcts.size() != _model->coeffVolumes.size())
     {
-        qDebug() << "Number of basis functions:" << _model->basisFcts.size()
-                 << "Number of coefficient volumes:" << _model->coeffVolumes.size();
-        throw std::runtime_error("BasisFunctionVolume::BasisFunctionVolume: Number of coefficient "
-                                 "volumes does not match the number of basis functions.");
+        throw std::runtime_error(errMsgDifferentNumberOfCoeffsAndBasisFcts());
     }
 
     if(std::any_of(std::next(_model->coeffVolumes.cbegin()), _model->coeffVolumes.cend(),
@@ -55,17 +51,7 @@ BasisFunctionVolume::BasisFunctionVolume(BasisFunctionVolume::CoeffVolumes coeff
                            || c.voxelSize() != this->voxelSize();
                    }))
     {
-        auto errorMsg = QStringLiteral("Dimensions of coefficient volumes:\n");
-        std::for_each(_model->coeffVolumes.cbegin(), _model->coeffVolumes.cend(),
-                      [&errorMsg](const VoxelVolume<float>& v) {
-                          errorMsg.append(v.nbVoxels().info().c_str());
-                          errorMsg.append(" | ");
-                          errorMsg.append(v.voxelSize().info().c_str());
-                          errorMsg.append("\n");
-                      });
-        qDebug().noquote() << errorMsg;
-        throw std::runtime_error("BasisFunctionVolume::BasisFunctionVolume: Inconsistent voxel "
-                                 "size or dimensions of coefficient volumes.");
+        throw std::runtime_error(errMsgInconsistentVolumes());
     }
 
     if(std::any_of(std::next(_model->basisFcts.cbegin()), _model->basisFcts.cend(),
@@ -73,15 +59,7 @@ BasisFunctionVolume::BasisFunctionVolume(BasisFunctionVolume::CoeffVolumes coeff
                        return f.size() != _model->basisFcts.at(0).size();
                    }))
     {
-        auto errorMsg = QStringLiteral("Samples of basis functions:\n| ");
-        std::for_each(_model->basisFcts.cbegin(), _model->basisFcts.cend(),
-                      [&errorMsg](const std::vector<float>& f) {
-                          errorMsg.append(QString::number(f.size()));
-                          errorMsg.append(" | ");
-                      });
-        qDebug().noquote() << errorMsg;
-        throw std::runtime_error("BasisFunctionVolume::BasisFunctionVolume: Inconsistent length "
-                                 "of basis functions.");
+        throw std::runtime_error(errMsgInconsistentBasisFcts());
     }
 
     this->setTime(0.0); // only for initializing the volume, otherwise the volume is empty
@@ -131,6 +109,44 @@ float BasisFunctionVolume::sample2Time(size_t sample) const
 size_t BasisFunctionVolume::time2Sample(double time) const
 {
     return static_cast<size_t>(std::round(time));
+}
+
+std::string BasisFunctionVolume::errMsgDifferentNumberOfCoeffsAndBasisFcts() const
+{
+    std::string errorMsg("BasisFunctionVolume::BasisFunctionVolume: Number of coefficient volumes "
+                         "does not match the number of basis functions.\n");
+    errorMsg += "Number of basis functions: " + std::to_string(_model->basisFcts.size()) + "\n";
+    errorMsg += "Number of coefficient volumes: " + std::to_string(_model->coeffVolumes.size());
+
+    return errorMsg;
+}
+
+std::string BasisFunctionVolume::errMsgInconsistentBasisFcts() const
+{
+    std::string errorMsg("BasisFunctionVolume::BasisFunctionVolume: Inconsistent length of "
+                         "of basis functions.\n"
+                         "Samples of basis functions:\n| ");
+
+    std::for_each(_model->basisFcts.cbegin(), _model->basisFcts.cend(),
+                  [&errorMsg](const std::vector<float>& f) {
+                      errorMsg += std::to_string(f.size()) + " | ";
+                  });
+
+    return errorMsg;
+}
+
+std::string BasisFunctionVolume::errMsgInconsistentVolumes() const
+{
+    std::string errorMsg("BasisFunctionVolume::BasisFunctionVolume: Inconsistent voxel size "
+                         "or dimensions of coefficient volumes. "
+                         "Dimensions of coefficient volumes:\n");
+
+    std::for_each(_model->coeffVolumes.cbegin(), _model->coeffVolumes.cend(),
+                  [&errorMsg](const VoxelVolume<float>& v) {
+                      errorMsg += v.nbVoxels().info() + " | " + v.voxelSize().info() + "\n";
+                  });
+
+    return errorMsg;
 }
 
 } // namespace CTL

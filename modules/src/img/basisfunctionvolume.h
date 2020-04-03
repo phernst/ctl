@@ -36,6 +36,10 @@ private:
         SampledFunctions basisFcts;
     };
 
+    std::string errMsgDifferentNumberOfCoeffsAndBasisFcts() const;
+    std::string errMsgInconsistentBasisFcts() const;
+    std::string errMsgInconsistentVolumes() const;
+
     std::shared_ptr<const ModelParameters> _model;
 };
 
