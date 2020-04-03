@@ -28,6 +28,9 @@
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QSlider" name="_VS_projection">
+       <property name="maximum">
+        <number>0</number>
+       </property>
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
