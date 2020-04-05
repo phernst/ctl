@@ -159,7 +159,8 @@ run-doxygen:
     - lynx -cmd_script=start-doxy $DOXY_LOGIN_PAGE > /dev/null
     
 
-# update codes of line analysis
+# update lines of code website
+analyze-loc:
   stage: build
   script:
     - git clone https://gitlab.com/robertFrysch/cntln.git
