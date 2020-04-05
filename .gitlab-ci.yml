@@ -166,7 +166,8 @@ run-doxygen:
     - cd cntln && qmake && make && cd ..
     - cntln/cntln    modules testing examples > index.md
     - cntln/cntln -e modules testing examples > empty.md
-    - curl -T index.md -u $NC_UPLOAD_DIR -H 'X-Requested-With: XMLHttpRequest' -H 'X-Method-Override: PUT' https://rf.p7.de/public.php/webdav/index.md
-    - curl -T empty.md -u $NC_UPLOAD_DIR -H 'X-Requested-With: XMLHttpRequest' -H 'X-Method-Override: PUT' https://rf.p7.de/public.php/webdav/empty.md
+    - UD=$NC_UPLOAD_DIR
+    - curl -T index.md -u $UD -H 'X-Requested-With: XMLHttpRequest' -H 'X-Method-Override: PUT' https://rf.p7.de/public.php/webdav/index.md
+    - curl -T empty.md -u $UD -H 'X-Requested-With: XMLHttpRequest' -H 'X-Method-Override: PUT' https://rf.p7.de/public.php/webdav/empty.md
 
     
