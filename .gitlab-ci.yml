@@ -157,3 +157,16 @@ run-doxygen:
   script:
     - wget -q -O start-doxy $INITIATE_DOXY_SCRIPT
     - lynx -cmd_script=start-doxy $DOXY_LOGIN_PAGE > /dev/null
+    
+
+# update codes of line analysis
+  stage: build
+  script:
+    - git clone https://gitlab.com/robertFrysch/cntln.git
+    - cd cntln && qmake && make && cd ..
+    - cntln/cntln    modules testing examples > index.md
+    - cntln/cntln -e modules testing examples > empty.md
+    - curl -T index.md -u $NC_UPLOAD_DIR -H 'X-Requested-With: XMLHttpRequest' -H 'X-Method-Override: PUT' https://rf.p7.de/public.php/webdav/index.md
+    - curl -T empty.md -u $NC_UPLOAD_DIR -H 'X-Requested-With: XMLHttpRequest' -H 'X-Method-Override: PUT' https://rf.p7.de/public.php/webdav/empty.md
+
+    
