@@ -199,7 +199,7 @@ private:
         void setInterpolation(bool enabled);
         void setRaysPerPixel(const QSize& sampling);
         void setRaySampling(float sampling);
-        void setVolumeUpSampling(uint upsamplingFactor);
+        void setVolumeUpSampling(uint upSamplingFactor);
 
         SettingsRayCaster(const SettingsRayCaster&) = delete;
         SettingsRayCaster& operator=(const SettingsRayCaster&) = delete;

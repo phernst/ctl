@@ -318,8 +318,8 @@ StandardPipeline::SettingsSpectralEffects StandardPipeline::settingsSpectralEffe
  * - setRaySampling(float sampling): sets the step length used to traverse the ray to \a sampling,
  * which is defined as the fraction of the length of a voxel in its shortest dimension [ default
  * value: 0.3 ]
- * - setVolumeUpSampling(uint upsamplingFactor): sets the factor for upsampling of the input volume
- * data to \a upsamplingFactor [ default value: 1 (i.e. no upsampling) ]
+ * - setVolumeUpSampling(uint upSamplingFactor): sets the factor for upsampling of the input volume
+ * data to \a upSamplingFactor [ default value: 1 (i.e. no upsampling) ]
  *
  * Example:
  * \code
@@ -424,8 +424,8 @@ void StandardPipeline::SettingsRayCaster::setInterpolation(bool enabled)
 
 void StandardPipeline::SettingsRayCaster::setRaysPerPixel(const QSize& sampling)
 {
-    _proj->settings().raysPerPixel[0] = sampling.width();
-    _proj->settings().raysPerPixel[1] = sampling.height();
+    _proj->settings().raysPerPixel[0] = static_cast<uint>(sampling.width());
+    _proj->settings().raysPerPixel[1] = static_cast<uint>(sampling.height());
 }
 
 void StandardPipeline::SettingsRayCaster::setRaySampling(float sampling)
@@ -433,9 +433,9 @@ void StandardPipeline::SettingsRayCaster::setRaySampling(float sampling)
     _proj->settings().raySampling = sampling;
 }
 
-void StandardPipeline::SettingsRayCaster::setVolumeUpSampling(uint upsamplingFactor)
+void StandardPipeline::SettingsRayCaster::setVolumeUpSampling(uint upSamplingFactor)
 {
-    _proj->settings().volumeUpSampling = upsamplingFactor;
+    _proj->settings().volumeUpSampling = upSamplingFactor;
 }
 
 /*!
