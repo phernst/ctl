@@ -157,7 +157,9 @@ run-doxygen:
   script:
     - wget -q -O start-doxy $INITIATE_DOXY_SCRIPT
     - lynx -cmd_script=start-doxy $DOXY_LOGIN_PAGE > /dev/null
-    
+  only:
+    - master
+
 
 # update lines of code website
 analyze-loc:
@@ -169,5 +171,5 @@ analyze-loc:
     - cntln/cntln -e modules testing examples > empty.md
     - curl -T index.md -u $NC_UPLOAD_DIR -H 'X-Requested-With:XMLHttpRequest' -H 'X-Method-Override:PUT' https://rf.p7.de/public.php/webdav/index.md
     - curl -T empty.md -u $NC_UPLOAD_DIR -H 'X-Requested-With:XMLHttpRequest' -H 'X-Method-Override:PUT' https://rf.p7.de/public.php/webdav/empty.md
-
-    
+  only:
+    - master
