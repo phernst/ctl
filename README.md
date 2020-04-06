@@ -257,11 +257,16 @@ int main(int argc, char* argv[])
 
 --------------
 
-Statistics on the master branch:  
+Statistics on the master branch:
+
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=code)
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=comments)
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=blanks)
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=files)
+
+For more details click [this link](https://rf.p7.de/apps/cms_pico/pico/ctlstat/).
+
+--------------
 
 If you have any problems or questions regarding the CTL, please contact us:  
 <sw4g.production@gmail.com>.
