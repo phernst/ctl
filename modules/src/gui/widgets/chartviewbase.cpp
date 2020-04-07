@@ -9,6 +9,9 @@ using namespace QtCharts;
 namespace CTL {
 namespace gui {
 
+/*!
+ * Constructs a ChartViewBase object.
+ */
 ChartViewBase::ChartViewBase(QWidget* parent)
     : QChartView(parent)
     , _chart(new QChart)
@@ -21,6 +24,11 @@ ChartViewBase::ChartViewBase(QWidget* parent)
     setRubberBand(QChartView::RectangleRubberBand);
 }
 
+/*!
+ * Returns the current visualization shown by this instance rendered to a QImage with size
+ * \a renderSize. If no size is passed, the resulting image will have the same size as the window
+ * this instance is shown in.
+ */
 QImage ChartViewBase::image(const QSize& renderSize)
 {
     QSize imgSize = renderSize.isValid() ? renderSize : size();
@@ -33,6 +41,16 @@ QImage ChartViewBase::image(const QSize& renderSize)
     return ret;
 }
 
+/*!
+ * Automatically sets the data range visualized by this instance to the minimum and maximum values
+ * (on both axes) occurring in the data managed by this instance.
+ *
+ * If such a range would be of length zero, i.e. minimum and maximum value are identical, the range
+ * will be chosen as [value - 1.0, value + 1.0].
+ *
+ * Note that if setOverRangeY() or setUseNiceX() have been used to activate the corresponding range
+ * adjust mechanism, determined min/max values are adjusted accordingly.
+ */
 void ChartViewBase::autoRange()
 {
     auto compareX = [] (const QPointF& a, const QPointF& b) { return a.x()<b.x(); };
@@ -91,23 +109,53 @@ void ChartViewBase::saveDialog()
     save(fn);
 }
 
-void ChartViewBase::setLabelX(const QString &label)
+/*!
+ * Sets the label text on the *x*-axis to \a label.
+ */
+void ChartViewBase::setLabelX(const QString& label)
 {
     myAxisX(_plottableSeries)->setTitleText(label);
     myAxisX(_plottableSeriesLog)->setTitleText(label);
 }
 
-void ChartViewBase::setLabelY(const QString &label)
+/*!
+ * Sets the label text on the *y*-axis to \a label.
+ */
+void ChartViewBase::setLabelY(const QString& label)
 {
     myAxisY(_plottableSeries)->setTitleText(label);
     myAxisY(_plottableSeriesLog)->setTitleText(label);
 }
 
+/*!
+ * Puts the *y*-axis of this instance to logarithmic mode if \a enabled = \c true and in linear mode
+ * otherwise.
+ */
 void ChartViewBase::setLogAxisY(bool enabled)
 {
     enabled ? switchToLogAxisY() : switchToLinAxisY();
 }
 
+/*!
+ * Sets the usage of the *y*-axis over ranging to \a enabled.
+ *
+ * If in use, display ranges for the *y*-axis are always modified to extend their upper end point.
+ * Ranges are adjusted such that the end point is increased by 1% of the total width of the
+ * requested range. This can be helpful to avoid unpleasant appearances of data points on the very
+ * (upper) end of the plot range.
+ *
+ * When activated, this is also used when automatic ranging is performed (see also autoRange()).
+ */
+void ChartViewBase::setOverRangeY(bool enabled)
+{
+    _overRangeY = enabled;
+}
+
+/*!
+ * Sets the range of the *x*-axis to [from, to].
+ *
+ * Note that this range might be adjusted if "Nice X mode" is enabled (see setUseNiceX()).
+ */
 void ChartViewBase::setRangeX(double from, double to)
 {
     if(yAxisIsLinear())

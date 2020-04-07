@@ -10,6 +10,15 @@ class QLineSeries;
 namespace CTL {
 namespace gui {
 
+/*!
+ * \class ChartViewBase
+ *
+ * \brief The ChartViewBase class is the base class for plot-like visualizers in the CTL.
+ *
+ * This class is used as base class for LineSeriesView and IntervalSeriesView. Refer to the
+ * corresponding documentations of these classes for details on usage.
+ */
+
 class ChartViewBase : public QtCharts::QChartView
 {
     Q_OBJECT
