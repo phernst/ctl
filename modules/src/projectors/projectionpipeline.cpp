@@ -125,7 +125,7 @@ void ProjectionPipeline::appendExtension(ProjectorExtension* extension)
  */
 void ProjectionPipeline::insertExtension(uint pos, ProjectorExtension* extension)
 {
-    qDebug() << "ProjectionPipeline::insertExtension at pos " << pos;
+    qDebug() << "ProjectionPipeline::insertExtension at pos" << pos;
 
     const auto oldNbExt = nbExtensions();
 
@@ -184,7 +184,7 @@ void ProjectionPipeline::setProjector(AbstractProjector* projector)
  */
 ProjectorExtension* ProjectionPipeline::releaseExtension(uint pos)
 {
-    qDebug() << "ProjectionPipeline::releaseExtension at pos " << pos;
+    qDebug() << "ProjectionPipeline::releaseExtension at pos" << pos;
 
     const auto oldNbExt = nbExtensions();
     if(pos >= oldNbExt)

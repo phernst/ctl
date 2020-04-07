@@ -336,7 +336,10 @@ StandardPipeline::SettingsRayCaster StandardPipeline::settingsRayCaster()
  * Returns the position of the areal focal spot extension in the standard pipeline.
  * This is defined to always be the first position (maximum efficiency).
  */
-uint StandardPipeline::posAFS() const { return 0; }
+uint StandardPipeline::posAFS() const
+{
+    return 0;
+}
 
 /*!
  * Returns the position of the detector saturation extension in the standard pipeline.
