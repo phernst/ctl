@@ -58,7 +58,7 @@ private:
     // generic parse function that uses a specified factory map to create an object
     static SerializationInterface* parse(const QVariant& variant, const FactoryMap& factoryMap);
 
-    // map that maps a type ID to the factory function of a data model
+    // maps that map a type ID to a factory function
     FactoryMap _componentFactories;
     FactoryMap _modelFactories;
     FactoryMap _prepareStepFactories;
