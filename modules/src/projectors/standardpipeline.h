@@ -90,7 +90,7 @@ class SpectralEffectsExtension;
  * auto projections = pipe.project(volume);
  * \endcode
  */
-class StandardPipeline: public AbstractProjector
+class StandardPipeline : public AbstractProjector
 {
     CTL_TYPE_ID(201)
 
@@ -100,7 +100,7 @@ class StandardPipeline: public AbstractProjector
     class SettingsSpectralEffects;
     class SettingsRayCaster;
 
-public:    
+public:
     enum ApproximationPolicy
     {
         No_Approximation,
@@ -113,7 +113,7 @@ public:
 
     void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
-    ProjectionData projectComposite(const CompositeVolume &volume) override;
+    ProjectionData projectComposite(const CompositeVolume& volume) override;
     bool isLinear() const override;
     ProjectorNotifier* notifier() override;
 
