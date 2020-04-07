@@ -144,7 +144,6 @@ private:
         SettingsAFS& operator=(const SettingsAFS&) = delete;
     private:
         SettingsAFS(ArealFocalSpotExtension& ext) : _ext(ext) {}
-        SettingsAFS(ArealFocalSpotExtension&& ext) = delete;
         ArealFocalSpotExtension& _ext;
 
         friend class StandardPipeline;
@@ -159,7 +158,6 @@ private:
         SettingsDetectorSaturation& operator=(const SettingsDetectorSaturation&) = delete;
     private:
         SettingsDetectorSaturation(DetectorSaturationExtension& ext) : _ext(ext) {}
-        SettingsDetectorSaturation(DetectorSaturationExtension&& ext) = delete;
         DetectorSaturationExtension& _ext;
 
         friend class StandardPipeline;
@@ -176,7 +174,6 @@ private:
         SettingsPoissonNoise& operator=(const SettingsPoissonNoise&) = delete;
     private:
         SettingsPoissonNoise(PoissonNoiseExtension& ext) : _ext(ext) {}
-        SettingsPoissonNoise(PoissonNoiseExtension&& ext) = delete;
         PoissonNoiseExtension& _ext;
 
         friend class StandardPipeline;
@@ -191,7 +188,6 @@ private:
         SettingsSpectralEffects& operator=(const SettingsSpectralEffects&) = delete;
     private:
         SettingsSpectralEffects(SpectralEffectsExtension& ext) : _ext(ext) {}
-        SettingsSpectralEffects(SpectralEffectsExtension&& ext) = delete;
         SpectralEffectsExtension& _ext;
 
         friend class StandardPipeline;
@@ -209,7 +205,6 @@ private:
         SettingsRayCaster& operator=(const SettingsRayCaster&) = delete;
     private:
         SettingsRayCaster(OCL::RayCasterProjector& proj) : _proj(proj) {}
-        SettingsRayCaster(OCL::RayCasterProjector&& proj) = delete;
         OCL::RayCasterProjector& _proj;
 
         friend class StandardPipeline;
