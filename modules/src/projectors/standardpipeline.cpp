@@ -234,7 +234,7 @@ void StandardPipeline::enableSpectralEffects(bool enable)
  */
 StandardPipeline::SettingsAFS StandardPipeline::settingsArealFocalSpot()
 {
-    return { _extAFS };
+    return { *_extAFS };
 }
 
 /*!
@@ -256,7 +256,7 @@ StandardPipeline::SettingsAFS StandardPipeline::settingsArealFocalSpot()
  */
 StandardPipeline::SettingsDetectorSaturation StandardPipeline::settingsDetectorSaturation()
 {
-    return { _extDetSat };
+    return { *_extDetSat };
 }
 
 /*!
@@ -282,7 +282,7 @@ StandardPipeline::SettingsDetectorSaturation StandardPipeline::settingsDetectorS
  */
 StandardPipeline::SettingsPoissonNoise StandardPipeline::settingsPoissonNoise()
 {
-    return { _extPoisson };
+    return { *_extPoisson };
 }
 
 /*!
@@ -303,7 +303,7 @@ StandardPipeline::SettingsPoissonNoise StandardPipeline::settingsPoissonNoise()
  */
 StandardPipeline::SettingsSpectralEffects StandardPipeline::settingsSpectralEffects()
 {
-    return { _extSpectral };
+    return { *_extSpectral };
 }
 
 /*!
@@ -331,7 +331,7 @@ StandardPipeline::SettingsSpectralEffects StandardPipeline::settingsSpectralEffe
  * \sa OCL::RayCasterProjector::settings()
  */
 StandardPipeline::SettingsRayCaster StandardPipeline::settingsRayCaster() {
-    return { _projector };
+    return { *_projector };
 }
 
 // ###############
@@ -384,58 +384,58 @@ uint StandardPipeline::posSpectral() const
 
 void StandardPipeline::SettingsPoissonNoise::setFixedSeed(uint seed)
 {
-    _ext->setFixedSeed(seed);
+    _ext.setFixedSeed(seed);
 }
 
 void StandardPipeline::SettingsPoissonNoise::setRandomSeedMode()
 {
-    _ext->setRandomSeedMode();
+    _ext.setRandomSeedMode();
 }
 
 void StandardPipeline::SettingsPoissonNoise::setParallelizationMode(bool enabled)
 {
-    _ext->setParallelizationEnabled(enabled);
+    _ext.setParallelizationEnabled(enabled);
 }
 
 void StandardPipeline::SettingsAFS::setDiscretization(const QSize &discretization)
 {
-    _ext->setDiscretization(discretization);
+    _ext.setDiscretization(discretization);
 }
 
 void StandardPipeline::SettingsAFS::enableLowExtinctionApproximation(bool enable)
 {
-    _ext->enableLowExtinctionApproximation(enable);
+    _ext.enableLowExtinctionApproximation(enable);
 }
 
 void StandardPipeline::SettingsDetectorSaturation::setSpectralSamples(uint nbSamples)
 {
-    _ext->setIntensitySampling(nbSamples);
+    _ext.setIntensitySampling(nbSamples);
 }
 
 void StandardPipeline::SettingsSpectralEffects::setSamplingResolution(float energyBinWidth)
 {
-    _ext->setSpectralSamplingResolution(energyBinWidth);
+    _ext.setSpectralSamplingResolution(energyBinWidth);
 }
 
 void StandardPipeline::SettingsRayCaster::setInterpolation(bool enabled)
 {
-    _proj->settings().interpolate = enabled;
+    _proj.settings().interpolate = enabled;
 }
 
 void StandardPipeline::SettingsRayCaster::setRaysPerPixel(const QSize& sampling)
 {
-    _proj->settings().raysPerPixel[0] = static_cast<uint>(sampling.width());
-    _proj->settings().raysPerPixel[1] = static_cast<uint>(sampling.height());
+    _proj.settings().raysPerPixel[0] = static_cast<uint>(sampling.width());
+    _proj.settings().raysPerPixel[1] = static_cast<uint>(sampling.height());
 }
 
 void StandardPipeline::SettingsRayCaster::setRaySampling(float sampling)
 {
-    _proj->settings().raySampling = sampling;
+    _proj.settings().raySampling = sampling;
 }
 
 void StandardPipeline::SettingsRayCaster::setVolumeUpSampling(uint upSamplingFactor)
 {
-    _proj->settings().volumeUpSampling = upSamplingFactor;
+    _proj.settings().volumeUpSampling = upSamplingFactor;
 }
 
 /*!

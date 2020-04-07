@@ -143,8 +143,9 @@ private:
         SettingsAFS(const SettingsAFS&) = delete;
         SettingsAFS& operator=(const SettingsAFS&) = delete;
     private:
-        SettingsAFS(ArealFocalSpotExtension* ext) : _ext(ext) {}
-        ArealFocalSpotExtension* _ext;
+        SettingsAFS(ArealFocalSpotExtension& ext) : _ext(ext) {}
+        SettingsAFS(ArealFocalSpotExtension&& ext) = delete;
+        ArealFocalSpotExtension& _ext;
 
         friend class StandardPipeline;
     };
@@ -157,8 +158,9 @@ private:
         SettingsDetectorSaturation(const SettingsDetectorSaturation&) = delete;
         SettingsDetectorSaturation& operator=(const SettingsDetectorSaturation&) = delete;
     private:
-        SettingsDetectorSaturation(DetectorSaturationExtension* ext) : _ext(ext) {}
-        DetectorSaturationExtension* _ext;
+        SettingsDetectorSaturation(DetectorSaturationExtension& ext) : _ext(ext) {}
+        SettingsDetectorSaturation(DetectorSaturationExtension&& ext) = delete;
+        DetectorSaturationExtension& _ext;
 
         friend class StandardPipeline;
     };
@@ -173,8 +175,9 @@ private:
         SettingsPoissonNoise(const SettingsPoissonNoise&) = delete;
         SettingsPoissonNoise& operator=(const SettingsPoissonNoise&) = delete;
     private:
-        SettingsPoissonNoise(PoissonNoiseExtension* ext) : _ext(ext) {}
-        PoissonNoiseExtension* _ext;
+        SettingsPoissonNoise(PoissonNoiseExtension& ext) : _ext(ext) {}
+        SettingsPoissonNoise(PoissonNoiseExtension&& ext) = delete;
+        PoissonNoiseExtension& _ext;
 
         friend class StandardPipeline;
     };
@@ -187,8 +190,9 @@ private:
         SettingsSpectralEffects(const SettingsSpectralEffects&) = delete;
         SettingsSpectralEffects& operator=(const SettingsSpectralEffects&) = delete;
     private:
-        SettingsSpectralEffects(SpectralEffectsExtension* ext) : _ext(ext) {}
-        SpectralEffectsExtension* _ext;
+        SettingsSpectralEffects(SpectralEffectsExtension& ext) : _ext(ext) {}
+        SettingsSpectralEffects(SpectralEffectsExtension&& ext) = delete;
+        SpectralEffectsExtension& _ext;
 
         friend class StandardPipeline;
     };
@@ -204,8 +208,9 @@ private:
         SettingsRayCaster(const SettingsRayCaster&) = delete;
         SettingsRayCaster& operator=(const SettingsRayCaster&) = delete;
     private:
-        SettingsRayCaster(OCL::RayCasterProjector* proj) : _proj(proj) {}
-        OCL::RayCasterProjector* _proj;
+        SettingsRayCaster(OCL::RayCasterProjector& proj) : _proj(proj) {}
+        SettingsRayCaster(OCL::RayCasterProjector&& proj) = delete;
+        OCL::RayCasterProjector& _proj;
 
         friend class StandardPipeline;
     };
