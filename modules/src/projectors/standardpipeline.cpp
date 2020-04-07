@@ -1,9 +1,9 @@
 #include "standardpipeline.h"
 
-#include "raycasterprojector.h"
 #include "arealfocalspotextension.h"
 #include "detectorsaturationextension.h"
 #include "poissonnoiseextension.h"
+#include "raycasterprojector.h"
 #include "spectraleffectsextension.h"
 
 namespace CTL {
@@ -16,17 +16,17 @@ DECLARE_SERIALIZABLE_TYPE(StandardPipeline)
  * The default configuration enables spectral effects and Poisson noise simulation.
  */
 StandardPipeline::StandardPipeline(ApproximationPolicy policy)
-    : _projector (new OCL::RayCasterProjector)
-    , _extAFS (new ArealFocalSpotExtension)
-    , _extDetSat (new DetectorSaturationExtension)
-    , _extPoisson (new PoissonNoiseExtension)
-    , _extSpectral (new SpectralEffectsExtension)
+    : _projector(new OCL::RayCasterProjector)
+    , _extAFS(new ArealFocalSpotExtension)
+    , _extDetSat(new DetectorSaturationExtension)
+    , _extPoisson(new PoissonNoiseExtension)
+    , _extSpectral(new SpectralEffectsExtension)
     , _approxMode(policy)
 {
     _pipeline.setProjector(_projector);
 
     // configure extensions
-    _extAFS->setDiscretization( {3, 3} );
+    _extAFS->setDiscretization({ 3, 3 });
     if(policy == ApproximationPolicy::Full_Approximation)
         _extAFS->enableLowExtinctionApproximation();
 
@@ -48,12 +48,10 @@ StandardPipeline::~StandardPipeline()
 /*!
  * \brief Sets the acquisition setup for the simulation to \a setup.
  *
- * Sets the acquisition setup for the simulation to \a setup. This needs to be done prior to calling project().
+ * Sets the acquisition setup for the simulation to \a setup. This needs to be done prior to calling
+ * project().
  */
-void StandardPipeline::configure(const AcquisitionSetup& setup)
-{
-    _pipeline.configure(setup);
-}
+void StandardPipeline::configure(const AcquisitionSetup& setup) { _pipeline.configure(setup); }
 
 /*!
  * \brief Creates projection data from \a volume.
@@ -80,15 +78,9 @@ ProjectionData StandardPipeline::projectComposite(const CompositeVolume& volume)
 /*!
  * Returns true if the application of the full processing pipeline is linear.
  */
-bool StandardPipeline::isLinear() const
-{
-    return _pipeline.isLinear();
-}
+bool StandardPipeline::isLinear() const { return _pipeline.isLinear(); }
 
-ProjectorNotifier* StandardPipeline::notifier()
-{
-    return _pipeline.notifier();
-}
+ProjectorNotifier* StandardPipeline::notifier() { return _pipeline.notifier(); }
 
 void StandardPipeline::fromVariant(const QVariant& variant)
 {
@@ -109,7 +101,7 @@ void StandardPipeline::fromVariant(const QVariant& variant)
     _extSpectral->fromVariant(map.value("ext spectral"));
 
     _approxMode = ApproximationPolicy(map.value("approximation policy",
-                                                int(ApproximationPolicy::Default_Approximation)).toInt());
+                                                int(Default_Approximation)).toInt());
 
     enableArealFocalSpot(map.value("use areal focal spot").toBool());
     enableDetectorSaturation(map.value("use detector saturation").toBool());
@@ -157,7 +149,8 @@ void StandardPipeline::enableArealFocalSpot(bool enable)
  * Enables/disables the simulation of detector saturation effects, according to \a enable.
  *
  * This only has an effect on the simulation if the detector component of the system passed with
- * the setup during configure() has a detector response model (see AbstractDetector::setSaturationModel()).
+ * the setup during configure() has a detector response model (see
+ * AbstractDetector::setSaturationModel()).
  */
 void StandardPipeline::enableDetectorSaturation(bool enable)
 {
@@ -330,7 +323,8 @@ StandardPipeline::SettingsSpectralEffects StandardPipeline::settingsSpectralEffe
  *
  * \sa OCL::RayCasterProjector::settings()
  */
-StandardPipeline::SettingsRayCaster StandardPipeline::settingsRayCaster() {
+StandardPipeline::SettingsRayCaster StandardPipeline::settingsRayCaster()
+{
     return { *_projector };
 }
 
@@ -342,10 +336,7 @@ StandardPipeline::SettingsRayCaster StandardPipeline::settingsRayCaster() {
  * Returns the position of the areal focal spot extension in the standard pipeline.
  * This is defined to always be the first position (maximum efficiency).
  */
-uint StandardPipeline::posAFS() const
-{
-    return 0;
-}
+uint StandardPipeline::posAFS() const { return 0; }
 
 /*!
  * Returns the position of the detector saturation extension in the standard pipeline.
@@ -353,9 +344,7 @@ uint StandardPipeline::posAFS() const
  */
 uint StandardPipeline::posDetSat() const
 {
-    return uint(_arealFSEnabled)
-            + uint(_spectralEffEnabled)
-            + uint(_poissonEnabled);
+    return uint(_arealFSEnabled) + uint(_spectralEffEnabled) + uint(_poissonEnabled);
 }
 
 /*!
@@ -397,7 +386,7 @@ void StandardPipeline::SettingsPoissonNoise::setParallelizationMode(bool enabled
     _ext.setParallelizationEnabled(enabled);
 }
 
-void StandardPipeline::SettingsAFS::setDiscretization(const QSize &discretization)
+void StandardPipeline::SettingsAFS::setDiscretization(const QSize& discretization)
 {
     _ext.setDiscretization(discretization);
 }
