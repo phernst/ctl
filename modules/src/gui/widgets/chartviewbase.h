@@ -23,6 +23,7 @@ public slots:
     void setLabelX(const QString& label);
     void setLabelY(const QString& label);
     void setLogAxisY(bool enabled);
+    void setOverRangeY(bool enabled);
     void setRangeX(double from, double to);
     void setRangeY(double from, double to);
     void setUseNiceX(bool enabled);
@@ -50,6 +51,7 @@ protected:
     QtCharts::QLineSeries* _dataSeriesLog;
 
 private:
+    bool _overRangeY = false;
     bool _useNiceX = false;
 };
 

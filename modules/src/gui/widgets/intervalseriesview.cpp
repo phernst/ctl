@@ -41,6 +41,7 @@ IntervalSeriesView::IntervalSeriesView(QWidget* parent)
     mySetAxisY(new QLogValueAxis, areaSeriesLog);
 
     setSeriesShow(_plottableSeriesLog, false);
+    setOverRangeY(true);
 }
 
 void IntervalSeriesView::plot(const IntervalDataSeries& intervalSeries,

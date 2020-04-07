@@ -60,14 +60,28 @@ void ChartViewBase::autoRange()
     }
 
     setRangeX(xRange.first, xRange.second);
-    setRangeY(yRange.first, 1.05 * yRange.second);
+    setRangeY(yRange.first, yRange.second);
 }
 
+/*!
+ * Saves the image currently shown by this instance to the file \a fileName.
+ *
+ * The file type must be an image file type supported by Qt and will be determined automatically
+ * from the ending of \a fileName. If no file type ending is found, or it is incompatible, a PNG
+ * file is created.
+ *
+ * Same as: \code image().save(fileName) \endcode
+ */
 bool ChartViewBase::save(const QString& fileName)
 {
     return image().save(fileName);
 }
 
+/*!
+ * Opens a save file dialog to get the file name used to save the currently shown image to a file.
+ *
+ * \sa save().
+ */
 void ChartViewBase::saveDialog()
 {
     auto fn = QFileDialog::getSaveFileName(this, "Save plot", "", "Images (*.png *.jpg *.bmp)");
@@ -110,16 +124,35 @@ void ChartViewBase::setRangeX(double from, double to)
     }
 }
 
+/*!
+ * Sets the range of the *y*-axis to [from, to].
+ *
+ * Note that the upper end (ie. \a to) of the range is adjusted if "*y*-axis over ranging" is enabled
+ * (see setOverRangeY()).
+ */
 void ChartViewBase::setRangeY(double from, double to)
 {
+    if(_overRangeY)
+    {
+        const auto width = to - from;
+        to += 0.01 * width;
+    }
+
     if(yAxisIsLinear())
         myAxisY(_plottableSeries)->setRange(from, to);
     else
         myAxisY(_plottableSeriesLog)->setRange(from, to);
 }
 
+/*!
+ * Sets the usage of the "Nice X mode" to \a enabled. If activated, this uses
+ * QtCharts::QValueAxis::applyNiceNumbers() to adjust the range of the *x*-axis.
+ */
 void ChartViewBase::setUseNiceX(bool enabled) { _useNiceX = enabled; }
 
+/*!
+ * Switches between the linear and logarithmic mode of the *y*-axis.
+ */
 void ChartViewBase::toggleLinLogY()
 {
     if(yAxisIsLinear())
