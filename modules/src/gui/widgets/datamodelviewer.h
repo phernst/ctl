@@ -26,19 +26,23 @@ public:
     explicit DataModelViewer(QWidget *parent = nullptr);
     ~DataModelViewer();
 
+    LineSeriesView* dataViewValues() const;
+    IntervalSeriesView* dataViewBinIntegrals() const;
     void setData(std::shared_ptr<AbstractDataModel> model);
 
     static void plot(std::shared_ptr<AbstractDataModel> model,
                      const QString& labelX = "x", const QString& labelY = "y");
 
 public slots:
-    void updatePlot();
-    void setNumberOfSamples(int nbSamples);
     void increaseSamplingDensity();
+    void hideParameterGUI(bool hide = true);
     void reduceSamplingDensity();
     void setLabelX(const QString& label);
     void setLabelY(const QString& label);
+    void setNumberOfSamples(int nbSamples);
+    void setSamplingRange(float from, float to);
     void toggleLogY();
+    void updatePlot();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
@@ -50,7 +54,6 @@ private:
 
     std::shared_ptr<AbstractDataModel> _model;
 
-    void setNumberSamplesSilent(int val);
     void setModelParameter(QVariant parameter);
 };
 

@@ -161,6 +161,63 @@ void DataModelViewer::setModelParameter(QVariant parameter)
     updatePlot();
 }
 
+/*!
+ * Returns the viewport for displaying the line series data in this instance. Use this to adjust its
+ * specific settings if required.
+ *
+ * Example: setting a specific axis range for the line series view and changing the chart title
+ * \code
+ * auto viewer = new gui::DataModelViewer;
+ * // ...
+ *
+ * viewer->dataViewValues()->setRangeX(20.0, 30.0);
+ * viewer->dataViewValues()->chart()->setTitle("Example title");
+ * viewer->show();
+ * \endcode
+ *
+ * \sa LineSeriesView.
+ */
+LineSeriesView* DataModelViewer::dataViewValues() const
+{
+    return _lineView;
+}
+
+/*!
+ * Returns the viewport for displaying the bin integral data in this instance. Use this to adjust
+ * its specific settings if required.
+ *
+ * Example: setting a dark theme for the bin integral chart
+ * \code
+ * auto viewer = new gui::DataModelViewer;
+ * // ...
+ *
+ * viewer->dataViewBinIntegrals()->chart()->setTheme(QtCharts::QChart::ChartThemeDark);
+ * viewer->show();
+ * \endcode
+ *
+ * \sa IntervalSeriesView.
+ */
+IntervalSeriesView* DataModelViewer::dataViewBinIntegrals() const
+{
+    return _intervalView;
+}
+
+/*!
+ * Hides the model parameter GUI element if \a hide = \c true and shows it otherwise.
+ */
+void DataModelViewer::hideParameterGUI(bool hide)
+{
+    hide ? ui->_GB_parameter->hide() : ui->_GB_parameter->show();
+}
+
+/*!
+ * Sets the range within which the model is sampled to [\a from, \a to].
+ */
+void DataModelViewer::setSamplingRange(float from, float to)
+{
+    ui->_SB_rangeFrom->setValue(from);
+    ui->_SB_rangeTo->setValue(to);
+}
 
 namespace details {
 
