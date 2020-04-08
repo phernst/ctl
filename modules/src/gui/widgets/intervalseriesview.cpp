@@ -13,10 +13,15 @@ using namespace QtCharts;
 namespace CTL {
 namespace gui {
 
+/*!
+ * Creates an IntervalSeriesView and sets its parent to \a parent.
+ *
+ * By default, this class uses "Y axis over ranging" (see setOverRangeY()).
+ */
 IntervalSeriesView::IntervalSeriesView(QWidget* parent)
     : ChartViewBase(parent)
 {
-    setWindowTitle("Bar Series View");
+    setWindowTitle("Interval Series View");
 
     auto areaSeries = new QAreaSeries;
     auto areaSeriesLog = new QAreaSeries;
@@ -44,6 +49,25 @@ IntervalSeriesView::IntervalSeriesView(QWidget* parent)
     setOverRangeY(true);
 }
 
+/*!
+ * Creates an IntervalSeriesView for \a intervalSeries and shows the window.
+ *
+ * Labels of the axes can be specified by \a labelX and \a labelY. If left empty, default axis
+ * labels are "x" and "y". To create a plot with a logarithmic *y*-axis, pass \c true for
+ * \a logAxisY.
+ *
+ * The widget will be deleted automatically if the window is closed.
+ *
+ * Example: visualize spectrum of an X-ray tube with 120 keV tube voltage
+ * \code
+ * XrayTube tube;
+ * tube.setTubeVoltage(120.0f);
+ *
+ * gui::IntervalSeriesView::plot(tube.spectrum(100), "Energy [keV]", " Relative flux");
+ * \endcode
+ *
+ * ![Resulting visualization from the example above.](gui/IntervalSeriesView_plot.png)
+ */
 void IntervalSeriesView::plot(const IntervalDataSeries& intervalSeries,
                          const QString& labelX, const QString& labelY, bool logAxisY)
 {
@@ -62,6 +86,12 @@ void IntervalSeriesView::plot(const IntervalDataSeries& intervalSeries,
     viewer->show();
 }
 
+/*!
+ * Sets the series visualized by this instance to \a intervalSeries.
+ *
+ * Applies a min/max range (see autoRange()). By default, this class uses "Y axis over ranging"
+ * (see setOverRangeY()).
+ */
 void IntervalSeriesView::setData(const IntervalDataSeries& intervalSeries)
 {
     _dataSeries->clear();
@@ -86,6 +116,14 @@ void IntervalSeriesView::setData(const IntervalDataSeries& intervalSeries)
     autoRange();
 }
 
+/*!
+ * Finds a suitable lower end point for the bars in logarithmic scale plot mode. This returns a
+ * value of 0.01 times the smallest positive value occuring in \a intervalSeries (bound to a
+ * minimum value of std::numeric_limits<double>::min()).
+ *
+ * This leads to a visualization in which the lower end of all bars is two decades below the minimal
+ * occuring upper end of all bars.
+ */
 double IntervalSeriesView::suitableLogMinVal(const IntervalDataSeries& intervalSeries)
 {
     static const auto bottomScale = 0.01;
