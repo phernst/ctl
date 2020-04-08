@@ -19,7 +19,7 @@ namespace gui {
  * it is closed by the user.
  *
  * Data will be visualized as a line plot. Individual data points are not shown by default.
- * Use setShowPoints() to enable this. Axis label can be specified using setLabelX() and
+ * Use setShowPoints() to enable this. Axis labels can be specified using setLabelX() and
  * setLabelY() or by passing the labels as arguments when using the plot() method, respectively.
  * Logarithmic *y*-axis visualization can be enabled using setLogAxisY(true), or by passing the
  * corresponding flag as last argument of plot().

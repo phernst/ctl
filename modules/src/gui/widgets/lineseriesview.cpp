@@ -82,6 +82,11 @@ void LineSeriesView::plot(const QList<QPointF>& lineSeries,
     plot(XYDataSeries(lineSeries), labelX, labelY, logAxisY);
 }
 
+/*!
+ * Sets the series visualized by this instance to \a lineSeries.
+ *
+ * Applies a min/max range (see autoRange()).
+ */
 void LineSeriesView::setData(const XYDataSeries& lineSeries)
 {
     _dataSeries->clear();
@@ -95,11 +100,17 @@ void LineSeriesView::setData(const XYDataSeries& lineSeries)
     autoRange();
 }
 
+/*!
+ * Convenience overload of setData(const XYDataSeries&).
+ */
 void LineSeriesView::setData(const QList<QPointF>& lineSeries)
 {
     setData(XYDataSeries(lineSeries));
 }
 
+/*!
+ * Sets the visibility of markers for data points to \a enabled. Markers are not shown by default.
+ */
 void LineSeriesView::setShowPoints(bool enabled)
 {
     _dataSeries->setPointsVisible(enabled);
