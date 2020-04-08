@@ -10,6 +10,9 @@
 namespace CTL {
 namespace gui {
 
+/*!
+ * Creates a DataModelViewer and sets its parent to \a parent.
+ */
 DataModelViewer::DataModelViewer(QWidget *parent)
     : QWidget(parent)
     , _lineView(new LineSeriesView)
@@ -37,31 +40,34 @@ DataModelViewer::DataModelViewer(QWidget *parent)
     setWindowTitle("Data Model Viewer");
 }
 
+/*!
+ * Deletes this instance.
+ */
 DataModelViewer::~DataModelViewer()
 {
     delete ui;
 }
 
-void DataModelViewer::setData(std::shared_ptr<AbstractDataModel> model)
-{
-    _model = std::move(model);
-    if(_model->isIntegrable())
-        ui->_RB_binIntegrals->setEnabled(true);
-    else
-    {
-        ui->_RB_binIntegrals->setEnabled(false);
-        ui->_RB_values->setChecked(true);
-    }
-
-    _lineView->chart()->setTitle(_model->name());
-    _intervalView->chart()->setTitle(_model->name());
-
-    ui->_W_parameterEditor->updateInterface(_model->parameter());
-    ui->_W_parameterEditor->isEmpty() ? ui->_GB_parameter->hide() : ui->_GB_parameter->show();
-
-    updatePlot();
-}
-
+/*!
+ * Creates a DataModelViewer for \a model and shows the window.
+ *
+ * Labels of the axes can be specified by \a labelX and \a labelY. If left empty, default axis
+ * labels are "x" and "y".
+ *
+ * Depending on whether or not \a model is integrable (see AbstractIntegrableDataModel), the widget
+ * also offers the option to visualize bin integrals.
+ *
+ * The widget will be deleted automatically if the window is closed.
+ *
+ * Example:
+ * \code
+ * // get the attenuation model of lead from the database
+ * auto attModel = attenuationModel(database::Element::Pb);
+ *
+ * // visualize
+ * gui::DataModelViewer::plot(attModel, "Energy [keV]", "Mass atten. coeff. [cm^2/g]");
+ * \endcode
+ */
 void DataModelViewer::plot(std::shared_ptr<AbstractDataModel> model,
                            const QString& labelX, const QString& labelY)
 {
@@ -75,90 +81,6 @@ void DataModelViewer::plot(std::shared_ptr<AbstractDataModel> model,
 
     viewer->resize(800, 600);
     viewer->show();
-}
-
-void DataModelViewer::updatePlot()
-{
-    const auto nbSamples = ui->_SB_nbSamples->value();
-    const auto range = SamplingRange(ui->_SB_rangeFrom->value(), ui->_SB_rangeTo->value());
-
-    if(ui->_RB_values->isChecked())
-    {
-        auto sampledValues = XYDataSeries::sampledFromModel(*_model, range.linspace(nbSamples));
-
-        _lineView->setData(sampledValues.data());
-        ui->_stackedWidget->setCurrentWidget(_lineView);
-    }
-    else // bin integrals is checked
-    {
-        auto sampledValues = IntervalDataSeries::sampledFromModel(
-                    static_cast<const AbstractIntegrableDataModel&>(*_model),
-                    range.start(), range.end(), nbSamples);
-
-        _intervalView->setData(sampledValues);
-        ui->_stackedWidget->setCurrentWidget(_intervalView);
-    }
-}
-
-void DataModelViewer::setNumberOfSamples(int nbSamples)
-{
-    ui->_SB_nbSamples->setValue(nbSamples);
-}
-
-void DataModelViewer::increaseSamplingDensity()
-{
-    setNumberOfSamples(qCeil(ui->_SB_nbSamples->value() * 1.25));
-}
-
-void DataModelViewer::reduceSamplingDensity()
-{
-    setNumberOfSamples(qCeil(ui->_SB_nbSamples->value() * 0.8));
-}
-
-void DataModelViewer::setLabelX(const QString& label)
-{
-    _lineView->setLabelX(label);
-    _intervalView->setLabelX(label);
-}
-
-void DataModelViewer::setLabelY(const QString& label)
-{
-    _lineView->setLabelY(label);
-    _intervalView->setLabelY(label);
-}
-
-void DataModelViewer::toggleLogY()
-{
-    _lineView->toggleLinLogY();
-    _intervalView->toggleLinLogY();
-
-    if(QObject::sender() != ui->_PB_linLogY)
-    {
-        ui->_PB_linLogY->blockSignals(true);
-        ui->_PB_linLogY->toggle();
-        ui->_PB_linLogY->blockSignals(false);
-    }
-}
-
-void DataModelViewer::keyPressEvent(QKeyEvent *event)
-{
-    if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
-    {
-        if(ui->_stackedWidget->currentWidget() == _lineView)
-            _lineView->saveDialog();
-        else
-            _intervalView->saveDialog();
-
-        event->accept();
-    }
-
-    QWidget::keyPressEvent(event);
-}
-
-void DataModelViewer::setModelParameter(QVariant parameter)
-{
-    _model->setParameter(parameter);
-    updatePlot();
 }
 
 /*!
@@ -203,11 +125,83 @@ IntervalSeriesView* DataModelViewer::dataViewBinIntegrals() const
 }
 
 /*!
+ * Sets the data model visualized by this instance to \a model.
+ *
+ * Note that the model is accessed through a shared_ptr, meaning that any changes in its parameters
+ * will effect all instances of the object. If model paramters are changed from outside this viewer
+ * instance, the plot is not updated automatically but needs to be refreshed with updatePlot(), if
+ * necessary.
+ */
+void DataModelViewer::setData(std::shared_ptr<AbstractDataModel> model)
+{
+    _model = std::move(model);
+    if(_model->isIntegrable())
+        ui->_RB_binIntegrals->setEnabled(true);
+    else
+    {
+        ui->_RB_binIntegrals->setEnabled(false);
+        ui->_RB_values->setChecked(true);
+    }
+
+    _lineView->chart()->setTitle(_model->name());
+    _intervalView->chart()->setTitle(_model->name());
+
+    ui->_W_parameterEditor->updateInterface(_model->parameter());
+    ui->_W_parameterEditor->isEmpty() ? ui->_GB_parameter->hide() : ui->_GB_parameter->show();
+
+    updatePlot();
+}
+
+// public slots
+
+/*!
+ * Increases the number of sampling points by 25% of their current value.
+ */
+void DataModelViewer::increaseSamplingDensity()
+{
+    setNumberOfSamples(qCeil(ui->_SB_nbSamples->value() * 1.25));
+}
+
+/*!
  * Hides the model parameter GUI element if \a hide = \c true and shows it otherwise.
  */
 void DataModelViewer::hideParameterGUI(bool hide)
 {
     hide ? ui->_GB_parameter->hide() : ui->_GB_parameter->show();
+}
+
+/*!
+ * Reduces the number of sampling points to 80% of their current value.
+ */
+void DataModelViewer::reduceSamplingDensity()
+{
+    setNumberOfSamples(qCeil(ui->_SB_nbSamples->value() * 0.8));
+}
+
+/*!
+ * Sets the label of the *x*-axis of both plot types to \a label.
+ */
+void DataModelViewer::setLabelX(const QString& label)
+{
+    _lineView->setLabelX(label);
+    _intervalView->setLabelX(label);
+}
+
+/*!
+ * Sets the label of the *y*-axis of both plot types to \a label.
+ */
+void DataModelViewer::setLabelY(const QString& label)
+{
+    _lineView->setLabelY(label);
+    _intervalView->setLabelY(label);
+}
+
+/*!
+ * Sets the number of sampling points to \a nbSamples.
+ */
+void DataModelViewer::setNumberOfSamples(int nbSamples)
+{
+    ui->_SB_nbSamples->setValue(nbSamples);
 }
 
 /*!
@@ -218,6 +212,74 @@ void DataModelViewer::setSamplingRange(float from, float to)
     ui->_SB_rangeFrom->setValue(from);
     ui->_SB_rangeTo->setValue(to);
 }
+
+/*!
+ * Toggles between linear and logarithmic *y*-axis display.
+ */
+void DataModelViewer::toggleLogY()
+{
+    _lineView->toggleLinLogY();
+    _intervalView->toggleLinLogY();
+
+    if(QObject::sender() != ui->_PB_linLogY)
+    {
+        ui->_PB_linLogY->blockSignals(true);
+        ui->_PB_linLogY->toggle();
+        ui->_PB_linLogY->blockSignals(false);
+    }
+}
+
+/*!
+ * Updates the current plot. This will readout all UI elements for information on sampling and
+ * performs a new sampling of the values from the model.
+ *
+ * Usually called automatically. Call this method manually if model parameters have been changed
+ * from outside this instance and a corresponding update of the plot is desired.
+ */
+void DataModelViewer::updatePlot()
+{
+    const auto nbSamples = ui->_SB_nbSamples->value();
+    const auto range = SamplingRange(ui->_SB_rangeFrom->value(), ui->_SB_rangeTo->value());
+
+    if(ui->_RB_values->isChecked())
+    {
+        auto sampledValues = XYDataSeries::sampledFromModel(*_model, range.linspace(nbSamples));
+
+        _lineView->setData(sampledValues.data());
+        ui->_stackedWidget->setCurrentWidget(_lineView);
+    }
+    else // bin integrals is checked
+    {
+        auto sampledValues = IntervalDataSeries::sampledFromModel(
+                    static_cast<const AbstractIntegrableDataModel&>(*_model),
+                    range.start(), range.end(), nbSamples);
+
+        _intervalView->setData(sampledValues);
+        ui->_stackedWidget->setCurrentWidget(_intervalView);
+    }
+}
+
+void DataModelViewer::keyPressEvent(QKeyEvent *event)
+{
+    if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_S)
+    {
+        if(ui->_stackedWidget->currentWidget() == _lineView)
+            _lineView->saveDialog();
+        else
+            _intervalView->saveDialog();
+
+        event->accept();
+    }
+
+    QWidget::keyPressEvent(event);
+}
+
+void DataModelViewer::setModelParameter(QVariant parameter)
+{
+    _model->setParameter(parameter);
+    updatePlot();
+}
+
 
 namespace details {
 
