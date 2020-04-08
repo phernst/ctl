@@ -27,8 +27,6 @@ public:
     void setData(const XYDataSeries& lineSeries);
     void setData(const QList<QPointF>& lineSeries);
 
-    QImage image(const QSize& renderSize = QSize());
-
 public slots:
     void setShowPoints(bool enabled = true);
 
