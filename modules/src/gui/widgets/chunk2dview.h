@@ -35,6 +35,9 @@ namespace gui {
  *    - Hold right mouse button + drag mouse to draw a line.
  *    - Press 'K' button to create a contrast line plot of the current line (requires
  * ctl_gui_charts.pri submodule).
+ *    - Press CTRL + C to copy the currently drawn contrast line coordinates to the clipboard
+ *    - Press CTRL + V to set a contrast line based on previously copied coordinates from the
+ * clipboard. The coordinates can also be copied from another window or widget.
  * - Save to image:
  *    - Press CRTL + S to open a dialog for saving the current figure to a file.
  * - Read-out live pixel data under cursor:

@@ -25,7 +25,7 @@ class Chunk2DView;
  *
  * ![A ProjectionViewer window visualizing projection data of two balls and a cylinder. A line has been drawn across the center of the projection, for which a contrast plot can be requested pressing 'K'.](gui/ProjectionViewer_withCtrLine.png)
  *
- * Use the vertical slider to cylce through the projections from individual views. When projection
+ * Use the vertical slider to cycle through the projections from individual views. When projection
  * data shall be visualized that contains multiple detector modules, the specific ModuleLayout of
  * the detector configuration can be passed by setModuleLayout() and the projections will be
  * combined accordingly. Without additional specification of a layout, all found modules are assumed
@@ -44,6 +44,9 @@ class Chunk2DView;
  *    - Hold right mouse button + drag mouse to draw a line.
  *    - Press 'K' button to create a contrast line plot of the current line (requires
  * ctl_gui_charts.pri submodule).
+ *    - Press CTRL + C to copy the currently drawn contrast line coordinates to the clipboard
+ *    - Press CTRL + V to set a contrast line based on previously copied coordinates from the
+ * clipboard. The coordinates can also be copied from another window or widget.
  * - Read-out live pixel data under cursor:
  *    - Mouse movements: Live pixel data is shown under the bottom right corner of the image.
  *

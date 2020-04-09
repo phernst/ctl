@@ -547,7 +547,7 @@ QPixmap Chunk2DView::checkerboard() const
 void Chunk2DView::contrastLineFromClipbord()
 {
     QString text = QGuiApplication::clipboard()->text();
-    QStringList list = text.split(",");
+    QStringList list = text.split(" ");
 
     if(list.length() != 4)
         return;
@@ -576,7 +576,7 @@ void Chunk2DView::contrastLineToClipbord() const
          << QString::number(_contrastLineItem->line().p2().x())
          << QString::number(_contrastLineItem->line().p2().y());
 
-    QGuiApplication::clipboard()->setText(text.join(","));
+    QGuiApplication::clipboard()->setText(text.join(" "));
 }
 
 void Chunk2DView::setGrayscaleColorTable()
