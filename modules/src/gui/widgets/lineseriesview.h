@@ -29,8 +29,11 @@ namespace gui {
  *    - Hold left mouse button + drag rectangle to zoom into that particular section of the plot.
  *    - Right click to zoom out.
  *    - Double-click left to request automatic zooming (ie. min/max).
+ * - Copying data to clipboard:
+ *    - Press CTRL + C to copy the values in the current plot to the clipboard. Each data point
+ * will be on a separate line with x and y value separated by a single whitespace.
  * - Save to image:
- *    - Press CRTL + S to open a dialog for saving the current figure to a file.
+ *    - Press CTRL + S to open a dialog for saving the current figure to a file.
  *
  * Axis ranges (both x and y) can also be defined explicitely using setRangeX() and setRangeY().
  *

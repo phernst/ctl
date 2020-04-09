@@ -35,7 +35,7 @@ class Chunk2DView;
  *
  * Within the viewport of the current projection:
  * - Zooming:
- *    - Hold CRTL + scroll mouse wheel up/down to zoom in/out.
+ *    - Hold CTRL + scroll mouse wheel up/down to zoom in/out.
  * - Data windowing:
  *    - Hold left mouse button + move up/down to raise/lower the center (or level) of the window.
  *    - Hold left mouse button + move left/right to narrow/broaden the width of the window.
@@ -52,7 +52,7 @@ class Chunk2DView;
  *
  * Anywhere in the widget:
  * - Save to image:
- *    - Press CRTL + S to open a dialog for saving the current figure to a file.
+ *    - Press CTRL + S to open a dialog for saving the current figure to a file.
  * - Plotting a contrast line:
  *    - Press 'K' button to create a contrast line plot of the current line (requires
  * ctl_gui_charts.pri submodule).

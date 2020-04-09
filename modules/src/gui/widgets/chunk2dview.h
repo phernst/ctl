@@ -26,7 +26,7 @@ namespace gui {
  *
  * The following IO operations are supported by this class:
  * - Zooming:
- *    - Hold CRTL + scroll mouse wheel up/down to zoom in/out.
+ *    - Hold CTRL + scroll mouse wheel up/down to zoom in/out.
  * - Data windowing:
  *    - Hold left mouse button + move up/down to raise/lower the center (or level) of the window.
  *    - Hold left mouse button + move left/right to narrow/broaden the width of the window.
@@ -39,7 +39,7 @@ namespace gui {
  *    - Press CTRL + V to set a contrast line based on previously copied coordinates from the
  * clipboard. The coordinates can also be copied from another window or widget.
  * - Save to image:
- *    - Press CRTL + S to open a dialog for saving the current figure to a file.
+ *    - Press CTRL + S to open a dialog for saving the current figure to a file.
  * - Read-out live pixel data under cursor:
  *    - Can be enabled with setLivePixelDataEnabled(true); if enabled, emits a signal with pixel
  * information that can be catched elsewhere.
