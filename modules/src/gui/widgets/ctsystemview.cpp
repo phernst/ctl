@@ -20,9 +20,6 @@
 #include <Qt3DRender/QCamera>
 #include <Qt3DRender/QFrameGraphNode>
 
-#include <Qt3DExtras/QForwardRenderer>
-#include <Qt3DRender/QRenderCapture>
-
 namespace CTL {
 namespace gui {
 
