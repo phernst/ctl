@@ -44,6 +44,7 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
 
+    virtual void copyDataToClipboard() const;
     void mySetAxisX(QtCharts::QAbstractAxis* axisX, QtCharts::QAbstractSeries* series);
     void mySetAxisY(QtCharts::QAbstractAxis* axisY, QtCharts::QAbstractSeries* series);
     QtCharts::QAbstractAxis* myAxisX(QtCharts::QAbstractSeries* series);

@@ -6,6 +6,8 @@
 #include <QLineSeries>
 #include <QValueAxis>
 #include <QLogValueAxis>
+#include <QApplication>
+#include <QClipboard>
 #include <limits>
 
 using namespace QtCharts;
@@ -97,23 +99,40 @@ void IntervalSeriesView::setData(const IntervalDataSeries& intervalSeries)
     _dataSeries->clear();
     _dataSeriesLog->clear();
 
-    static const auto eps = 0.0001;
     const auto binWidth = intervalSeries.binWidth();
     const auto logMinVal = suitableLogMinVal(intervalSeries);
 
     for(const auto& pt : intervalSeries.data())
     {
-        _dataSeries->append(pt.x() - (0.5 - eps) * binWidth, pt.y());
+        _dataSeries->append(pt.x() - (0.5 - BAR_GAP) * binWidth, pt.y());
         _dataSeries->append(pt.x() + 0.5 * binWidth, pt.y());
-        _dataSeries->append(pt.x() + (0.5 + eps) * binWidth, 0.0);
+        _dataSeries->append(pt.x() + (0.5 + BAR_GAP) * binWidth, 0.0);
 
         const auto clampedLogVal = std::max( { pt.y(), logMinVal } );
-        _dataSeriesLog->append(pt.x() - (0.5 - eps) * binWidth, clampedLogVal);
+        _dataSeriesLog->append(pt.x() - (0.5 - BAR_GAP) * binWidth, clampedLogVal);
         _dataSeriesLog->append(pt.x() + 0.5 * binWidth, clampedLogVal);
-        _dataSeriesLog->append(pt.x() + (0.5 + eps) * binWidth, logMinVal);
+        _dataSeriesLog->append(pt.x() + (0.5 + BAR_GAP) * binWidth, logMinVal);
     }
 
     autoRange();
+}
+
+void IntervalSeriesView::copyDataToClipboard() const
+{
+    const auto dataPts = yAxisIsLinear() ? _dataSeries->pointsVector()
+                                         : _dataSeriesLog->pointsVector();
+
+    QStringList list;
+    for(auto dataIt = dataPts.cbegin(); dataIt < dataPts.cend(); dataIt += 3)
+    {
+        const auto binWidth = ((dataIt+1)->x() - dataIt->x()) / (1.0 - BAR_GAP);
+
+        const auto x = (dataIt+1)->x() - 0.5 * binWidth;
+        const auto y = dataIt->y();
+        list << QString::number(x) + QStringLiteral(" ") + QString::number(y);
+    }
+
+    QApplication::clipboard()->setText(list.join("\n"));
 }
 
 /*!

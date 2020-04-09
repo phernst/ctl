@@ -3,6 +3,8 @@
 #include <QValueAxis>
 #include <QLogValueAxis>
 #include <QFileDialog>
+#include <QApplication>
+#include <QClipboard>
 
 using namespace QtCharts;
 
@@ -225,8 +227,25 @@ void ChartViewBase::keyPressEvent(QKeyEvent* event)
         event->accept();
         return;
     }
+    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_C)
+    {
+        copyDataToClipboard();
+        event->accept();
+        return;
+    }
 
     QWidget::keyPressEvent(event);
+}
+
+void ChartViewBase::copyDataToClipboard() const
+{
+    auto seriesToCopy = yAxisIsLinear() ? _dataSeries : _dataSeriesLog;
+
+    QStringList list;
+    for(const auto& pt : seriesToCopy->points())
+        list << QString::number(pt.x()) + QStringLiteral(" ") + QString::number(pt.y());
+
+    QApplication::clipboard()->setText(list.join("\n"));
 }
 
 void ChartViewBase::setSeriesShow(QAbstractSeries* series, bool shown)
