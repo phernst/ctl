@@ -6,6 +6,8 @@
 #include "img/voxelvolume.h"
 #include "gui/util/qttype_utils.h"
 
+#include <QApplication>
+#include <QElapsedTimer>
 #include <QGridLayout>
 #include <Qt3DCore/QTransform>
 #include <Qt3DExtras/QConeMesh>
@@ -15,17 +17,25 @@
 #include <Qt3DExtras/QOrbitCameraController>
 #include <Qt3DExtras/QPhongMaterial>
 #include <Qt3DExtras/QPhongAlphaMaterial>
-#include <Qt3DExtras/Qt3DWindow>
 #include <Qt3DRender/QCamera>
 #include <Qt3DRender/QFrameGraphNode>
+
+#include <Qt3DExtras/QForwardRenderer>
+#include <Qt3DRender/QRenderCapture>
 
 namespace CTL {
 namespace gui {
 
+/*!
+ * Creates a CTSystemView and sets its parent to \a parent.
+ *
+ * If specified, sets the scaling for the visual appearance of components within the scene to
+ * \a visualScale.
+ */
 CTSystemView::CTSystemView(QWidget* parent, float visualScale)
     : QWidget(parent)
     , _mainLayout(new QGridLayout(this))
-    , _view(new Qt3DExtras::Qt3DWindow())
+    , _view(new details::CTL3DWindow)
     , _rootEntity(new Qt3DCore::QEntity())
     , _camera(_view->camera())
     , _camController(new Qt3DExtras::QOrbitCameraController(_rootEntity))
@@ -40,12 +50,26 @@ CTSystemView::CTSystemView(QWidget* parent, float visualScale)
     setWindowTitle("CT system view");
 }
 
-void CTSystemView::setCTSystem(const SimpleCTsystem& system)
-{
-    clearScene();
-    addSystemVisualization(system);
-}
-
+/*!
+ * Creates a CTSystemView for visualization of \a system and shows the window.
+ *
+ * If specified, sets the scaling for the visual appearance of components within the scene to
+ * \a visualScale.
+ *
+ * The widget will be deleted automatically if the window is closed.
+ *
+ * Example: create a visualization of a GenericTubularCT with three different visual scales
+ * \code
+ * auto system = SimpleCTsystem::fromCTsystem(
+ *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
+ *
+ * gui::CTSystemView::plot(system, 25.0f);
+ * gui::CTSystemView::plot(system);        // visualScale = 50 [default value]
+ * gui::CTSystemView::plot(system, 75.0f);
+ * \endcode
+ *
+ * ![Resulting visualization from the example above (window size and zoom adjusted).](gui/CTSystemView_scales.png)
+ */
 void CTSystemView::plot(SimpleCTsystem system, float visualScale)
 {
     auto viewer = new CTSystemView(nullptr, visualScale);
@@ -55,10 +79,134 @@ void CTSystemView::plot(SimpleCTsystem system, float visualScale)
     viewer->show();
 }
 
+/*!
+ * Sets the system to be visualized by this instance to \a system. This overrides any previous
+ * visualization.
+ */
+void CTSystemView::setCTSystem(const SimpleCTsystem& system)
+{
+    clearScene();
+    addSystemVisualization(system);
+}
+
+/*!
+ * Adds a visualization of \a system to the scene of this instance.
+ *
+ * Example:
+ * \code
+ * auto system = SimpleCTsystem::fromCTsystem(
+ *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
+ *
+ * auto viewer = new gui::CTSystemView;
+ * viewer->setCTSystem(system);
+ *
+ * // rotate system to 45 degree position and visualize as well
+ * static_cast<TubularGantry*>(system.gantry())->setRotationAngle(45.0_deg);
+ * viewer->addSystemVisualization(system);
+ *
+ * viewer->show();
+ * \endcode
+ *
+ * ![Resulting visualization. The view has been zoomed in and its camera position adjusted slightly for better visibility.](gui/CTSystemView_2systems.png)
+ */
 void CTSystemView::addSystemVisualization(const SimpleCTsystem& system)
 {
     addDetectorComponent(system.gantry(), system.detector());
     addSourceComponent(system.gantry(), system.source());
+}
+
+/*!
+ * Adds a visualization of \a volume to the scene of this instance. The volume will be shown in its
+ * real dimensions and voxels will appear as translucent black boxes with alpha channel
+ * corresponding to the value of the voxel (higher values appear less transparent).
+ *
+ * Note that, if once added, the volume visualization will be permanent throughout the lifetime of
+ * this instance. That means in particular that it will not be removed when calling clearScene() or
+ * resetView().
+ *
+ * Example:
+ * \code
+ * auto system = SimpleCTsystem::fromCTsystem(
+ *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
+ *
+ * // create a volume with 10x10x10 voxels (each of size 10mm x 10mm x 10mm)
+ * auto volume = VoxelVolume<uchar>(10,10,10,10.0,10.0,10.0);
+ * volume.fill(20); // fill with value 20 for a highly transparent visualization
+ *
+ * auto viewer = new gui::CTSystemView;
+ * viewer->setCTSystem(system);
+ * viewer->addVolume(vol);
+ * viewer->show();
+ * \endcode
+ *
+ * ![Resulting visualization. The view has been zoomed in for better visibility.](gui/CTSystemView_volume.png)
+ */
+void CTSystemView::addVolume(const VoxelVolume<uchar>& volume)
+{
+    const QQuaternion identityQuaternion;
+    const QVector3D voxelSize(volume.voxelSize().x, volume.voxelSize().y, volume.voxelSize().z);
+    const uint X = volume.nbVoxels().x, Y = volume.nbVoxels().y, Z = volume.nbVoxels().z;
+    // volume offset
+    QVector3D volExtentCompensation(X - 1, Y - 1, Z - 1);
+    volExtentCompensation *= 0.5f * voxelSize;
+    QVector3D volumeOffset(volume.offset().x, volume.offset().y, volume.offset().z);
+    volumeOffset -= volExtentCompensation;
+
+    for(uint x = 0; x < X; ++x)
+        for(uint y = 0; y < Y; ++y)
+            for(uint z = 0; z < Z; ++z)
+                if(volume(x,y,z))
+                {
+                    auto material = new Qt3DExtras::QPhongAlphaMaterial(_rootEntity);
+                    material->setAlpha(volume(x,y,z) / 255.0f);
+                    material->setObjectName("permanent");
+
+                    QVector3D translation(x * voxelSize.x(), y * voxelSize.y(), z * voxelSize.z());
+                    translation += volumeOffset;
+                    addBoxObject(voxelSize, translation, identityQuaternion, material);
+                }
+}
+
+/*!
+ * Clears the scene of this instance. This removes all system visualizations that have been added to
+ * the scene.
+ *
+ * Note that this does not remove coordinate axes and visualized volumes (if those had been added).
+ *
+ * \sa addVolume(), resetView().
+ */
+void CTSystemView::clearScene()
+{
+    QList<QObject*> deleteList;
+
+    for(auto child : _rootEntity->children())
+        if(child->objectName() != "permanent")
+            deleteList.append(child);
+
+    for(auto obj : deleteList)
+        delete obj;
+}
+
+/*!
+ * Restores the initial camera position.
+ */
+void CTSystemView::resetCamera()
+{
+    static const QVector3D startPos(10.0f * _visualScale, -10.0f * _visualScale, -40.0f * _visualScale);
+    _camera->setPosition(startPos);
+    _camera->setViewCenter(QVector3D(0.0f, 0.0f, 0.0f));
+    _camera->setUpVector(QVector3D(0, -1, 0));
+}
+
+/*!
+ * Resets the view by clearing its scene and resetting the camera position.
+ *
+ * \sa clearScene(), resetCamera().
+ */
+void CTSystemView::resetView()
+{
+    clearScene();
+    resetCamera();
 }
 
 void CTSystemView::initializeView()
@@ -79,32 +227,6 @@ void CTSystemView::initializeView()
 
     _mainLayout->addWidget(QWidget::createWindowContainer(_view, this), 0, 0);
     qDebug() << "widget set";
-}
-
-void CTSystemView::resetCamera()
-{
-    static const QVector3D startPos(10.0f * _visualScale, -10.0f * _visualScale, -40.0f * _visualScale);
-    _camera->setPosition(startPos);
-    _camera->setViewCenter(QVector3D(0.0f, 0.0f, 0.0f));
-    _camera->setUpVector(QVector3D(0, -1, 0));
-}
-
-void CTSystemView::resetView()
-{
-    clearScene();
-    resetCamera();
-}
-
-void CTSystemView::clearScene()
-{
-    QList<QObject*> deleteList;
-
-    for(auto child : _rootEntity->children())
-        if(child->objectName() != "permanent")
-            deleteList.append(child);
-
-    for(auto obj : deleteList)
-        delete obj;
 }
 
 void CTSystemView::addCoordinateSystem()
@@ -184,32 +306,6 @@ void CTSystemView::addSourceComponent(AbstractGantry* gantry, AbstractSource* )
     boxExtentCompensation = srcRotQuaternion.rotatedVector(boxExtentCompensation);
 
     addBoxObject(srcBoxSize, srcPosQVector + boxExtentCompensation, srcRotQuaternion);
-}
-
-void CTSystemView::addVolume(const VoxelVolume<uchar>& volume)
-{
-    const QQuaternion identityQuaternion;
-    const QVector3D voxelSize(volume.voxelSize().x, volume.voxelSize().y, volume.voxelSize().z);
-    const uint X = volume.nbVoxels().x, Y = volume.nbVoxels().y, Z = volume.nbVoxels().z;
-    // volume offset
-    QVector3D volExtentCompensation(X - 1, Y - 1, Z - 1);
-    volExtentCompensation *= 0.5f * voxelSize;
-    QVector3D volumeOffset(volume.offset().x, volume.offset().y, volume.offset().z);
-    volumeOffset -= volExtentCompensation;
-
-    for(uint x = 0; x < X; ++x)
-        for(uint y = 0; y < Y; ++y)
-            for(uint z = 0; z < Z; ++z)
-                if(volume(x,y,z))
-                {
-                    auto material = new Qt3DExtras::QPhongAlphaMaterial(_rootEntity);
-                    material->setAlpha(volume(x,y,z) / 255.0f);
-                    material->setObjectName("permanent");
-
-                    QVector3D translation(x * voxelSize.x(), y * voxelSize.y(), z * voxelSize.z());
-                    translation += volumeOffset;
-                    addBoxObject(voxelSize, translation, identityQuaternion, material);
-                }
 }
 
 void CTSystemView::addAxis(Qt::Axis axis, float lineLength)
@@ -298,6 +394,14 @@ void CTSystemView::addAxis(Qt::Axis axis, float lineLength)
     coneEntity->addComponent(coneMesh);
     coneEntity->addComponent(transformCone);
     coneEntity->addComponent(axisMaterial);
+}
+
+void details::CTL3DWindow::keyPressEvent(QKeyEvent *e)
+{
+    if(e->modifiers() == Qt::CTRL && e->key() == Qt::Key_S)
+        emit saveRequest();
+    else
+        Qt3DWindow::keyPressEvent(e);
 }
 
 } // namespace gui

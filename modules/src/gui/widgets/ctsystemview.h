@@ -2,6 +2,7 @@
 #define CTL_CTSYSTEMVIEW_H
 
 #include <QWidget>
+#include <Qt3DWindow>
 
 // forward delcarations
 namespace CTL {
@@ -17,7 +18,6 @@ namespace Qt3DCore {
 class QEntity;
 } // namespace Qt3DCore
 namespace Qt3DExtras {
-class Qt3DWindow;
 class QOrbitCameraController;
 } // namespace Qt3DExtras
 namespace Qt3DRender {
@@ -25,8 +25,55 @@ class QCamera;
 class QMaterial;
 } // namespace Qt3DRender
 
+
 namespace CTL {
 namespace gui {
+
+namespace details {
+class CTL3DWindow;
+}
+
+/*!
+ * \class CTSystemView
+ *
+ * \brief The CTSystemView class provides a tool for visualization of a SimpleCTsystem
+ *
+ * This class can be used to visualize the positioning of source and detector component of a
+ * SimpleCTsystem in an interactive 3D viewer. For convenience, the plot() method can be used to
+ * achieve a one-line solution, creating a widget that will be destroyed once it is closed by the
+ * user.
+ *
+ * The following IO operations are supported by this widget:
+ *
+ * - Zooming:
+ *    - Scroll mouse wheel up/down to zoom in/out.
+ * - Camera positioning / orientation:
+ *    - Hold left mouse button + move up/down/left/right to move the camera position in the
+ * corresponding direction
+ *    - Hold right mouse button + move up/down/left/right to rotate the camera direction
+ *
+ * The system to be visualized is set via setCTSystem(). It is also possible to add further systems
+ * to the same visualization scene with addSystemVisualization(). To clear all previously added
+ * systems from the scene, use clearScene(). Camera position can be reset to its original setting
+ * by resetCamera(). The resetView() combines the effects of clearing the scene and resetting the
+ * camera.
+ *
+ * Example:
+ * \code
+ * auto system = SimpleCTsystem::fromCTsystem(
+ *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
+ *
+ * // (static version) using the plot() command
+ * gui::CTSystemView::plot(system);
+ *
+ * // (property-based version)
+ * auto viewer = new gui::CTSystemView; // needs to be deleted at an appropriate time
+ * viewer->setCTSystem(system);
+ * viewer->show();
+ * \endcode
+ *
+ * ![Visualization (static version) of a system, created from the GenericTubularCT blueprint.](gui/CTSystemView.png)
+ */
 
 class CTSystemView : public QWidget
 {
@@ -49,7 +96,7 @@ public slots:
 protected:
     QGridLayout* _mainLayout;
 
-    Qt3DExtras::Qt3DWindow* _view;
+    details::CTL3DWindow* _view;
     Qt3DCore::QEntity* _rootEntity;
 
     void addBoxObject(const QVector3D& dimensions,
@@ -70,6 +117,23 @@ private:
     void addAxis(Qt::Axis axis, float lineLength = 10.0f);
     void addCoordinateSystem();
 };
+
+namespace details {
+
+class CTL3DWindow : public Qt3DExtras::Qt3DWindow
+{
+    Q_OBJECT
+public:
+    using Qt3DExtras::Qt3DWindow::Qt3DWindow;
+
+protected:
+    void keyPressEvent(QKeyEvent* e) override;
+
+signals:
+    void saveRequest();
+};
+
+}
 
 } // namespace gui
 } // namespace CTL
