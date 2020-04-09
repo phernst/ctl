@@ -13,6 +13,8 @@
 #include <QGraphicsPixmapItem>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QGuiApplication>
+#include <QClipboard>
 
 namespace CTL {
 namespace gui {
@@ -232,7 +234,6 @@ void Chunk2DView::showContrastLinePlot()
 #endif
 }
 
-
 // getter
 /*!
  * Returns the data held by this instance.
@@ -424,6 +425,18 @@ void Chunk2DView::keyPressEvent(QKeyEvent *event)
         event->accept();
         return;
     }
+    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_C)
+    {
+        contrastLineToClipbord();
+        event->accept();
+        return;
+    }
+    else if(event->modifiers() == Qt::CTRL && event->key() == Qt::Key_V)
+    {
+        contrastLineFromClipbord();
+        event->accept();
+        return;
+    }
 
     QWidget::keyPressEvent(event);
 }
@@ -477,6 +490,7 @@ void Chunk2DView::mousePressEvent(QMouseEvent* event)
         _mouseDragStart = event->pos();
         _contrastLineItem->setLine( { mapToScene(_mouseDragStart), mapToScene(_mouseDragStart) } );
         _contrastLineItem->hide();
+        _scene.update();
     }
 
     QWidget::mousePressEvent(event);
@@ -528,6 +542,41 @@ QPixmap Chunk2DView::checkerboard() const
     }
 
     return QPixmap::fromImage(img);
+}
+
+void Chunk2DView::contrastLineFromClipbord()
+{
+    QString text = QGuiApplication::clipboard()->text();
+    QStringList list = text.split(",");
+
+    if(list.length() != 4)
+        return;
+
+    QPointF p1, p2;
+    bool ok;
+    p1.setX(list.at(0).toDouble(&ok));
+    if(!ok) return;
+    p1.setY(list.at(1).toDouble(&ok));
+    if(!ok) return;
+    p2.setX(list.at(2).toDouble(&ok));
+    if(!ok) return;
+    p2.setY(list.at(3).toDouble(&ok));
+    if(!ok) return;
+
+    // all ok -> set and show line
+    _contrastLineItem->setLine( { p1, p2 } );
+    _contrastLineItem->show();
+}
+
+void Chunk2DView::contrastLineToClipbord() const
+{
+    QStringList text;
+    text << QString::number(_contrastLineItem->line().p1().x())
+         << QString::number(_contrastLineItem->line().p1().y())
+         << QString::number(_contrastLineItem->line().p2().x())
+         << QString::number(_contrastLineItem->line().p2().y());
+
+    QGuiApplication::clipboard()->setText(text.join(","));
 }
 
 void Chunk2DView::setGrayscaleColorTable()

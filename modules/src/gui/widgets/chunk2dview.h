@@ -153,6 +153,8 @@ private:
     double _wheelZoomPerTurn = 0.25; // i.e 0.25 zoom per 15.0 deg;
 
     QPixmap checkerboard() const;
+    void contrastLineFromClipbord();
+    void contrastLineToClipbord() const;
     QPoint pixelIdxFromPos(const QPoint& pos);
     void setGrayscaleColorTable();
     void updateImage();
