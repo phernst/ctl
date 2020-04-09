@@ -6,8 +6,6 @@
 #include "img/voxelvolume.h"
 #include "gui/util/qttype_utils.h"
 
-#include <QApplication>
-#include <QElapsedTimer>
 #include <QGridLayout>
 #include <Qt3DCore/QTransform>
 #include <Qt3DExtras/QConeMesh>
@@ -18,7 +16,6 @@
 #include <Qt3DExtras/QPhongMaterial>
 #include <Qt3DExtras/QPhongAlphaMaterial>
 #include <Qt3DRender/QCamera>
-#include <Qt3DRender/QFrameGraphNode>
 
 namespace CTL {
 namespace gui {
