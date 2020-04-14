@@ -35,11 +35,14 @@ public:
     explicit IntersectionPlaneView(QWidget* parent = nullptr,
                                    float visualScale = 50.0f);
 
+    void setPlaneSize(double width, double height);
     void setPlaneSize(const QSizeF& size);
     void setVolumeDim(const VoxelVolume<float>& volume);
+    void setVolumeDim(float sizeX, float sizeY, float sizeZ,
+                      const VoxelVolume<float>::Offset& offset = { 0.0f, 0.0f, 0.0f});
     void setVolumeDim(const VoxelVolume<float>::Dimensions& dimensions,
-                      const VoxelVolume<float>::Offset& offset,
-                      const VoxelVolume<float>::VoxelSize& voxelSize);
+                      const VoxelVolume<float>::VoxelSize& voxelSize,
+                      const VoxelVolume<float>::Offset& offset = { 0.0f, 0.0f, 0.0f});
 
     static void plot(const VoxelVolume<float>& volume,
                      double azimuth, double polar, double distance, float visualScale = 50.0f);

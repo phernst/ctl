@@ -35,7 +35,87 @@ IntersectionPlaneView::IntersectionPlaneView(QWidget* parent, float visualScale)
     addCoordinateSystem();
 
     resize(800, 600);
+
     setWindowTitle("Intersection plane view");
+}
+
+void IntersectionPlaneView::plot(const VoxelVolume<float>& volume,
+                                 double azimuth, double polar, double distance, float visualScale)
+{
+    const auto maxDim = std::max(std::max(volume.dimensions().x * volume.voxelSize().x,
+                                          volume.dimensions().y * volume.voxelSize().y),
+                                 volume.dimensions().z * volume.voxelSize().z);
+
+    auto viewer = new IntersectionPlaneView(nullptr, visualScale);
+    viewer->setAttribute(Qt::WA_DeleteOnClose);
+    viewer->setVolumeDim(volume);
+    viewer->setPlaneSize( { double(maxDim) * std::sqrt(3.0), double(maxDim) * std::sqrt(3.0) } );
+    viewer->setPlaneParameter(azimuth, polar, distance);
+
+    viewer->show();
+}
+
+void IntersectionPlaneView::setPlaneSize(double width, double height)
+{
+    _planeSize = QSizeF(width, height);
+
+    redraw();
+}
+
+void IntersectionPlaneView::setPlaneSize(const QSizeF& size)
+{
+    _planeSize = size;
+
+    redraw();
+}
+
+void IntersectionPlaneView::setVolumeDim(const VoxelVolume<float>& volume)
+{
+    setVolumeDim(volume.dimensions(), volume.voxelSize(), volume.offset());
+}
+
+void IntersectionPlaneView::setVolumeDim(float sizeX, float sizeY, float sizeZ,
+                                         const VoxelVolume<float>::Offset& offset)
+{
+    setVolumeDim( {1, 1, 1 }, {sizeX, sizeY, sizeZ}, offset);
+}
+
+void IntersectionPlaneView::setVolumeDim(const VoxelVolume<float>::Dimensions& dimensions,
+                                         const VoxelVolume<float>::VoxelSize& voxelSize,
+                                         const VoxelVolume<float>::Offset& offset)
+{
+    _volDim = dimensions;
+    _volOffset = offset;
+    _volVoxSize = voxelSize;
+
+    redraw();
+}
+
+// public slots
+void IntersectionPlaneView::clearScene()
+{
+    QList<QObject*> deleteList;
+
+    for(auto child : _rootEntity->children())
+        if(child->objectName() != "permanent")
+            deleteList.append(child);
+
+    for(auto obj : deleteList)
+        delete obj;
+}
+
+void IntersectionPlaneView::resetCamera()
+{
+    static const QVector3D startPos( 750.0f, -300.0f, -750.0f );
+    _camera->setPosition(startPos);
+    _camera->setViewCenter(QVector3D(0.0f, 0.0f, 0.0f));
+    _camera->setUpVector(QVector3D(0, -1, 0));
+}
+
+void IntersectionPlaneView::resetView()
+{
+    clearScene();
+    resetCamera();
 }
 
 void IntersectionPlaneView::setPlaneParameter(double azimuth, double polar, double distance)
@@ -62,47 +142,7 @@ void IntersectionPlaneView::setPlaneParameter(double azimuth, double polar, doub
     redraw();
 }
 
-void IntersectionPlaneView::setPlaneSize(const QSizeF& size)
-{
-    _planeSize = size;
-
-    redraw();
-}
-
-void IntersectionPlaneView::setVolumeDim(const VoxelVolume<float>& volume)
-{
-    _volDim = volume.dimensions();
-    _volOffset = volume.offset();
-    _volVoxSize = volume.voxelSize();
-
-    redraw();
-}
-
-void IntersectionPlaneView::setVolumeDim(const VoxelVolume<float>::Dimensions& dimensions,
-                                         const VoxelVolume<float>::Offset& offset,
-                                         const VoxelVolume<float>::VoxelSize& voxelSize)
-{
-    _volDim = dimensions;
-    _volOffset = offset;
-    _volVoxSize = voxelSize;
-
-    redraw();
-}
-
-void IntersectionPlaneView::plot(const VoxelVolume<float>& volume,
-                                 double azimuth, double polar, double distance, float visualScale)
-{
-    const auto maxDim = std::max(std::max(volume.dimensions().x, volume.dimensions().y),
-                                 volume.dimensions().z);
-
-    auto viewer = new IntersectionPlaneView(nullptr, visualScale);
-    viewer->setAttribute(Qt::WA_DeleteOnClose);
-    viewer->setVolumeDim(volume);
-    viewer->setPlaneSize( { double(maxDim) * std::sqrt(3.0), double(maxDim) * std::sqrt(3.0) } );
-    viewer->setPlaneParameter(azimuth, polar, distance);
-
-    viewer->show();
-}
+// private
 
 void IntersectionPlaneView::initializeView()
 {
@@ -135,32 +175,6 @@ void IntersectionPlaneView::initializeView()
     qDebug() << "widget set";
 }
 
-void IntersectionPlaneView::resetCamera()
-{
-    static const QVector3D startPos( 750.0f, -300.0f, -750.0f );
-    _camera->setPosition(startPos);
-    _camera->setViewCenter(QVector3D(0.0f, 0.0f, 0.0f));
-    _camera->setUpVector(QVector3D(0, -1, 0));
-}
-
-void IntersectionPlaneView::resetView()
-{
-    clearScene();
-    resetCamera();
-}
-
-void IntersectionPlaneView::clearScene()
-{
-    QList<QObject*> deleteList;
-
-    for(auto child : _rootEntity->children())
-        if(child->objectName() != "permanent")
-            deleteList.append(child);
-
-    for(auto obj : deleteList)
-        delete obj;
-}
-
 void IntersectionPlaneView::addCoordinateSystem()
 {
     // Lines
@@ -170,9 +184,9 @@ void IntersectionPlaneView::addCoordinateSystem()
 }
 
 void IntersectionPlaneView::addBoxObject(const QVector3D& dimensions,
-                                          const QVector3D& translation,
-                                          const QQuaternion& rotation,
-                                          Qt3DRender::QMaterial *material)
+                                         const QVector3D& translation,
+                                         const QQuaternion& rotation,
+                                         Qt3DRender::QMaterial *material)
 {
     auto boxEntity = new Qt3DCore::QEntity(_rootEntity);
     auto boxMesh = new Qt3DExtras::QCuboidMesh;

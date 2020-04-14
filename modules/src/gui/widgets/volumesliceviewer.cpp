@@ -86,7 +86,7 @@ void VolumeSliceViewer::plot(const VoxelVolume<float>& volume)
 void VolumeSliceViewer::dataChange()
 {
     #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
-    _3dViewer->setVolumeDim(_slicer->volDim(), _slicer->volOffset(), _slicer->volVoxSize());
+    _3dViewer->setVolumeDim(_slicer->volDim(), _slicer->volVoxSize(), _slicer->volOffset());
     _3dViewer->setPlaneSize( { _slicer->sliceDimensions().width * _slicer->sliceResolution(),
                              _slicer->sliceDimensions().height * _slicer->sliceResolution() } );
     #endif // GUI_WIDGETS_3D_MODULE_AVAILABLE
