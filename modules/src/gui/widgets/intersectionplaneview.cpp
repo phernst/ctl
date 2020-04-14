@@ -20,6 +20,12 @@
 namespace CTL {
 namespace gui {
 
+/*!
+ * Constructs an IntersectionPlaneView with the given \a parent.
+ *
+ * If specified, sets the scaling for the visual appearance of components within the scene to
+ * \a visualScale (see CTSystemView::plot() for an example).
+ */
 IntersectionPlaneView::IntersectionPlaneView(QWidget* parent, float visualScale)
     : QWidget(parent)
     , _mainLayout(new QGridLayout(this))
@@ -39,6 +45,25 @@ IntersectionPlaneView::IntersectionPlaneView(QWidget* parent, float visualScale)
     setWindowTitle("Intersection plane view");
 }
 
+/*!
+ * Creates an IntersectionPlaneView for visualization of \a volume and the plane specified by the
+ * spherical coordinate tuple (\a azimuth, \a polar, \a distance). Note that only the outer bounding
+ * box of \a volume is visualized in the scene for means of simplicity.
+ *
+ * If specified, sets the scaling for the visual appearance of components within the scene to
+ * \a visualScale.
+ *
+ * The widget will be deleted automatically if the window is closed.
+ *
+ * Example:
+ * \code
+ * // create a volume with total size 100mm x 100mm x 200mm (note: number of voxels is irrelevant)
+ * VoxelVolume<float> volume(1, 1, 1, 100.0, 100.0, 200.0);
+ *
+ * // (static version) using the plot() command
+ * gui::IntersectionPlaneView::plot(volume, 10.0_deg, 30.0_deg, 50.0);
+ * \endcode
+ */
 void IntersectionPlaneView::plot(const VoxelVolume<float>& volume,
                                  double azimuth, double polar, double distance, float visualScale)
 {
@@ -55,6 +80,10 @@ void IntersectionPlaneView::plot(const VoxelVolume<float>& volume,
     viewer->show();
 }
 
+/*!
+ * Sets the size of the visualized plane to \a width x \a height (both in mm) and updates the
+ * visualization.
+ */
 void IntersectionPlaneView::setPlaneSize(double width, double height)
 {
     _planeSize = QSizeF(width, height);
@@ -62,6 +91,10 @@ void IntersectionPlaneView::setPlaneSize(double width, double height)
     redraw();
 }
 
+/*!
+ * Sets the size of the visualized plane to \a size (width x height, in mm) and updates the
+ * visualization.
+ */
 void IntersectionPlaneView::setPlaneSize(const QSizeF& size)
 {
     _planeSize = size;
@@ -69,17 +102,88 @@ void IntersectionPlaneView::setPlaneSize(const QSizeF& size)
     redraw();
 }
 
+/*!
+ * Sets the size and position of the volume visualized in the scene based on the specification of
+ * \a volume. No copy of actual data is created; only information about the size and position of
+ * the volume is extracted.
+ *
+ * Note that only the outer bounding box of \a volume is visualized in the scene for means of
+ * simplicity.
+ *
+ * Updates the visualization.
+ *
+ * Example:
+ * \code
+ * // creating a volume object
+ * VoxelVolume<float> volume(100, 200, 300);
+ * volume.setVoxelSize(1.5, 0.5, 1.0);
+ * volume.setVolumeOffset(0.0f, -50.0f, 0.0f);
+ *
+ * auto viewer = new gui::IntersectionPlaneView;
+ * viewer->setPlaneParameter(10.0_deg, 30.0_deg, 50.0);
+ * viewer->setPlaneSize(300.0, 300.0);
+ *
+ * viewer->setVolumeDim(volume);
+ * viewer->show();
+ * \endcode
+ *
+ * Note that the discretization of the volume has no influence on the visualization. Therefore,
+ * replacing \c volume in the example above by the following code would yield the same result:
+ * \code
+ * // creating a volume object with one (big) voxel
+ * VoxelVolume<float> volume(1, 1, 1);          // we use a single voxel here
+ * volume.setVoxelSize(150.0f, 100.0f, 300.0f); // this is the total size of our volume
+ * volume.setVolumeOffset(0.0f, -50.0f, 0.0f);
+ *
+ * // ...
+ * \endcode
+ */
 void IntersectionPlaneView::setVolumeDim(const VoxelVolume<float>& volume)
 {
     setVolumeDim(volume.dimensions(), volume.voxelSize(), volume.offset());
 }
 
+/*!
+ * Sets the size of the volume visualized in the scene to \a sizeX x \a sizeY x \a sizeZ (all in mm)
+ * and sets the position offset to \a offset.
+ *
+ * Updates the visualization.
+ *
+ * Example:
+ * \code
+ * auto viewer = new gui::IntersectionPlaneView;
+ * viewer->setPlaneParameter(10.0_deg, 30.0_deg, 50.0);
+ * viewer->setPlaneSize(300.0, 300.0);
+ * viewer->setVolumeDim(200.0f, 150.0f, 300.0f, {0.0f, 0.0f, 100.0f});
+ * viewer->show();
+ * \endcode
+ */
 void IntersectionPlaneView::setVolumeDim(float sizeX, float sizeY, float sizeZ,
                                          const VoxelVolume<float>::Offset& offset)
 {
     setVolumeDim( {1, 1, 1 }, {sizeX, sizeY, sizeZ}, offset);
 }
 
+/*!
+ * Sets the size of the volume visualized in the scene based on \a dimensions and \a voxelSize. An
+ * offset can be specified by \a offset to shift the volume to a specific position.
+ *
+ * Note that only the outer bounding box of the specified volume is visualized in the scene for
+ * means of simplicity. This means, in particular, that the number of voxels specified by
+ * \a dimensions has no effect, except for being used to determine the total size of the volume
+ * (as a product with their individual size).
+ *
+ * Updates the visualization.
+ *
+ * Example:
+ * \code
+ * auto viewer = new gui::IntersectionPlaneView;
+ * viewer->setPlaneParameter(10.0_deg, 30.0_deg, 50.0);
+ * viewer->setPlaneSize(450.0, 450.0);
+ * viewer->setVolumeDim( {256, 256, 256}, {1.0, 1.0, 1.0});
+ * viewer->show();
+ * \endcode
+ */
 void IntersectionPlaneView::setVolumeDim(const VoxelVolume<float>::Dimensions& dimensions,
                                          const VoxelVolume<float>::VoxelSize& voxelSize,
                                          const VoxelVolume<float>::Offset& offset)
@@ -92,6 +196,12 @@ void IntersectionPlaneView::setVolumeDim(const VoxelVolume<float>::Dimensions& d
 }
 
 // public slots
+/*!
+ * Clears the scene of this instance. This removes all items that have been added to the scene.
+ * Does not remove coordinate axes.
+ *
+ * \sa resetView().
+ */
 void IntersectionPlaneView::clearScene()
 {
     QList<QObject*> deleteList;
@@ -104,6 +214,9 @@ void IntersectionPlaneView::clearScene()
         delete obj;
 }
 
+/*!
+ * Restores the initial camera position.
+ */
 void IntersectionPlaneView::resetCamera()
 {
     static const QVector3D startPos( 750.0f, -300.0f, -750.0f );
@@ -112,12 +225,38 @@ void IntersectionPlaneView::resetCamera()
     _camera->setUpVector(QVector3D(0, -1, 0));
 }
 
+/*!
+ * Resets the view by clearing its scene and resetting the camera position.
+ *
+ * \sa clearScene(), resetCamera().
+ */
 void IntersectionPlaneView::resetView()
 {
     clearScene();
     resetCamera();
 }
 
+/*!
+ * Sets the parameters of the visualized plane to the spherical coordinate tuple (\a azimuth,
+ * \a polar, \a distance) and updates the visualization.
+ *
+ * Example:
+ * \code
+ * auto viewer = new gui::IntersectionPlaneView;
+ * viewer->setPlaneSize(300.0, 300.0);
+ * viewer->setVolumeDim(200.0f, 200.0f, 200.0f);
+ *
+ * // three different planes
+ * viewer->setPlaneParameter(10.0_deg, 30.0_deg, 0.0);    // (a)
+ * //viewer->setPlaneParameter(10.0_deg, 30.0_deg, 75.0); // (b)
+ * //viewer->setPlaneParameter(45.0_deg, 30.0_deg, 0.0);  // (c)
+ * //viewer->setPlaneParameter(45.0_deg, 120.0_deg, 0.0); // (d)
+ *
+ * viewer->show();
+ * \endcode
+ *
+ * ![Resulting visualization (window size and zoom adjusted).](gui/IntersectionPlaneView_planes.png)
+ */
 void IntersectionPlaneView::setPlaneParameter(double azimuth, double polar, double distance)
 {
     using namespace CTL;
