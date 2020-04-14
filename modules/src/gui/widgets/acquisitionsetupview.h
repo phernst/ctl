@@ -24,16 +24,18 @@ public:
                      float visualScale = 50.0f);
 
 public slots:
+    void addViewVisualization(int view);
     void animateAcquisition(int msPerView);
     void setAnimationStacking(bool enabled);
     void setSourceOnly(bool enabled);
     void showFullAcquisition(uint leaveOut = 0);
     void showSourceTrajectory();
+    void showView(int view);
 
 private:
-    AcquisitionSetup _currentAcquisition;
-    QTimer* _animationTimer;
-    uint _currentView;
+    AcquisitionSetup _setup;
+    QTimer* _animTimer;
+    uint _animCurrentView;
 
     bool _stackAnimation = false;
     bool _sourceOnly = false;

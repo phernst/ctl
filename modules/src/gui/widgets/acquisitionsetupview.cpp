@@ -8,10 +8,10 @@ namespace gui {
 
 AcquisitionSetupView::AcquisitionSetupView(QWidget* parent, float visualScale)
     : CTSystemView(parent, visualScale)
-    , _animationTimer(new QTimer(this))
-    , _currentView(0)
+    , _animTimer(new QTimer(this))
+    , _animCurrentView(0)
 {
-    connect(_animationTimer, SIGNAL(timeout()), SLOT(updateAnimation()));
+    connect(_animTimer, SIGNAL(timeout()), SLOT(updateAnimation()));
 
     resize(800, 600);
     setWindowTitle("Acquisition setup view");
@@ -19,12 +19,12 @@ AcquisitionSetupView::AcquisitionSetupView(QWidget* parent, float visualScale)
 
 void AcquisitionSetupView::setAcquisitionSetup(const AcquisitionSetup& acqSetup)
 {
-    _currentAcquisition = acqSetup;
+    _setup = acqSetup;
 }
 
-void AcquisitionSetupView::setAcquisitionSetup(AcquisitionSetup &&acqSetup)
+void AcquisitionSetupView::setAcquisitionSetup(AcquisitionSetup&& acqSetup)
 {
-    _currentAcquisition = std::move(acqSetup);
+    _setup = std::move(acqSetup);
 }
 
 void AcquisitionSetupView::plot(AcquisitionSetup setup, uint maxNbViews, bool sourceOnly, float visualScale)
@@ -42,15 +42,32 @@ void AcquisitionSetupView::plot(AcquisitionSetup setup, uint maxNbViews, bool so
     viewer->show();
 }
 
+void AcquisitionSetupView::addViewVisualization(int view)
+{
+    if(!_setup.isValid())
+        return;
+
+    if(view >= static_cast<int>(_setup.nbViews()))
+    {
+        qWarning("Requested view exceeds number of views in current acquisition setup.");
+        return;
+    }
+
+    _setup.prepareView(view);
+    _sourceOnly ? addSourceComponent(_setup.system()->gantry(),
+                                     _setup.system()->source())
+                : addSystemVisualization(*_setup.system());
+}
+
 void AcquisitionSetupView::animateAcquisition(int msPerView)
 {
-    if(!_currentAcquisition.isValid())
+    if(!_setup.isValid())
         return;
 
     clearScene();
 
-    _currentView = 0;
-    _animationTimer->start(msPerView);
+    _animCurrentView = 0;
+    _animTimer->start(msPerView);
 }
 
 void AcquisitionSetupView::setAnimationStacking(bool enabled)
@@ -65,66 +82,43 @@ void AcquisitionSetupView::setSourceOnly(bool enabled)
 
 void AcquisitionSetupView::showFullAcquisition(uint leaveOut)
 {
-    if(!_currentAcquisition.isValid())
-        return;
-
     clearScene();
 
-    for(uint view = 0; view < _currentAcquisition.nbViews(); (++view) += leaveOut)
-    {
-        _currentAcquisition.prepareView(view);
-        _sourceOnly ? addSourceComponent(_currentAcquisition.system()->gantry(),
-                                         _currentAcquisition.system()->source())
-                    : addSystemVisualization(*_currentAcquisition.system());
-    }
+    for(uint view = 0; view < _setup.nbViews(); (++view) += leaveOut)
+        addViewVisualization(view);
 }
 
 void AcquisitionSetupView::showSourceTrajectory()
 {
-    if(!_currentAcquisition.isValid())
-        return;
+    const auto cache = _sourceOnly;
 
+    _sourceOnly = true;
+    showFullAcquisition();
+    _sourceOnly = cache;
+}
+
+void AcquisitionSetupView::showView(int view)
+{
     clearScene();
 
-    for(uint view = 0; view < _currentAcquisition.nbViews(); ++view)
-    {
-        _currentAcquisition.prepareView(view);
-        addSourceComponent(_currentAcquisition.system()->gantry(),
-                           _currentAcquisition.system()->source());
-    }
+    addViewVisualization(view);
 }
 
 void AcquisitionSetupView::updateAnimation()
 {
-    if(_currentView >= _currentAcquisition.nbViews())
+    if(_animCurrentView >= _setup.nbViews())
     {
-        _animationTimer->stop();
+        qDebug() << "animation stopped";
+        _animTimer->stop();
         return;
     }
 
-    qDebug() << "animate: " << _currentView;
-    _currentAcquisition.prepareView(_currentView);
-    if(_stackAnimation)
-    {
-        if(_sourceOnly)
-            addSourceComponent(_currentAcquisition.system()->gantry(),
-                               _currentAcquisition.system()->source());
-        else
-            addSystemVisualization(*_currentAcquisition.system());
-    }
-    else
-    {
-        if(_sourceOnly)
-        {
-            clearScene();
-            addSourceComponent(_currentAcquisition.system()->gantry(),
-                               _currentAcquisition.system()->source());
-        }
-        else
-            setCTSystem(*_currentAcquisition.system());
-    }
+    qDebug() << "animate: " << _animCurrentView;
 
-    ++_currentView;
+    _stackAnimation ? addViewVisualization(_animCurrentView)
+                    : showView(_animCurrentView);
+
+    ++_animCurrentView;
 }
 
 } // namespace gui
