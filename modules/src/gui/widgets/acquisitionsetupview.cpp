@@ -10,6 +10,7 @@ AcquisitionSetupView::AcquisitionSetupView(QWidget* parent, float visualScale)
     : CTSystemView(parent, visualScale)
     , _animTimer(new QTimer(this))
     , _animCurrentView(0)
+    , _animLeaveOut(0)
 {
     connect(_animTimer, SIGNAL(timeout()), SLOT(updateAnimation()));
 
@@ -59,7 +60,7 @@ void AcquisitionSetupView::addViewVisualization(int view)
                 : addSystemVisualization(*_setup.system());
 }
 
-void AcquisitionSetupView::animateAcquisition(int msPerView)
+void AcquisitionSetupView::animateAcquisition(int msPerView, uint leaveOut)
 {
     if(!_setup.isValid())
         return;
@@ -67,6 +68,7 @@ void AcquisitionSetupView::animateAcquisition(int msPerView)
     clearScene();
 
     _animCurrentView = 0;
+    _animLeaveOut = leaveOut;
     _animTimer->start(msPerView);
 }
 
@@ -118,7 +120,7 @@ void AcquisitionSetupView::updateAnimation()
     _stackAnimation ? addViewVisualization(_animCurrentView)
                     : showView(_animCurrentView);
 
-    ++_animCurrentView;
+    _animCurrentView += (1 + _animLeaveOut);
 }
 
 } // namespace gui

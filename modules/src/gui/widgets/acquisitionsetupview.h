@@ -25,7 +25,7 @@ public:
 
 public slots:
     void addViewVisualization(int view);
-    void animateAcquisition(int msPerView);
+    void animateAcquisition(int msPerView, uint leaveOut = 0);
     void setAnimationStacking(bool enabled);
     void setSourceOnly(bool enabled);
     void showFullAcquisition(uint leaveOut = 0);
@@ -36,6 +36,7 @@ private:
     AcquisitionSetup _setup;
     QTimer* _animTimer;
     uint _animCurrentView;
+    uint _animLeaveOut;
 
     bool _stackAnimation = false;
     bool _sourceOnly = false;
