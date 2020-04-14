@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     CTL::OCL::VolumeResampler radonSpaceSampler(radon3d);
 
     // Init optimizer
-    GrangeatRegistration2D3D reg;
+    CTL::NLOPT::GrangeatRegistration2D3D reg;
 
     //metric
     auto gmc = parser.isSet("m")

@@ -8,6 +8,9 @@
 #include "processing/volumeresampler.h"
 #include <nlopt.hpp>
 
+namespace CTL {
+namespace NLOPT {
+
 /*!
  * \class GrangeatRegistration2D3D
  *
@@ -34,5 +37,8 @@ private:
     const CTL::imgproc::AbstractErrorMetric* _metric = &CTL::metric::L2;
     float _subSamplingLevel = 1.0f;
 };
+
+} // namespace NLOPT
+} // namespace CTL
 
 #endif // CTL_GRANGEATREGISTRATION2D3D_H
