@@ -162,6 +162,7 @@ run-doxygen:
 
 
 # update lines of code website
+
 analyze-loc:
   stage: build
   script:
