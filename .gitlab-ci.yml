@@ -173,3 +173,4 @@ analyze-loc:
     - curl -T empty.md -u $NC_UPLOAD_DIR -H 'X-Requested-With:XMLHttpRequest' -H 'X-Method-Override:PUT' https://rf.p7.de/public.php/webdav/empty.md
   only:
     - master
+  allow_failure: true
