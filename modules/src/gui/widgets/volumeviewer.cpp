@@ -245,7 +245,7 @@ void VolumeViewer::setWindowPresetsInMu(WindowPreset preset1, WindowPreset prese
 void VolumeViewer::autoResize()
 {
     static const auto staticMinSize = QSize(500, 400);
-    static const auto staticMargin = QSize(108, 100);
+    static const auto staticMargin = QSize(108, 118);
 
     QSize minimumSize = staticMinSize;
     QSize totalMargin = staticMargin;
