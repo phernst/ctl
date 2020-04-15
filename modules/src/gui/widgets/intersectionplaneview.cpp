@@ -57,7 +57,8 @@ IntersectionPlaneView::IntersectionPlaneView(QWidget* parent, float visualScale)
  *
  * Example:
  * \code
- * // create a volume with total size 100mm x 100mm x 200mm (note: number of voxels is irrelevant)
+ * // create a volume with total size 100mm x 100mm x 200mm
+ * // (note: total size is the product of number of voxels and voxel size)
  * VoxelVolume<float> volume(1, 1, 1, 100.0, 100.0, 200.0);
  *
  * // (static version) using the plot() command
