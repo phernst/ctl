@@ -7,6 +7,7 @@
 #include "gui/util/qttype_utils.h"
 
 #include <QGridLayout>
+#include <QKeyEvent>
 #include <Qt3DCore/QTransform>
 #include <Qt3DExtras/QConeMesh>
 #include <Qt3DExtras/QCuboidMesh>
@@ -390,7 +391,7 @@ void CTSystemView::addAxis(Qt::Axis axis, float lineLength)
     coneEntity->addComponent(axisMaterial);
 }
 
-void details::CTL3DWindow::keyPressEvent(QKeyEvent *e)
+void details::CTL3DWindow::keyPressEvent(QKeyEvent* e)
 {
     if(e->modifiers() == Qt::CTRL && e->key() == Qt::Key_S)
         emit saveRequest();
