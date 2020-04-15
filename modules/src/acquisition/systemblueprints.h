@@ -90,6 +90,26 @@ inline AbstractDetector* GenericCarmCT::detector() const
     return new FlatPanelDetector(nbPixel, pixelDimensions, detectorName);
 }
 
+inline std::unique_ptr<CTsystem> makeCTsystem(const AbstractCTsystemBlueprint& blueprint)
+{
+    std::unique_ptr<CTsystem> ret{ CTsystemBuilder::createFromBlueprint(blueprint).clone() };
+    return ret;
+}
+
+inline std::unique_ptr<SimpleCTsystem> makeSimpleCTsystem(const AbstractCTsystemBlueprint& blueprint)
+{
+    std::unique_ptr<SimpleCTsystem> ret{ nullptr };
+    bool canConvert;
+    auto simpleSystem = SimpleCTsystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprint),
+                                                     &canConvert);
+    if(!canConvert)
+        return ret;
+
+    ret.reset(static_cast<SimpleCTsystem*>(std::move(simpleSystem).clone()));
+
+    return ret;
+}
+
 } // namespace blueprints
 
 } // namespace CTL
