@@ -506,7 +506,8 @@ void Chunk2DView::wheelEvent(QWheelEvent* event)
     }
     else if(event->modifiers() == Qt::SHIFT)
     {
-        int turnDirection = std::signbit(event->angleDelta().y()) ? -1 : 1;
+        // static cast is required due to missing overloads of signbit for integral types in MSVS
+        int turnDirection = std::signbit(static_cast<double>(event->angleDelta().y())) ? -1 : 1;
         emit viewChangeRequested(turnDirection);
         event->accept();
     }
