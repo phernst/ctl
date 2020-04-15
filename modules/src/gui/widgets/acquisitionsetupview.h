@@ -51,7 +51,7 @@ namespace gui {
  * setup.applyPreparationProtocol(protocols::CirclePlusLineTrajectory(200.0_deg, 600.0, 500.0, 0.5, 180.0_deg));
  *
  * // ... and visualize the setup, showing a maximum of 30 views (for a better overview)
- * gui::AcquisitionSetupView::plot(setup, 30);
+ * gui::AcquisitionSetupView::plot(setup, 30);  // see figure below
  *
  * // using the property-based approach, we can also create an animation of this setup
  * auto viewer = new gui::AcquisitionSetupView;
