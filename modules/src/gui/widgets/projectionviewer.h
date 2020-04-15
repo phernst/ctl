@@ -34,6 +34,8 @@ class Chunk2DView;
  * The following IO operations are supported by this widget:
  *
  * Within the viewport of the current projection:
+ * - Change view:
+ *    - Hold SHIFT + scroll mouse wheel to up/down to show next/previous view
  * - Zooming:
  *    - Hold CTRL + scroll mouse wheel up/down to zoom in/out.
  * - Data windowing:
@@ -145,6 +147,7 @@ private:
     ModuleLayout _modLayout;
 
 private slots:
+    void changeView(int requestedChange);
     void updateSliderRange();
     void updatePixelInfo(int x, int y, float value);
     void windowingUpdate();

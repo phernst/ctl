@@ -134,6 +134,7 @@ protected:
 
 signals:
     void pixelInfoUnderCursor(int x, int y, float value);
+    void viewChangeRequested(int requestedChange);
     void windowingChanged(double from, double to);
     void zoomChanged(double zoom);
 

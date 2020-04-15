@@ -504,6 +504,12 @@ void Chunk2DView::wheelEvent(QWheelEvent* event)
         setZoom(_zoom + numTurns.y() * _wheelZoomPerTurn);
         event->accept();
     }
+    else if(event->modifiers() == Qt::SHIFT)
+    {
+        int turnDirection = std::signbit(event->angleDelta().y()) ? -1 : 1;
+        emit viewChangeRequested(turnDirection);
+        event->accept();
+    }
     else
         QGraphicsView::wheelEvent(event);
 }

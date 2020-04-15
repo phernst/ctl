@@ -20,6 +20,7 @@ ProjectionViewer::ProjectionViewer(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->_VS_projection, &QSlider::valueChanged, this, &ProjectionViewer::showView);
+    connect(ui->_W_dataView, &Chunk2DView::viewChangeRequested, this, &ProjectionViewer::changeView);
     // connections for windowing
     connect(ui->_W_windowing, &WindowingWidget::windowingChanged, this, &ProjectionViewer::windowingUpdate);
     connect(ui->_W_windowing, &WindowingWidget::autoWindowingRequested, ui->_W_dataView, &Chunk2DView::setWindowingMinMax);
@@ -209,6 +210,12 @@ void ProjectionViewer::keyPressEvent(QKeyEvent* event)
     }
 
     QWidget::keyPressEvent(event);
+}
+
+void ProjectionViewer::changeView(int requestedChange)
+{
+    const auto curViewIdx = ui->_VS_projection->value();
+    ui->_VS_projection->setValue(curViewIdx + requestedChange);
 }
 
 void ProjectionViewer::updateSliderRange()

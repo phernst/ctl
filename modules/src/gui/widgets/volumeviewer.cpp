@@ -30,6 +30,7 @@ VolumeViewer::VolumeViewer(QWidget* parent)
     ui->setupUi(this);
 
     connect(ui->_VS_slice, &QSlider::valueChanged, this, &VolumeViewer::showSlice);
+    connect(ui->_W_dataView, &Chunk2DView::viewChangeRequested, this, &VolumeViewer::changeSlice);
     // connections for windowing
     connect(ui->_W_windowing, &WindowingWidget::windowingChanged, this, &VolumeViewer::windowingUpdate);
     connect(ui->_W_windowing, &WindowingWidget::autoWindowingRequested, ui->_W_dataView, &Chunk2DView::setWindowingMinMax);
@@ -326,6 +327,12 @@ void VolumeViewer::keyPressEvent(QKeyEvent* event)
 const SpectralVolumeData& VolumeViewer::selectedVolume() const
 {
     return _compData.subVolume(ui->_TW_volumeOverview->selectedItems().first()->row());
+}
+
+void VolumeViewer::changeSlice(int requestedChange)
+{
+    const auto curViewIdx = ui->_VS_slice->value();
+    ui->_VS_slice->setValue(curViewIdx + requestedChange);
 }
 
 void VolumeViewer::selectCentralSlice()

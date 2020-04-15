@@ -39,6 +39,8 @@ class Chunk2DView;
  * The following IO operations are supported by this widget:
  *
  * Within the viewport of the current slice:
+ * - Change slice:
+ *    - Hold SHIFT + scroll mouse wheel to up/down to show next/previous slice
  * - Zooming:
  *    - Hold CTRL + scroll mouse wheel up/down to zoom in/out.
  * - Data windowing:
@@ -155,6 +157,7 @@ private:
     const SpectralVolumeData& selectedVolume() const;
 
 private slots:
+    void changeSlice(int requestedChange);
     void selectCentralSlice();
     void sliceDirectionChanged();
     void updateVolumeOverview();
