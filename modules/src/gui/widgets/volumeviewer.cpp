@@ -146,9 +146,15 @@ void VolumeViewer::setData(CompositeVolume data)
 {
     _compData = std::move(data);
 
+    bool needsAutoWindow = (ui->_W_windowing->windowFromTo() == qMakePair(0.0, 0.0));
+
     updateVolumeOverview();
     if(_compData.nbSubVolumes())
         ui->_TW_volumeOverview->selectRow(0);
+
+    selectCentralSlice();
+    if(needsAutoWindow)
+        ui->_W_dataView->setWindowingMinMax();
 }
 
 /*!
@@ -320,6 +326,16 @@ void VolumeViewer::keyPressEvent(QKeyEvent* event)
 const SpectralVolumeData& VolumeViewer::selectedVolume() const
 {
     return _compData.subVolume(ui->_TW_volumeOverview->selectedItems().first()->row());
+}
+
+void VolumeViewer::selectCentralSlice()
+{
+    if(ui->_RB_directionX->isChecked())
+        ui->_VS_slice->setValue(static_cast<int>(std::floor(selectedVolume().nbVoxels().x / 2.0)));
+    else if(ui->_RB_directionY->isChecked())
+        ui->_VS_slice->setValue(static_cast<int>(std::floor(selectedVolume().nbVoxels().y / 2.0)));
+    else if(ui->_RB_directionZ->isChecked())
+        ui->_VS_slice->setValue(static_cast<int>(std::floor(selectedVolume().nbVoxels().z / 2.0)));
 }
 
 void VolumeViewer::sliceDirectionChanged()

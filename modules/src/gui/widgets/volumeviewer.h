@@ -155,6 +155,7 @@ private:
     const SpectralVolumeData& selectedVolume() const;
 
 private slots:
+    void selectCentralSlice();
     void sliceDirectionChanged();
     void updateVolumeOverview();
     void updateSliderRange();
