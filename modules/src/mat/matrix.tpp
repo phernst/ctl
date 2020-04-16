@@ -12,6 +12,21 @@
 namespace CTL {
 namespace mat {
 
+namespace details {
+
+constexpr uint rangeDim(uint from, uint to)
+{
+    return to >= from ? to - from + 1u : from - to + 1u;
+}
+
+template <uint VecDim>
+constexpr uint vecRangeDim(uint from, uint to)
+{
+    return VecDim > 1u ? rangeDim(from, to) : 1u;
+}
+
+} // namespace details
+
 // ### MatrixBase ###
 // constructors
 /*!
@@ -532,14 +547,14 @@ Matrix<Rows, Cols>::fromContainer(const Container& vector, size_t NthMat, bool* 
 template <uint Rows, uint Cols>
 template <uint fromRow, uint toRow, uint fromCol, uint toCol>
 auto Matrix<Rows, Cols>::subMat() const ->
-Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>
+Matrix<details::rangeDim(fromRow, toRow), details::rangeDim(fromCol, toCol)>
 {
     static_assert(fromRow < Rows, "`fromRow` exceeds matrix dimension.");
     static_assert(toRow < Rows, "`toRow` exceeds matrix dimension.");
     static_assert(fromCol < Cols, "`fromCol` exceeds matrix dimension.");
     static_assert(toCol < Cols, "`toCol` exceeds matrix dimension.");
 
-    Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)> ret;
+    Matrix<details::rangeDim(fromRow, toRow), details::rangeDim(fromCol, toCol)> ret;
     constexpr auto rowInc = toRow >= fromRow ? 1u : static_cast<uint>(-1);
     constexpr auto colInc = toCol >= fromCol ? 1u : static_cast<uint>(-1);
 
@@ -572,14 +587,15 @@ Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>
  */
 template <uint Rows, uint Cols>
 template <uint from, uint to>
-auto Matrix<Rows, Cols>::subMat() const -> Matrix<vecRowDim(from, to), vecColDim(from, to)>
+auto Matrix<Rows, Cols>::subMat() const ->
+Matrix<details::vecRangeDim<Rows>(from, to), details::vecRangeDim<Cols>(from, to)>
 {
     static_assert(Rows == 1u || Cols == 1u, "`subMat<from, to>()` supports only vectors.");
     constexpr auto nbElem = Rows == 1u ? Cols : Rows;
     static_assert(from < nbElem, "`from` exceeds vector dimension.");
     static_assert(to < nbElem, "`to` exceeds vector dimension.");
 
-    Matrix<vecRowDim(from, to), vecColDim(from, to)> ret;
+    Matrix<details::vecRangeDim<Rows>(from, to), details::vecRangeDim<Cols>(from, to)> ret;
     constexpr auto inc = to >= from ? 1u : static_cast<uint>(-1);
 
     // suppress MSVS compiler warning `4307` caused by an (intended) integer overflow
@@ -814,24 +830,6 @@ Matrix<Rows, Cols>::operator*(const Matrix<Cols, Cols2>& rhs) const
         }
 
     return ret;
-}
-
-template <uint Rows, uint Cols>
-constexpr uint Matrix<Rows, Cols>::rangeDim(uint from, uint to)
-{
-    return to >= from ? to - from + 1u : from - to + 1u;
-}
-
-template <uint Rows, uint Cols>
-constexpr uint Matrix<Rows, Cols>::vecRowDim(uint from, uint to)
-{
-    return Rows > 1u ? rangeDim(from, to) : 1u;
-}
-
-template <uint Rows, uint Cols>
-constexpr uint Matrix<Rows, Cols>::vecColDim(uint from, uint to)
-{
-    return Cols > 1u ? rangeDim(from, to) : 1u;
 }
 
 // ### Scalar specialization ###

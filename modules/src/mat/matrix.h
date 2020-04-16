@@ -20,6 +20,15 @@ typedef unsigned int uint;
 namespace CTL {
 namespace mat {
 
+namespace details {
+
+// helper function for `subMat()`
+constexpr uint rangeDim(uint from, uint to);
+// helper function for vectors' `subMat()`
+template <uint VecDim> constexpr uint vecRangeDim(uint from, uint to);
+
+} // namespace details
+
 /*!
  * \class MatrixBase
  *
@@ -113,12 +122,6 @@ private:
 template <uint Rows, uint Cols>
 class Matrix : public MatrixBase<Rows, Cols>
 {
-    // helper function for `subMat()`
-    static constexpr uint rangeDim(uint from, uint to);
-    // helper function for vectors' `subMat()`
-    static constexpr uint vecRowDim(uint from, uint to);
-    static constexpr uint vecColDim(uint from, uint to);
-
 public:
     Matrix() = default;
     explicit Matrix(double fillValue);
@@ -135,10 +138,12 @@ public:
 
     // sub-matrix extraction
     template <uint fromRow, uint toRow, uint fromCol, uint toCol>
-    auto subMat() const -> Matrix<rangeDim(fromRow, toRow), rangeDim(fromCol, toCol)>;
+    auto subMat() const -> Matrix<details::rangeDim(fromRow, toRow),
+                                  details::rangeDim(fromCol, toCol)>;
     // sub-vector extraction
     template <uint from, uint to>
-    auto subMat() const -> Matrix<vecRowDim(from, to), vecColDim(from, to)>;
+    auto subMat() const -> Matrix<details::vecRangeDim<Rows>(from, to),
+                                  details::vecRangeDim<Cols>(from, to)>;
 
     // single vector extraction
     template <uint i>

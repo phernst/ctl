@@ -9,7 +9,7 @@ namespace details {
     template <typename T> void grindCylinderX(VoxelVolume<T>& volume, float radius);
     template <typename T> void grindCylinderY(VoxelVolume<T>& volume, float radius);
     template <typename T> void grindCylinderZ(VoxelVolume<T>& volume, float radius);
-}
+} // namespace details
 
 /*!
  * Constructs a voxelized volume with \a nbVoxels voxels.
