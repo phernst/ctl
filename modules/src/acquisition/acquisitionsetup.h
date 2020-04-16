@@ -64,6 +64,8 @@ public:
     AcquisitionSetup() = default;
     AcquisitionSetup(const CTsystem& system, uint nbViews = 0);
     AcquisitionSetup(CTsystem&& system, uint nbViews = 0);
+    AcquisitionSetup(std::unique_ptr<CTsystem> system, uint nbViews = 0);
+    AcquisitionSetup(std::unique_ptr<SimpleCTsystem> system, uint nbViews = 0);
 
     // cp/mv cstor/assignment
     AcquisitionSetup(const AcquisitionSetup& other);

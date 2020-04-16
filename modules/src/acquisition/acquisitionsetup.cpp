@@ -272,6 +272,19 @@ AcquisitionSetup::AcquisitionSetup(CTsystem&& system, uint nbViews)
     this->setNbViews(nbViews);
 }
 
+AcquisitionSetup::AcquisitionSetup(std::unique_ptr<CTsystem> system, uint nbViews)
+{
+    if(system)
+        this->resetSystem(std::move(*system));
+    this->setNbViews(nbViews);
+}
+
+AcquisitionSetup::AcquisitionSetup(std::unique_ptr<SimpleCTsystem> system, uint nbViews)
+    : _system(std::move(system))
+{
+    this->setNbViews(nbViews);
+}
+
 /*!
  * Creates a copy of \a other. This uses CTsystem::clone() to create a deep copy of the CTsystem
  * member variable.
