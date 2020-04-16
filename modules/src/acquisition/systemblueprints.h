@@ -90,18 +90,26 @@ inline AbstractDetector* GenericCarmCT::detector() const
     return new FlatPanelDetector(nbPixel, pixelDimensions, detectorName);
 }
 
-inline std::unique_ptr<CTsystem> makeCTsystem(const AbstractCTsystemBlueprint& blueprint)
+} // namespace blueprints
+
+template <typename CTsystemBlueprint, typename... BlueprintCtorArgs>
+std::unique_ptr<CTsystem> makeCTsystem(BlueprintCtorArgs&&... args)
 {
-    std::unique_ptr<CTsystem> ret{ CTsystemBuilder::createFromBlueprint(blueprint).clone() };
+    std::unique_ptr<CTsystem> ret{ CTsystemBuilder::createFromBlueprint(
+                                       CTsystemBlueprint{
+                                           std::forward<BlueprintCtorArgs>(args)... }).clone() };
     return ret;
 }
 
-inline std::unique_ptr<SimpleCTsystem> makeSimpleCTsystem(const AbstractCTsystemBlueprint& blueprint)
+template <typename CTsystemBlueprint, typename... BlueprintCtorArgs>
+std::unique_ptr<SimpleCTsystem> makeSimpleCTsystem(BlueprintCtorArgs&&... args)
 {
     std::unique_ptr<SimpleCTsystem> ret{ nullptr };
     bool canConvert;
-    auto simpleSystem = SimpleCTsystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprint),
-                                                     &canConvert);
+    auto simpleSystem
+        = SimpleCTsystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(CTsystemBlueprint{
+                                           std::forward<BlueprintCtorArgs>(args)... }),
+                                       &canConvert);
     if(!canConvert)
         return ret;
 
@@ -109,8 +117,6 @@ inline std::unique_ptr<SimpleCTsystem> makeSimpleCTsystem(const AbstractCTsystem
 
     return ret;
 }
-
-} // namespace blueprints
 
 } // namespace CTL
 
