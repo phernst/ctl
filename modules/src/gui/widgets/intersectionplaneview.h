@@ -43,6 +43,8 @@ namespace gui {
  * const VoxelVolume<float>::VoxelSize&) or simply by copying the specs of a given volume data
  * object using setVolumeDim(const VoxelVolume<float>&).
  *
+ * For convenience, the plot() method can be used to achieve a one-line solution, creating a
+ * widget that will be destroyed once it is closed by the user.
  *
  * The following IO operations are supported by this widget:
  *

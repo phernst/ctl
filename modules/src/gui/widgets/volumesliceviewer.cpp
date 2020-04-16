@@ -16,6 +16,9 @@
 namespace CTL {
 namespace gui {
 
+/*!
+ * Constructs a VolumeSliceViewer with the given \a parent.
+ */
 VolumeSliceViewer::VolumeSliceViewer(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::VolumeSliceViewer)
@@ -62,11 +65,18 @@ VolumeSliceViewer::VolumeSliceViewer(QWidget *parent) :
     setWindowTitle("Volume slice viewer");
 }
 
+/*!
+ * Destroys the viewer.
+ */
 VolumeSliceViewer::~VolumeSliceViewer()
 {
     delete ui;
 }
 
+/*!
+ * Sets the volume data handled by this instance to \a volume. Data is copied directly to the OpenCL
+ * device used to reslice the volume.
+ */
 void VolumeSliceViewer::setData(const VoxelVolume<float>& volume)
 {
     _slicer.reset(new OCL::VolumeSlicer(volume));
@@ -74,35 +84,20 @@ void VolumeSliceViewer::setData(const VoxelVolume<float>& volume)
     dataChange();
 }
 
+/*!
+ * Creates a VolumeSliceViewer for visualization of arbitrary slices through \a volume.
+ *
+ * The widget will be deleted automatically if the window is closed.
+ */
 void VolumeSliceViewer::plot(const VoxelVolume<float>& volume)
 {
     auto viewer = new VolumeSliceViewer;
     viewer->setAttribute(Qt::WA_DeleteOnClose);
     viewer->setData(volume);
 
+    viewer->ui->_w_sliceView->setAutoMouseWindowScaling();
+
     viewer->show();
-}
-
-void VolumeSliceViewer::dataChange()
-{
-    #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
-    _3dViewer->setVolumeDim(_slicer->volDim(), _slicer->volVoxSize(), _slicer->volOffset());
-    _3dViewer->setPlaneSize( { _slicer->sliceDimensions().width * _slicer->sliceResolution(),
-                             _slicer->sliceDimensions().height * _slicer->sliceResolution() } );
-    #endif // GUI_WIDGETS_3D_MODULE_AVAILABLE
-
-    recomputeSlice();
-}
-
-void VolumeSliceViewer::planeChange()
-{
-    #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
-    _3dViewer->setPlaneParameter(qDegreesToRadians(ui->_SB_azimuth->value()),
-                                 qDegreesToRadians(ui->_SB_polar->value()),
-                                 ui->_SB_distance->value());
-    #endif // GUI_WIDGETS_3D_MODULE_AVAILABLE
-
-    recomputeSlice();
 }
 
 void VolumeSliceViewer::keyPressEvent(QKeyEvent *event)
@@ -120,6 +115,17 @@ void VolumeSliceViewer::keyPressEvent(QKeyEvent *event)
     QWidget::keyPressEvent(event);
 }
 
+void VolumeSliceViewer::dataChange()
+{
+    #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
+    _3dViewer->setVolumeDim(_slicer->volDim(), _slicer->volVoxSize(), _slicer->volOffset());
+    _3dViewer->setPlaneSize( { _slicer->sliceDimensions().width * _slicer->sliceResolution(),
+                             _slicer->sliceDimensions().height * _slicer->sliceResolution() } );
+    #endif // GUI_WIDGETS_3D_MODULE_AVAILABLE
+
+    recomputeSlice();
+}
+
 void VolumeSliceViewer::recomputeSlice()
 {
     auto slice = _slicer->slice(qDegreesToRadians(ui->_SB_azimuth->value()),
@@ -127,6 +133,17 @@ void VolumeSliceViewer::recomputeSlice()
                                 ui->_SB_distance->value());
 
     ui->_w_sliceView->setData(slice);
+}
+
+void VolumeSliceViewer::planeChange()
+{
+    #ifdef GUI_WIDGETS_3D_MODULE_AVAILABLE
+    _3dViewer->setPlaneParameter(qDegreesToRadians(ui->_SB_azimuth->value()),
+                                 qDegreesToRadians(ui->_SB_polar->value()),
+                                 ui->_SB_distance->value());
+    #endif // GUI_WIDGETS_3D_MODULE_AVAILABLE
+
+    recomputeSlice();
 }
 
 void VolumeSliceViewer::updatePixelInfo(int x, int y, float value)
