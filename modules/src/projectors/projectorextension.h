@@ -3,7 +3,6 @@
 
 #include "abstractprojector.h"
 #include <memory>
-#include <QDebug>
 
 namespace CTL {
 /*!

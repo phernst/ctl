@@ -1,4 +1,5 @@
 #include "projectorextension.h"
+#include <QDebug>
 
 namespace CTL {
 

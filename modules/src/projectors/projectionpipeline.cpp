@@ -1,4 +1,5 @@
 #include "projectionpipeline.h"
+#include <QDebug>
 
 namespace CTL {
 
