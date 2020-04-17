@@ -123,6 +123,12 @@ void Chunk2DView::setColorTable(const QVector<QRgb>& colorTable)
     updateImage();
 }
 
+template<>
+void Chunk2DView::setData(const Chunk2D<float>& data)
+{
+    setData(Chunk2D<float>(data));
+}
+
 /*!
  * Sets the data visualized by this instance to \a data. Data is copied, so consider moving it if
  * it is no longer required.

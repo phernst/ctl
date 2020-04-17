@@ -169,7 +169,7 @@ private:
 };
 
 template<typename T>
-void setData(const Chunk2D<T>& data)
+void Chunk2DView::setData(const Chunk2D<T>& data)
 {
     Chunk2D<float> convChunk(data.dimensions());
     convChunk.allocateMemory();
@@ -179,12 +179,6 @@ void setData(const Chunk2D<T>& data)
                    [] (const T& val) { return static_cast<float>(val); } );
 
     setData(std::move(convChunk));
-}
-
-template<>
-void Chunk2DView::setData(const Chunk2D<float>& data)
-{
-    setData(Chunk2D<float>(data));
 }
 
 } // namespace gui
