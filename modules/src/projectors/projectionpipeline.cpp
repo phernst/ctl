@@ -96,6 +96,14 @@ ProjectionPipeline::ProjectionPipeline(AbstractProjector* projector)
 }
 
 /*!
+ * Convenience overload of ProjectionPipeline(AbstractProjector*) for unique_ptr arguments.
+ */
+ProjectionPipeline::ProjectionPipeline(ProjectorPtr projector)
+    : ProjectionPipeline(projector.release())
+{
+}
+
+/*!
  * Appends the extension \a extension to the end of the pipeline.
  *
  * This object takes ownership of \a extension.
