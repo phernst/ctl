@@ -181,7 +181,7 @@ private slots:
 template<typename T>
 void VolumeViewer::plot(const VoxelVolume<T>& data)
 {
-    plot(convertedToFloat(data));
+    plot(SpectralVolumeData(convertedToFloat(data)));
 }
 
 /*!
@@ -191,7 +191,7 @@ void VolumeViewer::plot(const VoxelVolume<T>& data)
 template<typename T>
 void VolumeViewer::setData(const VoxelVolume<T>& data)
 {
-    setData(convertedToFloat(data));
+    setData(SpectralVolumeData(convertedToFloat(data)));
 }
 
 template <typename T>
