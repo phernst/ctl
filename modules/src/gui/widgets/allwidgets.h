@@ -36,7 +36,7 @@ inline void plot(CompositeVolume data)
 inline void plot(ProjectionData projections, const ModuleLayout& layout = {})
 { ProjectionViewer::plot(std::move(projections), layout); }
 
-inline void plot(SimpleCTsystem system, float visualScale = 50.0f)
+inline void plot(SimpleCTSystem system, float visualScale = 50.0f)
 { CTSystemView::plot(std::move(system), visualScale); }
 
 inline void plot(SpectralVolumeData data)

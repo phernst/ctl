@@ -13,8 +13,8 @@
 namespace CTL {
 
 class AcquisitionSetup;
-class CTsystem;
-class SimpleCTsystem;
+class CTSystem;
+class SimpleCTSystem;
 
 /*!
  * \class AbstractPrepareStep
@@ -37,7 +37,7 @@ class SimpleCTsystem;
  * requirement to be able to de-/serialize an AcquisitionSetup.
  *
  * The isApplicableTo() method shall serve as an option to verify whether a specific prepare step
- * can be applied to a given CTsystem. This usually checks if the required components (which are
+ * can be applied to a given CTSystem. This usually checks if the required components (which are
  * to be prepared) are present in the system.
  *
  * In the prepare() method, the actual preparation of the system state is performed. Note that this
@@ -48,8 +48,8 @@ class AbstractPrepareStep : public SerializationInterface
     CTL_TYPE_ID(0)
 
     // abstract interface
-    public:virtual void prepare(SimpleCTsystem& system) const = 0;
-    public:virtual bool isApplicableTo(const CTsystem& system) const = 0;
+    public:virtual void prepare(SimpleCTSystem& system) const = 0;
+    public:virtual bool isApplicableTo(const CTSystem& system) const = 0;
 
 public:
     void fromVariant(const QVariant& variant) override; // de-serialization
@@ -78,7 +78,7 @@ protected:
  *
  * For convenience, AbstractPreparationProtocol can also provide a method to confirm its
  * applicability to a given AcquisitionSetup - just as AbstractPrepareStep does for a given
- * CTsystem. This should be reimplemented in sub-classes to cover all dependencies of the particular
+ * CTSystem. This should be reimplemented in sub-classes to cover all dependencies of the particular
  * protocol.
  */
 class AbstractPreparationProtocol
@@ -106,7 +106,7 @@ inline bool AbstractPreparationProtocol::isApplicableTo(const AcquisitionSetup&)
 }
 
 /*!
- * \fn AbstractPrepareStep::prepare(SimpleCTsystem* system) const
+ * \fn AbstractPrepareStep::prepare(SimpleCTSystem* system) const
  *
  * This method performs the actual preparation of the state of \a system. This usually consists of
  * setting member variables of certain components in \a system to defined values.
@@ -116,7 +116,7 @@ inline bool AbstractPreparationProtocol::isApplicableTo(const AcquisitionSetup&)
  */
 
 /*!
- * \fn AbstractPrepareStep::isApplicableTo(const CTsystem& system) const
+ * \fn AbstractPrepareStep::isApplicableTo(const CTSystem& system) const
  *
  * Returns true if this prepare step can be applied to \a system.
  *

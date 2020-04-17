@@ -15,16 +15,16 @@ class AbstractSource;
 class AbstractBeamModifier;
 
 /*!
- * \class CTsystem
+ * \class CTSystem
  *
- * \brief The CTsystem class manages the list of all components of a system.
+ * \brief The CTSystem class manages the list of all components of a system.
  *
  * This class is used to manage the list of system components. System components can be added
  * using addComponent() or the "stream" operator<<(). The full component list can by filtered by
  * the components' base types in order to assess, for example all detector components in the system.
  *
  * \code
- *   CTsystem mySystem;
+ *   CTSystem mySystem;
  *   std::cout << mySystem.overview().toStdString();
  *   // *** Output ***
  *   // CT system: Generic CT-system
@@ -81,22 +81,22 @@ class AbstractBeamModifier;
  * \endcode
  */
 
-class CTsystem : public SerializationInterface
+class CTSystem : public SerializationInterface
 {
 public:
     typedef std::unique_ptr<SystemComponent> ComponentPtr; //!< Alias for unique pointer to SystemComponent
 
-    CTsystem(QString name = defaultName());
-    CTsystem(const CTsystem& other);
-    CTsystem(CTsystem&& other) = default;
-    CTsystem& operator=(CTsystem&& other) = default;
-    CTsystem& operator=(const CTsystem& other);
+    CTSystem(QString name = defaultName());
+    CTSystem(const CTSystem& other);
+    CTSystem(CTSystem&& other) = default;
+    CTSystem& operator=(CTSystem&& other) = default;
+    CTSystem& operator=(const CTSystem& other);
 
-    virtual ~CTsystem() = default;
+    virtual ~CTSystem() override = default;
 
     // virtual methods
-    virtual CTsystem* clone() const &;
-    virtual CTsystem* clone() &&;
+    virtual CTSystem* clone() const &;
+    virtual CTSystem* clone() &&;
     virtual QString info() const;
     virtual QString overview() const;
 
@@ -127,13 +127,16 @@ public:
     static QString defaultName();
 
     // operators
-    CTsystem& operator<<(ComponentPtr component);
-    CTsystem& operator<<(SystemComponent* component);
+    CTSystem& operator<<(ComponentPtr component);
+    CTSystem& operator<<(SystemComponent* component);
 
 private:
     QString _name; //!< The name of the system.
     std::vector<ComponentPtr> _componentList; //!< The list of components.
 };
+
+Q_DECL_DEPRECATED_X("Class has been renamed. Please consider the new spelling 'CTSystem'")
+typedef CTSystem CTsystem;
 
 } // namespace CTL
 

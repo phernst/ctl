@@ -6,21 +6,21 @@
 namespace CTL {
 
 /*!
- * Constructs a GeometryEncoder object. This object refers to a SimpleCTsystem.
+ * Constructs a GeometryEncoder object. This object refers to a SimpleCTSystem.
  *
- * Note that the SimpleCTsystem on which \a system points to is not owned by the GeometryEncoder
+ * Note that the SimpleCTSystem on which \a system points to is not owned by the GeometryEncoder
  * and the client have to make sure that the object \a system points to a valid object before
  * calling encodeSingleViewGeometry().
  */
-GeometryEncoder::GeometryEncoder(const SimpleCTsystem* system)
+GeometryEncoder::GeometryEncoder(const SimpleCTSystem* system)
     : _system(system)
 {
 }
 
 /*!
- * Returns a pointer to the (constant) SimpleCTsystem that has been assigned to this instance.
+ * Returns a pointer to the (constant) SimpleCTSystem that has been assigned to this instance.
  */
-const SimpleCTsystem *GeometryEncoder::system() const
+const SimpleCTSystem *GeometryEncoder::system() const
 {
     return _system;
 }
@@ -29,7 +29,7 @@ const SimpleCTsystem *GeometryEncoder::system() const
  * Returns the (average) effective pixel area [in mm²] of detector pixels in the detector module
  * \a module of this instance's system within its current state.
  *
- * \sa effectivePixelArea(const SimpleCTsystem& system, uint module).
+ * \sa effectivePixelArea(const SimpleCTSystem& system, uint module).
  */
 float GeometryEncoder::effectivePixelArea(uint module) const
 {
@@ -42,7 +42,7 @@ float GeometryEncoder::effectivePixelArea(uint module) const
 /*!
  * Returns the (average) effective pixel areas of all individual modules in \a system.
  *
- * \sa effectivePixelArea(const SimpleCTsystem& system, uint module).
+ * \sa effectivePixelArea(const SimpleCTSystem& system, uint module).
  */
 std::vector<float> GeometryEncoder::effectivePixelAreas() const
 {
@@ -57,13 +57,13 @@ std::vector<float> GeometryEncoder::effectivePixelAreas() const
  *
  * This instance does not take ownership of \a system.
  */
-void GeometryEncoder::assignSystem(const SimpleCTsystem* system)
+void GeometryEncoder::assignSystem(const SimpleCTSystem* system)
 {
     _system = system;
 }
 
 /*!
- * Computes a SingleViewGeometry based on the state of the internal SimpleCTsystem.
+ * Computes a SingleViewGeometry based on the state of the internal SimpleCTSystem.
  */
 SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry() const
 {
@@ -101,7 +101,7 @@ FullGeometry GeometryEncoder::encodeFullGeometry(AcquisitionSetup setup)
  * Computes the geometry representation for a single view with the current configuration of
  * \a system.
  */
-SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry(const SimpleCTsystem& system)
+SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry(const SimpleCTSystem& system)
 {
     SingleViewGeometry ret;
 
@@ -137,9 +137,9 @@ SingleViewGeometry GeometryEncoder::encodeSingleViewGeometry(const SimpleCTsyste
 /*!
  * Returns the (average) effective pixel areas of all individual modules in \a system.
  *
- * \sa effectivePixelArea(const SimpleCTsystem& system, uint module).
+ * \sa effectivePixelArea(const SimpleCTSystem& system, uint module).
  */
-std::vector<float> GeometryEncoder::effectivePixelAreas(const SimpleCTsystem &system)
+std::vector<float> GeometryEncoder::effectivePixelAreas(const SimpleCTSystem &system)
 {
     auto nbMod = system.detector()->nbDetectorModules();
     std::vector<float> areas(nbMod);
@@ -152,7 +152,7 @@ std::vector<float> GeometryEncoder::effectivePixelAreas(const SimpleCTsystem &sy
 /*!
  * Returns the final position of detector \a module in \a system.
  *
- * \sa finalModulePosition(const SimpleCTsystem &system, uint module).
+ * \sa finalModulePosition(const SimpleCTSystem &system, uint module).
  */
 Vector3x1WCS GeometryEncoder::finalModulePosition(uint module) const
 {
@@ -165,7 +165,7 @@ Vector3x1WCS GeometryEncoder::finalModulePosition(uint module) const
 /*!
  * Returns the final rotation of detector \a module in \a system.
  *
- * \sa finalModuleRotation(const SimpleCTsystem &system, uint module).
+ * \sa finalModuleRotation(const SimpleCTSystem &system, uint module).
  */
 Matrix3x3 GeometryEncoder::finalModuleRotation(uint module) const
 {
@@ -179,7 +179,7 @@ Matrix3x3 GeometryEncoder::finalModuleRotation(uint module) const
  * Computes the final position of the origin of the X-rays. This takes into account the location
  * of the source component itself as well as the positioning of the focal spot.
  *
- * \sa finalSourcePosition(const SimpleCTsystem& system).
+ * \sa finalSourcePosition(const SimpleCTSystem& system).
  */
 Vector3x1WCS GeometryEncoder::finalSourcePosition() const
 {
@@ -227,7 +227,7 @@ Vector3x1WCS GeometryEncoder::finalSourcePosition() const
  * Note that the source position used in these computations is the final position, i.e. including
  * focal spot position shifts and/or displacements of the source component.
  */
-float GeometryEncoder::effectivePixelArea(const SimpleCTsystem& system, uint module)
+float GeometryEncoder::effectivePixelArea(const SimpleCTSystem& system, uint module)
 {
     auto nominalArea = system.detector()->pixelDimensions().width() *
             system.detector()->pixelDimensions().height();
@@ -253,7 +253,7 @@ float GeometryEncoder::effectivePixelArea(const SimpleCTsystem& system, uint mod
  * \left(R_{\textrm{det}}^{\textrm{total}}\right)^{T}\cdot t_{\textrm{module}}
  * \f$
  */
-Vector3x1WCS GeometryEncoder::finalModulePosition(const SimpleCTsystem &system, uint module)
+Vector3x1WCS GeometryEncoder::finalModulePosition(const SimpleCTSystem &system, uint module)
 {
     const auto& detectorRot = system.gantry()->detectorRotation();
     const auto& modLoc = system.detector()->moduleLocation(module);
@@ -270,7 +270,7 @@ Vector3x1WCS GeometryEncoder::finalModulePosition(const SimpleCTsystem &system, 
  * R_{\textrm{module}}^{\textrm{final}}=R_{\textrm{module}}\cdot R_{\textrm{det}}^{\textrm{total}}
  * \f$
  */
-Matrix3x3 GeometryEncoder::finalModuleRotation(const SimpleCTsystem &system, uint module)
+Matrix3x3 GeometryEncoder::finalModuleRotation(const SimpleCTSystem &system, uint module)
 {
     return system.detector()->moduleLocation(module).rotation * system.gantry()->detectorRotation();
 }
@@ -286,7 +286,7 @@ Matrix3x3 GeometryEncoder::finalModuleRotation(const SimpleCTsystem &system, uin
  * R_{\textrm{source}}^{\textrm{total}}\cdot t_{\textrm{focal spot}}
  * \f$
  */
-Vector3x1WCS GeometryEncoder::finalSourcePosition(const SimpleCTsystem& system)
+Vector3x1WCS GeometryEncoder::finalSourcePosition(const SimpleCTSystem& system)
 {
     return system.gantry()->sourcePosition()
             + system.gantry()->sourceRotation() * system.source()->focalSpotPosition();

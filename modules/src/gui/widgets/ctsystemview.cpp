@@ -55,7 +55,7 @@ CTSystemView::CTSystemView(QWidget* parent, float visualScale)
  *
  * Example: create a visualization of a GenericTubularCT with three different visual scales
  * \code
- * auto system = SimpleCTsystem::fromCTsystem(
+ * auto system = SimpleCTSystem::fromCTsystem(
  *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
  *
  * gui::CTSystemView::plot(system, 25.0f);
@@ -65,7 +65,7 @@ CTSystemView::CTSystemView(QWidget* parent, float visualScale)
  *
  * ![Resulting visualization from the example above (window size and zoom adjusted).](gui/CTSystemView_scales.png)
  */
-void CTSystemView::plot(SimpleCTsystem system, float visualScale)
+void CTSystemView::plot(SimpleCTSystem system, float visualScale)
 {
     auto viewer = new CTSystemView(nullptr, visualScale);
     viewer->setAttribute(Qt::WA_DeleteOnClose);
@@ -78,7 +78,7 @@ void CTSystemView::plot(SimpleCTsystem system, float visualScale)
  * Sets the system to be visualized by this instance to \a system. This overrides any previous
  * visualization.
  */
-void CTSystemView::setCTSystem(const SimpleCTsystem& system)
+void CTSystemView::setCTSystem(const SimpleCTSystem& system)
 {
     clearScene();
     addSystemVisualization(system);
@@ -89,7 +89,7 @@ void CTSystemView::setCTSystem(const SimpleCTsystem& system)
  *
  * Example:
  * \code
- * auto system = SimpleCTsystem::fromCTsystem(
+ * auto system = SimpleCTSystem::fromCTsystem(
  *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
  *
  * auto viewer = new gui::CTSystemView;
@@ -104,7 +104,7 @@ void CTSystemView::setCTSystem(const SimpleCTsystem& system)
  *
  * ![Resulting visualization. The view has been zoomed in and its camera position adjusted slightly for better visibility.](gui/CTSystemView_2systems.png)
  */
-void CTSystemView::addSystemVisualization(const SimpleCTsystem& system)
+void CTSystemView::addSystemVisualization(const SimpleCTSystem& system)
 {
     addDetectorComponent(system.gantry(), system.detector());
     addSourceComponent(system.gantry(), system.source());
@@ -121,7 +121,7 @@ void CTSystemView::addSystemVisualization(const SimpleCTsystem& system)
  *
  * Example:
  * \code
- * auto system = SimpleCTsystem::fromCTsystem(
+ * auto system = SimpleCTSystem::fromCTsystem(
  *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
  *
  * // create a volume with 10x10x10 voxels (each of size 10mm x 10mm x 10mm)

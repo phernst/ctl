@@ -8,7 +8,7 @@ namespace CTL {
 
 class AbstractCTsystemBlueprint
 {
-    // abstract interface (must-haves of a complete CTsystem)
+    // abstract interface (must-haves of a complete CTSystem)
     public:virtual AbstractDetector* detector() const = 0;
     public:virtual AbstractGantry* gantry() const = 0;
     public:virtual AbstractSource* source() const = 0;
@@ -31,8 +31,8 @@ protected:
 class CTsystemBuilder
 {
 public:
-    static CTsystem createFromBlueprint(const AbstractCTsystemBlueprint& systemBlueprint);
-    static CTsystem createFromJSONFile(const QString& fileName);
+    static CTSystem createFromBlueprint(const AbstractCTsystemBlueprint& systemBlueprint);
+    static CTSystem createFromJSONFile(const QString& fileName);
 };
 
 } // namespace CTL

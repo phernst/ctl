@@ -52,11 +52,11 @@ typedef Vector3x1 Vector3x1CTS; //!< Alias name for 3D (column) vectors in CT co
 class GeometryEncoder
 {
 public:
-    GeometryEncoder(const SimpleCTsystem* system);
+    GeometryEncoder(const SimpleCTSystem* system);
 
-    void assignSystem(const SimpleCTsystem* system);
+    void assignSystem(const SimpleCTSystem* system);
     SingleViewGeometry encodeSingleViewGeometry() const;
-    const SimpleCTsystem* system() const;
+    const SimpleCTSystem* system() const;
     float effectivePixelArea(uint module) const;
     std::vector<float> effectivePixelAreas() const;
     Vector3x1WCS finalModulePosition(uint module) const;
@@ -65,12 +65,12 @@ public:
 
     // static methods
     static FullGeometry encodeFullGeometry(AcquisitionSetup setup);
-    static SingleViewGeometry encodeSingleViewGeometry(const SimpleCTsystem& system);
-    static float effectivePixelArea(const SimpleCTsystem& system, uint module);
-    static std::vector<float> effectivePixelAreas(const SimpleCTsystem& system);
-    static Vector3x1WCS finalModulePosition(const SimpleCTsystem& system, uint module);
-    static Matrix3x3 finalModuleRotation(const SimpleCTsystem& system, uint module);
-    static Vector3x1WCS finalSourcePosition(const SimpleCTsystem& system);
+    static SingleViewGeometry encodeSingleViewGeometry(const SimpleCTSystem& system);
+    static float effectivePixelArea(const SimpleCTSystem& system, uint module);
+    static std::vector<float> effectivePixelAreas(const SimpleCTSystem& system);
+    static Vector3x1WCS finalModulePosition(const SimpleCTSystem& system, uint module);
+    static Matrix3x3 finalModuleRotation(const SimpleCTSystem& system, uint module);
+    static Vector3x1WCS finalSourcePosition(const SimpleCTSystem& system);
 
 private:
     // methods
@@ -83,7 +83,7 @@ private:
                                               double skewCoefficient);
 
     // member variables
-    const SimpleCTsystem* _system; //!< Pointer to system whose geometry shall be encoded.
+    const SimpleCTSystem* _system; //!< Pointer to system whose geometry shall be encoded.
 };
 
 } // namespace CTL

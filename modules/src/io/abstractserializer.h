@@ -20,7 +20,7 @@ public:
     void serialize(const AbstractPrepareStep& prepStep, const QString& fileName) const;
     void serialize(const AbstractProjector& prepStep, const QString& fileName) const;
     void serialize(const AcquisitionSetup& setup, const QString& fileName) const;
-    void serialize(const CTsystem& system, const QString& fileName) const;
+    void serialize(const CTSystem& system, const QString& fileName) const;
     void serialize(const SystemComponent& component, const QString& fileName) const;
 
     // ABSTRACT INTERFACE
@@ -33,7 +33,7 @@ public:
     public:virtual std::unique_ptr<AbstractDataModel> deserializeDataModel(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<AbstractPrepareStep> deserializePrepareStep(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<AbstractProjector> deserializeProjector(const QString& fileName) const = 0;
-    public:virtual std::unique_ptr<CTsystem> deserializeSystem(const QString& fileName) const = 0;
+    public:virtual std::unique_ptr<CTSystem> deserializeSystem(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<AcquisitionSetup> deserializeAquisitionSetup(const QString& fileName) const = 0;
     public:virtual std::unique_ptr<SerializationInterface> deserializeMiscObject(const QString& fileName) const = 0;
 
@@ -52,7 +52,7 @@ private:
     template<class DerivedType>
     std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, AbstractProjector*);
     template<class DerivedType>
-    std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, CTsystem*);
+    std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, CTSystem*);
     template<class DerivedType>
     std::unique_ptr<DerivedType> deserializeDerived(const QString& fileName, AcquisitionSetup*);
     template<class DerivedType>
@@ -87,7 +87,7 @@ inline void AbstractSerializer::serialize(const AcquisitionSetup& setup, const Q
     serialize(static_cast<const SerializationInterface&>(setup), fileName);
 }
 
-inline void AbstractSerializer::serialize(const CTsystem& system, const QString& fileName) const
+inline void AbstractSerializer::serialize(const CTSystem& system, const QString& fileName) const
 {
     serialize(static_cast<const SerializationInterface&>(system), fileName);
 }
@@ -141,7 +141,7 @@ std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QStrin
         return nullptr;
 }
 template<class DerivedType>
-std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, CTsystem*)
+std::unique_ptr<DerivedType> AbstractSerializer::deserializeDerived(const QString& fileName, CTSystem*)
 {
     auto uPtr = deserializeSystem(fileName);
     if(dynamic_cast<DerivedType*>(uPtr.get()))

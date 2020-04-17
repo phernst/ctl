@@ -14,7 +14,7 @@ using namespace CTL;
 
 void CTsystemTest::initTestCase()
 {
-    _theTestSystem = new CTsystem;
+    _theTestSystem = new CTSystem;
 
     AbstractDetector* detector     = new CylindricalDetector(QSize(16, 64), QSizeF(1.0, 1.0), 40, 1.0_deg, 0.2);
     AbstractGantry* gantry         = new TubularGantry(1000.0, 550.0, 0.0, 90.0_deg, 0.0_deg);
@@ -52,7 +52,7 @@ void CTsystemTest::renameCheck()
 {
     // rename the system --> should no longer have default name
     _theTestSystem->rename("mySystem");
-    QVERIFY(_theTestSystem->name() != CTsystem::defaultName());
+    QVERIFY(_theTestSystem->name() != CTSystem::defaultName());
 }
 
 void CTsystemTest::testSystemBuilder()

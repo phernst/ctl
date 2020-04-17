@@ -7,7 +7,7 @@
 
 namespace CTL {
 
-RadiationEncoder::RadiationEncoder(const SimpleCTsystem* system)
+RadiationEncoder::RadiationEncoder(const SimpleCTSystem* system)
     : _system(system)
 {
 }
@@ -17,7 +17,7 @@ RadiationEncoder::RadiationEncoder(const SimpleCTsystem* system)
  *
  * This instance does not take ownership of \a system.
  */
-void RadiationEncoder::assignSystem(const SimpleCTsystem* system)
+void RadiationEncoder::assignSystem(const SimpleCTSystem* system)
 {
     _system = system;
 }
@@ -160,7 +160,7 @@ float RadiationEncoder::detectiveMeanEnergy() const
     return ret;
 }
 
-const SimpleCTsystem* RadiationEncoder::system() const
+const SimpleCTSystem* RadiationEncoder::system() const
 {
     return _system;
 }

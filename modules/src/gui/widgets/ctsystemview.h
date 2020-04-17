@@ -9,7 +9,7 @@ namespace CTL {
 class AbstractDetector;
 class AbstractGantry;
 class AbstractSource;
-class SimpleCTsystem;
+class SimpleCTSystem;
 template <typename T>
 class VoxelVolume;
 } // namespace CTL
@@ -36,10 +36,10 @@ class CTL3DWindow;
 /*!
  * \class CTSystemView
  *
- * \brief The CTSystemView class provides a tool for visualization of a SimpleCTsystem
+ * \brief The CTSystemView class provides a tool for visualization of a SimpleCTSystem
  *
  * This class can be used to visualize the positioning of source and detector component of a
- * SimpleCTsystem in an interactive 3D viewer. For convenience, the plot() method can be used to
+ * SimpleCTSystem in an interactive 3D viewer. For convenience, the plot() method can be used to
  * achieve a one-line solution, creating a widget that will be destroyed once it is closed by the
  * user.
  *
@@ -60,7 +60,7 @@ class CTL3DWindow;
  *
  * Example:
  * \code
- * auto system = SimpleCTsystem::fromCTsystem(
+ * auto system = SimpleCTSystem::fromCTsystem(
  *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
  *
  * // (static version) using the plot() command
@@ -81,11 +81,11 @@ class CTSystemView : public QWidget
 public:
     explicit CTSystemView(QWidget* parent = nullptr, float visualScale = 50.0f);
 
-    void setCTSystem(const SimpleCTsystem& system);
+    void setCTSystem(const SimpleCTSystem& system);
 
-    static void plot(SimpleCTsystem system, float visualScale = 50.0f);
+    static void plot(SimpleCTSystem system, float visualScale = 50.0f);
 
-    void addSystemVisualization(const SimpleCTsystem& system);
+    void addSystemVisualization(const SimpleCTSystem& system);
     void addVolume(const VoxelVolume<uchar>& volume);
 
 public slots:

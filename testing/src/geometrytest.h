@@ -6,7 +6,7 @@
 #include "mat/mat.h"
 
 namespace CTL {
-    class CTsystem;
+    class CTSystem;
 }
 
 class GeometryTest : public QObject
@@ -23,8 +23,8 @@ private Q_SLOTS:
     void cleanupTestCase();
 
 private:
-    CTL::CTsystem* _cArmTestSystem;
-    CTL::CTsystem* _tubeTestSystem;
+    CTL::CTSystem* _cArmTestSystem;
+    CTL::CTSystem* _tubeTestSystem;
 
     void verifyPmatDiff(const CTL::FullGeometry& toVerify, const CTL::FullGeometry& original);
 

@@ -34,7 +34,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    CTL::SimpleCTsystem _CTSystem;
+    CTL::SimpleCTSystem _CTSystem;
     
     CTL::VoxelVolume<float> _volumeData = CTL::VoxelVolume<float>(0,0,0);
     CTL::ProjectionData _projectionData = CTL::ProjectionData(0,0,0);

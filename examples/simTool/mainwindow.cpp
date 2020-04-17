@@ -19,7 +19,7 @@ using namespace CTL;
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    _CTSystem(SimpleCTsystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT())))
+    _CTSystem(SimpleCTSystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT())))
 {
     ui->setupUi(this);
 

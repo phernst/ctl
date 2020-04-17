@@ -255,54 +255,54 @@ AcquisitionSetup::PrepareStep& AcquisitionSetup::View::prepareStep(int prepareSt
 }
 
 /*!
- * Creates an AcquisitionSetup with \a nbViews views that uses the CTsystem \a system.
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTSystem \a system.
  */
-AcquisitionSetup::AcquisitionSetup(const CTsystem& system, uint nbViews)
+AcquisitionSetup::AcquisitionSetup(const CTSystem& system, uint nbViews)
 {
     this->resetSystem(system);
     this->setNbViews(nbViews);
 }
 
 /*!
- * Creates an AcquisitionSetup with \a nbViews views that uses the CTsystem \a system.
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTSystem \a system.
  */
-AcquisitionSetup::AcquisitionSetup(CTsystem&& system, uint nbViews)
+AcquisitionSetup::AcquisitionSetup(CTSystem&& system, uint nbViews)
 {
     this->resetSystem(std::move(system));
     this->setNbViews(nbViews);
 }
 
-AcquisitionSetup::AcquisitionSetup(std::unique_ptr<CTsystem> system, uint nbViews)
+AcquisitionSetup::AcquisitionSetup(std::unique_ptr<CTSystem> system, uint nbViews)
 {
     if(system)
         this->resetSystem(std::move(*system));
     this->setNbViews(nbViews);
 }
 
-AcquisitionSetup::AcquisitionSetup(std::unique_ptr<SimpleCTsystem> system, uint nbViews)
+AcquisitionSetup::AcquisitionSetup(std::unique_ptr<SimpleCTSystem> system, uint nbViews)
     : _system(std::move(system))
 {
     this->setNbViews(nbViews);
 }
 
 /*!
- * Creates a copy of \a other. This uses CTsystem::clone() to create a deep copy of the CTsystem
+ * Creates a copy of \a other. This uses CTSystem::clone() to create a deep copy of the CTSystem
  * member variable.
  */
 AcquisitionSetup::AcquisitionSetup(const AcquisitionSetup& other)
     : SerializationInterface(other)
-    , _system(other._system ? static_cast<SimpleCTsystem*>(other._system->clone()) : nullptr)
+    , _system(other._system ? static_cast<SimpleCTSystem*>(other._system->clone()) : nullptr)
     , _views(other._views)
 {
 }
 
 /*!
- * Assigns the content of \a other to this instance. This uses CTsystem::clone() to create a deep
- * copy of the CTsystem member variable.
+ * Assigns the content of \a other to this instance. This uses CTSystem::clone() to create a deep
+ * copy of the CTSystem member variable.
  */
 AcquisitionSetup& AcquisitionSetup::operator=(const AcquisitionSetup& other)
 {
-    _system.reset(other._system ? static_cast<SimpleCTsystem*>(other._system->clone()) : nullptr);
+    _system.reset(other._system ? static_cast<SimpleCTSystem*>(other._system->clone()) : nullptr);
     _views = other._views;
     return *this;
 }
@@ -385,15 +385,15 @@ void AcquisitionSetup::removeAllPrepareSteps()
 
 /*!
  * Sets the system of this setup to \a system. This creates a deep copy of \a system using
- * CTsystem::clone(). The previous system is deleted.
+ * CTSystem::clone(). The previous system is deleted.
  *
- * \a system must be convertible to a SimpleCTsystem. Otherwise the system will be set to nullptr.
+ * \a system must be convertible to a SimpleCTSystem. Otherwise the system will be set to nullptr.
  */
-bool AcquisitionSetup::resetSystem(const CTsystem& system)
+bool AcquisitionSetup::resetSystem(const CTSystem& system)
 {
     bool ok;
-    auto clonedSystem = static_cast<SimpleCTsystem*>(
-                SimpleCTsystem::fromCTsystem(system, &ok).clone());
+    auto clonedSystem = static_cast<SimpleCTSystem*>(
+                SimpleCTSystem::fromCTsystem(system, &ok).clone());
 
     if(ok)
         _system.reset(clonedSystem);
@@ -407,13 +407,13 @@ bool AcquisitionSetup::resetSystem(const CTsystem& system)
  * Sets the system of this setup to \a system. This moves \a system to this instance. The previous
  * system is deleted.
  *
- * \a system must be convertible to a SimpleCTsystem. Otherwise the system will be set to nullptr.
+ * \a system must be convertible to a SimpleCTSystem. Otherwise the system will be set to nullptr.
  */
-bool AcquisitionSetup::resetSystem(CTsystem&& system)
+bool AcquisitionSetup::resetSystem(CTSystem&& system)
 {
     bool ok;
-    auto clonedSystem = static_cast<SimpleCTsystem*>(
-        SimpleCTsystem::fromCTsystem(std::move(system), &ok).clone());
+    auto clonedSystem = static_cast<SimpleCTSystem*>(
+        SimpleCTSystem::fromCTsystem(std::move(system), &ok).clone());
 
     if(ok)
         _system.reset(clonedSystem);
@@ -482,7 +482,7 @@ void AcquisitionSetup::setNbViews(uint nbViews)
 /*!
  * Returns a pointer to the system in this setup.
  */
-SimpleCTsystem* AcquisitionSetup::system()
+SimpleCTSystem* AcquisitionSetup::system()
 {
     if(_system == nullptr)
         qWarning("No CT system has been set for the AcquisitionSetup.");
@@ -492,7 +492,7 @@ SimpleCTsystem* AcquisitionSetup::system()
 /*!
  * Returns a pointer to the (constant) system in this setup.
  */
-const SimpleCTsystem* AcquisitionSetup::system() const
+const SimpleCTSystem* AcquisitionSetup::system() const
 {
     if(_system == nullptr)
         qWarning("No CT system has been set for the AcquisitionSetup.");
@@ -530,7 +530,7 @@ void AcquisitionSetup::fromVariant(const QVariant &variant)
 {
     auto varMap = variant.toMap();
 
-    CTsystem system;
+    CTSystem system;
     system.fromVariant(varMap.value("CT system"));
     this->resetSystem(std::move(system));
 

@@ -119,7 +119,7 @@ ProjectionData DetectorSaturationExtension::extendedProject(const MetaProjector&
 /*!
  * Applies the detector saturation model to \a projections in the photon count domain.
  * Transformation of input extinction data from \a projections to counts is based on the incident
- * photon count queried from the system (see SimpleCTsystem::photonsPerPixel()).
+ * photon count queried from the system (see SimpleCTSystem::photonsPerPixel()).
  */
 void DetectorSaturationExtension::processCounts(ProjectionData& projections)
 {
@@ -182,7 +182,7 @@ void DetectorSaturationExtension::processExtinctions(ProjectionData& projections
 /*!
  * Applies the detector saturation model to \a projections in the intensity domain.
  * Transformation of input extinction data from \a projections to intensities is based on the
- * incident photon count queried from the system (see SimpleCTsystem::photonsPerPixel()) multiplied
+ * incident photon count queried from the system (see SimpleCTSystem::photonsPerPixel()) multiplied
  * by the mean energy in the incident X-ray spectrum. Note that this is an approximation. Ideally,
  * the final radiation spectrum reaching the detector would be considered instead.
  */

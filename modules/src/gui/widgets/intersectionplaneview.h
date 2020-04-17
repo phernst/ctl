@@ -10,7 +10,7 @@ namespace CTL {
 class AbstractDetector;
 class AbstractGantry;
 class AbstractSource;
-class SimpleCTsystem;
+class SimpleCTSystem;
 } // namespace CTL
 class QGridLayout;
 namespace Qt3DCore {

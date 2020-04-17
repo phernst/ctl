@@ -15,8 +15,8 @@ using namespace CTL;
 
 void GeometryTest::initTestCase()
 {
-    _cArmTestSystem = new CTsystem;
-    _tubeTestSystem = new CTsystem;
+    _cArmTestSystem = new CTSystem;
+    _tubeTestSystem = new CTSystem;
 
     auto detector   = new CylindricalDetector(QSize(16, 64), QSizeF(1.0, 1.0), 40, 1.0_deg, 0.2);
     auto tubeGantry = new TubularGantry(1000.0, 550.0, 0.0, 90.0_deg, 0.0_deg);

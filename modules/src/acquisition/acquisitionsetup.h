@@ -9,7 +9,7 @@ namespace CTL {
 /*!
  * \class AcquisitionSetup
  *
- * \brief Holds a CTsystem together with the information about the system settings for all views
+ * \brief Holds a CTSystem together with the information about the system settings for all views
  * from which projection images shall be simulated.
  *
  *
@@ -62,10 +62,10 @@ public:
     };
 
     AcquisitionSetup() = default;
-    AcquisitionSetup(const CTsystem& system, uint nbViews = 0);
-    AcquisitionSetup(CTsystem&& system, uint nbViews = 0);
-    AcquisitionSetup(std::unique_ptr<CTsystem> system, uint nbViews = 0);
-    AcquisitionSetup(std::unique_ptr<SimpleCTsystem> system, uint nbViews = 0);
+    AcquisitionSetup(const CTSystem& system, uint nbViews = 0);
+    AcquisitionSetup(CTSystem&& system, uint nbViews = 0);
+    AcquisitionSetup(std::unique_ptr<CTSystem> system, uint nbViews = 0);
+    AcquisitionSetup(std::unique_ptr<SimpleCTSystem> system, uint nbViews = 0);
 
     // cp/mv cstor/assignment
     AcquisitionSetup(const AcquisitionSetup& other);
@@ -80,11 +80,11 @@ public:
     uint nbViews() const;
     void prepareView(uint viewNb);
     void removeAllPrepareSteps();
-    bool resetSystem(const CTsystem& system);
-    bool resetSystem(CTsystem&& system);
+    bool resetSystem(const CTSystem& system);
+    bool resetSystem(CTSystem&& system);
     void setNbViews(uint nbViews);
-    SimpleCTsystem* system();
-    const SimpleCTsystem* system() const;
+    SimpleCTSystem* system();
+    const SimpleCTSystem* system() const;
     View& view(uint viewNb);
     const View& view(uint viewNb) const;
     std::vector<View>& views();
@@ -94,7 +94,7 @@ public:
     QVariant toVariant() const override; // serialization
 
 private:
-    std::unique_ptr<SimpleCTsystem> _system; //!< CTsystem used for the acquisition.
+    std::unique_ptr<SimpleCTSystem> _system; //!< CTSystem used for the acquisition.
     std::vector<View> _views; //!< List of all views of the acquisition.
 };
 

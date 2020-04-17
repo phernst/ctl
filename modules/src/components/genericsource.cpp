@@ -48,7 +48,7 @@ QString GenericSource::defaultName()
     return counter++ ? defName + " (" + QString::number(counter) + ")" : defName;
 }
 
-void GenericSource::setPhotonCountInSystem(SimpleCTsystem* system, double photonsPerPixel)
+void GenericSource::setPhotonCountInSystem(SimpleCTSystem* system, double photonsPerPixel)
 {
     if(system->source()->type() != GenericSource::Type)
         throw std::runtime_error("GenericSource::setPhotonCountInSystem(): Cannot set photon count,"

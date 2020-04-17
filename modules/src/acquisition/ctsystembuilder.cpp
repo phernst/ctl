@@ -5,11 +5,11 @@
 namespace CTL {
 
 /*!
- * Constructs a CTsystem based on the definitions in \a systemBlueprint
+ * Constructs a CTSystem based on the definitions in \a systemBlueprint
  */
-CTsystem CTsystemBuilder::createFromBlueprint(const AbstractCTsystemBlueprint& systemBlueprint)
+CTSystem CTsystemBuilder::createFromBlueprint(const AbstractCTsystemBlueprint& systemBlueprint)
 {
-    CTsystem ret(systemBlueprint.systemName());
+    CTSystem ret(systemBlueprint.systemName());
 
     // add basic components
     ret.addComponent(systemBlueprint.detector());
@@ -25,16 +25,16 @@ CTsystem CTsystemBuilder::createFromBlueprint(const AbstractCTsystemBlueprint& s
 }
 
 /*!
- * Constructs a CTsystem from the information in the JSON file \a fileName.
+ * Constructs a CTSystem from the information in the JSON file \a fileName.
  *
  * Uses JsonSerializer to deserialize data from the file.
  */
-CTsystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
+CTSystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
 {
     JsonSerializer serializer;
     auto deserializedSys = serializer.deserializeSystem(fileName);
 
-    CTsystem ret(std::move(*deserializedSys));
+    CTSystem ret(std::move(*deserializedSys));
 
     return ret;
 }

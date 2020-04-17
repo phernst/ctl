@@ -26,7 +26,7 @@ namespace CTL {
  * \code
  * // define volume and acquisition setup (incl. system)
  * auto volume = VolumeData::cube(100, 1.0f, 0.02f);
- * auto system = SimpleCTsystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)));
+ * auto system = SimpleCTSystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)));
  *
  * // reduce default radiation output of the source component (-> make noise more prominent)
  * static_cast<XrayTube*>(system.source())->setMilliampereSeconds(0.001);

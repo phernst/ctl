@@ -82,7 +82,7 @@ void AcquisitionSetupTest::testFlyingFocalSpotProtocol()
 }
 
 AcquisitionSetupTest::AcquisitionSetupTest()
-    : _testSetup(CTL::SimpleCTsystem(CTL::FlatPanelDetector(QSize(100,100),QSizeF(1.0,1.0)),
+    : _testSetup(CTL::SimpleCTSystem(CTL::FlatPanelDetector(QSize(100,100),QSizeF(1.0,1.0)),
                                      CTL::TubularGantry(1000.0, 600.0),
                                      CTL::XrayLaser()))
 {

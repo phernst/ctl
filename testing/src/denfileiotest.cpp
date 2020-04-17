@@ -61,7 +61,7 @@ void DenFileIOtest::initTestCase()
 
 void DenFileIOtest::testPmatReader()
 {
-    CTsystem system = CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT());
+    CTSystem system = CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT());
 
     // create an acquisition setup (here: helical scan protocol)
     AcquisitionSetup mySetup(system);

@@ -40,7 +40,7 @@ namespace CTL {
  *     auto spectralVol = SpectralVolumeData::fromMuVolume(volume,
  *                                                         database::attenuationModel(database::Composite::Bone_Cortical));
  *
- *     auto system = SimpleCTsystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)));
+ *     auto system = SimpleCTSystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)));
  *     AcquisitionSetup acquisitionSetup(system, 10);
  *     acquisitionSetup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0));
  *

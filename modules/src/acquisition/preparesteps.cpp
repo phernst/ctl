@@ -19,7 +19,7 @@ DECLARE_SERIALIZABLE_TYPE(XrayTubeParam)
 // ### GANTRIES ###
 // ### ###  ### ###
 
-void TubularGantryParam::prepare(SimpleCTsystem& system) const
+void TubularGantryParam::prepare(SimpleCTSystem& system) const
 {
     auto gantryPtr = static_cast<TubularGantry*>(system.gantry());
 
@@ -36,7 +36,7 @@ void TubularGantryParam::prepare(SimpleCTsystem& system) const
         gantryPtr->setTiltAngle(_newTiltAngle.second);
 }
 
-bool TubularGantryParam::isApplicableTo(const CTsystem& system) const
+bool TubularGantryParam::isApplicableTo(const CTSystem& system) const
 {
     return system.isSimple() &&
             dynamic_cast<TubularGantry*>(system.gantries().front());
@@ -68,7 +68,7 @@ QVariant TubularGantryParam::toVariant() const
     return ret;
 }
 
-void CarmGantryParam::prepare(SimpleCTsystem& system) const
+void CarmGantryParam::prepare(SimpleCTSystem& system) const
 {
     auto gantryPtr = static_cast<CarmGantry*>(system.gantry());
 
@@ -83,7 +83,7 @@ void CarmGantryParam::prepare(SimpleCTsystem& system) const
         gantryPtr->setCarmSpan(_newCarmSpan.second);
 }
 
-bool CarmGantryParam::isApplicableTo(const CTsystem& system) const
+bool CarmGantryParam::isApplicableTo(const CTSystem& system) const
 {
     return system.isSimple() &&
            dynamic_cast<CarmGantry*>(system.gantries().front());
@@ -115,7 +115,7 @@ QVariant CarmGantryParam::toVariant() const
     return ret;
 }
 
-void GenericGantryParam::prepare(SimpleCTsystem& system) const
+void GenericGantryParam::prepare(SimpleCTSystem& system) const
 {
     auto gantryPtr = static_cast<GenericGantry*>(system.gantry());
 
@@ -133,7 +133,7 @@ void GenericGantryParam::prepare(SimpleCTsystem& system) const
         gantryPtr->setSourceLocation(_newSourceLocation.second);
 }
 
-bool GenericGantryParam::isApplicableTo(const CTsystem& system) const
+bool GenericGantryParam::isApplicableTo(const CTSystem& system) const
 {
     return system.isSimple() &&
            dynamic_cast<GenericGantry*>(system.gantries().front());
@@ -169,7 +169,7 @@ QVariant GenericGantryParam::toVariant() const
     return ret;
 }
 
-void GantryDisplacementParam::prepare(SimpleCTsystem& system) const
+void GantryDisplacementParam::prepare(SimpleCTSystem& system) const
 {
     auto gantryPtr = system.gantry();
 
@@ -212,7 +212,7 @@ void GantryDisplacementParam::prepare(SimpleCTsystem& system) const
     }
 }
 
-bool GantryDisplacementParam::isApplicableTo(const CTsystem& system) const
+bool GantryDisplacementParam::isApplicableTo(const CTSystem& system) const
 {
     return system.isSimple();
 }
@@ -275,7 +275,7 @@ QVariant GantryDisplacementParam::toVariant() const
 // ### SOURCES ###
 // ### ### ### ###
 
-void SourceParam::prepare(SimpleCTsystem& system) const
+void SourceParam::prepare(SimpleCTSystem& system) const
 {
     auto sourcePtr = system.source();
 
@@ -297,7 +297,7 @@ void SourceParam::prepare(SimpleCTsystem& system) const
         sourcePtr->setEnergyRangeRestriction(_energyRangeRestr.second);
 }
 
-bool SourceParam::isApplicableTo(const CTsystem& system) const
+bool SourceParam::isApplicableTo(const CTSystem& system) const
 {
     return system.isSimple();
 }
@@ -353,7 +353,7 @@ QVariant SourceParam::toVariant() const
     return ret;
 }
 
-void XrayLaserParam::prepare(SimpleCTsystem& system) const
+void XrayLaserParam::prepare(SimpleCTSystem& system) const
 {
     SourceParam::prepare(system);
 
@@ -369,7 +369,7 @@ void XrayLaserParam::prepare(SimpleCTsystem& system) const
         sourcePtr->setRadiationOutput(_newPower.second);
 }
 
-bool XrayLaserParam::isApplicableTo(const CTsystem& system) const
+bool XrayLaserParam::isApplicableTo(const CTSystem& system) const
 {
     return system.isSimple() &&
            dynamic_cast<XrayLaser*>(system.sources().front());
@@ -399,7 +399,7 @@ QVariant XrayLaserParam::toVariant() const
     return ret;
 }
 
-void XrayTubeParam::prepare(SimpleCTsystem& system) const
+void XrayTubeParam::prepare(SimpleCTSystem& system) const
 {
     SourceParam::prepare(system);
 
@@ -415,7 +415,7 @@ void XrayTubeParam::prepare(SimpleCTsystem& system) const
         sourcePtr->setMilliampereSeconds(_newEmissionCurrent.second);
 }
 
-bool XrayTubeParam::isApplicableTo(const CTsystem& system) const
+bool XrayTubeParam::isApplicableTo(const CTSystem& system) const
 {
     return system.isSimple() &&
            dynamic_cast<XrayTube*>(system.sources().front());
@@ -445,7 +445,7 @@ QVariant XrayTubeParam::toVariant() const
     return ret;
 }
 
-void GenericDetectorParam::prepare(SimpleCTsystem& system) const
+void GenericDetectorParam::prepare(SimpleCTSystem& system) const
 {
     auto detectorPtr = static_cast<GenericDetector*>(system.detector());
 
@@ -463,7 +463,7 @@ void GenericDetectorParam::prepare(SimpleCTsystem& system) const
         detectorPtr->setSkewCoefficient(_newSkewCoefficient.second);
 }
 
-bool GenericDetectorParam::isApplicableTo(const CTsystem& system) const
+bool GenericDetectorParam::isApplicableTo(const CTSystem& system) const
 {
     return system.isSimple() &&
            dynamic_cast<GenericDetector*>(system.detectors().front());

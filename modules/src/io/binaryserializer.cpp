@@ -63,9 +63,9 @@ std::unique_ptr<AcquisitionSetup> BinarySerializer::deserializeAquisitionSetup(c
     return ret;
 }
 
-std::unique_ptr<CTsystem> BinarySerializer::deserializeSystem(const QString &fileName) const
+std::unique_ptr<CTSystem> BinarySerializer::deserializeSystem(const QString &fileName) const
 {
-    std::unique_ptr<CTsystem> ret(new CTsystem);
+    std::unique_ptr<CTSystem> ret(new CTSystem);
 
     auto variant = variantFromBinaryFile(fileName);
     if(!variant.isValid())
