@@ -30,10 +30,12 @@ PipelineComposer::PipelineComposer(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    connect(ui->_LW_projectorProto, &QListWidget::itemDoubleClicked,
+            this, &PipelineComposer::setProjector);
     connect(ui->_w_extensions, &ExtensionChainWidget::extensionItemClicked,
-            ui->_W_propertyManager, &ExtensionConfigWidget::updateInterface);
+            ui->_W_propertyManager, &details::ExtensionConfigWidget::updateInterface);
     connect(ui->_LW_selectedProjector, &QListWidget::itemClicked,
-            ui->_W_propertyManager, &ExtensionConfigWidget::updateInterface);
+            ui->_W_propertyManager, &details::ExtensionConfigWidget::updateInterface);
 
     initializeExtensionPrototypes();
     initializeProjectorPrototypes();
@@ -55,7 +57,6 @@ std::unique_ptr<ProjectionPipeline> PipelineComposer::pipeline() const
     if(projectorItem)
         projectorType = int(projectorItem->type()) - int(QListWidgetItem::UserType) - ProjectorTypeOffset;
 
-    qInfo() << projectorType;
     auto projector = createProjector(projectorType);
     if(projector)
         projector->setParameter(projectorItem->data(Qt::UserRole));
@@ -196,6 +197,16 @@ std::unique_ptr<AbstractProjector> PipelineComposer::createProjector(int type) c
     return ret;
 }
 
+void PipelineComposer::setProjector(QListWidgetItem* item)
+{
+    ui->_LW_selectedProjector->clear();
+    auto newItem = new QListWidgetItem(item->text(), ui->_LW_selectedProjector, item->type());
+    newItem->setData(Qt::UserRole, item->data(Qt::UserRole));
+    ui->_W_propertyManager->updateInterface(newItem);
+}
+
+namespace details {
+
 ExtensionConfigWidget::ExtensionConfigWidget(QWidget* parent)
     : QWidget(parent)
     , _layout(new QGridLayout)
@@ -297,13 +308,7 @@ QVariant ExtensionConfigWidget::parsedInputWidget(QWidget *widget)
     return ret;
 }
 
-void PipelineComposer::on__LW_projectorProto_itemDoubleClicked(QListWidgetItem *item)
-{
-    ui->_LW_selectedProjector->clear();
-    auto newItem = new QListWidgetItem(item->text(), ui->_LW_selectedProjector, item->type());
-    newItem->setData(Qt::UserRole, item->data(Qt::UserRole));
-    ui->_W_propertyManager->updateInterface(newItem);
-}
+} // namespace details
 
 } // namespace gui
 } // namespace CTL

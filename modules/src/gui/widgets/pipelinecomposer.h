@@ -36,7 +36,7 @@ public:
     static std::unique_ptr<ProjectionPipeline> fromDialog();
 
 private slots:
-    void on__LW_projectorProto_itemDoubleClicked(QListWidgetItem *item);
+    void setProjector(QListWidgetItem *item);
 
 private:
     Ui::PipelineComposer *ui;
@@ -46,6 +46,9 @@ private:
     std::unique_ptr<ProjectorExtension> createExtension(int type) const;
     std::unique_ptr<AbstractProjector> createProjector(int type) const;
 };
+
+namespace details
+{
 
 class ExtensionConfigWidget : public QWidget
 {
@@ -69,6 +72,8 @@ private:
 private slots:
     void somethingChanged();
 };
+
+} // namespace details;
 
 } // namespace gui
 } // namespace CTL

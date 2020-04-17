@@ -122,7 +122,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="CTL::gui::ExtensionConfigWidget" name="_W_propertyManager" native="true">
+       <widget class="CTL::gui::details::ExtensionConfigWidget" name="_W_propertyManager" native="true">
         <property name="minimumSize">
          <size>
           <width>300</width>
@@ -151,7 +151,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>CTL::gui::ExtensionConfigWidget</class>
+   <class>CTL::gui::details::ExtensionConfigWidget</class>
    <extends>QWidget</extends>
    <header>gui/widgets/pipelinecomposer.h</header>
    <container>1</container>
