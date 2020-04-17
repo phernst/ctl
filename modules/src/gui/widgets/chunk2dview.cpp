@@ -124,7 +124,7 @@ void Chunk2DView::setColorTable(const QVector<QRgb>& colorTable)
 }
 
 template<>
-void Chunk2DView::setData(const Chunk2D<float>& data)
+void Chunk2DView::setData<float>(const Chunk2D<float>& data)
 {
     setData(Chunk2D<float>(data));
 }
