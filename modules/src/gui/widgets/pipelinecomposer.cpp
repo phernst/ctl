@@ -24,6 +24,9 @@
 namespace CTL {
 namespace gui {
 
+/*!
+ * Constructs a PipelineComposer with the given \a parent.
+ */
 PipelineComposer::PipelineComposer(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PipelineComposer)
@@ -43,11 +46,19 @@ PipelineComposer::PipelineComposer(QWidget *parent) :
     setWindowTitle("Pipeline composer");
 }
 
+/*!
+ * Destroys this instance.
+ */
 PipelineComposer::~PipelineComposer()
 {
     delete ui;
 }
 
+/*!
+ * Returns the currently composed pipeline.
+ *
+ * \sa ProjectionPipeline.
+ */
 std::unique_ptr<ProjectionPipeline> PipelineComposer::pipeline() const
 {
     std::unique_ptr<ProjectionPipeline> pipe(new ProjectionPipeline);
@@ -77,6 +88,12 @@ std::unique_ptr<ProjectionPipeline> PipelineComposer::pipeline() const
     return pipe;
 }
 
+/*!
+ * Creates a dialog window to compose the pipeline and return the composed object once the dialog is
+ * accepted by the user by clicking "OK".
+ *
+ * Returns a \c nullptr if the dialog is cancelled.
+ */
 std::unique_ptr<ProjectionPipeline> PipelineComposer::fromDialog()
 {
     QDialog dialog;
