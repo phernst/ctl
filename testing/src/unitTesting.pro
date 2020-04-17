@@ -4,6 +4,10 @@ CONFIG -= app_bundle
 DEFINES += QT_DEPRECATED_WARNINGS \
            QT_NO_DEBUG_OUTPUT
 
+CONFIG += warn_on
+win32-g++|!win32: QMAKE_CXXFLAGS += -Werror
+win32-msvc*: QMAKE_CXXFLAGS += /WX
+
 # MODULES
 # =======
 include(../../modules/ctl.pri)
