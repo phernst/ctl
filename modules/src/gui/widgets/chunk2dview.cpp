@@ -130,7 +130,7 @@ void Chunk2DView::setColorTable(const QVector<QRgb>& colorTable)
  * Applies a min/max windowing if no specific windowing has been set (ie. the current window is
  * [0,0]).
  */
-void Chunk2DView::setData(Chunk2D<float> data)
+void Chunk2DView::setData(Chunk2D<float>&& data)
 {
     _data = std::move(data);
 

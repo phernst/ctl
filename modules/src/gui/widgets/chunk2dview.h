@@ -105,7 +105,11 @@ public:
 
     // setter methods
     void setColorTable(const QVector<QRgb>& colorTable);
-    void setData(Chunk2D<float> data);
+    template<typename T>
+    void setData(const Chunk2D<T>& data);
+    template<>
+    void setData(const Chunk2D<float>& data);
+    void setData(Chunk2D<float>&& data);
     void setMouseWindowingScaling(double centerScale, double widthScale);
     void setWheelZoomPerTurn(double zoomPerTurn);
 
@@ -163,6 +167,25 @@ private:
     void setGrayscaleColorTable();
     void updateImage();
 };
+
+template<typename T>
+void setData(const Chunk2D<T>& data)
+{
+    Chunk2D<float> convChunk(data.dimensions());
+    convChunk.allocateMemory();
+
+    const auto& dataRef = data.constData();
+    std::transform(dataRef.cbegin(), dataRef.cend(), convChunk.data().begin(),
+                   [] (const T& val) { return static_cast<float>(val); } );
+
+    setData(std::move(convChunk));
+}
+
+template<>
+void Chunk2DView::setData(const Chunk2D<float>& data)
+{
+    setData(Chunk2D<float>(data));
+}
 
 } // namespace gui
 } // namespace CTL
