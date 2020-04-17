@@ -12,6 +12,77 @@ namespace CTL {
  * \brief The ProjectorExtension class provides the interface to extend projectors with additional
  * functionality using the concept of decoration.
  *
+ * The ProjectorExtension class allowes to extend the functionalty of any projector, i.e. of any
+ * class derived from AbstractProjector. The idea is that an extension *uses* another projector as
+ * a nested projector that is called. Before and after that call any modification can be made.
+ * The nested projector itself may also be an extension.
+ * Note that the nested projector is *owned* by the extension meaning that when the extension gets
+ * destroyed the nested projector will be destroyed too.
+ *
+ * When implementing a custom extension, your class must be a subclass of ProjectorExtension.
+ * There are two possiblilties to implement that extension:
+ * 1. Override `extendedProject`
+ * 2. Override `project` and `projectComposite`.
+ *
+ * Doing 1. and 2. at the same time is not sensible as the implementation of `extendedProject` will
+ * have no effect.
+ *
+ * You would like to override the AbstractProjector::configure method as well in order to initialize
+ * your Extension with informations from the AcquisitionSetup. When doing so, you should also call
+ * ProjectorExtension::configure in order to configure the nested projector.
+ *
+ * If your extension \f$ E \f$ leads to a non-linear projector (regarding `project` or
+ * `projectComposite`), i.e.
+ * \f$
+ * E(a\boldsymbol{v_{1}}+\boldsymbol{v_{2}})\neq aE\boldsymbol{v_{1}}+E\boldsymbol{v_{2}}
+ * \f$
+ * , with volumes \f$ \boldsymbol{v_{1}} \f$, \f$ \boldsymbol{v_{2}} \f$ and \f$ a\in \mathbb{R} \f$,
+ * then you should override AbstractProjector::isLinear so that it returns false. Otherwise do not
+ * override this method---in particular do not override with `true`.
+ *
+ * The full effect of an extension can be formalized as follows. An extension \f$ E \f$ can be
+ * decomposed into three operators:
+ *
+ * \f$
+ * E\left\{A_{\boldsymbol{\pi}}\right\}\boldsymbol{v}=P\,A_{\Pi\boldsymbol{\pi}}\,V\boldsymbol{v},
+ * \f$
+ *
+ * a modficication \f$ V \f$ of the `VolumeData` \f$ \boldsymbol{v} \f$,
+ * a modification \f$ \Pi \f$ of the AcquisitionSetup \f$ \boldsymbol{\pi} \f$ and
+ * a modification \f$ P \f$ of the ProjectionData after projection with the nested projector
+ * \f$ A_{\Pi\boldsymbol{\pi}} \f$ (that uses the modified AcquisitionSetup
+ * \f$ \Pi\boldsymbol{\pi} \f$).
+ * All three operators "maintain the dimensionality" of the objects they affect. Only the nested
+ * projector \f$ A \f$ maps from volume space to projection space. In case you directly use the
+ * ProjectorExtension class (without any customization) all three operators are identity maps, i.e.
+ * it reduces to
+ *
+ * \f$
+ * E\left\{A_{\boldsymbol{\pi}}\right\}\boldsymbol{v}=A_{\boldsymbol{\pi}}\,\boldsymbol{v}\,,
+ * \f$
+ *
+ * meaning that only the nested projector is applied.
+ *
+ * In case you opt for variant 1, i.e. you override the `extendedProject` method, you can only
+ * implement the \f$ P \f$ operator, i.e.
+ *
+ * \f$
+ * E\left\{A_{\boldsymbol{\pi}}\right\}\boldsymbol{v}=PA_{\boldsymbol{\pi}}\,\boldsymbol{v}\,.
+ * \f$
+ *
+ * This would lead to an extension that perform only post-processing of the ProjectionData, i.e.
+ * it represents a part in a classical pipeline.
+ * The variant 2 effectively enables the implementation of all the three operators
+ * \f$ V \f$, \f$ \Pi \f$ and \f$ P \f$.
+ *
+ * When considering a concatenation of two extensions, first \f$ E_1 \f$ and then \f$ E_2 \f$, the
+ * following order of operators is applied by design:
+ *
+ * \f$
+ * \left(E_{2}\circ E_{1}\right)\left\{ A_{\boldsymbol{\pi}}\right\} \boldsymbol{v}=
+ * P_{2}P_{1}\,A_{\Pi_{1}\Pi_{2}\boldsymbol{\boldsymbol{\pi}}}\,V_{1}V_{2}\boldsymbol{v}.
+ * \f$
+ *
  * \sa configure(), project().
  */
 class ProjectorExtension : public AbstractProjector
