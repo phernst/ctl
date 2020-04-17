@@ -107,8 +107,6 @@ public:
     void setColorTable(const QVector<QRgb>& colorTable);
     template<typename T>
     void setData(const Chunk2D<T>& data);
-    template<>
-    void setData(const Chunk2D<float>& data);
     void setData(Chunk2D<float>&& data);
     void setMouseWindowingScaling(double centerScale, double widthScale);
     void setWheelZoomPerTurn(double zoomPerTurn);
@@ -180,6 +178,8 @@ void Chunk2DView::setData(const Chunk2D<T>& data)
 
     setData(std::move(convChunk));
 }
+
+template<> void Chunk2DView::setData<float>(const Chunk2D<float>& data);
 
 } // namespace gui
 } // namespace CTL
