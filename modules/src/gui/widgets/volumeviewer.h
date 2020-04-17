@@ -127,11 +127,15 @@ public:
     VolumeViewer(CompositeVolume volume, QWidget *parent = nullptr);
     ~VolumeViewer();
 
+    template <typename T>
+    static void plot(const VoxelVolume<T>& data);
     static void plot(CompositeVolume data);
     static void plot(SpectralVolumeData data);
 
     const CompositeVolume& data() const;
     Chunk2DView* dataView() const;
+    template <typename T>
+    void setData(const VoxelVolume<T>& data);
     void setData(SpectralVolumeData data);
     void setData(CompositeVolume data);
     void setWindowPresets(WindowPreset preset1, WindowPreset preset2);
@@ -156,6 +160,9 @@ private:
 
     const SpectralVolumeData& selectedVolume() const;
 
+    template <typename T>
+    static VoxelVolume<float> convertedToFloat(const VoxelVolume<T>& in);
+
 private slots:
     void changeSlice(int requestedChange);
     void selectCentralSlice();
@@ -166,6 +173,41 @@ private slots:
     void volumeSelectionChanged();
     void windowingUpdate();
 };
+
+/*!
+ * Convenience overload to plot VoxelVolume data of arbitrary template type. The values in \a data
+ * will be converted to \c float for internal storage and displaying.
+ */
+template<typename T>
+void VolumeViewer::plot(const VoxelVolume<T>& data)
+{
+    plot(convertedToFloat(data));
+}
+
+/*!
+ * Convenience overload to set VoxelVolume data of arbitrary template type. The values in \a data
+ * will be converted to \c float for internal storage and displaying.
+ */
+template<typename T>
+void VolumeViewer::setData(const VoxelVolume<T>& data)
+{
+    setData(convertedToFloat(data));
+}
+
+template <typename T>
+VoxelVolume<float> VolumeViewer::convertedToFloat(const VoxelVolume<T>& in)
+{
+    VoxelVolume<float> convVol(in.dimensions().x, in.dimensions().y, in.dimensions().z);
+    convVol.setVoxelSize(in.voxelSize().x, in.voxelSize().y, in.voxelSize().z);
+    convVol.setVolumeOffset(in.offset().x, in.offset().y, in.offset().z);
+    convVol.allocateMemory();
+
+    const auto& inRef = in.constData();
+    std::transform(inRef.cbegin(), inRef.cend(), convVol.data().begin(),
+                   [] (const T& val) { return static_cast<float>(val); } );
+
+    return convVol;
+}
 
 } // namespace gui
 } // namespace CTL

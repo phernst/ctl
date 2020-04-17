@@ -93,6 +93,9 @@ public:
     //~Chunk2DView();
 
     // factory
+    template<typename T>
+    static void plot(const Chunk2D<T>& data,
+                     QPair<double,double> windowing = qMakePair(0.0, 0.0), double zoom = 1.0);
     static void plot(Chunk2D<float> data,
                      QPair<double,double> windowing = qMakePair(0.0, 0.0), double zoom = 1.0);
 
@@ -107,7 +110,7 @@ public:
     void setColorTable(const QVector<QRgb>& colorTable);
     template<typename T>
     void setData(const Chunk2D<T>& data);
-    void setData(Chunk2D<float>&& data);
+    void setData(Chunk2D<float> data);
     void setMouseWindowingScaling(double centerScale, double widthScale);
     void setWheelZoomPerTurn(double zoomPerTurn);
 
@@ -164,22 +167,44 @@ private:
     QPoint pixelIdxFromPos(const QPoint& pos);
     void setGrayscaleColorTable();
     void updateImage();
+
+    template<typename T>
+    static Chunk2D<float> convertedToFloat(const Chunk2D<T>& in);
 };
 
 template<typename T>
-void Chunk2DView::setData(const Chunk2D<T>& data)
+Chunk2D<float> Chunk2DView::convertedToFloat(const Chunk2D<T>& in)
 {
-    Chunk2D<float> convChunk(data.dimensions());
+    Chunk2D<float> convChunk(in.dimensions().width, in.dimensions().height);
     convChunk.allocateMemory();
 
-    const auto& dataRef = data.constData();
-    std::transform(dataRef.cbegin(), dataRef.cend(), convChunk.data().begin(),
+    const auto& inRef = in.constData();
+    std::transform(inRef.cbegin(), inRef.cend(), convChunk.data().begin(),
                    [] (const T& val) { return static_cast<float>(val); } );
 
-    setData(std::move(convChunk));
+    return convChunk;
 }
 
-template<> void Chunk2DView::setData<float>(const Chunk2D<float>& data);
+/*!
+ * Convenience overload to set Chunk2D data of arbitrary template type. The values in \a data will
+ * be converted to \c float for internal storage and displaying.
+ */
+template<typename T>
+void Chunk2DView::setData(const Chunk2D<T>& data)
+{
+    setData(convertedToFloat(data));
+}
+
+/*!
+ * Convenience overload to plot Chunk2D data of arbitrary template type. The values in \a data will
+ * be converted to \c float for internal storage and displaying.
+ */
+template<typename T>
+void Chunk2DView::plot(const Chunk2D<T>& data, QPair<double, double> windowing, double zoom)
+{
+    plot(convertedToFloat(data), windowing, zoom);
+}
+
 
 } // namespace gui
 } // namespace CTL

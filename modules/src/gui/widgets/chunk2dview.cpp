@@ -123,12 +123,6 @@ void Chunk2DView::setColorTable(const QVector<QRgb>& colorTable)
     updateImage();
 }
 
-template<>
-void Chunk2DView::setData<float>(const Chunk2D<float>& data)
-{
-    setData(Chunk2D<float>(data));
-}
-
 /*!
  * Sets the data visualized by this instance to \a data. Data is copied, so consider moving it if
  * it is no longer required.
@@ -136,11 +130,11 @@ void Chunk2DView::setData<float>(const Chunk2D<float>& data)
  * Applies a min/max windowing if no specific windowing has been set (ie. the current window is
  * [0,0]).
  */
-void Chunk2DView::setData(Chunk2D<float>&& data)
+void Chunk2DView::setData(Chunk2D<float> data)
 {
     _data = std::move(data);
 
-    if(_window.first == 0 && _window.second == 0) // still default values -> window min/max
+    if(_window == qMakePair(0.0, 0.0)) // still default values -> window min/max
         setWindowingMinMax(); // this includes updateImage()
     else
         updateImage(); // keep previous window
