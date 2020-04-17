@@ -5,13 +5,8 @@ CONFIG -= app_bundle
 DEFINES += QT_DEPRECATED_WARNINGS \
            QT_NO_DEBUG_OUTPUT
 
-# Full optimization
+# Compiler optimization
 CONFIG += optimize_full
-unix {
-    QMAKE_LFLAGS -= -O1
-    QMAKE_LFLAGS -= -O2
-    QMAKE_LFLAGS += -O3
-}
 
 # Warnings as errors
 CONFIG += warn_on
