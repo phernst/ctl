@@ -7,7 +7,11 @@ DEFINES += QT_DEPRECATED_WARNINGS \
 
 # Full optimization
 CONFIG += optimize_full
-unix: QMAKE_LFLAGS += -O3
+unix {
+    QMAKE_LFLAGS -= -O1
+    QMAKE_LFLAGS -= -O2
+    QMAKE_LFLAGS += -O3
+}
 
 # Warnings as errors
 CONFIG += warn_on
