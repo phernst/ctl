@@ -92,22 +92,22 @@ inline AbstractDetector* GenericCarmCT::detector() const
 
 } // namespace blueprints
 
-template <typename CTsystemBlueprint, typename... BlueprintCtorArgs>
+template <typename CTSystemBlueprint, typename... BlueprintCtorArgs>
 std::unique_ptr<CTSystem> makeCTSystem(BlueprintCtorArgs&&... args)
 {
     std::unique_ptr<CTSystem> ret{ CTSystemBuilder::createFromBlueprint(
-                                       CTsystemBlueprint{
+                                       CTSystemBlueprint{
                                            std::forward<BlueprintCtorArgs>(args)... }).clone() };
     return ret;
 }
 
-template <typename CTsystemBlueprint, typename... BlueprintCtorArgs>
+template <typename CTSystemBlueprint, typename... BlueprintCtorArgs>
 std::unique_ptr<SimpleCTSystem> makeSimpleCTSystem(BlueprintCtorArgs&&... args)
 {
     std::unique_ptr<SimpleCTSystem> ret{ nullptr };
     bool canConvert;
     auto simpleSystem
-        = SimpleCTSystem::fromCTSystem(CTSystemBuilder::createFromBlueprint(CTsystemBlueprint{
+        = SimpleCTSystem::fromCTSystem(CTSystemBuilder::createFromBlueprint(CTSystemBlueprint{
                                            std::forward<BlueprintCtorArgs>(args)... }),
                                        &canConvert);
     if(!canConvert)
