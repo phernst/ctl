@@ -20,7 +20,7 @@ namespace CTL {
  * on the SimpleCTSystem class (and their sub-classes).
  *
  * Instances of this class can be created from "regular" CTSystem objects using the factory method
- * fromCTsystem(). This assures that the configuration of the system is simple. Alternatively, a
+ * fromCTSystem(). This assures that the configuration of the system is simple. Alternatively, a
  * constructor taking all three essential components can also be used. As it is required
  * for SimpleCTSystem objects at all times to retain a simple configuration, adding further
  * components using addComponent() (or removing components with removeComponent()) is no longer
@@ -40,13 +40,13 @@ namespace CTL {
  *    mySystem << myDetector << mySource;
  *
  *    // The system is still missing a gantry component by now.
- *    SimpleCTSystem simpleSystem = SimpleCTSystem::fromCTsystem(mySystem);
+ *    SimpleCTSystem simpleSystem = SimpleCTSystem::fromCTSystem(mySystem);
  *    std::cout << "simpleSystem is valid: " << simpleSystem.isValid() << std::endl;
  *    // Output: simpleSystem is valid: 0
  *
  *    // We now add the missing gantry.
  *    mySystem << myGantry;
- *    simpleSystem = SimpleCTSystem::fromCTsystem(mySystem);
+ *    simpleSystem = SimpleCTSystem::fromCTSystem(mySystem);
  *    std::cout << "simpleSystem is valid: " << simpleSystem.isValid() << std::endl;
  *    // Output: simpleSystem is valid: 1
  *
@@ -104,8 +104,8 @@ public:
                    AbstractSource&& source);
 
     // factory ctor
-    static SimpleCTSystem fromCTsystem(const CTSystem& system, bool* ok = nullptr);
-    static SimpleCTSystem fromCTsystem(CTSystem&& system, bool* ok = nullptr);
+    static SimpleCTSystem fromCTSystem(const CTSystem& system, bool* ok = nullptr);
+    static SimpleCTSystem fromCTSystem(CTSystem&& system, bool* ok = nullptr);
 
     // virtual methods
     CTSystem* clone() const & override;

@@ -60,8 +60,8 @@ class CTL3DWindow;
  *
  * Example:
  * \code
- * auto system = SimpleCTSystem::fromCTsystem(
- *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
+ * auto system = SimpleCTSystem::fromCTSystem(
+ *             CTSystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
  *
  * // (static version) using the plot() command
  * gui::CTSystemView::plot(system);

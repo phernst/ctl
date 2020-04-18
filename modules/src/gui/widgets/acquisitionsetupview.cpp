@@ -67,7 +67,7 @@ void AcquisitionSetupView::setAcquisitionSetup(AcquisitionSetup&& acqSetup)
  *
  * Example: create visualizations of a (100 view) short scan trajectory with a C-arm system
  * \code
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  * AcquisitionSetup setup(system, 100);
  * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(600.0));
  *
@@ -99,7 +99,7 @@ void AcquisitionSetupView::plot(AcquisitionSetup setup, uint maxNbViews, bool so
  *
  * Example: create a visualization of two views from a short scan trajectory with a C-arm system
  * \code
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  * AcquisitionSetup setup(system, 100);
  * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(600.0));
  *
@@ -146,7 +146,7 @@ void AcquisitionSetupView::addViewVisualization(int view)
  *
  * Example: create an animation of a wobble scan trajectory with a C-arm system
  * \code
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  * AcquisitionSetup setup(system, 100);
  * setup.applyPreparationProtocol(protocols::WobbleTrajectory(200.0_deg, 600.0, 180.0_deg, 30.0_deg, 2.0f));
  *
@@ -184,7 +184,7 @@ void AcquisitionSetupView::setAnimationStacking(bool enabled)
  *
  * Example: helical trajectory with and without "Source only" mode
  * \code
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericTubularCT());
  * AcquisitionSetup setup(system, 200);
  * setup.applyPreparationProtocol(protocols::HelicalTrajectory(7.0_deg, -2.0, 200.0));
  *
@@ -222,7 +222,7 @@ void AcquisitionSetupView::setSourceOnly(bool enabled)
  *
  * Example: visualize a wobble scan trajectory of a C-arm system
  * \code
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  * AcquisitionSetup setup(system, 100);
  * setup.applyPreparationProtocol(protocols::WobbleTrajectory(200.0_deg, 600.0, 180.0_deg, 30.0_deg, 2.0f));
  *

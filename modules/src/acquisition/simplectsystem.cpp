@@ -36,7 +36,7 @@ SimpleCTSystem::SimpleCTSystem(AbstractDetector&& detector,
  *
  * Note that this constructor does not check whether \a system can properly be "converted"
  * into a SimpleCTSystem. This is acceptable here, since it is protected  and is only called
- * from the public factory method fromCTsystem(), which already makes sure that the system is
+ * from the public factory method fromCTSystem(), which already makes sure that the system is
  * simple (and thus, can be converted).
  */
 SimpleCTSystem::SimpleCTSystem(const CTSystem& system)
@@ -49,7 +49,7 @@ SimpleCTSystem::SimpleCTSystem(const CTSystem& system)
  *
  * Note that this constructor does not check whether \a system can properly be "converted"
  * into a SimpleCTSystem. This is acceptable here, since it is protected and is only called
- * from the public factory method fromCTsystem(), which already makes sure that the system is
+ * from the public factory method fromCTSystem(), which already makes sure that the system is
  * simple (and thus, can be converted).
  */
 SimpleCTSystem::SimpleCTSystem(CTSystem&& system)
@@ -64,7 +64,7 @@ SimpleCTSystem::SimpleCTSystem(CTSystem&& system)
  * successful, i.e. \a system is simple, otherwise \a *ok will be set to false.
  * If \a ok is a nullptr and the \a system is not simple, an exception will be thrown.
  */
-SimpleCTSystem SimpleCTSystem::fromCTsystem(const CTSystem& system, bool* ok)
+SimpleCTSystem SimpleCTSystem::fromCTSystem(const CTSystem& system, bool* ok)
 {
     // check if 'system' has a simple configuration (i.e. only one source, detector, and gantry)
     if(system.isSimple())
@@ -78,18 +78,18 @@ SimpleCTSystem SimpleCTSystem::fromCTsystem(const CTSystem& system, bool* ok)
         if(ok)
             *ok = false;
         else
-            throw std::runtime_error("SimpleCTSystem::fromCTsystem(const CTSystem&): "
+            throw std::runtime_error("SimpleCTSystem::fromCTSystem(const CTSystem&): "
                                      "System is not simple.");
         return { };
     }
 }
 
 /*!
- * Overload of SimpleCTSystem::fromCTsystem(const CTSystem& system, bool* ok) that binds to a
+ * Overload of SimpleCTSystem::fromCTSystem(const CTSystem& system, bool* ok) that binds to a
  * \a system passed as a rvalue.
  * An exception will be thrown if \a system is not simple and \a ok is a nullptr.
  */
-SimpleCTSystem SimpleCTSystem::fromCTsystem(CTSystem&& system, bool* ok)
+SimpleCTSystem SimpleCTSystem::fromCTSystem(CTSystem&& system, bool* ok)
 {
     // check if 'system' has a simple configuration (i.e. only one source, detector, and gantry)
     if(system.isSimple())
@@ -103,7 +103,7 @@ SimpleCTSystem SimpleCTSystem::fromCTsystem(CTSystem&& system, bool* ok)
         if(ok)
             *ok = false;
         else
-            throw std::runtime_error("SimpleCTSystem::fromCTsystem(CTSystem&&): "
+            throw std::runtime_error("SimpleCTSystem::fromCTSystem(CTSystem&&): "
                                      "System is not simple.");
         return { };
     }

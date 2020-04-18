@@ -6,7 +6,7 @@
 
 namespace CTL {
 
-class AbstractCTsystemBlueprint
+class AbstractCTSystemBlueprint
 {
     // abstract interface (must-haves of a complete CTSystem)
     public:virtual AbstractDetector* detector() const = 0;
@@ -14,24 +14,24 @@ class AbstractCTsystemBlueprint
     public:virtual AbstractSource* source() const = 0;
 
 public:
-    virtual ~AbstractCTsystemBlueprint() = default;
+    virtual ~AbstractCTSystemBlueprint() = default;
 
     // optionally reimplementable
     virtual QString systemName() const { return QStringLiteral("Blueprinted system"); }
     virtual std::vector<GenericBeamModifier*> modifiers() const { return { }; }
 
 protected:
-    AbstractCTsystemBlueprint() = default;
-    AbstractCTsystemBlueprint(const AbstractCTsystemBlueprint&) = default;
-    AbstractCTsystemBlueprint(AbstractCTsystemBlueprint&&) = default;
-    AbstractCTsystemBlueprint& operator=(const AbstractCTsystemBlueprint&) = default;
-    AbstractCTsystemBlueprint& operator=(AbstractCTsystemBlueprint&&) = default;
+    AbstractCTSystemBlueprint() = default;
+    AbstractCTSystemBlueprint(const AbstractCTSystemBlueprint&) = default;
+    AbstractCTSystemBlueprint(AbstractCTSystemBlueprint&&) = default;
+    AbstractCTSystemBlueprint& operator=(const AbstractCTSystemBlueprint&) = default;
+    AbstractCTSystemBlueprint& operator=(AbstractCTSystemBlueprint&&) = default;
 };
 
-class CTsystemBuilder
+class CTSystemBuilder
 {
 public:
-    static CTSystem createFromBlueprint(const AbstractCTsystemBlueprint& systemBlueprint);
+    static CTSystem createFromBlueprint(const AbstractCTSystemBlueprint& systemBlueprint);
     static CTSystem createFromJSONFile(const QString& fileName);
 };
 

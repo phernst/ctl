@@ -62,7 +62,7 @@ void ProjectorTest::testSpectralExtension()
     compVol.addSubVolume(volume2);
 
     auto photonsPerPixel = 100000.0;
-    auto simpleSys = SimpleCTSystem::fromCTsystem(system);
+    auto simpleSys = SimpleCTSystem::fromCTSystem(system);
     auto fluxAdjustFactor = photonsPerPixel / simpleSys.photonsPerPixelMean();
 
     AcquisitionSetup setup(simpleSys);
@@ -159,7 +159,7 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
     source->setFocalSpotSize(QSizeF(5.0, 5.0));
     theSystem << detector << gantry << source;
 
-    auto calibPower = meanPhotons / SimpleCTSystem::fromCTsystem(theSystem).photonsPerPixelMean();
+    auto calibPower = meanPhotons / SimpleCTSystem::fromCTSystem(theSystem).photonsPerPixelMean();
     source->setRadiationOutput(calibPower);
 
     AcquisitionSetup setup(theSystem);

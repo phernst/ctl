@@ -76,7 +76,7 @@ class SpectralEffectsExtension;
  *                                        database::attenuationModel(database::Composite::Water));
  *
  * // create a C-arm CT system and a short scan protocol with 10 views
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  * auto setup = AcquisitionSetup(system, 10);
  * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0));
  *

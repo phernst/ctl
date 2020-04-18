@@ -43,7 +43,7 @@ namespace gui {
  *
  * Example:
  * \code
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  *
  * // create an AcquisitionSetup with 100 views using the system we created
  * AcquisitionSetup setup(system, 100);

@@ -73,7 +73,7 @@ void MainWindow::on__PB_circTraj_clicked()
     else
         mySystem.addComponent(_curvedDetector->clone());
 
-    auto carmSys = CTL::SimpleCTSystem::fromCTsystem(mySystem);
+    auto carmSys = CTL::SimpleCTSystem::fromCTSystem(mySystem);
 
     // create acquisition
     CTL::AcquisitionSetup acqProt(carmSys);
@@ -106,7 +106,7 @@ void MainWindow::on__PB_helicalTraj_clicked()
     else
         mySystem.addComponent(_curvedDetector->clone());
 
-    auto tubeSys = CTL::SimpleCTSystem::fromCTsystem(mySystem);
+    auto tubeSys = CTL::SimpleCTSystem::fromCTSystem(mySystem);
 
     // create acquisition
     CTL::AcquisitionSetup acqProt(tubeSys);
@@ -141,7 +141,7 @@ void MainWindow::on__PB_wobbleTraj_clicked()
     else
         mySystem.addComponent(_curvedDetector->clone());
 
-    auto carmSys = CTL::SimpleCTSystem::fromCTsystem(mySystem);
+    auto carmSys = CTL::SimpleCTSystem::fromCTSystem(mySystem);
 
     // create acquisition
     CTL::AcquisitionSetup acqProt(carmSys);

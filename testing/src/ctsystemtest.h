@@ -7,12 +7,12 @@ namespace CTL {
     class CTSystem;
 }
 
-class CTsystemTest : public QObject
+class CTSystemTest : public QObject
 {
     Q_OBJECT
 
 public:
-    CTsystemTest() = default;
+    CTSystemTest() = default;
 
 private Q_SLOTS:
     void initTestCase();

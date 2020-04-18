@@ -55,8 +55,8 @@ CTSystemView::CTSystemView(QWidget* parent, float visualScale)
  *
  * Example: create a visualization of a GenericTubularCT with three different visual scales
  * \code
- * auto system = SimpleCTSystem::fromCTsystem(
- *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
+ * auto system = SimpleCTSystem::fromCTSystem(
+ *             CTSystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
  *
  * gui::CTSystemView::plot(system, 25.0f);
  * gui::CTSystemView::plot(system);        // visualScale = 50 [default value]
@@ -89,8 +89,8 @@ void CTSystemView::setCTSystem(const SimpleCTSystem& system)
  *
  * Example:
  * \code
- * auto system = SimpleCTSystem::fromCTsystem(
- *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
+ * auto system = SimpleCTSystem::fromCTSystem(
+ *             CTSystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
  *
  * auto viewer = new gui::CTSystemView;
  * viewer->setCTSystem(system);
@@ -121,8 +121,8 @@ void CTSystemView::addSystemVisualization(const SimpleCTSystem& system)
  *
  * Example:
  * \code
- * auto system = SimpleCTSystem::fromCTsystem(
- *             CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
+ * auto system = SimpleCTSystem::fromCTSystem(
+ *             CTSystemBuilder::createFromBlueprint(blueprints::GenericTubularCT()));
  *
  * // create a volume with 10x10x10 voxels (each of size 10mm x 10mm x 10mm)
  * auto volume = VoxelVolume<uchar>(10,10,10,10.0,10.0,10.0);

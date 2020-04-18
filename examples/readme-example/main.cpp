@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
         auto volume = io.readVolume<float>("path/to/volume.nrrd");
 
         // use of a predefined system from "acquisition/systemblueprints.h"
-        auto system = CTL::CTsystemBuilder::createFromBlueprint(CTL::blueprints::GenericCarmCT());
+        auto system = CTL::CTSystemBuilder::createFromBlueprint(CTL::blueprints::GenericCarmCT());
 
         // create an acquisition setup
         uint nbViews = 100;

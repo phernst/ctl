@@ -7,7 +7,7 @@ namespace CTL {
 /*!
  * Constructs a CTSystem based on the definitions in \a systemBlueprint
  */
-CTSystem CTsystemBuilder::createFromBlueprint(const AbstractCTsystemBlueprint& systemBlueprint)
+CTSystem CTSystemBuilder::createFromBlueprint(const AbstractCTSystemBlueprint& systemBlueprint)
 {
     CTSystem ret(systemBlueprint.systemName());
 
@@ -29,7 +29,7 @@ CTSystem CTsystemBuilder::createFromBlueprint(const AbstractCTsystemBlueprint& s
  *
  * Uses JsonSerializer to deserialize data from the file.
  */
-CTSystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
+CTSystem CTSystemBuilder::createFromJSONFile(const QString& fileName)
 {
     JsonSerializer serializer;
     auto deserializedSys = serializer.deserializeSystem(fileName);
@@ -40,7 +40,7 @@ CTSystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
 }
 
 /*!
- * \fn virtual AbstractDetector* AbstractCTsystemBlueprint::detector() const = 0
+ * \fn virtual AbstractDetector* AbstractCTSystemBlueprint::detector() const = 0
  *
  * Constructs the detector component for the blueprinted system. The caller must take care of the
  * ownership of the constructed object.
@@ -50,7 +50,7 @@ CTSystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
  */
 
 /*!
- * \fn virtual AbstractGantry* AbstractCTsystemBlueprint::gantry() const = 0
+ * \fn virtual AbstractGantry* AbstractCTSystemBlueprint::gantry() const = 0
  *
  * Constructs the gantry component for the blueprinted system. The caller must take care of the
  * ownership of the constructed object.
@@ -60,7 +60,7 @@ CTSystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
  */
 
 /*!
- * \fn virtual AbstractSource* AbstractCTsystemBlueprint::source() const = 0
+ * \fn virtual AbstractSource* AbstractCTSystemBlueprint::source() const = 0
  *
  * Constructs the source component for the blueprinted system. The caller must take care of the
  * ownership of the constructed object.
@@ -70,7 +70,7 @@ CTSystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
  */
 
 /*!
- * \fn AbstractCTsystemBlueprint::AbstractCTsystemBlueprint()
+ * \fn AbstractCTSystemBlueprint::AbstractCTSystemBlueprint()
  *
  * Constructs the source component for the blueprinted system. The caller must take care of the
  * ownership of the constructed object.
@@ -80,43 +80,43 @@ CTSystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
  */
 
 /*!
- * \fn AbstractCTsystemBlueprint::AbstractCTsystemBlueprint()
+ * \fn AbstractCTSystemBlueprint::AbstractCTSystemBlueprint()
  *
  * Standard default constructor.
  */
 
 /*!
- * \fn AbstractCTsystemBlueprint::AbstractCTsystemBlueprint(const AbstractCTsystemBlueprint&)
+ * \fn AbstractCTSystemBlueprint::AbstractCTSystemBlueprint(const AbstractCTSystemBlueprint&)
  *
  * Standard copy constructor.
  */
 
 /*!
- * \fn AbstractCTsystemBlueprint::AbstractCTsystemBlueprint(AbstractCTsystemBlueprint&&)
+ * \fn AbstractCTSystemBlueprint::AbstractCTSystemBlueprint(AbstractCTSystemBlueprint&&)
  *
  * Standard move constructor.
  */
 
 /*!
- * \fn AbstractCTsystemBlueprint& AbstractCTsystemBlueprint::operator= (const AbstractCTsystemBlueprint&)
+ * \fn AbstractCTSystemBlueprint& AbstractCTSystemBlueprint::operator= (const AbstractCTSystemBlueprint&)
  *
  * Standard copy assignment operator.
  */
 
 /*!
- * \fn AbstractCTsystemBlueprint& AbstractCTsystemBlueprint::operator= (AbstractCTsystemBlueprint&&)
+ * \fn AbstractCTSystemBlueprint& AbstractCTSystemBlueprint::operator= (AbstractCTSystemBlueprint&&)
  *
  * Standard move assignment operator.
  */
 
 /*!
- * \fn virtual AbstractCTsystemBlueprint::~AbstractCTsystemBlueprint()
+ * \fn virtual AbstractCTSystemBlueprint::~AbstractCTSystemBlueprint()
  *
  * Default destructor. Virtual for purpose of polymorphism.
  */
 
 /*!
- * \fn QString AbstractCTsystemBlueprint::systemName() const
+ * \fn QString AbstractCTSystemBlueprint::systemName() const
  *
  * Returns the name of the blueprinted system.
  *
@@ -125,7 +125,7 @@ CTSystem CTsystemBuilder::createFromJSONFile(const QString& fileName)
  */
 
 /*!
- * \fn std::vector<GenericBeamModifier*> AbstractCTsystemBlueprint::modifiers() const
+ * \fn std::vector<GenericBeamModifier*> AbstractCTSystemBlueprint::modifiers() const
  *
  * Constructs all beam modifier components blueprinted for the system and returns a vector
  * containing pointers to all constructed objects.

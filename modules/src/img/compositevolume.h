@@ -59,7 +59,7 @@ namespace CTL {
  * We can now create a projection image from this composite with the following example code:
  * \code
  * // First, we need to define an acquisition setup (with a CT system and the number of views; 10 in this case)
- * AcquisitionSetup setup(CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)), 10);
+ * AcquisitionSetup setup(CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)), 10);
  * // We also need to specify the acquisition geometry, here we set a simple short scan trajectory
  * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0f));
  *
@@ -94,7 +94,7 @@ namespace CTL {
  * volume.addSubVolume(std::move(subVolume2));
  *
  * // In the projection code, we only change the setting for the standard pipeline to 'No_Approximation'...
- * AcquisitionSetup setup(CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)), 10);
+ * AcquisitionSetup setup(CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)), 10);
  * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0f));
  *
  * //... here comes the changed line:

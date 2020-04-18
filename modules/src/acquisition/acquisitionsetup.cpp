@@ -393,7 +393,7 @@ bool AcquisitionSetup::resetSystem(const CTSystem& system)
 {
     bool ok;
     auto clonedSystem = static_cast<SimpleCTSystem*>(
-                SimpleCTSystem::fromCTsystem(system, &ok).clone());
+                SimpleCTSystem::fromCTSystem(system, &ok).clone());
 
     if(ok)
         _system.reset(clonedSystem);
@@ -413,7 +413,7 @@ bool AcquisitionSetup::resetSystem(CTSystem&& system)
 {
     bool ok;
     auto clonedSystem = static_cast<SimpleCTSystem*>(
-        SimpleCTSystem::fromCTsystem(std::move(system), &ok).clone());
+        SimpleCTSystem::fromCTSystem(std::move(system), &ok).clone());
 
     if(ok)
         _system.reset(clonedSystem);

@@ -72,7 +72,7 @@ namespace gui {
  * \code
  * auto volume = VoxelVolume<float>::ball(50.0f, 0.5f, 0.02f);
  *
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  * AcquisitionSetup setup(system, 100);
  * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(600.0f));
  *

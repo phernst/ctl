@@ -23,7 +23,7 @@ namespace CTL {
  * \code
  *   // define volume and acquisition setup (incl. system)
  *  auto volume = VolumeData::cube(100, 1.0f, 0.02f);
- *  auto system = SimpleCTSystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)));
+ *  auto system = SimpleCTSystem::fromCTSystem(CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)));
  *  AcquisitionSetup acquisitionSetup(system, 10);
  *  acquisitionSetup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0));
  *
