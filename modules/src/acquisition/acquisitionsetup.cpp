@@ -272,6 +272,9 @@ AcquisitionSetup::AcquisitionSetup(CTSystem&& system, uint nbViews)
     this->setNbViews(nbViews);
 }
 
+/*!
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTSystem \a system.
+ */
 AcquisitionSetup::AcquisitionSetup(std::unique_ptr<CTSystem> system, uint nbViews)
 {
     if(system)
@@ -279,8 +282,19 @@ AcquisitionSetup::AcquisitionSetup(std::unique_ptr<CTSystem> system, uint nbView
     this->setNbViews(nbViews);
 }
 
+/*!
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTSystem \a system.
+ */
 AcquisitionSetup::AcquisitionSetup(std::unique_ptr<SimpleCTSystem> system, uint nbViews)
     : _system(std::move(system))
+{
+    this->setNbViews(nbViews);
+}
+
+/*!
+ * Creates an AcquisitionSetup with \a nbViews views without a CTSystem.
+ */
+AcquisitionSetup::AcquisitionSetup(uint nbViews)
 {
     this->setNbViews(nbViews);
 }
