@@ -107,6 +107,13 @@ public:
     static SimpleCTSystem fromCTSystem(const CTSystem& system, bool* ok = nullptr);
     static SimpleCTSystem fromCTSystem(CTSystem&& system, bool* ok = nullptr);
 
+    Q_DECL_DEPRECATED_X("Function has been renamed. "
+                        "Please consider the new spelling 'fromCTSystem'.")
+    static SimpleCTSystem fromCTsystem(const CTSystem& system, bool* ok = nullptr);
+    Q_DECL_DEPRECATED_X("Function has been renamed. "
+                        "Please consider the new spelling 'fromCTSystem'.")
+    static SimpleCTSystem fromCTsystem(CTSystem&& system, bool* ok = nullptr);
+
     // virtual methods
     CTSystem* clone() const & override;
     CTSystem* clone() && override;
@@ -143,7 +150,7 @@ private:
     using CTSystem::operator<<;
 };
 
-Q_DECL_DEPRECATED_X("Class has been renamed. Please consider the new spelling 'SimpleCTSystem'")
+Q_DECL_DEPRECATED_X("Class has been renamed. Please consider the new spelling 'SimpleCTSystem'.")
 typedef SimpleCTSystem SimpleCTsystem;
 
 } // namespace CTL

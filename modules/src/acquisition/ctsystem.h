@@ -135,7 +135,7 @@ private:
     std::vector<ComponentPtr> _componentList; //!< The list of components.
 };
 
-Q_DECL_DEPRECATED_X("Class has been renamed. Please consider the new spelling 'CTSystem'")
+Q_DECL_DEPRECATED_X("Class has been renamed. Please consider the new spelling 'CTSystem'.")
 typedef CTSystem CTsystem;
 
 } // namespace CTL

@@ -35,6 +35,9 @@ public:
     static CTSystem createFromJSONFile(const QString& fileName);
 };
 
+Q_DECL_DEPRECATED_X("Class has been renamed. Please consider the new spelling 'CTSystemBuilder'.")
+typedef CTSystemBuilder CTsystemBuilder;
+
 } // namespace CTL
 
 #endif // CTL_CTSYSTEMBUILDER_H

@@ -110,6 +110,22 @@ SimpleCTSystem SimpleCTSystem::fromCTSystem(CTSystem&& system, bool* ok)
 }
 
 /*!
+ * Old spelling of fromCTSystem(const CTSystem& system, bool* ok).
+ */
+SimpleCTSystem SimpleCTSystem::fromCTsystem(const CTSystem& system, bool* ok)
+{
+    return fromCTSystem(system, ok);
+}
+
+/*!
+ * Old spelling of fromCTSystem(CTSystem&& system, bool* ok).
+ */
+SimpleCTSystem SimpleCTSystem::fromCTsystem(CTSystem&& system, bool* ok)
+{
+    return fromCTSystem(std::move(system), ok);
+}
+
+/*!
  * Returns a pointer to the detector component in the system. This does not transfer ownership.
  */
 AbstractDetector* SimpleCTSystem::detector() const
