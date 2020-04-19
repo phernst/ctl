@@ -3,7 +3,7 @@
 
 #include "components/allcomponents.h"
 #include "acquisition/ctsystembuilder.h"
-#include "mat/mat.h"
+#include "mat/deg.h"
 
 /*
  * NOTE: This is header only.
