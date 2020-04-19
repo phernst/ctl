@@ -278,4 +278,4 @@ ProjectorExtension*& pipe(ProjectorExtension*& lhs, ProjectorExtension* rhs)
     return lhs;
 }
 
-}
+} // namespace CTL

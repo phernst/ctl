@@ -18,8 +18,52 @@ namespace CTL {
  * Note that the nested projector is *owned* by the extension meaning that when the extension gets
  * destroyed the nested projector will be destroyed too.
  *
+ * There are several syntactical ways to extend another projector/extension.
+ * The following snippets show exemplarily the PoissonNoiseExtension extending the
+ * OCL::RayCasterProjector. Each pattern supports raw pointers as well as `std::unique_ptr`s.
+ * 1. By using the contructor
+ * \code
+ * // with `new` and raw pointers
+ * auto extRaw  = new PoissonNoiseExtension(new OCL::RayCasterProjector);
+ *
+ * // with make functions and `std::unique_ptr`s (safer in terms of accidental memory leaks)
+ * auto extUPtr = makeExtension<PoissonNoiseExtension>(makeProjector<OCL::RayCasterProjector>());
+ * \endcode
+ * 2. By using the ProjectorExtension::use method
+ * \code
+ * auto ext = makeExtension<PoissonNoiseExtension>();
+ * ext->use(makeProjector<OCL::RayCasterProjector>());
+ * \endcode
+ * 3. By using pipe operators (pay attention to the order)
+ * \code
+ * auto ext1 = makeProjector<OCL::RayCasterProjector>() |
+ *             makeExtension<PoissonNoiseExtension>();
+ *
+ * // or in separate steps
+ * std::unique_ptr<AbstractProjector> ext2;
+ * ext2 = makeProjector<OCL::RayCasterProjector>();
+ * ext2 |= makeExtension<PoissonNoiseExtension>();
+ *
+ * // also mixtures of unique and raw pointers are possible
+ * auto ext3 = makeProjector<OCL::RayCasterProjector>() | new PoissonNoiseExtension;
+ * \endcode
+ * 4. (3b) By using the `pipe` function for two raw pointers
+ * (because two raw pointers cannot be combined via '`|`' or '`|=`')
+ * \code
+ * AbstractProjector* ext;
+ * ext = new OCL::RayCasterProjector;
+ * pipe(ext, new PoissonNoiseExtension);
+ *
+ * // multiple concatenation is also possible similar to the pipe operators
+ * pipe(pipe(ext, new PoissonNoiseExtension), new ProjectorExtension);
+ * // Note: '... | ProjectorExtension' does not change the projector's behavior
+ * \endcode
+ *
+ * In order to build and manage a larger pipeline of `ProjectorExtension`s, see the helper class
+ * ProjectionPipeline. A pre-defined (suggested) pipeline is provided by the StandardPipeline class.
+ *
  * When implementing a custom extension, your class must be a subclass of ProjectorExtension.
- * There are two possiblilties to implement that extension:
+ * There are two possiblilties to implement such an extension:
  * 1. Override `extendedProject`
  * 2. Override `project` and `projectComposite`.
  *
