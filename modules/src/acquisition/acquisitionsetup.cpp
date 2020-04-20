@@ -256,6 +256,11 @@ AcquisitionSetup::PrepareStep& AcquisitionSetup::View::prepareStep(int prepareSt
 
 /*!
  * Creates an AcquisitionSetup with \a nbViews views that uses the CTSystem \a system.
+ *
+ * If \a nbViews = 0, make sure to explicitely set the desired number of views with setNbViews()
+ * and adjust the views for the required purpose (either individually or by use of a preparation
+ * protocol, see applyPreparationProtocol()) before using the setup. Alternatively all views can be
+ * added individually with addView().
  */
 AcquisitionSetup::AcquisitionSetup(const CTSystem& system, uint nbViews)
 {
@@ -293,6 +298,8 @@ AcquisitionSetup::AcquisitionSetup(std::unique_ptr<SimpleCTSystem> system, uint 
 
 /*!
  * Creates an AcquisitionSetup with \a nbViews views without a CTSystem.
+ *
+ * Note that a CTSystem must be set explicitely with resetSystem() before the setup can be used.
  */
 AcquisitionSetup::AcquisitionSetup(uint nbViews)
 {
