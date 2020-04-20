@@ -334,6 +334,27 @@ inline void AbstractGantry::setDetectorDisplacementPosition(double x, double y, 
 }
 
 /*!
+ *  Convenience setter. Sets the position component of the whole gantry displacement to \a position.
+ *
+ * \sa setGantryDisplacement()
+ */
+inline void AbstractGantry::setGantryDisplacementPosition(const Vector3x1& position)
+{
+    _globalGantryDisplacement.position = position;
+}
+
+/*!
+ *  Convenience setter. Sets the position component of the whole gantry displacement to
+ * (\a x, \a y, \a z).
+ *
+ * \sa setGantryDisplacement()
+ */
+inline void AbstractGantry::setGantryDisplacementPosition(double x, double y, double z)
+{
+    _globalGantryDisplacement.position = Vector3x1(x, y, z);
+}
+
+/*!
  *  Convenience setter. Sets the position component of the source displacement to \a position.
  *
  * \sa setSourceDisplacement()
