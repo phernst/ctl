@@ -1,4 +1,5 @@
 #include "consistency.h"
+#include "ocl/clfileloader.h"
 #include "processing/radontransform2d.h"
 #include "processing/radontransform3d.h"
 #include "processing/imageprocessing.h"
@@ -8,6 +9,9 @@
 
 #include <bitset>
 #include <random>
+
+const std::string CL_KERNEL_HOM2RADON = "homToRadon"; //!< name of the OpenCL kernel function
+const std::string CL_KERNEL_RADON2HOM = "radonToHom"; //!< name of the OpenCL kernel function
 
 namespace {
 
@@ -795,7 +799,7 @@ const cl::Buffer& Radon3DCoordTransform::transform(const Homography3D& homograph
                    [](double val){ return float(val); });
     _homTransfBuf.transferPinnedMemToDev(false);
 
-    auto kernel = OpenCLConfig::instance().kernel("transform3dRadon");
+    auto kernel = OpenCLConfig::instance().kernel(CL_KERNEL_HOM2RADON);
     kernel->setArg(0, _homTransfBuf.devBuffer());
     kernel->setArg(1, _initialPlanesHomCoord);
     kernel->setArg(2, _transformedCoords);
@@ -841,83 +845,19 @@ std::vector<HomCoordPlaneNormalized> Radon3DCoordTransform::initialHomCoords() c
 
 void Radon3DCoordTransform::addKernels() const
 {
-    static const std::string kernelSource =
-            R"OpenCLSourceCode(
-            __kernel void transform3dRadon( __constant float16* H,
-                                            __global const float4* initialPlanes,
-                                            __global float* transformedCoords )
-            {
-                const uint coordNb = get_global_id(0);
-                const float4 plane = initialPlanes[coordNb];
-                const float4 transformedPlane = (float4)(dot((*H).s0123, plane),
-                                                         dot((*H).s4567, plane),
-                                                         dot((*H).s89ab, plane),
-                                                         dot((*H).scdef, plane));
-                transformedCoords += 3 * coordNb;
-                transformedCoords[0] = atan2(transformedPlane.y, transformedPlane.x);
-                transformedCoords[1] = acos(transformedPlane.z);
-                transformedCoords[2] = -transformedPlane.w;
-            }
+    OCL::ClFileLoader clFileLoader;
 
+    clFileLoader.setFileName("processing/" + CL_KERNEL_HOM2RADON + ".cl");
+    OpenCLConfig::instance().addKernel(CL_KERNEL_HOM2RADON, clFileLoader.loadSourceCode());
 
-            )OpenCLSourceCode";
-
-    static const std::string kernelSourceRadToHom =
-            R"OpenCLSourceCode(
-            __kernel void radonToHom( __global const float* planesRadonC,
-                                      __global float* planesHomC )
-            {
-                const uint coordNb = get_global_id(0);
-
-                planesRadonC += 3 * coordNb;
-                float sinAzi = sin(planesRadonC[0]);
-                float cosAzi = cos(planesRadonC[0]);
-                float sinPol = sin(planesRadonC[1]);
-                float cosPol = cos(planesRadonC[1]);
-
-                planesHomC += 4 * coordNb;
-                planesHomC[0] = sinPol * cosAzi;
-                planesHomC[1] = sinPol * sinAzi;
-                planesHomC[2] = cosPol;
-                planesHomC[3] = - planesRadonC[2];
-            }
-
-
-            )OpenCLSourceCode";
-
-    OpenCLConfig::instance().addKernel("transform3dRadon", kernelSource);
-    OpenCLConfig::instance().addKernel("radonToHom", kernelSourceRadToHom);
+    clFileLoader.setFileName("processing/" + CL_KERNEL_RADON2HOM + ".cl");
+    OpenCLConfig::instance().addKernel(CL_KERNEL_RADON2HOM, clFileLoader.loadSourceCode());
 }
 
 size_t Radon3DCoordTransform::nbCoords() const
 {
     return _initialPlanesRadonCoord.nbElements() / 3;
 }
-
-/*
-void Radon3DCoordTransform::initHomPlanes(const std::vector<Radon3DCoord>& initialCoords) const
-{
-    auto planes = std::vector<float>(4 * initialCoords.size());
-    auto planePtr = planes.data();
-    float sinPol, cosPol, sinAzi, cosAzi;
-
-    for(const auto& coord : initialCoords)
-    {
-        sinPol = std::sin(coord.polar());
-        cosPol = std::cos(coord.polar());
-        sinAzi = std::sin(coord.azimuth());
-        cosAzi = std::cos(coord.azimuth());
-        planePtr[0] = sinPol * cosAzi;
-        planePtr[1] = sinPol * sinAzi;
-        planePtr[2] = cosPol;
-        planePtr[3] = -coord.dist();
-
-        planePtr += 4;
-    }
-
-    _q.enqueueWriteBuffer(_initialPlanesHomCoord, CL_TRUE, 0, planes.size() * sizeof(float), planes.data());
-}
-*/
 
 void Radon3DCoordTransform::recreateBuffers(size_t nbCoords)
 {
@@ -930,7 +870,7 @@ void Radon3DCoordTransform::recreateBuffers(size_t nbCoords)
 
 void Radon3DCoordTransform::transformRadonToHom() const
 {
-    auto kernel = OpenCLConfig::instance().kernel("radonToHom");
+    auto kernel = OpenCLConfig::instance().kernel(CL_KERNEL_RADON2HOM);
 
     kernel->setArg(0, _initialPlanesRadonCoord.devBuffer());
     kernel->setArg(1, _initialPlanesHomCoord);
@@ -940,7 +880,6 @@ void Radon3DCoordTransform::transformRadonToHom() const
 
 } // namespace OCL
 } // namespace CTL
-
 
 namespace {
 
