@@ -106,14 +106,14 @@ namespace CTL {
  * meaning that only the nested projector is applied.
  *
  * In case you opt for variant 1, i.e. you override the `extendedProject` method, you can only
- * implement the \f$ P \f$ operator, i.e.
+ * implement the \f$ P \f$ and \f$ \Pi \f$ operators, i.e.
  *
  * \f$
- * E\left\{A_{\boldsymbol{\pi}}\right\}\boldsymbol{v}=PA_{\boldsymbol{\pi}}\,\boldsymbol{v}\,.
+ * E\left\{A_{\boldsymbol{\pi}}\right\}\boldsymbol{v}=PA_{\Pi\boldsymbol{\pi}}\,\boldsymbol{v}\,.
  * \f$
  *
- * This leads to an extension that performs only post-processing of the ProjectionData, i.e.
- * it represents a part in a classical pipeline.
+ * If even a custom \f$ \Pi \f$ is not provided, it leads to an extension that performs only
+ * post-processing of the ProjectionData, i.e. it represents a part in a classical pipeline.
  * The variant 2 effectively enables the implementation of all the three operators
  * \f$ V \f$, \f$ \Pi \f$ and \f$ P \f$.
  *
