@@ -36,8 +36,7 @@ namespace CTL {
  * \endcode
  * 3. By using pipe operators (pay attention to the order)
  * \code
- * auto ext1 = makeProjector<OCL::RayCasterProjector>() |
- *             makeExtension<PoissonNoiseExtension>();
+ * auto ext1 = makeProjector<OCL::RayCasterProjector>() | makeExtension<PoissonNoiseExtension>();
  *
  * // or in separate steps
  * std::unique_ptr<AbstractProjector> ext2;
@@ -113,18 +112,24 @@ namespace CTL {
  * E\left\{A_{\boldsymbol{\pi}}\right\}\boldsymbol{v}=PA_{\boldsymbol{\pi}}\,\boldsymbol{v}\,.
  * \f$
  *
- * This would lead to an extension that perform only post-processing of the ProjectionData, i.e.
+ * This leads to an extension that performs only post-processing of the ProjectionData, i.e.
  * it represents a part in a classical pipeline.
  * The variant 2 effectively enables the implementation of all the three operators
  * \f$ V \f$, \f$ \Pi \f$ and \f$ P \f$.
  *
- * When considering a concatenation of two extensions, first \f$ E_1 \f$ and then \f$ E_2 \f$, the
- * following order of operators is applied by design:
+ * When considering a concatenation of two extensions, first/inner \f$ E_1 \f$ and then/outer
+ * \f$ E_2 \f$ (i.e. `E2->use(E1)` or equivalent `E1|E2`), the following order of operators is
+ * applied by design:
  *
  * \f$
  * \left(E_{2}\circ E_{1}\right)\left\{ A_{\boldsymbol{\pi}}\right\} \boldsymbol{v}=
  * P_{2}P_{1}\,A_{\Pi_{1}\Pi_{2}\boldsymbol{\boldsymbol{\pi}}}\,V_{1}V_{2}\boldsymbol{v}.
  * \f$
+ *
+ * In other words \f$ P \f$ is a post-processing operator while \f$ \Pi \f$ and \f$ V \f$ are
+ * pre-processing operators. This is simply due to the fact that the `AcquisitionSetup`/`VolumeData`
+ * could be changed before calling `configure`/`project`(`Composite`) of the nested projector
+ * whereas the ProjectionData may be changed afterwards.
  *
  * \sa configure(), project().
  */
