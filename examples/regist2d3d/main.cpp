@@ -1,11 +1,5 @@
-#include "io/den/denfileio.h"
-#include "io/den/den_utils.h"
-#include "io/nrrd/nrrdfileio.h"
-#include "mat/matrix_utils.h"
-#include "processing/diff.h"
-#include "processing/volumeresampler.h"
-#include "processing/errormetrics.h"
-#include "app/registration/grangeatregistration2d3d.h"
+#include "ctl.h"
+#include "ctl_nlopt.h"
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
