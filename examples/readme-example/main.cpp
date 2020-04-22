@@ -1,7 +1,5 @@
-#include "acquisition/systemblueprints.h"
-#include "acquisition/trajectories.h"
-#include "io/nrrd/nrrdfileio.h"
-#include "projectors/raycasterprojector.h"
+#include "ctl.h"
+#include "ctl_ocl.h"
 #include <QCoreApplication>
 #include <iostream>
 

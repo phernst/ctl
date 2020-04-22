@@ -193,10 +193,8 @@ projector extensions can "decorate" the used forward projector in order to
 include further geometric/physical/measuring effects.
 
 ```cpp
-#include "acquisition/systemblueprints.h"
-#include "acquisition/trajectories.h"
-#include "io/nrrd/nrrdfileio.h"
-#include "projectors/raycasterprojector.h"
+#include "ctl.h"
+#include "ctl_ocl.h"
 #include <QCoreApplication>
 #include <iostream>
 
@@ -220,7 +218,7 @@ int main(int argc, char* argv[])
         uint nbViews = 100;
         CTL::AcquisitionSetup myCarmSetup(system, nbViews);
         // add a predefined trajectory to the setup from "acquisition/trajectories.h"
-        double angleSpan = 200.0_deg; // floating-point literal _deg in "mat/mat.h" converts to rad
+        double angleSpan = 200.0_deg; // floating-point literal _deg in "mat/deg.h" converts to rad
         double sourceToIsocenter = 750.0; // mm is the standard unit for length dimensions
         myCarmSetup.applyPreparationProtocol(CTL::protocols::WobbleTrajectory(angleSpan,
                                                                               sourceToIsocenter));
@@ -228,9 +226,8 @@ int main(int argc, char* argv[])
             return -1;
 
         // configure a projector and project volume
-        CTL::OCL::RayCasterProjector::Config rcConfig;  // config with standard settings
-        CTL::OCL::RayCasterProjector myProjector;       // the projector
-        myProjector.configure(myCarmSetup, rcConfig);   // configure projector
+        CTL::OCL::RayCasterProjector myProjector;       // the projector (uses its default settings)
+        myProjector.configure(myCarmSetup);             // configure projector
         auto projections = myProjector.project(volume); // project
 
         // save projections
