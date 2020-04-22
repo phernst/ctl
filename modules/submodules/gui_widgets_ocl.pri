@@ -6,6 +6,7 @@
 
 # declare module
 CONFIG += GUI_WIDGETS_OCL
+DEFINES += GUI_WIDGETS_OCL_AVAILABLE
 
 HEADERS += \
     $$PWD/../src/gui/widgets/pipelinecomposer.h \

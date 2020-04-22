@@ -7,6 +7,7 @@ CONFIG(debug, debug|release) {
 
 # declare module
 CONFIG += CTL_CORE_MODULE
+DEFINES += CTL_CORE_MODULE_AVAILABLE
 
 # enable logging function names and line numbers even for release builds
 DEFINES += QT_MESSAGELOGCONTEXT

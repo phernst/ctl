@@ -4,6 +4,7 @@
 
 # declare module
 CONFIG += OCL_ROUTINES_MODULE
+DEFINES += OCL_ROUTINES_MODULE_AVAILABLE
 
 HEADERS += \
     $$PWD/../src/processing/consistency.h \
@@ -35,8 +36,10 @@ DISTFILES += \
     $$PWD/../src/ocl/cl_src/projectors/external_raycaster.cl \
     $$PWD/../src/ocl/cl_src/projectors/raycasterprojector_interp.cl \
     $$PWD/../src/ocl/cl_src/projectors/raycasterprojector_no_interp.cl \
+    $$PWD/../src/ocl/cl_src/processing/homToRadon.cl \
     $$PWD/../src/ocl/cl_src/processing/imageResampler.cl \
     $$PWD/../src/ocl/cl_src/processing/planeIntegral.cl \
     $$PWD/../src/ocl/cl_src/processing/radon2d.cl \
+    $$PWD/../src/ocl/cl_src/processing/radonToHom.cl \
     $$PWD/../src/ocl/cl_src/processing/volumeResampler.cl \
     $$PWD/../src/ocl/cl_src/processing/volumeSlicer.cl

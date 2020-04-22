@@ -8,6 +8,7 @@
 
 # declare module
 CONFIG += DEN_FILE_IO_MODULE
+DEFINES += DEN_FILE_IO_MODULE_AVAILABLE
 
 HEADERS += \
     $$PWD/../src/io/den/den.h \

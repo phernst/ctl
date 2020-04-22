@@ -133,7 +133,7 @@ signals:
     void saveRequest();
 };
 
-}
+} // namespace details
 
 } // namespace gui
 } // namespace CTL

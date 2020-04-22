@@ -3,6 +3,7 @@
 
 # declare module
 CONFIG += GUI_WIDGETS_MODULE
+DEFINES += GUI_WIDGETS_MODULE_AVAILABLE
 
 QT += gui widgets
 

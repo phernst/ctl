@@ -5,3 +5,5 @@
 
 !OCL_CONFIG_MODULE:   include(submodules/ocl_config.pri)
 !OCL_ROUTINES_MODULE: include(submodules/ocl_routines.pri)
+
+HEADERS += $$PWD/src/ctl_ocl.h

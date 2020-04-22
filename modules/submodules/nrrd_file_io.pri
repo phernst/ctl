@@ -3,6 +3,7 @@
 
 # declare module
 CONFIG += NRRD_FILE_IO_MODULE
+DEFINES += NRRD_FILE_IO_MODULE_AVAILABLE
 
 HEADERS += $$PWD/../src/io/nrrd/nrrdfileio.h
 
