@@ -62,7 +62,7 @@ void AcquisitionSetupTest::testFlyingFocalSpotProtocol()
     setup.prepareView(7);
     QVERIFY(setup.system()->source()->focalSpotPosition() == pos2);
 
-    setup.clearViews();
+    setup.removeAllPrepareSteps(false);
     setup.applyPreparationProtocol(CTL::protocols::FlyingFocalSpot::fourAlternatingSpots(pos1, pos2, pos3, pos4));
     setup.prepareView(0);
     QVERIFY(setup.system()->source()->focalSpotPosition() == pos1);
@@ -71,7 +71,7 @@ void AcquisitionSetupTest::testFlyingFocalSpotProtocol()
     setup.prepareView(7);
     QVERIFY(setup.system()->source()->focalSpotPosition() == pos4);
 
-    setup.clearViews();
+    setup.removeAllPrepareSteps(false);
     setup.applyPreparationProtocol(CTL::protocols::FlyingFocalSpot({pos1, pos2, pos3}, true));
     setup.prepareView(0);
     QVERIFY(setup.system()->source()->focalSpotPosition() == pos1);
