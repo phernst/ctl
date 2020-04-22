@@ -98,6 +98,12 @@ private slots:
     void updateAnimation();
 };
 
+
+// free function plot()
+inline void plot(AcquisitionSetup setup, uint maxNbViews = 100, bool sourceOnly = false,
+                 float visualScale = 50.0f)
+{ AcquisitionSetupView::plot(std::move(setup), maxNbViews, sourceOnly, visualScale); }
+
 } // namespace gui
 } // namespace CTL
 

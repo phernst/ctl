@@ -209,6 +209,14 @@ VoxelVolume<float> VolumeViewer::convertedToFloat(const VoxelVolume<T>& in)
     return convVol;
 }
 
+
+// free function plot()
+inline void plot(CompositeVolume data)
+{ VolumeViewer::plot(std::move(data)); }
+
+inline void plot(SpectralVolumeData data)
+{ VolumeViewer::plot(std::move(data)); }
+
 } // namespace gui
 } // namespace CTL
 

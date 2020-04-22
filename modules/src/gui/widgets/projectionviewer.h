@@ -153,6 +153,11 @@ private slots:
     void windowingUpdate();
 };
 
+
+// free function plot()
+inline void plot(ProjectionData projections, const ModuleLayout& layout = {})
+{ ProjectionViewer::plot(std::move(projections), layout); }
+
 } // namespace gui
 } // namespace CTL
 

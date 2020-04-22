@@ -158,6 +158,12 @@ private slots:
 
 } // namespace details
 
+
+// free function plot()
+inline void plot(std::shared_ptr<AbstractDataModel> model,
+                 const QString& labelX = "x", const QString& labelY = "y")
+{ DataModelViewer::plot(std::move(model),labelX, labelY); }
+
 } // namespace gui
 } // namespace CTL
 

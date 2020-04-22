@@ -80,6 +80,12 @@ private:
     double suitableLogMinVal(const IntervalDataSeries& intervalSeries);
 };
 
+
+// free function plot()
+inline void plot(const IntervalDataSeries& intervalSeries, const QString& labelX = "x",
+                 const QString& labelY = "y", bool logAxisY = false)
+{ IntervalSeriesView::plot(intervalSeries, labelX, labelY, logAxisY); }
+
 } // namespace gui
 } // namespace CTL
 

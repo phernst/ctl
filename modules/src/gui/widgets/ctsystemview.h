@@ -83,7 +83,7 @@ public:
 
     void setCTSystem(const SimpleCTSystem& system);
 
-    static void plot(SimpleCTSystem system, float visualScale = 50.0f);
+    static void plot(const SimpleCTSystem& system, float visualScale = 50.0f);
 
     void addSystemVisualization(const SimpleCTSystem& system);
     void addVolume(const VoxelVolume<uchar>& volume);
@@ -134,6 +134,10 @@ signals:
 };
 
 } // namespace details
+
+// free function plot()
+inline void plot(const SimpleCTSystem& system, float visualScale = 50.0f)
+{ CTSystemView::plot(system, visualScale); }
 
 } // namespace gui
 } // namespace CTL

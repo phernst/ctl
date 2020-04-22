@@ -86,6 +86,12 @@ public slots:
 
 };
 
+
+// free function plot()
+inline void plot(const XYDataSeries& lineSeries, const QString& labelX = "x",
+                 const QString& labelY = "y", bool logAxisY = false)
+{ LineSeriesView::plot(lineSeries, labelX, labelY, logAxisY); }
+
 } // namespace gui
 } // namespace CTL
 

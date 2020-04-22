@@ -65,11 +65,11 @@ CTSystemView::CTSystemView(QWidget* parent, float visualScale)
  *
  * ![Resulting visualization from the example above (window size and zoom adjusted).](gui/CTSystemView_scales.png)
  */
-void CTSystemView::plot(SimpleCTSystem system, float visualScale)
+void CTSystemView::plot(const SimpleCTSystem& system, float visualScale)
 {
     auto viewer = new CTSystemView(nullptr, visualScale);
     viewer->setAttribute(Qt::WA_DeleteOnClose);
-    viewer->setCTSystem(std::move(system));
+    viewer->setCTSystem(system);
 
     viewer->show();
 }
