@@ -148,11 +148,11 @@ namespace CTL {
  * xRaySwitch2->setTubeVoltage(100.0); // switch two sets the voltage back to 100 kV
  *
  * // we now add the prepare steps to the views where they shall be applied
- * setup.view(30).addPrepareStep(std::move(xrayPar1)); // the first switch shall occur at view 30
- * setup.view(50).addPrepareStep(std::move(xrayPar2)); // the second switch shall occur at view 50
+ * setup.view(30).addPrepareStep(xRaySwitch1); // the first switch shall occur at view 30
+ * setup.view(50).addPrepareStep(xRaySwitch2); // the second switch shall occur at view 50
  *
  * // we can now read out the voltages for all views (if we want to inspect them):
- * const auto tube = static_cast<XrayTube*>(setup.system()->source()); // we remember a pointer to the XRayTube in the system
+ * const auto tube = static_cast<XrayTube*>(setup.system()->source()); // we remember a pointer to the XrayTube in the system
  * XYDataSeries voltages;
  * for(uint v = 0; v < setup.nbViews(); ++v)
  * {
@@ -233,11 +233,11 @@ public:
 
     void addView(View view);
     void applyPreparationProtocol(const AbstractPreparationProtocol& preparation);
-    void clearViews(bool keepTimeStamps = false);
     bool isValid() const;
     uint nbViews() const;
     void prepareView(uint viewNb);
-    void removeAllPrepareSteps();
+    void removeAllPrepareSteps(bool keepTimeStamps = true);
+    void removeAllViews();
     bool resetSystem(const CTSystem& system);
     bool resetSystem(CTSystem&& system);
     void setNbViews(uint nbViews);
