@@ -12,11 +12,11 @@
 #include "processing/imageresampler.h"
 #include "processing/radontransform2d.h"
 #include "processing/radontransform3d.h"
+#include "processing/volumeresampler.h"
+#include "processing/volumeslicer.h"
 #include "projectors/raycaster.h"
 #include "projectors/raycasteradapter.h"
 #include "projectors/raycasterprojector.h"
-#include "processing/volumeresampler.h"
-#include "processing/volumeslicer.h"
 #include "projectors/standardpipeline.h"
 #endif // OCL_ROUTINES_MODULE_AVAILABLE
 

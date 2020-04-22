@@ -10,10 +10,10 @@ QT += gui widgets
 HEADERS += \
     $$PWD/../src/gui/util/qttype_utils.h \
     $$PWD/../src/gui/widgets/chunk2dview.h \
+    $$PWD/../src/gui/widgets/extensionchainwidget.h \
     $$PWD/../src/gui/widgets/projectionviewer.h \
     $$PWD/../src/gui/widgets/volumeviewer.h \
     $$PWD/../src/gui/widgets/windowingwidget.h \
-    $$PWD/../src/gui/widgets/extensionchainwidget.h \
     $$PWD/../src/gui/widgets/zoomcontrolwidget.h
 
 SOURCES += \

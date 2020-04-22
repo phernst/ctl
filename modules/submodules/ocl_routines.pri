@@ -23,11 +23,11 @@ SOURCES += \
     $$PWD/../src/processing/imageresampler.cpp \
     $$PWD/../src/processing/radontransform2d.cpp \
     $$PWD/../src/processing/radontransform3d.cpp \
+    $$PWD/../src/processing/volumeresampler.cpp \
+    $$PWD/../src/processing/volumeslicer.cpp \
     $$PWD/../src/projectors/raycaster.cpp \
     $$PWD/../src/projectors/raycasteradapter.cpp \
     $$PWD/../src/projectors/raycasterprojector.cpp \
-    $$PWD/../src/processing/volumeresampler.cpp \
-    $$PWD/../src/processing/volumeslicer.cpp \
     $$PWD/../src/projectors/standardpipeline.cpp
 
 

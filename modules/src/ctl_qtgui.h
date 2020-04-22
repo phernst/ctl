@@ -4,10 +4,10 @@
 #ifdef GUI_WIDGETS_MODULE_AVAILABLE
 #include "gui/util/qttype_utils.h"
 #include "gui/widgets/chunk2dview.h"
+#include "gui/widgets/extensionchainwidget.h"
 #include "gui/widgets/projectionviewer.h"
 #include "gui/widgets/volumeviewer.h"
 #include "gui/widgets/windowingwidget.h"
-#include "gui/widgets/extensionchainwidget.h"
 #include "gui/widgets/zoomcontrolwidget.h"
 #endif // GUI_WIDGETS_MODULE_AVAILABLE
 
