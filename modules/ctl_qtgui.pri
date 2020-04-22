@@ -1,3 +1,6 @@
+# CTL QtGUI module
+# ================
+#
 # Includes GUI-related CTL submodules that depends on the following Qt modules:
 # gui widgets 3dcore 3drender 3dextras charts.
 # If the CTL OpenCL module has been included, this also includes the CTL submodule(s) for OpenCL-dependent widgets.

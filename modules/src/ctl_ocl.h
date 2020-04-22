@@ -1,6 +1,13 @@
 #ifndef CTL_META_CTL_OCL_H
 #define CTL_META_CTL_OCL_H
 
+/*
+ * This header includes all headers of the CTL OpenCL module
+ * provided that all submodules are included in the qmake project, usually by including
+ * the CTL OpenCL module 'ctl_ocl.pri'.
+ * Otherwise, only the headers of the added submodules will be included.
+ */
+
 #ifdef OCL_CONFIG_MODULE_AVAILABLE
 #include "ocl/clfileloader.h"
 #include "ocl/openclconfig.h"

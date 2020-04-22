@@ -1,6 +1,13 @@
 #ifndef CTL_META_CTL_H
 #define CTL_META_CTL_H
 
+/*
+ * This header includes all headers of the CTL main module
+ * provided that all submodules are included in the qmake project, usually by including
+ * the CTL main module 'ctl.pri'.
+ * Otherwise, only the headers of the added submodules will be included.
+ */
+
 #ifdef CTL_CORE_MODULE_AVAILABLE
 #include "acquisition/abstractpreparestep.h"
 #include "acquisition/acquisitionsetup.h"

@@ -1,6 +1,13 @@
 #ifndef CTL_META_CTL_QTGUI_H
 #define CTL_META_CTL_QTGUI_H
 
+/*
+ * This header includes all headers of the CTL QtGUI module
+ * provided that all submodules are included in the qmake project, usually by including
+ * the CTL QtGUI module 'ctl_qtgui.pri'.
+ * Otherwise, only the headers of the added submodules will be included.
+ */
+
 #ifdef GUI_WIDGETS_MODULE_AVAILABLE
 #include "gui/util/qttype_utils.h"
 #include "gui/widgets/chunk2dview.h"
