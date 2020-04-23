@@ -31,7 +31,7 @@ Other changes and additions:
 - implemented parallelization of arithmetic operations with `VoxelVolume<T>`
 - added meta headers for each main module - you can now include a single meta header (e.g. ctl.h) to include all headers from the corresponding ctl module.
 
-Note for developers who have already been using the dev_v0.3.2 branch: the namespace `CTL::gui::assist`, which previously contained the plot functions, has been dropped for the sake of simplicity. The all `plot()` overloads can now be found in `CTL::gui` namespace.
+Note for developers who have already been using the dev_v0.3.2 branch: the namespace `CTL::gui::assist`, which previously contained the plot functions, has been dropped for the sake of simplicity. All `plot()` overloads can now be found in `CTL::gui` namespace.
 
 ## 2020-03-20 (v.0.3.1)
 
