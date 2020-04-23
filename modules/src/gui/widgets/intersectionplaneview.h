@@ -115,7 +115,8 @@ public:
                       const VoxelVolume<float>::Offset& offset = { 0.0f, 0.0f, 0.0f});
 
     static void plot(const VoxelVolume<float>& volume,
-                     double azimuth, double polar, double distance, float visualScale = 50.0f);
+                     double azimuth, double polar, double distance,
+                     const QSizeF& planeSize = QSizeF(), float visualScale = 50.0f);
 
 public slots:
     void clearScene();
@@ -152,6 +153,7 @@ private:
     void addVolume();
     void initializeView();
     void redraw();
+    QSizeF planeSizeByVolDim();
 };
 
 } // namespace gui

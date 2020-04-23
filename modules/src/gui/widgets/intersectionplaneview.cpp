@@ -49,8 +49,11 @@ IntersectionPlaneView::IntersectionPlaneView(QWidget* parent, float visualScale)
  * Creates an IntersectionPlaneView for visualization of \a volume and the plane specified by the
  * spherical coordinate tuple (\a azimuth, \a polar, \a distance). Note that only the outer bounding
  * box of \a volume is visualized in the scene for means of simplicity.
+ * The \a planeSize argument can be used to explicitely specify how large the intersection plane
+ * shall be drawn (sizes in mm). If unset, a default size will be used that is a square with edge
+ * length of sqrt(3) times the largest edge length of the volume.
  *
- * If specified, sets the scaling for the visual appearance of components within the scene to
+ * If specified, the scaling for the visual appearance of components within the scene is set to
  * \a visualScale.
  *
  * The widget will be deleted automatically if the window is closed.
@@ -66,17 +69,14 @@ IntersectionPlaneView::IntersectionPlaneView(QWidget* parent, float visualScale)
  * \endcode
  */
 void IntersectionPlaneView::plot(const VoxelVolume<float>& volume,
-                                 double azimuth, double polar, double distance, float visualScale)
+                                 double azimuth, double polar, double distance,
+                                 const QSizeF& planeSize, float visualScale)
 {
-    const auto maxDim = std::max(std::max(volume.dimensions().x * volume.voxelSize().x,
-                                          volume.dimensions().y * volume.voxelSize().y),
-                                 volume.dimensions().z * volume.voxelSize().z);
-
     auto viewer = new IntersectionPlaneView(nullptr, visualScale);
     viewer->setAttribute(Qt::WA_DeleteOnClose);
     viewer->setVolumeDim(volume);
-    viewer->setPlaneSize( { double(maxDim) * std::sqrt(3.0), double(maxDim) * std::sqrt(3.0) } );
     viewer->setPlaneParameter(azimuth, polar, distance);
+    viewer->setPlaneSize(planeSize);
 
     viewer->show();
 }
@@ -84,6 +84,9 @@ void IntersectionPlaneView::plot(const VoxelVolume<float>& volume,
 /*!
  * Sets the size of the visualized plane to \a width x \a height (both in mm) and updates the
  * visualization.
+ *
+ * If no plane size is set explicitely (or an empty size is set), a default size will be used
+ * that is a square with edge length of sqrt(3) times the largest edge length of the volume.
  */
 void IntersectionPlaneView::setPlaneSize(double width, double height)
 {
@@ -95,6 +98,9 @@ void IntersectionPlaneView::setPlaneSize(double width, double height)
 /*!
  * Sets the size of the visualized plane to \a size (width x height, in mm) and updates the
  * visualization.
+ *
+ * If no plane size is set explicitely (or an empty size is set), a default size will be used
+ * that is a square with edge length of sqrt(3) times the largest edge length of the volume.
  */
 void IntersectionPlaneView::setPlaneSize(const QSizeF& size)
 {
@@ -459,8 +465,10 @@ void IntersectionPlaneView::addPlane()
 {
     const float PLANE_THICKNESS_RATIO = 0.01f;
 
-    const QVector3D planeSize(_planeSize.width(), _planeSize.height(),
-                              PLANE_THICKNESS_RATIO * std::max(_planeSize.width(), _planeSize.height()));
+    const QSizeF size = _planeSize.isEmpty() ? planeSizeByVolDim() : _planeSize;
+
+    const QVector3D planeSize(size.width(), size.height(),
+                              PLANE_THICKNESS_RATIO * std::max(size.width(), size.height()));
 
     auto material = new Qt3DExtras::QPhongAlphaMaterial(_rootEntity);
     material->setAlpha(90.0f / 255.0f);
@@ -475,6 +483,15 @@ void IntersectionPlaneView::redraw()
     addPlane();
     addVolume();
     addPlane();
+}
+
+QSizeF IntersectionPlaneView::planeSizeByVolDim()
+{
+    const auto maxDim = std::max(std::max(_volDim.x * _volVoxSize.x,
+                                          _volDim.y * _volVoxSize.y),
+                                 _volDim.z * _volVoxSize.z);
+
+    return { double(maxDim) * std::sqrt(3.0), double(maxDim) * std::sqrt(3.0) };
 }
 
 } // namespace gui
