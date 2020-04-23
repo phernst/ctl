@@ -1,6 +1,8 @@
 CTL - Computed Tomography Library
 =================================
 
+**Current version: 0.3.2**
+
 A C++11 toolkit for CT imaging with minimal dependencies.
 
 This early release enables to simluate freely customizable cone-beam X-ray
@@ -262,7 +264,6 @@ Statistics on the master branch:
 
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=code)
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=comments)
-![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=blanks)
 ![](https://tokei.rs/b1/GitLab/tpfeiffe/ctl?category=files)
 
 For more details click [this link](https://rf.p7.de/apps/cms_pico/pico/ctlstat/).
