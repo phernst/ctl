@@ -217,6 +217,10 @@ inline void plot(CompositeVolume data)
 inline void plot(SpectralVolumeData data)
 { VolumeViewer::plot(std::move(data)); }
 
+template<typename T>
+inline void plot(const VoxelVolume<T>& data)
+{  VolumeViewer::plot(data); }
+
 } // namespace gui
 } // namespace CTL
 

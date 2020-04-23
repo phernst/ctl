@@ -211,6 +211,11 @@ inline void plot(Chunk2D<float> data,
                  QPair<double,double> windowing = qMakePair(0.0, 0.0), double zoom = 1.0)
 { Chunk2DView::plot(std::move(data), windowing, zoom); }
 
+template<typename T>
+inline void plot(const Chunk2D<T>& data,
+                 QPair<double,double> windowing = qMakePair(0.0, 0.0), double zoom = 1.0)
+{ Chunk2DView::plot(data, windowing, zoom); }
+
 } // namespace gui
 } // namespace CTL
 
