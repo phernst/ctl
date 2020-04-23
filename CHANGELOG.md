@@ -1,5 +1,38 @@
 # Changelog
 
+## 2020-04-23 (v.0.3.2)
+
+FOCUS: GUI improvements
+
+### Added core functionality
+- added `Chunk2DView`: widget for visualization of `Chunk2D` data, also used for further widgets
+- added new submodule 'gui_widgets_charts.pri' containing widgets for several "plot-like" visualizations:
+  - `LineSeriesView`: visualizer for `XYDataSeries` data - a classic "x-y-style" plot
+  - `IntervalSeriesView`: visualizer for `IntervalSeries` data - a "bar-style" plot
+  - `DataModelViewer`: complex viewer for inspection of data models (any `AbstractDataModel` subclass) ; provides several visualization and manipulation options.
+- included several interaction options with visualizers (e.g. windowing with mouse-gestures, plotting of contrast lines, saving screenshots); refer to the documentation of each class for full details.
+- all visualizations can be invoked using a common function: `gui::plot()` with the input argument that shall be visualized, for maximal user convenience and slim code
+
+### Changed
+- moved all GUI classes to namespace `CTL::gui`
+- fully reworked widget for visualization of projection data: `ProjectionViewer` (replaces previous ProjectionView)
+- fully reworked widget for visualization of volume data: `VolumeViewer` (replaces previous VoxelVolumeView); now allows visualization of different volume types (i.e. `VoxelVolume<T>`, `SpectralVolumeData`, `CompositeVolume`)
+- refactored widget for computation and visualization of arbitrary slices through volume data: `VolumeSliceViewer` (replaces previous VolumeSlicerWidget)
+- renamed PipelineComposerWidget to `PipelineComposer`, added `DynamicProjectorExtension` as a possible extension
+- renamed AcquisitionVisualizerWidget to `AcquisitionSetupView`
+- renamed SystemVisualizerWidget to `CTSystemView`
+
+
+Other changes and additions:
+- changed spelling of `CTsystem` to `CTSystem` in all its occurrances (i.e. also in member methods and other classes such as `SimpleCTsystem`); old spelling will be kept as deprecated for a while, please consider renaming
+- added `AbstractDynamicVolumeData::timeCurve()` method to extract values for all time points of a single voxel ("time-attenuation-curve")
+- added `BasisFunctionVolume`: describes time dynamic by a linear combination of time-dependent basis functions 
+- added convenience function `makeCTsystem()` and `makeSimpleCTsystem()` for creating systems from blueprints; add `AcquisitionSetup` constructors accepting `unique_ptr`
+- implemented parallelization of arithmetic operations with `VoxelVolume<T>`
+- added meta headers for each main module - you can now include a single meta header (e.g. ctl.h) to include all headers from the corresponding ctl module.
+
+Note for developers who have already been using the dev_v0.3.2 branch: the namespace `CTL::gui::assist`, which previously contained the plot functions, has been dropped for the sake of simplicity. The all `plot()` overloads can now be found in `CTL::gui` namespace.
+
 ## 2020-03-20 (v.0.3.1)
 
 **Important change for existing users:**
