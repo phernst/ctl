@@ -36,18 +36,7 @@ AcquisitionSetupView::AcquisitionSetupView(QWidget* parent, float visualScale)
  * showView(), addViewVisualization(), showFullAcquisition(), showSourceTrajectory(), or
  * animateAcquisition().
  */
-void AcquisitionSetupView::setAcquisitionSetup(const AcquisitionSetup& acqSetup)
-{
-    _setup = acqSetup;
-
-    if(_setup.nbViews())
-        showView(0);
-}
-
-/*!
- * Overload of setAcquisitionSetup(const AcquisitionSetup&) for r-value references.
- */
-void AcquisitionSetupView::setAcquisitionSetup(AcquisitionSetup&& acqSetup)
+void AcquisitionSetupView::setAcquisitionSetup(AcquisitionSetup acqSetup)
 {
     _setup = std::move(acqSetup);
 

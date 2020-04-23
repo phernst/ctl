@@ -70,8 +70,7 @@ class AcquisitionSetupView : public CTSystemView
 public:
     explicit AcquisitionSetupView(QWidget* parent = nullptr, float visualScale = 50.0f);
 
-    void setAcquisitionSetup(const AcquisitionSetup& acqSetup);
-    void setAcquisitionSetup(AcquisitionSetup&& acqSetup);
+    void setAcquisitionSetup(AcquisitionSetup acqSetup);
 
     static void plot(AcquisitionSetup setup, uint maxNbViews = 100, bool sourceOnly = false,
                      float visualScale = 50.0f);
