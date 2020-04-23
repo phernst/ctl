@@ -4,15 +4,15 @@
 #include <QtTest>
 
 namespace CTL {
-    class CTsystem;
+    class CTSystem;
 }
 
-class CTsystemTest : public QObject
+class CTSystemTest : public QObject
 {
     Q_OBJECT
 
 public:
-    CTsystemTest() = default;
+    CTSystemTest() = default;
 
 private Q_SLOTS:
     void initTestCase();
@@ -24,7 +24,7 @@ private Q_SLOTS:
     void testSystemBuilder();
 
 private:
-    CTL::CTsystem* _theTestSystem;
+    CTL::CTSystem* _theTestSystem;
 };
 
 #endif // CTSYSTEMTEST_H

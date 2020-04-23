@@ -7,6 +7,7 @@ CONFIG(debug, debug|release) {
 
 # declare module
 CONFIG += CTL_CORE_MODULE
+DEFINES += CTL_CORE_MODULE_AVAILABLE
 
 # enable logging function names and line numbers even for release builds
 DEFINES += QT_MESSAGELOGCONTEXT
@@ -25,6 +26,7 @@ HEADERS += \
     $$PWD/../src/acquisition/geometryencoder.h \
     $$PWD/../src/acquisition/preparationprotocols.h \
     $$PWD/../src/acquisition/preparesteps.h \
+    $$PWD/../src/acquisition/radiationencoder.h \
     $$PWD/../src/acquisition/simplectsystem.h \
     $$PWD/../src/acquisition/systemblueprints.h \
     $$PWD/../src/acquisition/trajectories.h \
@@ -35,6 +37,7 @@ HEADERS += \
     $$PWD/../src/components/abstractsource.h \
     $$PWD/../src/components/allcomponents.h \
     $$PWD/../src/components/allgenerictypes.h \
+    $$PWD/../src/components/attenuationfilter.h \
     $$PWD/../src/components/carmgantry.h \
     $$PWD/../src/components/cylindricaldetector.h \
     $$PWD/../src/components/flatpaneldetector.h \
@@ -46,8 +49,11 @@ HEADERS += \
     $$PWD/../src/components/tubulargantry.h \
     $$PWD/../src/components/xraylaser.h \
     $$PWD/../src/components/xraytube.h \
+    $$PWD/../src/img/abstractdynamicvolumedata.h \
+    $$PWD/../src/img/basisfunctionvolume.h \
     $$PWD/../src/img/chunk2d.h \
     $$PWD/../src/img/compositevolume.h \
+    $$PWD/../src/img/lineardynamicvolume.h \
     $$PWD/../src/img/modulelayout.h \
     $$PWD/../src/img/projectiondata.h \
     $$PWD/../src/img/singleviewdata.h \
@@ -73,6 +79,8 @@ HEADERS += \
     $$PWD/../src/mat/pmatcomparator.h \
     $$PWD/../src/mat/projectionmatrix.h \
     $$PWD/../src/models/abstractdatamodel.h \
+    $$PWD/../src/models/abstractxrayspectrummodel.h \
+    $$PWD/../src/models/datamodeloperations.h \
     $$PWD/../src/models/detectorsaturationmodels.h \
     $$PWD/../src/models/intervaldataseries.h \
     $$PWD/../src/models/pointseriesbase.h \
@@ -90,17 +98,11 @@ HEADERS += \
     $$PWD/../src/projectors/abstractprojector.h \
     $$PWD/../src/projectors/arealfocalspotextension.h \
     $$PWD/../src/projectors/detectorsaturationextension.h \
-    $$PWD/../src/projectors/poissonnoiseextension.h \
-    $$PWD/../src/projectors/projectorextension.h \
-    $$PWD/../src/models/datamodeloperations.h \
-    $$PWD/../src/components/attenuationfilter.h \
-    $$PWD/../src/models/abstractxrayspectrummodel.h \
-    $$PWD/../src/acquisition/radiationencoder.h \
-    $$PWD/../src/projectors/spectraleffectsextension.h \
-    $$PWD/../src/projectors/projectionpipeline.h \
-    $$PWD/../src/img/abstractdynamicvolumedata.h \
     $$PWD/../src/projectors/dynamicprojectorextension.h \
-    $$PWD/../src/img/lineardynamicvolume.h
+    $$PWD/../src/projectors/poissonnoiseextension.h \
+    $$PWD/../src/projectors/projectionpipeline.h \
+    $$PWD/../src/projectors/projectorextension.h \
+    $$PWD/../src/projectors/spectraleffectsextension.h
 
 SOURCES += \
     $$PWD/../src/acquisition/acquisitionsetup.cpp \
@@ -110,9 +112,11 @@ SOURCES += \
     $$PWD/../src/acquisition/geometryencoder.cpp \
     $$PWD/../src/acquisition/preparationprotocols.cpp \
     $$PWD/../src/acquisition/preparesteps.cpp \
+    $$PWD/../src/acquisition/radiationencoder.cpp \
     $$PWD/../src/acquisition/simplectsystem.cpp \
     $$PWD/../src/acquisition/trajectories.cpp \
     $$PWD/../src/acquisition/viewgeometry.cpp \
+    $$PWD/../src/components/attenuationfilter.cpp \
     $$PWD/../src/components/carmgantry.cpp \
     $$PWD/../src/components/cylindricaldetector.cpp \
     $$PWD/../src/components/flatpaneldetector.cpp \
@@ -124,8 +128,10 @@ SOURCES += \
     $$PWD/../src/components/tubulargantry.cpp \
     $$PWD/../src/components/xraylaser.cpp \
     $$PWD/../src/components/xraytube.cpp \
+    $$PWD/../src/img/basisfunctionvolume.cpp \
     $$PWD/../src/img/chunk2d.tpp \
     $$PWD/../src/img/compositevolume.cpp \
+    $$PWD/../src/img/lineardynamicvolume.cpp \
     $$PWD/../src/img/projectiondata.cpp \
     $$PWD/../src/img/singleviewdata.cpp \
     $$PWD/../src/img/spectralvolumedata.cpp \
@@ -141,6 +147,9 @@ SOURCES += \
     $$PWD/../src/mat/matrix_algorithm.cpp \
     $$PWD/../src/mat/pmatcomparator.cpp \
     $$PWD/../src/mat/projectionmatrix.cpp \
+    $$PWD/../src/models/abstractdatamodel.cpp \
+    $$PWD/../src/models/abstractxrayspectrummodel.cpp \
+    $$PWD/../src/models/datamodeloperations.cpp \
     $$PWD/../src/models/detectorsaturationmodels.cpp \
     $$PWD/../src/models/intervaldataseries.cpp \
     $$PWD/../src/models/stepfunctionmodels.cpp \
@@ -153,17 +162,11 @@ SOURCES += \
     $$PWD/../src/processing/modelbasedvolumedecomposer.cpp \
     $$PWD/../src/projectors/arealfocalspotextension.cpp \
     $$PWD/../src/projectors/detectorsaturationextension.cpp \
+    $$PWD/../src/projectors/dynamicprojectorextension.cpp \
     $$PWD/../src/projectors/poissonnoiseextension.cpp \
-    $$PWD/../src/models/abstractdatamodel.cpp \
-    $$PWD/../src/models/datamodeloperations.cpp \
-    $$PWD/../src/components/attenuationfilter.cpp \
-    $$PWD/../src/models/abstractxrayspectrummodel.cpp \
-    $$PWD/../src/acquisition/radiationencoder.cpp \
-    $$PWD/../src/projectors/spectraleffectsextension.cpp \
     $$PWD/../src/projectors/projectionpipeline.cpp \
     $$PWD/../src/projectors/projectorextension.cpp \
-    $$PWD/../src/projectors/dynamicprojectorextension.cpp \
-    $$PWD/../src/img/lineardynamicvolume.cpp
+    $$PWD/../src/projectors/spectraleffectsextension.cpp
 
 # Qt-free headers and sources
 HEADERS += \
@@ -176,7 +179,7 @@ SOURCES += \
     $$PWD/../src/mat/matrix.tpp
 
 # create a file that contains the absolute path to database
-DATABASE_ROOT = $$PWD/../../database
+DATABASE_ROOT = $$clean_path($$PWD/../../database)
 QMAKE_SUBSTITUTES += indirect
 indirect.input = $$PWD/../.database.path.in
 indirect.output = $$DESTDIR/database.path

@@ -76,7 +76,7 @@ class SpectralEffectsExtension;
  *                                        database::attenuationModel(database::Composite::Water));
  *
  * // create a C-arm CT system and a short scan protocol with 10 views
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  * auto setup = AcquisitionSetup(system, 10);
  * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0));
  *
@@ -90,7 +90,7 @@ class SpectralEffectsExtension;
  * auto projections = pipe.project(volume);
  * \endcode
  */
-class StandardPipeline: public AbstractProjector
+class StandardPipeline : public AbstractProjector
 {
     CTL_TYPE_ID(201)
 
@@ -100,7 +100,7 @@ class StandardPipeline: public AbstractProjector
     class SettingsSpectralEffects;
     class SettingsRayCaster;
 
-public:    
+public:
     enum ApproximationPolicy
     {
         No_Approximation,
@@ -113,7 +113,7 @@ public:
 
     void configure(const AcquisitionSetup& setup) override;
     ProjectionData project(const VolumeData& volume) override;
-    ProjectionData projectComposite(const CompositeVolume &volume) override;
+    ProjectionData projectComposite(const CompositeVolume& volume) override;
     bool isLinear() const override;
     ProjectorNotifier* notifier() override;
 
@@ -143,8 +143,8 @@ private:
         SettingsAFS(const SettingsAFS&) = delete;
         SettingsAFS& operator=(const SettingsAFS&) = delete;
     private:
-        SettingsAFS(ArealFocalSpotExtension* ext) : _ext(ext) {}
-        ArealFocalSpotExtension* _ext;
+        SettingsAFS(ArealFocalSpotExtension& ext) : _ext(ext) {}
+        ArealFocalSpotExtension& _ext;
 
         friend class StandardPipeline;
     };
@@ -157,8 +157,8 @@ private:
         SettingsDetectorSaturation(const SettingsDetectorSaturation&) = delete;
         SettingsDetectorSaturation& operator=(const SettingsDetectorSaturation&) = delete;
     private:
-        SettingsDetectorSaturation(DetectorSaturationExtension* ext) : _ext(ext) {}
-        DetectorSaturationExtension* _ext;
+        SettingsDetectorSaturation(DetectorSaturationExtension& ext) : _ext(ext) {}
+        DetectorSaturationExtension& _ext;
 
         friend class StandardPipeline;
     };
@@ -173,8 +173,8 @@ private:
         SettingsPoissonNoise(const SettingsPoissonNoise&) = delete;
         SettingsPoissonNoise& operator=(const SettingsPoissonNoise&) = delete;
     private:
-        SettingsPoissonNoise(PoissonNoiseExtension* ext) : _ext(ext) {}
-        PoissonNoiseExtension* _ext;
+        SettingsPoissonNoise(PoissonNoiseExtension& ext) : _ext(ext) {}
+        PoissonNoiseExtension& _ext;
 
         friend class StandardPipeline;
     };
@@ -187,8 +187,8 @@ private:
         SettingsSpectralEffects(const SettingsSpectralEffects&) = delete;
         SettingsSpectralEffects& operator=(const SettingsSpectralEffects&) = delete;
     private:
-        SettingsSpectralEffects(SpectralEffectsExtension* ext) : _ext(ext) {}
-        SpectralEffectsExtension* _ext;
+        SettingsSpectralEffects(SpectralEffectsExtension& ext) : _ext(ext) {}
+        SpectralEffectsExtension& _ext;
 
         friend class StandardPipeline;
     };
@@ -199,13 +199,13 @@ private:
         void setInterpolation(bool enabled);
         void setRaysPerPixel(const QSize& sampling);
         void setRaySampling(float sampling);
-        void setVolumeUpSampling(uint upsamplingFactor);
+        void setVolumeUpSampling(uint upSamplingFactor);
 
         SettingsRayCaster(const SettingsRayCaster&) = delete;
         SettingsRayCaster& operator=(const SettingsRayCaster&) = delete;
     private:
-        SettingsRayCaster(OCL::RayCasterProjector* proj) : _proj(proj) {}
-        OCL::RayCasterProjector* _proj;
+        SettingsRayCaster(OCL::RayCasterProjector& proj) : _proj(proj) {}
+        OCL::RayCasterProjector& _proj;
 
         friend class StandardPipeline;
     };

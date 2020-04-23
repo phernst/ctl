@@ -26,7 +26,7 @@ namespace CTL {
  * \code
  * // define volume and acquisition setup (incl. system)
  * auto volume = VolumeData::cube(100, 1.0f, 0.02f);
- * auto system = SimpleCTsystem::fromCTsystem(CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)));
+ * auto system = SimpleCTSystem::fromCTSystem(CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT(DetectorBinning::Binning4x4)));
  *
  * // reduce default radiation output of the source component (-> make noise more prominent)
  * static_cast<XrayTube*>(system.source())->setMilliampereSeconds(0.001);
@@ -53,10 +53,7 @@ namespace CTL {
  * ProjectionData projections = extension->project(volume);    // (compute and) get the final (noisy) projections
  *
  * // visualization (optional, requires 'ctl_qtgui' submodule):
- *     // auto viewer = new ProjectionView();
- *     // viewer->resize(800, 600);
- *     // viewer->show();
- *     // viewer->setData(projections);
+ *     // gui::ProjectionViewer::plot(projections);
  * \endcode
  *
  * The difference between the projections with and without noise in the example above is shown here:

@@ -6,7 +6,7 @@
 
 namespace CTL {
 
-class SimpleCTsystem;
+class SimpleCTSystem;
 
 class GenericSource : public AbstractSource
 {
@@ -41,7 +41,7 @@ public:
 
     // static methods
     static QString defaultName();
-    static void setPhotonCountInSystem(SimpleCTsystem* system, double photonsPerPixel);
+    static void setPhotonCountInSystem(SimpleCTSystem* system, double photonsPerPixel);
 
 protected:
     EnergyRange _energyRange = { 0.0f, 0.0f }; //!< Energy range of the emitted radiation.

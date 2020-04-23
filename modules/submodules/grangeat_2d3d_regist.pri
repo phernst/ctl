@@ -5,6 +5,7 @@
 
 # declare module
 CONFIG += GRANGEAT_2D3D_REGIST_MODULE
+DEFINES += GRANGEAT_2D3D_REGIST_MODULE_AVAILABLE
 
 HEADERS += $$PWD/../src/app/registration/grangeatregistration2d3d.h
 

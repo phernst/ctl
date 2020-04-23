@@ -3,6 +3,9 @@
 
 #include <QGraphicsColorizeEffect>
 
+namespace CTL {
+namespace gui {
+
 WindowingWidget::WindowingWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::WindowingWidget)
@@ -15,6 +18,10 @@ WindowingWidget::WindowingWidget(QWidget *parent) :
     connect(ui->_SB_windowWidth, SIGNAL(valueChanged(double)), SLOT(widthChanged()));
 
     connect(ui->_PB_autoWindow, SIGNAL(clicked(bool)), SIGNAL(autoWindowingRequested()));
+    connect(ui->_PB_preset1, &QPushButton::clicked, this, &WindowingWidget::setPreset1);
+    connect(ui->_PB_preset2, &QPushButton::clicked, this, &WindowingWidget::setPreset2);
+
+    updatePresetButtonText();
 }
 
 WindowingWidget::~WindowingWidget()
@@ -38,125 +45,195 @@ QPair<double, double> WindowingWidget::windowCenterWidth() const
     return qMakePair(center, width);
 }
 
-void WindowingWidget::setWindowFromTo(const QPair<double, double> &window)
+void WindowingWidget::setWindowFromTo(const QPair<double, double>& window)
 {
-    ui->_SB_windowBottom->blockSignals(true);
-    ui->_SB_windowTop->blockSignals(true);
-    ui->_SB_windowBottom->setValue(window.first);
-    ui->_SB_windowTop->setValue(window.second);
-    ui->_SB_windowBottom->blockSignals(false);
-    ui->_SB_windowTop->blockSignals(false);
+    setWindowDataSilent(window.first, window.second);
+
+    emit windowingChanged();
+}
+
+void WindowingWidget::setWindowCenterWidth(const QPair<double, double>& window)
+{
+    setWindowDataSilent(window.second - window.first,
+                        window.first + 0.5 * (window.second - window.first));
+
+    emit windowingChanged();
+}
+
+void WindowingWidget::setPresets(QPair<QString, QPair<double, double>> preset1,
+                                 QPair<QString, QPair<double, double>> preset2)
+{
+    _preset1 = preset1;
+    _preset2 = preset2;
+
+    updatePresetButtonText();
+}
+
+void WindowingWidget::updatePresetButtonText()
+{
+    auto toolTipText = [] (const QPair<double, double>& window)
+    {
+        return QStringLiteral("(") + QString::number(window.first) + QStringLiteral(",")
+                + QString::number(window.second) + QStringLiteral(")");
+    };
+
+    ui->_PB_preset1->setText(_preset1.first);
+    ui->_PB_preset2->setText(_preset2.first);
+
+    ui->_PB_preset1->setToolTip(toolTipText(_preset1.second));
+    ui->_PB_preset2->setToolTip(toolTipText(_preset2.second));
+}
+
+void WindowingWidget::setWindowDataSilent(double from, double to)
+{
+    // block all signals (silent change)
+    blockSignalsTopBottom();
+    blockSignalsCenterWidth();
+
+    ui->_SB_windowBottom->setValue(from);
+    ui->_SB_windowTop->setValue(to);
+    ui->_SB_windowCenter->setValue(from + 0.5 * (to - from));
+    ui->_SB_windowWidth->setValue(to - from);
+
+    // restore all signals
+    unblockSignalsTopBottom();
+    unblockSignalsCenterWidth();
 
     checkFromValid();
     checkToValid();
-
-    updateCenterWidth();
 }
 
-void WindowingWidget::setWindowCenterWidth(const QPair<double, double> &window)
+void WindowingWidget::addInvalidEffect(QWidget *reciever)
+{
+    auto colorize = new QGraphicsColorizeEffect;
+    colorize->setColor(Qt::red);
+    reciever->setGraphicsEffect(colorize);
+}
+
+void WindowingWidget::removeInvalidEffects()
+{
+    ui->_SB_windowBottom->setGraphicsEffect(nullptr);
+    ui->_SB_windowTop->setGraphicsEffect(nullptr);
+}
+
+void WindowingWidget::blockSignalsTopBottom()
+{
+    ui->_SB_windowBottom->blockSignals(true);
+    ui->_SB_windowTop->blockSignals(true);
+}
+
+void WindowingWidget::blockSignalsCenterWidth()
 {
     ui->_SB_windowCenter->blockSignals(true);
     ui->_SB_windowWidth->blockSignals(true);
-    ui->_SB_windowCenter->setValue(window.first);
-    ui->_SB_windowWidth->setValue(window.second);
-    ui->_SB_windowCenter->blockSignals(false);
-    ui->_SB_windowWidth->blockSignals(false);
-
-    updateFromTo();
 }
 
-void WindowingWidget::updateFromTo()
+void WindowingWidget::unblockSignalsTopBottom()
+{
+    ui->_SB_windowBottom->blockSignals(false);
+    ui->_SB_windowTop->blockSignals(false);
+}
+
+void WindowingWidget::unblockSignalsCenterWidth()
+{
+    ui->_SB_windowCenter->blockSignals(false);
+    ui->_SB_windowWidth->blockSignals(false);
+}
+
+
+void WindowingWidget::updateFromToValues()
 {
     double center = ui->_SB_windowCenter->value();
     double width  = ui->_SB_windowWidth->value();
 
-    ui->_SB_windowBottom->blockSignals(true);
-    ui->_SB_windowTop->blockSignals(true);
+    blockSignalsTopBottom();
     ui->_SB_windowBottom->setValue(center - width/2.0);
     ui->_SB_windowTop->setValue(center + width/2.0);
-    ui->_SB_windowBottom->blockSignals(false);
-    ui->_SB_windowTop->blockSignals(false);
-
-    checkFromValid();
-    checkToValid();
-
-    emit windowingChanged();
+    unblockSignalsTopBottom();
 }
 
-void WindowingWidget::updateCenterWidth()
+void WindowingWidget::updateCenterWidthValues()
 {
     double bottom = ui->_SB_windowBottom->value();
-    double top = ui->_SB_windowTop->value();
+    double top    = ui->_SB_windowTop->value();
 
-    ui->_SB_windowCenter->blockSignals(true);
-    ui->_SB_windowWidth->blockSignals(true);
+    blockSignalsCenterWidth();
     ui->_SB_windowCenter->setValue((top+bottom)/2.0);
     ui->_SB_windowWidth->setValue(top-bottom);
-    ui->_SB_windowCenter->blockSignals(false);
-    ui->_SB_windowWidth->blockSignals(false);
-
-    if(ui->_SB_windowBottom->graphicsEffect() || ui->_SB_windowTop->graphicsEffect())
-        return;
-
-    emit windowingChanged();
+    unblockSignalsCenterWidth();
 }
 
 void WindowingWidget::fromChanged()
 {
-    checkFromValid();
+    updateCenterWidthValues();
 
-    updateCenterWidth();
+    if(checkFromValid())
+        emit windowingChanged();
+}
+
+void WindowingWidget::setPreset1()
+{
+    setWindowFromTo(_preset1.second);
+}
+
+void WindowingWidget::setPreset2()
+{
+    setWindowFromTo(_preset2.second);
 }
 
 void WindowingWidget::toChanged()
 {
-    checkToValid();
+    updateCenterWidthValues();
 
-    updateCenterWidth();
+    if(checkToValid())
+        emit windowingChanged();
 }
 
 void WindowingWidget::centerChanged()
 {
-    updateFromTo();
+    updateFromToValues();
+    emit windowingChanged();
 }
 
 void WindowingWidget::widthChanged()
 {
-    updateFromTo();
+    updateFromToValues();
+    emit windowingChanged();
 }
 
-void WindowingWidget::checkFromValid()
+bool WindowingWidget::checkFromValid()
 {
-    auto curFrom = ui->_SB_windowBottom->value();
-    auto curTo   = ui->_SB_windowTop->value();
+    const auto curFrom = ui->_SB_windowBottom->value();
+    const auto curTo   = ui->_SB_windowTop->value();
 
     if(curFrom > curTo)
     {
-        auto colorize = new QGraphicsColorizeEffect;
-        colorize->setColor(Qt::red);
-        ui->_SB_windowBottom->setGraphicsEffect(colorize);
+        addInvalidEffect(ui->_SB_windowBottom);
+
+        return false;
     }
     else
-    {
-        ui->_SB_windowBottom->setGraphicsEffect(nullptr);
-        ui->_SB_windowTop->setGraphicsEffect(nullptr);
-    }
+        removeInvalidEffects();
+
+    return true;
 }
 
-void WindowingWidget::checkToValid()
+bool WindowingWidget::checkToValid()
 {
-    auto curFrom = ui->_SB_windowBottom->value();
-    auto curTo   = ui->_SB_windowTop->value();
+    const auto curFrom = ui->_SB_windowBottom->value();
+    const auto curTo   = ui->_SB_windowTop->value();
 
     if(curTo < curFrom)
     {
-        auto colorize = new QGraphicsColorizeEffect;
-        colorize->setColor(Qt::red);
-        ui->_SB_windowTop->setGraphicsEffect(colorize);
+        addInvalidEffect(ui->_SB_windowTop);
+
+        return false;
     }
     else
-    {
-        ui->_SB_windowBottom->setGraphicsEffect(nullptr);
-        ui->_SB_windowTop->setGraphicsEffect(nullptr);
-    }
+        removeInvalidEffects();
+
+     return true;
+}
+
+}
 }

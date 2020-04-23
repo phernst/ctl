@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     }
 
     ProjectionMatrixTest pMat;
-    CTsystemTest ctSys;
+    CTSystemTest ctSys;
     DataTypeTest dataTest;
     GeometryTest geoTest;
     DenFileIOtest denFileTest;

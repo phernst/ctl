@@ -6,15 +6,15 @@
 namespace CTL {
 
 /*!
- * \fn SimpleCTsystem::SimpleCTsystem()
+ * \fn SimpleCTSystem::SimpleCTSystem()
  *
  * Default constructor. In protected domain and not intended for external use.
  */
 
 /*!
- * Constructs a SimpleCTsystem with the components \a detector, \a gantry and \a source.
+ * Constructs a SimpleCTSystem with the components \a detector, \a gantry and \a source.
  */
-SimpleCTsystem::SimpleCTsystem(const AbstractDetector& detector,
+SimpleCTSystem::SimpleCTSystem(const AbstractDetector& detector,
                                const AbstractGantry& gantry,
                                const AbstractSource& source)
 {
@@ -22,9 +22,9 @@ SimpleCTsystem::SimpleCTsystem(const AbstractDetector& detector,
 }
 
 /*!
- * Constructs a SimpleCTsystem with the components \a detector, \a gantry and \a source.
+ * Constructs a SimpleCTSystem with the components \a detector, \a gantry and \a source.
  */
-SimpleCTsystem::SimpleCTsystem(AbstractDetector&& detector,
+SimpleCTSystem::SimpleCTSystem(AbstractDetector&& detector,
                                AbstractGantry&& gantry,
                                AbstractSource&& source)
 {
@@ -32,39 +32,39 @@ SimpleCTsystem::SimpleCTsystem(AbstractDetector&& detector,
 }
 
 /*!
- * Constructs a SimpleCTsystem object as a copy of the CTsystem \a system.
+ * Constructs a SimpleCTSystem object as a copy of the CTSystem \a system.
  *
  * Note that this constructor does not check whether \a system can properly be "converted"
- * into a SimpleCTsystem. This is acceptable here, since it is protected  and is only called
- * from the public factory method fromCTsystem(), which already makes sure that the system is
+ * into a SimpleCTSystem. This is acceptable here, since it is protected  and is only called
+ * from the public factory method fromCTSystem(), which already makes sure that the system is
  * simple (and thus, can be converted).
  */
-SimpleCTsystem::SimpleCTsystem(const CTsystem& system)
-    : CTsystem(system)
+SimpleCTSystem::SimpleCTSystem(const CTSystem& system)
+    : CTSystem(system)
 {
 }
 
 /*!
- * Move-constructs a SimpleCTsystem object from CTsystem \a system.
+ * Move-constructs a SimpleCTSystem object from CTSystem \a system.
  *
  * Note that this constructor does not check whether \a system can properly be "converted"
- * into a SimpleCTsystem. This is acceptable here, since it is protected and is only called
- * from the public factory method fromCTsystem(), which already makes sure that the system is
+ * into a SimpleCTSystem. This is acceptable here, since it is protected and is only called
+ * from the public factory method fromCTSystem(), which already makes sure that the system is
  * simple (and thus, can be converted).
  */
-SimpleCTsystem::SimpleCTsystem(CTsystem&& system)
-    : CTsystem(std::move(system))
+SimpleCTSystem::SimpleCTSystem(CTSystem&& system)
+    : CTSystem(std::move(system))
 {
 }
 
 /*!
- * Constructs and returns a SimpleCTsystem object from the CTsystem \a system. Returns an empty
+ * Constructs and returns a SimpleCTSystem object from the CTSystem \a system. Returns an empty
  * object if \a system is not simple (isEmpty() of the returned object will return true).
- * If \a ok is nonnull \a *ok will be set to true if the conversion to a SimpleCTsystem was
+ * If \a ok is nonnull \a *ok will be set to true if the conversion to a SimpleCTSystem was
  * successful, i.e. \a system is simple, otherwise \a *ok will be set to false.
  * If \a ok is a nullptr and the \a system is not simple, an exception will be thrown.
  */
-SimpleCTsystem SimpleCTsystem::fromCTsystem(const CTsystem& system, bool* ok)
+SimpleCTSystem SimpleCTSystem::fromCTSystem(const CTSystem& system, bool* ok)
 {
     // check if 'system' has a simple configuration (i.e. only one source, detector, and gantry)
     if(system.isSimple())
@@ -78,18 +78,18 @@ SimpleCTsystem SimpleCTsystem::fromCTsystem(const CTsystem& system, bool* ok)
         if(ok)
             *ok = false;
         else
-            throw std::runtime_error("SimpleCTsystem::fromCTsystem(const CTsystem&): "
+            throw std::runtime_error("SimpleCTSystem::fromCTSystem(const CTSystem&): "
                                      "System is not simple.");
         return { };
     }
 }
 
 /*!
- * Overload of SimpleCTsystem::fromCTsystem(const CTsystem& system, bool* ok) that binds to a
+ * Overload of SimpleCTSystem::fromCTSystem(const CTSystem& system, bool* ok) that binds to a
  * \a system passed as a rvalue.
  * An exception will be thrown if \a system is not simple and \a ok is a nullptr.
  */
-SimpleCTsystem SimpleCTsystem::fromCTsystem(CTsystem&& system, bool* ok)
+SimpleCTSystem SimpleCTSystem::fromCTSystem(CTSystem&& system, bool* ok)
 {
     // check if 'system' has a simple configuration (i.e. only one source, detector, and gantry)
     if(system.isSimple())
@@ -103,16 +103,32 @@ SimpleCTsystem SimpleCTsystem::fromCTsystem(CTsystem&& system, bool* ok)
         if(ok)
             *ok = false;
         else
-            throw std::runtime_error("SimpleCTsystem::fromCTsystem(CTsystem&&): "
+            throw std::runtime_error("SimpleCTSystem::fromCTSystem(CTSystem&&): "
                                      "System is not simple.");
         return { };
     }
 }
 
 /*!
+ * Old spelling of fromCTSystem(const CTSystem& system, bool* ok).
+ */
+SimpleCTSystem SimpleCTSystem::fromCTsystem(const CTSystem& system, bool* ok)
+{
+    return fromCTSystem(system, ok);
+}
+
+/*!
+ * Old spelling of fromCTSystem(CTSystem&& system, bool* ok).
+ */
+SimpleCTSystem SimpleCTSystem::fromCTsystem(CTSystem&& system, bool* ok)
+{
+    return fromCTSystem(std::move(system), ok);
+}
+
+/*!
  * Returns a pointer to the detector component in the system. This does not transfer ownership.
  */
-AbstractDetector* SimpleCTsystem::detector() const
+AbstractDetector* SimpleCTSystem::detector() const
 {
     auto dtctrs = detectors();
     Q_ASSERT(!dtctrs.empty());
@@ -122,7 +138,7 @@ AbstractDetector* SimpleCTsystem::detector() const
 /*!
  * Returns a pointer to the gantry component in the system. This does not transfer ownership.
  */
-AbstractGantry* SimpleCTsystem::gantry() const
+AbstractGantry* SimpleCTSystem::gantry() const
 {
     auto gntrs = gantries();
     Q_ASSERT(!gntrs.empty());
@@ -132,7 +148,7 @@ AbstractGantry* SimpleCTsystem::gantry() const
 /*!
  * Returns a pointer to the source component in the system. This does not transfer ownership.
  */
-AbstractSource* SimpleCTsystem::source() const
+AbstractSource* SimpleCTSystem::source() const
 {
     auto srcs = sources();
     Q_ASSERT(!srcs.empty());
@@ -145,7 +161,7 @@ AbstractSource* SimpleCTsystem::source() const
  *
  * Does nothing if a nullptr is passed.
  */
-void SimpleCTsystem::replaceDetector(AbstractDetector* newDetector)
+void SimpleCTSystem::replaceDetector(AbstractDetector* newDetector)
 {
     Q_ASSERT(newDetector);
     if(newDetector)
@@ -161,7 +177,7 @@ void SimpleCTsystem::replaceDetector(AbstractDetector* newDetector)
  *
  * Does nothing if a nullptr is passed.
  */
-void SimpleCTsystem::replaceDetector(std::unique_ptr<AbstractDetector> newDetector)
+void SimpleCTSystem::replaceDetector(std::unique_ptr<AbstractDetector> newDetector)
 {
     replaceDetector(newDetector.release());
 }
@@ -172,7 +188,7 @@ void SimpleCTsystem::replaceDetector(std::unique_ptr<AbstractDetector> newDetect
  *
  * Does nothing if a nullptr is passed.
  */
-void SimpleCTsystem::replaceGantry(AbstractGantry* newGantry)
+void SimpleCTSystem::replaceGantry(AbstractGantry* newGantry)
 {
     Q_ASSERT(newGantry);
     if(newGantry)
@@ -188,7 +204,7 @@ void SimpleCTsystem::replaceGantry(AbstractGantry* newGantry)
  *
  * Does nothing if a nullptr is passed.
  */
-void SimpleCTsystem::replaceGantry(std::unique_ptr<AbstractGantry> newGantry)
+void SimpleCTSystem::replaceGantry(std::unique_ptr<AbstractGantry> newGantry)
 {
     replaceGantry(newGantry.release());
 }
@@ -199,7 +215,7 @@ void SimpleCTsystem::replaceGantry(std::unique_ptr<AbstractGantry> newGantry)
  *
  * Does nothing if a nullptr is passed.
  */
-void SimpleCTsystem::replaceSource(AbstractSource* newSource)
+void SimpleCTSystem::replaceSource(AbstractSource* newSource)
 {
     Q_ASSERT(newSource);
     if(newSource)
@@ -215,7 +231,7 @@ void SimpleCTsystem::replaceSource(AbstractSource* newSource)
  *
  * Does nothing if a nullptr is passed.
  */
-void SimpleCTsystem::replaceSource(std::unique_ptr<AbstractSource> newSource)
+void SimpleCTSystem::replaceSource(std::unique_ptr<AbstractSource> newSource)
 {
     replaceSource(newSource.release());
 }
@@ -224,12 +240,12 @@ void SimpleCTsystem::replaceSource(std::unique_ptr<AbstractSource> newSource)
  * Adds the AbstractBeamModifier \a modifier to the system. This instance takes ownership of
  * \a modifier.
  */
-void SimpleCTsystem::addBeamModifier(AbstractBeamModifier* modifier) { addComponent(modifier); }
+void SimpleCTSystem::addBeamModifier(AbstractBeamModifier* modifier) { addComponent(modifier); }
 
 /*!
  * Adds the AbstractBeamModifier \a modifier to the system.
  */
-void SimpleCTsystem::addBeamModifier(std::unique_ptr<AbstractBeamModifier> modifier)
+void SimpleCTSystem::addBeamModifier(std::unique_ptr<AbstractBeamModifier> modifier)
 {
     addComponent(std::move(modifier));
 }
@@ -238,7 +254,7 @@ void SimpleCTsystem::addBeamModifier(std::unique_ptr<AbstractBeamModifier> modif
  * Returns the number of photons that incide on a detector pixel averaged over all detector
  * modules.
  */
-float SimpleCTsystem::photonsPerPixelMean() const
+float SimpleCTSystem::photonsPerPixelMean() const
 {
     return RadiationEncoder(this).photonsPerPixelMean();
 }
@@ -246,7 +262,7 @@ float SimpleCTsystem::photonsPerPixelMean() const
 /*!
  * Returns the average number of photons that incide on a detector pixel in module \a module.
  */
-float SimpleCTsystem::photonsPerPixel(uint module) const
+float SimpleCTSystem::photonsPerPixel(uint module) const
 {
     return RadiationEncoder(this).photonsPerPixel(module);
 }
@@ -254,15 +270,15 @@ float SimpleCTsystem::photonsPerPixel(uint module) const
 /*!
  * Returns the average numbers of photons that incide on a detector pixel for all modules.
  */
-std::vector<float> SimpleCTsystem::photonsPerPixel() const
+std::vector<float> SimpleCTSystem::photonsPerPixel() const
 {
     return RadiationEncoder(this).photonsPerPixel();
 }
 
-// use documentation of CTsystem::clone()
-CTsystem* SimpleCTsystem::clone() const & { return new SimpleCTsystem(*this); }
+// use documentation of CTSystem::clone()
+CTSystem* SimpleCTSystem::clone() const & { return new SimpleCTSystem(*this); }
 
-// use documentation of CTsystem::clone()
-CTsystem* SimpleCTsystem::clone() && { return new SimpleCTsystem(std::move(*this)); }
+// use documentation of CTSystem::clone()
+CTSystem* SimpleCTSystem::clone() && { return new SimpleCTSystem(std::move(*this)); }
 
 } // namespace CTL

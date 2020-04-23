@@ -89,7 +89,8 @@ class TASMIPSpectrumModel : public FixedXraySpectrumModel
     public: AbstractDataModel* clone() const override;
 
 public:
-    TASMIPSpectrumModel() = default;
+    TASMIPSpectrumModel();
+    TASMIPSpectrumModel(float tubeVoltage);
 
     void setParameter(const QVariant& parameter) override;
 

@@ -60,6 +60,10 @@ project.
     ```
     If you are on another platform, note that a Qt3D version is needed that 
     requires a Qt version >= 5.9.
+3. QtCharts (optional, for [chart-based widgets](https://gitlab.com/tpfeiffe/ctl/blob/dev_v0.3.2/modules/submodules/gui_widgets_charts.pri))
+    ```console
+    sudo apt install libqt5charts5-dev
+    ```
 
 Install OpenCL 1.1/1.2
 ----------------------
@@ -191,10 +195,8 @@ projector extensions can "decorate" the used forward projector in order to
 include further geometric/physical/measuring effects.
 
 ```cpp
-#include "acquisition/systemblueprints.h"
-#include "acquisition/trajectories.h"
-#include "io/nrrd/nrrdfileio.h"
-#include "projectors/raycasterprojector.h"
+#include "ctl.h"
+#include "ctl_ocl.h"
 #include <QCoreApplication>
 #include <iostream>
 
@@ -212,13 +214,13 @@ int main(int argc, char* argv[])
         auto volume = io.readVolume<float>("path/to/volume.nrrd");
 
         // use of a predefined system from "acquisition/systemblueprints.h"
-        auto system = CTL::CTsystemBuilder::createFromBlueprint(CTL::blueprints::GenericCarmCT());
+        auto system = CTL::CTSystemBuilder::createFromBlueprint(CTL::blueprints::GenericCarmCT());
 
         // create an acquisition setup
         uint nbViews = 100;
         CTL::AcquisitionSetup myCarmSetup(system, nbViews);
         // add a predefined trajectory to the setup from "acquisition/trajectories.h"
-        double angleSpan = 200.0_deg; // floating-point literal _deg in "mat/mat.h" converts to rad
+        double angleSpan = 200.0_deg; // floating-point literal _deg in "mat/deg.h" converts to rad
         double sourceToIsocenter = 750.0; // mm is the standard unit for length dimensions
         myCarmSetup.applyPreparationProtocol(CTL::protocols::WobbleTrajectory(angleSpan,
                                                                               sourceToIsocenter));
@@ -226,9 +228,8 @@ int main(int argc, char* argv[])
             return -1;
 
         // configure a projector and project volume
-        CTL::OCL::RayCasterProjector::Config rcConfig;  // config with standard settings
-        CTL::OCL::RayCasterProjector myProjector;       // the projector
-        myProjector.configure(myCarmSetup, rcConfig);   // configure projector
+        CTL::OCL::RayCasterProjector myProjector;       // the projector (uses its default settings)
+        myProjector.configure(myCarmSetup);             // configure projector
         auto projections = myProjector.project(volume); // project
 
         // save projections

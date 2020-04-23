@@ -1,4 +1,5 @@
 #include "projectorextension.h"
+#include <QDebug>
 
 namespace CTL {
 
@@ -31,6 +32,18 @@ ProjectionData ProjectorExtension::MetaProjector::project() const
                          : _projector->project(*_simpleVolume);
 }
 
+/*!
+ * This protected virtual method can be overridden in a subclass in order to implement a custom
+ * ProjectorExtension. An implementation of extendedProject is convenient, because an
+ * implementation of the two functions project and projectComposite can be avoided. However, this
+ * strategy enables only `ProjectorExtension`s that perform post-processing of the
+ * ProjectionData from the nested projector and/or a modification of the AcquisitionSetup (by
+ * calling `ProjectorExtension::configure`), but no change of the VolumeData.
+ *
+ * You can simply obtain the ProjectionData from the \a nestedProjector via the call
+ * `nestedProjector.project()`, no matter if the client called `project` or `projectComposite`.
+ * Subsequent processing can be implemented before the data will be returned.
+ */
 ProjectionData ProjectorExtension::extendedProject(const MetaProjector& nestedProjector)
 {
     qDebug() << "called metaProject";
@@ -277,4 +290,4 @@ ProjectorExtension*& pipe(ProjectorExtension*& lhs, ProjectorExtension* rhs)
     return lhs;
 }
 
-}
+} // namespace CTL

@@ -8,8 +8,10 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class ExtensionChainWidget; }
 QT_END_NAMESPACE
 
-class ExtensionConfigWidget;
 class QListWidgetItem;
+
+namespace CTL {
+namespace gui {
 
 class ExtensionChainWidget : public QWidget
 {
@@ -25,12 +27,14 @@ public:
         PoissonNoiseExtension,
         SpectralEffectsExtension,
         DetectorSaturationExtension,
+        DynamicProjectorExtension,
         Count
     };
 
     enum class PhysicalCompatibility
     {
         False,  //!< unphysical
+        Undef,  //!< undefined, can depend on context
         Approx, //!< physical approximation
         Ineff,  //!< physically correct but inefficient to compute
         True    //!< physically correct
@@ -64,5 +68,8 @@ private:
 
     void initExtensionList();
 };
+
+} // namespace gui
+} // namespace CTL
 
 #endif // CTL_EXTENSIONCHAINWIDGET_H

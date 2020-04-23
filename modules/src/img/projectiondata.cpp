@@ -633,6 +633,9 @@ SingleViewData::Dimensions ProjectionData::viewDimensions() const
     return _viewDim;
 }
 
+/*!
+ * Helper function for running tasks in parallel over views.
+ */
 template<class Function>
 void ProjectionData::parallelExecution(const Function& f) const
 {

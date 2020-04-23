@@ -41,7 +41,7 @@ public:
     void setPixelPerModule(const QSize& value);
     void setPixelDimensions(const QSizeF& value);
 
-    static SimpleCTsystem decodeSingleViewGeometry(const SingleViewGeometry& singleViewGeometry,
+    static SimpleCTSystem decodeSingleViewGeometry(const SingleViewGeometry& singleViewGeometry,
                                                    const QSize& pixelPerModule,
                                                    PhysicalDimension physicalDimension = PixelWidth,
                                                    double mm = 1.0);

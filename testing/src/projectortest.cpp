@@ -47,7 +47,7 @@ void ProjectorTest::testSpectralExtension()
 
     //tube->setSpectrumModel(new HeuristicCubicSpectrumModel());
 
-    CTsystem system;
+    CTSystem system;
     system.addComponent(std::move(flatPanel));
     system.addComponent(std::move(tube));
     system.addComponent(std::move(tubeGantry));
@@ -62,7 +62,7 @@ void ProjectorTest::testSpectralExtension()
     compVol.addSubVolume(volume2);
 
     auto photonsPerPixel = 100000.0;
-    auto simpleSys = SimpleCTsystem::fromCTsystem(system);
+    auto simpleSys = SimpleCTSystem::fromCTSystem(system);
     auto fluxAdjustFactor = photonsPerPixel / simpleSys.photonsPerPixelMean();
 
     AcquisitionSetup setup(simpleSys);
@@ -150,7 +150,7 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
                                       double projAngle,
                                       uint nbRepetitions) const
 {
-    CTsystem theSystem;
+    CTSystem theSystem;
     auto detector = new FlatPanelDetector(QSize(50, 50), QSizeF(2.0, 2.0), "Flat detector");
     auto gantry = new CarmGantry(1200.0, "Gantry");
     auto source = new XrayLaser(75.0, 1.0, "my tube");
@@ -159,7 +159,7 @@ void ProjectorTest::poissonSimulation(double meanPhotons,
     source->setFocalSpotSize(QSizeF(5.0, 5.0));
     theSystem << detector << gantry << source;
 
-    auto calibPower = meanPhotons / SimpleCTsystem::fromCTsystem(theSystem).photonsPerPixelMean();
+    auto calibPower = meanPhotons / SimpleCTSystem::fromCTSystem(theSystem).photonsPerPixelMean();
     source->setRadiationOutput(calibPower);
 
     AcquisitionSetup setup(theSystem);

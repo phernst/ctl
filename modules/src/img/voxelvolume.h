@@ -46,6 +46,8 @@ public:
 
         bool operator==(const VoxelSize& other) const;
         bool operator!=(const VoxelSize& other) const;
+
+        std::string info() const;
     };
     struct Offset
     {
@@ -150,6 +152,9 @@ protected:
 
 private:
     bool hasEqualSizeAs(const std::vector<T>& other) const;
+
+    template <class Function>
+    void parallelExecution(const Function& f) const;
 };
 
 /*!

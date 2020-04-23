@@ -2,7 +2,8 @@
 #include "processing/consistency.h"
 #include <QDebug>
 
-using namespace CTL;
+namespace CTL {
+namespace NLOPT {
 
 namespace {
 
@@ -78,7 +79,6 @@ void GrangeatRegistration2D3D::setSubSamplingLevel(float subSamplingLevel)
 {
     _subSamplingLevel = subSamplingLevel;
 }
-
 
 namespace {
 
@@ -169,3 +169,5 @@ void generateMsg(nlopt::result errCode)
 }
 
 } // unnamed namespace
+} // namespace NLOPT
+} // namespace CTL

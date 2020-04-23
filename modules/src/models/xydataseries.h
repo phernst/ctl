@@ -19,13 +19,22 @@ public:
     // factory methods
     static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel,
                                          const QVector<float>& samplingPoints);
+    static XYDataSeries sampledFromModel(std::shared_ptr<AbstractDataModel> dataModel,
+                                         const QVector<float>& samplingPoints);
     static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel,
+                                         const std::vector<float>& samplingPoints);
+    static XYDataSeries sampledFromModel(std::shared_ptr<AbstractDataModel> dataModel,
                                          const std::vector<float>& samplingPoints);
     static XYDataSeries sampledFromModel(const AbstractDataModel& dataModel,
                                          float from,
                                          float to,
                                          uint nbSamples,
-                                         Sampling samplingPattern);
+                                         Sampling samplingPattern = Linear);
+    static XYDataSeries sampledFromModel(std::shared_ptr<AbstractDataModel> dataModel,
+                                         float from,
+                                         float to,
+                                         uint nbSamples,
+                                         Sampling samplingPattern = Linear);
 
     // setter methods
     void append(const QPointF& sample);

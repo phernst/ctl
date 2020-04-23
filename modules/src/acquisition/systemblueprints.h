@@ -3,7 +3,7 @@
 
 #include "components/allcomponents.h"
 #include "acquisition/ctsystembuilder.h"
-#include "mat/mat.h"
+#include "mat/deg.h"
 
 /*
  * NOTE: This is header only.
@@ -15,7 +15,7 @@ enum class DetectorBinning { Binning1x1, Binning2x2, Binning4x4 };
 
 namespace blueprints {
 
-class GenericTubularCT : public AbstractCTsystemBlueprint
+class GenericTubularCT : public AbstractCTSystemBlueprint
 {
 public:
     AbstractDetector* detector() const override
@@ -38,7 +38,7 @@ public:
     QString systemName() const override { return QStringLiteral("Tubular CT system"); }
 };
 
-class GenericCarmCT : public AbstractCTsystemBlueprint
+class GenericCarmCT : public AbstractCTSystemBlueprint
 {
 public:
     GenericCarmCT(DetectorBinning binning = DetectorBinning::Binning2x2)
@@ -91,6 +91,32 @@ inline AbstractDetector* GenericCarmCT::detector() const
 }
 
 } // namespace blueprints
+
+template <typename CTSystemBlueprint, typename... BlueprintCtorArgs>
+std::unique_ptr<CTSystem> makeCTSystem(BlueprintCtorArgs&&... args)
+{
+    std::unique_ptr<CTSystem> ret{ CTSystemBuilder::createFromBlueprint(
+                                       CTSystemBlueprint{
+                                           std::forward<BlueprintCtorArgs>(args)... }).clone() };
+    return ret;
+}
+
+template <typename CTSystemBlueprint, typename... BlueprintCtorArgs>
+std::unique_ptr<SimpleCTSystem> makeSimpleCTSystem(BlueprintCtorArgs&&... args)
+{
+    std::unique_ptr<SimpleCTSystem> ret{ nullptr };
+    bool canConvert;
+    auto simpleSystem
+        = SimpleCTSystem::fromCTSystem(CTSystemBuilder::createFromBlueprint(CTSystemBlueprint{
+                                           std::forward<BlueprintCtorArgs>(args)... }),
+                                       &canConvert);
+    if(!canConvert)
+        return ret;
+
+    ret.reset(static_cast<SimpleCTSystem*>(std::move(simpleSystem).clone()));
+
+    return ret;
+}
 
 } // namespace CTL
 

@@ -20,7 +20,7 @@ namespace CTL {
  * removed with removeExtension(). The actual projector to be used can be set using setProjector()
  * or directly in the constructor.
  * All methods take ownership of the objects passed to them and destroy any previous object, in case
- * the replace or remove it. To take extensions out of the pipeline without destroying the object,
+ * they replace or remove it. To take extensions out of the pipeline without destroying the object,
  * use releaseExtension() or takeExtension().
  *
  * All manipulations on the pipeline are executed immediately. That means each call to either of the
@@ -48,7 +48,7 @@ namespace CTL {
  *                                        database::attenuationModel(database::Composite::Bone_Cortical));
  *
  * // create a C-arm CT system and a short scan protocol with 10 views
- * auto system = CTsystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
  * auto setup = AcquisitionSetup(system, 10);
  * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(750.0));
  *
@@ -93,6 +93,7 @@ public:
     ProjectorNotifier* notifier() override;
 
     ProjectionPipeline(AbstractProjector* projector = nullptr);
+    ProjectionPipeline(ProjectorPtr projector);
 
     void appendExtension(ExtensionPtr extension);
     void appendExtension(ProjectorExtension* extension);

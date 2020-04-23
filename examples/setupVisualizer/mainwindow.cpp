@@ -1,14 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "acquisition/acquisitionsetup.h"
+#include "acquisition/geometrydecoder.h"
+#include "acquisition/trajectories.h"
 #include "components/carmgantry.h"
 #include "components/cylindricaldetector.h"
 #include "components/flatpaneldetector.h"
 #include "components/tubulargantry.h"
 #include "components/xraylaser.h"
-#include "acquisition/acquisitionsetup.h"
-#include "acquisition/geometrydecoder.h"
-#include "acquisition/trajectories.h"
+#include "gui/widgets/acquisitionsetupview.h"
 #include "img/voxelvolume.h"
 #include "io/den/denfileio.h"
 #include "mat/mat.h"
@@ -26,11 +27,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui->setupUi(this);
 
     setWindowTitle("Visualizer");
-    _avWid = new AcquisitionVisualizerWidget();
+    _avWid = ui->widget;
 
     constructDefaultComponents();
 
-    ui->gridLayout_2->addWidget(_avWid, 0, 1, -1, -1);
     _avWid->setFocus();
 }
 
@@ -61,7 +61,7 @@ void MainWindow::on__PB_circTraj_clicked()
     auto nbProj = ui->_SB_nbProj->value();
 
     // set-up system
-    CTL::CTsystem mySystem;
+    CTL::CTSystem mySystem;
     auto gantryCpy = _carmGantry->clone();
     static_cast<CTL::CarmGantry*>(gantryCpy)->setCarmSpan(srcToDet);
 
@@ -73,7 +73,7 @@ void MainWindow::on__PB_circTraj_clicked()
     else
         mySystem.addComponent(_curvedDetector->clone());
 
-    auto carmSys = CTL::SimpleCTsystem::fromCTsystem(mySystem);
+    auto carmSys = CTL::SimpleCTSystem::fromCTSystem(mySystem);
 
     // create acquisition
     CTL::AcquisitionSetup acqProt(carmSys);
@@ -95,7 +95,7 @@ void MainWindow::on__PB_helicalTraj_clicked()
     auto angleIncr = ui->_SB_nbRotations->value() * 360.0_deg / nbProj;
 
     // set-up system
-    CTL::CTsystem mySystem;
+    CTL::CTSystem mySystem;
     auto gantry = new CTL::TubularGantry(srcToDet, srcToIso, "Gantry");
 
     mySystem.addComponent(_source->clone());
@@ -106,7 +106,7 @@ void MainWindow::on__PB_helicalTraj_clicked()
     else
         mySystem.addComponent(_curvedDetector->clone());
 
-    auto tubeSys = CTL::SimpleCTsystem::fromCTsystem(mySystem);
+    auto tubeSys = CTL::SimpleCTSystem::fromCTSystem(mySystem);
 
     // create acquisition
     CTL::AcquisitionSetup acqProt(tubeSys);
@@ -129,7 +129,7 @@ void MainWindow::on__PB_wobbleTraj_clicked()
     auto wobbleAmpl = ui->_SB_wobbleAmpl->value() * PI / 180.0;
 
     // set-up system
-    CTL::CTsystem mySystem;
+    CTL::CTSystem mySystem;
     auto gantryCpy = _carmGantry->clone();
     static_cast<CTL::CarmGantry*>(gantryCpy)->setCarmSpan(srcToDet);
 
@@ -141,7 +141,7 @@ void MainWindow::on__PB_wobbleTraj_clicked()
     else
         mySystem.addComponent(_curvedDetector->clone());
 
-    auto carmSys = CTL::SimpleCTsystem::fromCTsystem(mySystem);
+    auto carmSys = CTL::SimpleCTSystem::fromCTSystem(mySystem);
 
     // create acquisition
     CTL::AcquisitionSetup acqProt(carmSys);

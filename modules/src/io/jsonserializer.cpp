@@ -49,9 +49,9 @@ std::unique_ptr<AbstractProjector> JsonSerializer::deserializeProjector(const QS
                 SerializationHelper::parseProjector(variantFromJsonFile(fileName)));
 }
 
-std::unique_ptr<CTsystem> JsonSerializer::deserializeSystem(const QString& fileName) const
+std::unique_ptr<CTSystem> JsonSerializer::deserializeSystem(const QString& fileName) const
 {
-    std::unique_ptr<CTsystem> ret(new CTsystem);
+    std::unique_ptr<CTSystem> ret(new CTSystem);
 
     auto variant = variantFromJsonFile(fileName);
     if(!variant.isValid())

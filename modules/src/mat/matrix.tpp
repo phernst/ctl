@@ -785,9 +785,7 @@ Matrix<Rows, Cols> Matrix<Rows, Cols>::operator+(const Matrix<Rows, Cols>& rhs) 
     Matrix<Rows, Cols> ret;
 
     std::transform(this->constBegin(), this->constEnd(), rhs.constBegin(), ret.begin(),
-                   [](double leftVal, double rightVal) {
-        return leftVal + rightVal;
-    });
+                   std::plus<double>());
 
     return ret;
 }
@@ -798,9 +796,7 @@ Matrix<Rows, Cols> Matrix<Rows, Cols>::operator-(const Matrix<Rows, Cols>& rhs) 
     Matrix<Rows, Cols> ret;
 
     std::transform(this->constBegin(), this->constEnd(), rhs.constBegin(), ret.begin(),
-                   [](double leftVal, double rightVal) {
-        return leftVal - rightVal;
-    });
+                   std::minus<double>());
 
     return ret;
 }

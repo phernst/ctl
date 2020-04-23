@@ -4,24 +4,24 @@
 namespace CTL {
 
 /*!
- * \fn CTsystem::CTsystem(CTsystem&& other)
+ * \fn CTSystem::CTSystem(CTSystem&& other)
  * Default move constructor.
  */
 
 /*!
- * \fn CTsystem& CTsystem::operator=(CTsystem&& other) =
+ * \fn CTSystem& CTSystem::operator=(CTSystem&& other) =
  * Default move assignment operator.
  */
 
 /*!
- * \fn CTsystem::~CTsystem()
+ * \fn CTSystem::~CTSystem()
  * Default destructor.
  */
 
 /*!
- * Constructs a CTsystem object named \a name.
+ * Constructs a CTSystem object named \a name.
  */
-CTsystem::CTsystem(QString name)
+CTSystem::CTSystem(QString name)
     : _name(std::move(name))
 {
 }
@@ -29,7 +29,7 @@ CTsystem::CTsystem(QString name)
 /*!
  * Constructs a copy of \a other.
  */
-CTsystem::CTsystem(const CTsystem& other)
+CTSystem::CTSystem(const CTSystem& other)
     : SerializationInterface(other)
     , _name(other.name())
 {
@@ -41,7 +41,7 @@ CTsystem::CTsystem(const CTsystem& other)
 /*!
  * Assigns the content of \a other to this system and returns a reference to this instance.
  */
-CTsystem& CTsystem::operator=(const CTsystem& other)
+CTSystem& CTSystem::operator=(const CTSystem& other)
 {
     if(this != &other)
     {
@@ -57,7 +57,7 @@ CTsystem& CTsystem::operator=(const CTsystem& other)
 /*!
  * Returns a string that contains full information about all components in the system.
  */
-QString CTsystem::info() const
+QString CTSystem::info() const
 {
     QString ret("CT system: ");
     ret.append(_name + " {\n");
@@ -75,7 +75,7 @@ QString CTsystem::info() const
  *
  * \sa isValid(), is Simple().
  */
-QString CTsystem::overview() const
+QString CTSystem::overview() const
 {
     QString ret("CT system: ");
     ret += _name
@@ -94,7 +94,7 @@ QString CTsystem::overview() const
 /*!
  * Returns true if the number of compontents is zero, otherwise it returns false.
  */
-bool CTsystem::isEmpty() const
+bool CTSystem::isEmpty() const
 {
     return this->nbComponents() == 0;
 }
@@ -108,7 +108,7 @@ bool CTsystem::isEmpty() const
  *
  * The system may have an arbitrary number of AbstractBeamModifier components and still be valid.
  */
-bool CTsystem::isValid() const
+bool CTSystem::isValid() const
 {
     bool hasDetector = !detectors().empty();
     bool hasGantry = !gantries().empty();
@@ -126,7 +126,7 @@ bool CTsystem::isValid() const
  *
  * The system may have an arbitrary number of AbstractBeamModifier components ans still be simple.
  */
-bool CTsystem::isSimple() const
+bool CTSystem::isSimple() const
 {
     return (detectors().size() == 1) && (gantries().size() == 1) && (sources().size() == 1);
 }
@@ -134,7 +134,7 @@ bool CTsystem::isSimple() const
 /*!
  * Returns the default name for the component: "Generic CT-system".
  */
-QString CTsystem::defaultName()
+QString CTSystem::defaultName()
 {
     static const QString defName(QStringLiteral("Generic CT-system"));
     static uint counter = 0;
@@ -144,7 +144,7 @@ QString CTsystem::defaultName()
 /*!
  * Returns a list of all components of elementary type AbstractDetector in the system.
  */
-std::vector<AbstractDetector*> CTsystem::detectors() const
+std::vector<AbstractDetector*> CTSystem::detectors() const
 {
     std::vector<AbstractDetector*> ret;
 
@@ -158,7 +158,7 @@ std::vector<AbstractDetector*> CTsystem::detectors() const
 /*!
  * Returns a list of all components of elementary type AbstractGantry in the system.
  */
-std::vector<AbstractGantry*> CTsystem::gantries() const
+std::vector<AbstractGantry*> CTSystem::gantries() const
 {
     std::vector<AbstractGantry*> ret;
 
@@ -172,7 +172,7 @@ std::vector<AbstractGantry*> CTsystem::gantries() const
 /*!
  * Returns a list of all components of elementary type AbstractSource in the system.
  */
-std::vector<AbstractSource *> CTsystem::sources() const
+std::vector<AbstractSource *> CTSystem::sources() const
 {
     std::vector<AbstractSource*> ret;
 
@@ -186,7 +186,7 @@ std::vector<AbstractSource *> CTsystem::sources() const
 /*!
  * Returns a list of all components of elementary type AbstractBeamModifier in the system.
  */
-std::vector<AbstractBeamModifier*> CTsystem::modifiers() const
+std::vector<AbstractBeamModifier*> CTSystem::modifiers() const
 {
     std::vector<AbstractBeamModifier*> ret;
 
@@ -200,7 +200,7 @@ std::vector<AbstractBeamModifier*> CTsystem::modifiers() const
 /*!
  * Reads all member variables from the QVariant \a variant.
  */
-void CTsystem::fromVariant(const QVariant &variant)
+void CTSystem::fromVariant(const QVariant &variant)
 {
     QVariantMap varMap = variant.toMap();
 
@@ -217,7 +217,7 @@ void CTsystem::fromVariant(const QVariant &variant)
  * Writes all components to a QVariant. This uses SerializationInterface::toVariant() of individual
  * components in the system.
  */
-QVariant CTsystem::toVariant() const
+QVariant CTSystem::toVariant() const
 {
     QVariantMap ret;
 
@@ -236,47 +236,47 @@ QVariant CTsystem::toVariant() const
 /*!
  * Constructs a copy of the system and returns a base-class pointer to the new object.
  */
-CTsystem* CTsystem::clone() const & { return new CTsystem(*this); }
+CTSystem* CTSystem::clone() const & { return new CTSystem(*this); }
 
 /*!
- * Constructs a new CTsystem object and moves the content of this instance into the new
+ * Constructs a new CTSystem object and moves the content of this instance into the new
  * object. Returns a base class pointer to the new instance.
  */
-CTsystem* CTsystem::clone() && { return new CTsystem(std::move(*this)); }
+CTSystem* CTSystem::clone() && { return new CTSystem(std::move(*this)); }
 
 /*!
  * Returns a constant reference to the list of components.
  */
-const std::vector<CTsystem::ComponentPtr>& CTsystem::components() const { return _componentList; }
+const std::vector<CTSystem::ComponentPtr>& CTSystem::components() const { return _componentList; }
 
 /*!
  * Returns the name of the system.
  */
-const QString& CTsystem::name() const { return _name; }
+const QString& CTSystem::name() const { return _name; }
 
 /*!
  * Returns the number of components in the system.
  *
  * Same as components().size().
  */
-uint CTsystem::nbComponents() const { return static_cast<uint>(_componentList.size()); }
+uint CTSystem::nbComponents() const { return static_cast<uint>(_componentList.size()); }
 
 /*!
  * Adds \a component to the system. Does nothing if \a component is \c null.
  */
-void CTsystem::addComponent(CTsystem::ComponentPtr component)
+void CTSystem::addComponent(CTSystem::ComponentPtr component)
 {
     if(component)
         _componentList.push_back(std::move(component));
 }
 
 /*!
- * Adds \a component to the system. This CTsystem instance takes ownership of
+ * Adds \a component to the system. This CTSystem instance takes ownership of
  * \a component.
  *
  * Does nothing if \a component is \c null.
  */
-void CTsystem::addComponent(SystemComponent* component)
+void CTSystem::addComponent(SystemComponent* component)
 {
     if(component)
         _componentList.push_back(ComponentPtr(component));
@@ -285,7 +285,7 @@ void CTsystem::addComponent(SystemComponent* component)
 /*!
  * Removes all components from the system.
  */
-void CTsystem::clear()
+void CTSystem::clear()
 {
     _componentList.clear();
 }
@@ -293,12 +293,12 @@ void CTsystem::clear()
 /*!
  * Sets the system's name to \a name.
  */
-void CTsystem::rename(QString name) { _name = std::move(name); }
+void CTSystem::rename(QString name) { _name = std::move(name); }
 
 /*!
  * Removes the component \a component from the system.
  */
-void CTsystem::removeComponent(SystemComponent *component)
+void CTSystem::removeComponent(SystemComponent *component)
 {
     std::vector<ComponentPtr> newComponentList;
     newComponentList.reserve(nbComponents());
@@ -318,19 +318,19 @@ void CTsystem::removeComponent(SystemComponent *component)
  *
  * Similar to addComponent() but also returns a reference to this instance.
  */
-CTsystem& CTsystem::operator<<(CTsystem::ComponentPtr component)
+CTSystem& CTSystem::operator<<(CTSystem::ComponentPtr component)
 {
     addComponent(std::move(component));
     return *this;
 }
 
 /*!
- * Operator style alternative to add \a component to the system. This CTsystem instance takes
+ * Operator style alternative to add \a component to the system. This CTSystem instance takes
  * ownership of \a component.
  *
  * Similar to addComponent() but also returns a reference to this instance.
  */
-CTsystem& CTsystem::operator<<(SystemComponent* component)
+CTSystem& CTSystem::operator<<(SystemComponent* component)
 {
     addComponent(component);
     return *this;

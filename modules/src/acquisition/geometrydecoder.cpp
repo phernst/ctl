@@ -33,7 +33,7 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
                                                            _physicalDimensionReference.second);
 }
 
-SimpleCTsystem
+SimpleCTSystem
 GeometryDecoder::decodeSingleViewGeometry(const SingleViewGeometry& singleViewGeometry,
                                           const QSize& pixelPerModule,
                                           GeometryDecoder::PhysicalDimension physicalDimension,
@@ -116,7 +116,7 @@ Matrix3x3 GeometryDecoder::computeSourceRotation(const QVector<mat::Location>& m
  * in each module and their (physical) size) is required. The number of individual flat panel
  * modules is automatically readout from \a geometry.
  *
- * This method constructs a SimpleCTsystem consisting of a GenericSource, GenericDetector and a
+ * This method constructs a SimpleCTSystem consisting of a GenericSource, GenericDetector and a
  * GenericGantry component.
  *
  * Some remarks on system configuration: All source settings remain at default values (i.e. source
@@ -133,7 +133,7 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry& geometr
                                                      const QSizeF& pixelDimensions)
 {
     // construct a generic system
-    CTsystem theSystem;
+    CTSystem theSystem;
 
     uint nbModules = 0;
     if(geometry.size() == 0u)
@@ -189,7 +189,7 @@ AcquisitionSetup GeometryDecoder::decodeFullGeometry(const FullGeometry &geometr
                                                      double mm)
 {
     // construct a generic system
-    CTsystem theSystem;
+    CTSystem theSystem;
 
     uint nbModules = 0;
     if(geometry.size() == 0u)

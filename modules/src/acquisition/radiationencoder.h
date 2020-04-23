@@ -43,8 +43,9 @@ private:
 class RadiationEncoder
 {
 public:
-    RadiationEncoder(const SimpleCTsystem* system);
+    RadiationEncoder(const SimpleCTSystem* system);
 
+    void assignSystem(const SimpleCTSystem* system);
     IntervalDataSeries finalSpectrum(uint nbSamples) const;
     IntervalDataSeries finalSpectrum(EnergyRange range, uint nbSamples) const;
     double finalPhotonFlux() const;
@@ -56,13 +57,13 @@ public:
     float detectiveQuantumEfficieny() const;
     float detectiveMeanEnergy() const;
 
-    const SimpleCTsystem* system() const;
+    const SimpleCTSystem* system() const;
 
     static SpectralInformation spectralInformation(AcquisitionSetup setup, float energyResolution = 0.0f);
 
 private:
     // member variables
-    const SimpleCTsystem* _system; //!< Pointer to system whose radiation shall be encoded.
+    const SimpleCTSystem* _system; //!< Pointer to system whose radiation shall be encoded.
 };
 
 } // namespace CTL

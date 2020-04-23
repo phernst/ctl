@@ -195,7 +195,7 @@ Chunk2D<T>& Chunk2D<T>::operator+=(const Chunk2D<T>& other)
                                 + dimensions().info() + " += " + other.dimensions().info());
 
     std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
-                   [](const T& a, const T& b) { return a + b; });
+                   std::plus<T>());
 
     return *this;
 }
@@ -213,7 +213,7 @@ Chunk2D<T>& Chunk2D<T>::operator-=(const Chunk2D<T>& other)
                                 + dimensions().info() + " -= " + other.dimensions().info());
 
     std::transform(_data.cbegin(), _data.cend(), other._data.cbegin(), _data.begin(),
-                   [](const T& a, const T& b) { return a - b; });
+                   std::minus<T>());
 
     return *this;
 }

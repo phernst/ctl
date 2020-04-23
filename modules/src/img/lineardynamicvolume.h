@@ -43,6 +43,16 @@ public:
     LinearDynamicVolume(VoxelVolume<float> slope,
                         VoxelVolume<float> offset);
 
+    static LinearDynamicVolume ball(float radius, float voxelSize, float slope, float offset);
+    static LinearDynamicVolume cube(uint nbVoxel, float voxelSize, float slope, float offset);
+    static LinearDynamicVolume cylinderX(float radius, float height, float voxelSize, float slope, float offset);
+    static LinearDynamicVolume cylinderY(float radius, float height, float voxelSize, float slope, float offset);
+    static LinearDynamicVolume cylinderZ(float radius, float height, float voxelSize, float slope, float offset);
+
+    XYDataSeries timeCurve(uint x, uint y, uint z, const std::vector<float>& timePoints) override;
+
+    using AbstractDynamicVolumeData::timeCurve;
+
 private:
     VoxelVolume<float> _lag;
     VoxelVolume<float> _slope;

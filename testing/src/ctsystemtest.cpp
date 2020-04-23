@@ -12,9 +12,9 @@
 
 using namespace CTL;
 
-void CTsystemTest::initTestCase()
+void CTSystemTest::initTestCase()
 {
-    _theTestSystem = new CTsystem;
+    _theTestSystem = new CTSystem;
 
     AbstractDetector* detector     = new CylindricalDetector(QSize(16, 64), QSizeF(1.0, 1.0), 40, 1.0_deg, 0.2);
     AbstractGantry* gantry         = new TubularGantry(1000.0, 550.0, 0.0, 90.0_deg, 0.0_deg);
@@ -24,22 +24,22 @@ void CTsystemTest::initTestCase()
     *_theTestSystem << detector << gantry << source << modifier;
 }
 
-void CTsystemTest::cleanupTestCase()
+void CTSystemTest::cleanupTestCase()
 {
     delete _theTestSystem;
 }
 
-void CTsystemTest::componentCount()
+void CTSystemTest::componentCount()
 {
     QCOMPARE(_theTestSystem->nbComponents(), uint(4));
 }
 
-void CTsystemTest::validSystem()
+void CTSystemTest::validSystem()
 {
     QVERIFY(_theTestSystem->isValid());
 }
 
-void CTsystemTest::simpleSystem()
+void CTSystemTest::simpleSystem()
 {
     QVERIFY(_theTestSystem->isSimple());
 
@@ -48,16 +48,16 @@ void CTsystemTest::simpleSystem()
     QVERIFY(!_theTestSystem->isSimple());
 }
 
-void CTsystemTest::renameCheck()
+void CTSystemTest::renameCheck()
 {
     // rename the system --> should no longer have default name
     _theTestSystem->rename("mySystem");
-    QVERIFY(_theTestSystem->name() != CTsystem::defaultName());
+    QVERIFY(_theTestSystem->name() != CTSystem::defaultName());
 }
 
-void CTsystemTest::testSystemBuilder()
+void CTSystemTest::testSystemBuilder()
 {
-    auto testSystem = CTsystemBuilder::createFromBlueprint(blueprints::GenericTubularCT());
+    auto testSystem = CTSystemBuilder::createFromBlueprint(blueprints::GenericTubularCT());
 
     QVERIFY(testSystem.isValid());
     QVERIFY(testSystem.isSimple());

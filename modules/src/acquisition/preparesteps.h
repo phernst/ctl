@@ -25,8 +25,8 @@ public:
     void setTiltAngle(double tilt)         { _newTiltAngle     = {true, tilt}; }
 
     // AbstractPrepareStep interface
-    void prepare(SimpleCTsystem& system) const override;
-    bool isApplicableTo(const CTsystem &system) const override;
+    void prepare(SimpleCTSystem& system) const override;
+    bool isApplicableTo(const CTSystem &system) const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
@@ -45,8 +45,8 @@ public:
     void setCarmSpan(double span)                   { _newCarmSpan = {true, span}; }
 
     // AbstractPrepareStep interface
-    void prepare(SimpleCTsystem& system) const override;
-    bool isApplicableTo(const CTsystem &system) const override;
+    void prepare(SimpleCTSystem& system) const override;
+    bool isApplicableTo(const CTSystem &system) const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
@@ -64,8 +64,8 @@ public:
     void setSourceLocation(const mat::Location& location)   { _newSourceLocation   = {true, location}; }
 
     // AbstractPrepareStep interface
-    void prepare(SimpleCTsystem& system) const override;
-    bool isApplicableTo(const CTsystem &system) const override;
+    void prepare(SimpleCTSystem& system) const override;
+    bool isApplicableTo(const CTSystem &system) const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
@@ -87,8 +87,8 @@ public:
     void incrementSourceDisplacement(const mat::Location& increment)   { _sourceDisplacementIncrement   = {true, increment}; }
 
     // AbstractPrepareStep interface
-    void prepare(SimpleCTsystem& system) const override;
-    bool isApplicableTo(const CTsystem &system) const override;
+    void prepare(SimpleCTSystem& system) const override;
+    bool isApplicableTo(const CTSystem &system) const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
@@ -115,8 +115,8 @@ public:
     void setFocalSpotPosition(const Vector3x1 &position)      { _newSpotPosition = {true, position}; }
 
     // AbstractPrepareStep interface
-    void prepare(SimpleCTsystem& system) const override;
-    bool isApplicableTo(const CTsystem &system) const override;
+    void prepare(SimpleCTSystem& system) const override;
+    bool isApplicableTo(const CTSystem &system) const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
@@ -136,8 +136,8 @@ public:
     void setPower(double power)         { _newPower = {true, power}; }
 
     // AbstractPrepareStep interface
-    void prepare(SimpleCTsystem& system) const override;
-    bool isApplicableTo(const CTsystem &system) const override;
+    void prepare(SimpleCTSystem& system) const override;
+    bool isApplicableTo(const CTSystem &system) const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
@@ -155,8 +155,8 @@ public:
     void setEmissionCurrent(double current) { _newEmissionCurrent = {true, current}; }
 
     // AbstractPrepareStep interface
-    void prepare(SimpleCTsystem& system) const override;
-    bool isApplicableTo(const CTsystem &system) const override;
+    void prepare(SimpleCTSystem& system) const override;
+    bool isApplicableTo(const CTSystem &system) const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 
@@ -180,8 +180,8 @@ public:
     void setSkewCoefficient(double skewCoefficient) { _newSkewCoefficient = {true, skewCoefficient}; }
 
     // AbstractPrepareStep interface
-    void prepare(SimpleCTsystem& system) const override;
-    bool isApplicableTo(const CTsystem &system) const override;
+    void prepare(SimpleCTSystem& system) const override;
+    bool isApplicableTo(const CTSystem &system) const override;
     void fromVariant(const QVariant& variant) override; // de-serialization
     QVariant toVariant() const override; // serialization
 

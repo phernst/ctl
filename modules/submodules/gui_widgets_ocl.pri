@@ -6,12 +6,16 @@
 
 # declare module
 CONFIG += GUI_WIDGETS_OCL
+DEFINES += GUI_WIDGETS_OCL_AVAILABLE
 
 HEADERS += \
-    $$PWD/../src/gui/widgets/pipelinecomposerwidget.h
+    $$PWD/../src/gui/widgets/pipelinecomposer.h \
+    $$PWD/../src/gui/widgets/volumesliceviewer.h
 
 SOURCES += \
-    $$PWD/../src/gui/widgets/pipelinecomposerwidget.cpp
+    $$PWD/../src/gui/widgets/pipelinecomposer.cpp \
+    $$PWD/../src/gui/widgets/volumesliceviewer.cpp
 
 FORMS += \
-    $$PWD/../src/gui/widgets/pipelinecomposerwidget.ui
+    $$PWD/../src/gui/widgets/pipelinecomposer.ui \
+    $$PWD/../src/gui/widgets/volumesliceviewer.ui

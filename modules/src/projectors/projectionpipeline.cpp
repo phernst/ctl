@@ -1,4 +1,5 @@
 #include "projectionpipeline.h"
+#include <QDebug>
 
 namespace CTL {
 
@@ -96,6 +97,14 @@ ProjectionPipeline::ProjectionPipeline(AbstractProjector* projector)
 }
 
 /*!
+ * Convenience overload of ProjectionPipeline(AbstractProjector*) for unique_ptr arguments.
+ */
+ProjectionPipeline::ProjectionPipeline(ProjectorPtr projector)
+    : ProjectionPipeline(projector.release())
+{
+}
+
+/*!
  * Appends the extension \a extension to the end of the pipeline.
  *
  * This object takes ownership of \a extension.
@@ -125,7 +134,7 @@ void ProjectionPipeline::appendExtension(ProjectorExtension* extension)
  */
 void ProjectionPipeline::insertExtension(uint pos, ProjectorExtension* extension)
 {
-    qDebug() << "ProjectionPipeline::insertExtension at pos " << pos;
+    qDebug() << "ProjectionPipeline::insertExtension at pos" << pos;
 
     const auto oldNbExt = nbExtensions();
 
@@ -184,7 +193,7 @@ void ProjectionPipeline::setProjector(AbstractProjector* projector)
  */
 ProjectorExtension* ProjectionPipeline::releaseExtension(uint pos)
 {
-    qDebug() << "ProjectionPipeline::releaseExtension at pos " << pos;
+    qDebug() << "ProjectionPipeline::releaseExtension at pos" << pos;
 
     const auto oldNbExt = nbExtensions();
     if(pos >= oldNbExt)

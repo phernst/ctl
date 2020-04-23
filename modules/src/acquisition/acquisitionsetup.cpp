@@ -255,41 +255,75 @@ AcquisitionSetup::PrepareStep& AcquisitionSetup::View::prepareStep(int prepareSt
 }
 
 /*!
- * Creates an AcquisitionSetup with \a nbViews views that uses the CTsystem \a system.
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTSystem \a system.
+ *
+ * If \a nbViews = 0, make sure to explicitely set the desired number of views with setNbViews()
+ * and adjust the views for the required purpose (either individually or by use of a preparation
+ * protocol, see applyPreparationProtocol()) before using the setup. Alternatively all views can be
+ * added individually with addView().
  */
-AcquisitionSetup::AcquisitionSetup(const CTsystem& system, uint nbViews)
+AcquisitionSetup::AcquisitionSetup(const CTSystem& system, uint nbViews)
 {
     this->resetSystem(system);
     this->setNbViews(nbViews);
 }
 
 /*!
- * Creates an AcquisitionSetup with \a nbViews views that uses the CTsystem \a system.
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTSystem \a system.
  */
-AcquisitionSetup::AcquisitionSetup(CTsystem&& system, uint nbViews)
+AcquisitionSetup::AcquisitionSetup(CTSystem&& system, uint nbViews)
 {
     this->resetSystem(std::move(system));
     this->setNbViews(nbViews);
 }
 
 /*!
- * Creates a copy of \a other. This uses CTsystem::clone() to create a deep copy of the CTsystem
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTSystem \a system.
+ */
+AcquisitionSetup::AcquisitionSetup(std::unique_ptr<CTSystem> system, uint nbViews)
+{
+    if(system)
+        this->resetSystem(std::move(*system));
+    this->setNbViews(nbViews);
+}
+
+/*!
+ * Creates an AcquisitionSetup with \a nbViews views that uses the CTSystem \a system.
+ */
+AcquisitionSetup::AcquisitionSetup(std::unique_ptr<SimpleCTSystem> system, uint nbViews)
+    : _system(std::move(system))
+{
+    this->setNbViews(nbViews);
+}
+
+/*!
+ * Creates an AcquisitionSetup with \a nbViews views without a CTSystem.
+ *
+ * Note that a CTSystem must be set explicitely with resetSystem() before the setup can be used.
+ */
+AcquisitionSetup::AcquisitionSetup(uint nbViews)
+{
+    this->setNbViews(nbViews);
+}
+
+/*!
+ * Creates a copy of \a other. This uses CTSystem::clone() to create a deep copy of the CTSystem
  * member variable.
  */
 AcquisitionSetup::AcquisitionSetup(const AcquisitionSetup& other)
     : SerializationInterface(other)
-    , _system(other._system ? static_cast<SimpleCTsystem*>(other._system->clone()) : nullptr)
+    , _system(other._system ? static_cast<SimpleCTSystem*>(other._system->clone()) : nullptr)
     , _views(other._views)
 {
 }
 
 /*!
- * Assigns the content of \a other to this instance. This uses CTsystem::clone() to create a deep
- * copy of the CTsystem member variable.
+ * Assigns the content of \a other to this instance. This uses CTSystem::clone() to create a deep
+ * copy of the CTSystem member variable.
  */
 AcquisitionSetup& AcquisitionSetup::operator=(const AcquisitionSetup& other)
 {
-    _system.reset(other._system ? static_cast<SimpleCTsystem*>(other._system->clone()) : nullptr);
+    _system.reset(other._system ? static_cast<SimpleCTSystem*>(other._system->clone()) : nullptr);
     _views = other._views;
     return *this;
 }
@@ -302,6 +336,9 @@ void AcquisitionSetup::addView(AcquisitionSetup::View view) { _views.push_back(s
 /*!
  * Applies the prepration protocol \a preparation to this setup. This means that the prepare steps
  * created by AbstractPreparationProtocol::prepareSteps() are appended to all views in this setup.
+ * The consequences of this aspect are, in particular, that application of multiple preparation
+ * protocols is cumulative. When this is not desired, consider removing all prepare steps with
+ * removeAllPrepareSteps() before applying a new preparation protocol.
  *
  * Note that changing the number of views afterwards does not take into account this application of
  * \a preparation. Consequently, all views that are added later on will not contain the preparation
@@ -327,29 +364,34 @@ void AcquisitionSetup::applyPreparationProtocol(const AbstractPreparationProtoco
 }
 
 /*!
- * Clears all views from the setup. This leaves the setup with the same number of views as it had
- * beforehand. If \a keepTimeStamps is \c true, the time stamps from the previous views are
- * preserved. Otherwise, views are created with default time stamps.
- */
-void AcquisitionSetup::clearViews(bool keepTimeStamps)
-{
-    if(keepTimeStamps)
-    {
-        removeAllPrepareSteps();
-    }
-    else
-    {
-        uint prevNbViews = nbViews();
-        _views.clear();
-        setNbViews(prevNbViews);
-    }
-}
-
-/*!
  * Prepares the system of this setup for the view \a viewNb.
  *
  * This applies all prepare step queued in the corresponding View. Steps are applied in the order
  * they have been added to the View object.
+ *
+ * Use this method if you want to inspect the system configuration for a certain view in the setup.
+ *
+ * Example: reading the tube voltage of an XrayTube component for all views
+ * \code
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ * // note that a GenericCarmCT has a default X-ray tube voltage of 100 kV
+ *
+ * AcquisitionSetup setup(system, 100);
+ * // ... arbitrary view configuration comes here
+ *
+ * // read out the voltages for all views:
+ * const auto tube = static_cast<XrayTube*>(setup.system()->source()); // we remember a pointer to the XrayTube in the system
+ * XYDataSeries voltages;
+ * for(uint v = 0; v < setup.nbViews(); ++v)
+ * {
+ *     setup.prepareView(v);                    // this prepares the system for view "v"
+ *     voltages.append(v, tube->tubeVoltage()); // this reads the tube voltage and adds it to our data series
+ * }
+ *
+ * // If you have included the 'ctl_qtgui.pri' module (or submodule 'gui_widgets_charts.pri') in the project,
+ * // you can use the LineSeriesView class to visualize the read-out voltages.
+ * gui::LineSeriesView::plot(voltages, "View index", "Tube voltage [kV]");
+ * \endcode
  */
 void AcquisitionSetup::prepareView(uint viewNb)
 {
@@ -361,26 +403,69 @@ void AcquisitionSetup::prepareView(uint viewNb)
 }
 
 /*!
- * Removes all prepare steps from all views of this setup. This preserves the time stamp of all
- * these View instances.
+ * Removes all prepare steps from all views of this setup. This leaves the setup with the same
+ * number of views as it had beforehand. If \a keepTimeStamps is \c true, the time stamps from
+ * the previous views are preserved. Otherwise, views are created with default time stamps.
+ *
+ * This method can be used, for instance, to re-use the same setup with a different trajectory
+ * protocol applied. In the following example, we use the same setup with a GenericCarmCT once for
+ * an acquisition with a short-scan trajectory and then again for a wobble trajectory:
+ * \code
+ * auto system = CTSystemBuilder::createFromBlueprint(blueprints::GenericCarmCT());
+ *
+ * AcquisitionSetup setup(system, 100);
+ * setup.applyPreparationProtocol(protocols::ShortScanTrajectory(500.0));
+ *
+ * // we do someting with the setup, e.g. visualize the setup or use it to create projections
+ * gui::AcquisitionSetupView::plot(setup); // note: this requires 'gui_widgets_3d.pri' submodule
+ * auto volume = VoxelVolume<float>::cube(100, 1.0f, 0.02f);
+ * auto projector = makeProjector<OCL::RayCasterProjector>();
+ * projector->configure(setup);
+ * auto projections = projector->project(volume);
+ *
+ * // we now change the geometry, by ...
+ * //... first, removing all prepare steps (previously added by the short scan protocol)
+ * setup.removeAllPrepareSteps();
+ * //... then, applying the protocol for the new trajectory
+ * setup.applyPreparationProtocol(protocols::WobbleTrajectory(200.0_deg, 500.0));
+ *
+ * // now, we can repeat the steps that do something with our setup (which now represents a wobble scan)
+ * gui::AcquisitionSetupView::plot(setup); // note: this requires 'gui_widgets_3d.pri' submodule
+ * projector->configure(setup);
+ * projections = projector->project(volume);
+ * \endcode
  */
-void AcquisitionSetup::removeAllPrepareSteps()
+void AcquisitionSetup::removeAllPrepareSteps(bool keepTimeStamps)
 {
-    for(auto& view : _views)
-        view.clearPrepareSteps();
+    if(keepTimeStamps)
+    {
+        for(auto& view : _views)
+            view.clearPrepareSteps();
+    }
+    else
+    {
+        uint prevNbViews = nbViews();
+        _views.clear();
+        setNbViews(prevNbViews);
+    }
 }
 
 /*!
- * Sets the system of this setup to \a system. This creates a deep copy of \a system using
- * CTsystem::clone(). The previous system is deleted.
- *
- * \a system must be convertible to a SimpleCTsystem. Otherwise the system will be set to nullptr.
+ * Removes all views from the setup. Same as setNbViews(0).
  */
-bool AcquisitionSetup::resetSystem(const CTsystem& system)
+void AcquisitionSetup::removeAllViews() { setNbViews(0); }
+
+/*!
+ * Sets the system of this setup to \a system. This creates a deep copy of \a system using
+ * CTSystem::clone(). The previous system is deleted.
+ *
+ * \a system must be convertible to a SimpleCTSystem. Otherwise the system will be set to nullptr.
+ */
+bool AcquisitionSetup::resetSystem(const CTSystem& system)
 {
     bool ok;
-    auto clonedSystem = static_cast<SimpleCTsystem*>(
-                SimpleCTsystem::fromCTsystem(system, &ok).clone());
+    auto clonedSystem = static_cast<SimpleCTSystem*>(
+                SimpleCTSystem::fromCTSystem(system, &ok).clone());
 
     if(ok)
         _system.reset(clonedSystem);
@@ -394,13 +479,13 @@ bool AcquisitionSetup::resetSystem(const CTsystem& system)
  * Sets the system of this setup to \a system. This moves \a system to this instance. The previous
  * system is deleted.
  *
- * \a system must be convertible to a SimpleCTsystem. Otherwise the system will be set to nullptr.
+ * \a system must be convertible to a SimpleCTSystem. Otherwise the system will be set to nullptr.
  */
-bool AcquisitionSetup::resetSystem(CTsystem&& system)
+bool AcquisitionSetup::resetSystem(CTSystem&& system)
 {
     bool ok;
-    auto clonedSystem = static_cast<SimpleCTsystem*>(
-        SimpleCTsystem::fromCTsystem(std::move(system), &ok).clone());
+    auto clonedSystem = static_cast<SimpleCTSystem*>(
+        SimpleCTSystem::fromCTSystem(std::move(system), &ok).clone());
 
     if(ok)
         _system.reset(clonedSystem);
@@ -469,7 +554,7 @@ void AcquisitionSetup::setNbViews(uint nbViews)
 /*!
  * Returns a pointer to the system in this setup.
  */
-SimpleCTsystem* AcquisitionSetup::system()
+SimpleCTSystem* AcquisitionSetup::system()
 {
     if(_system == nullptr)
         qWarning("No CT system has been set for the AcquisitionSetup.");
@@ -479,7 +564,7 @@ SimpleCTsystem* AcquisitionSetup::system()
 /*!
  * Returns a pointer to the (constant) system in this setup.
  */
-const SimpleCTsystem* AcquisitionSetup::system() const
+const SimpleCTSystem* AcquisitionSetup::system() const
 {
     if(_system == nullptr)
         qWarning("No CT system has been set for the AcquisitionSetup.");
@@ -517,7 +602,7 @@ void AcquisitionSetup::fromVariant(const QVariant &variant)
 {
     auto varMap = variant.toMap();
 
-    CTsystem system;
+    CTSystem system;
     system.fromVariant(varMap.value("CT system"));
     this->resetSystem(std::move(system));
 

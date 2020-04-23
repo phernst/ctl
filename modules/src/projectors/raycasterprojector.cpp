@@ -189,8 +189,8 @@ ProjectionData RayCasterProjector::project(const VolumeData& volume)
         auto& context = oclConfig.context();
         const auto nbUsedDevs = qMin(uint(_settings.deviceIDs.size()), nbViews);
         if(nbUsedDevs == 0)
-            throw std::runtime_error("no devices or no views for RayCasterProjector::project");
-        qDebug() << "number of used devices for RayCasterProjector: " << nbUsedDevs;
+            throw std::runtime_error("No devices or no views for RayCasterProjector::project.");
+        qDebug() << "Number of used devices for RayCasterProjector:" << nbUsedDevs;
 
         // Create kernel
         auto* kernel = oclConfig.kernel(CL_KERNEL_NAME, _oclProgramName);

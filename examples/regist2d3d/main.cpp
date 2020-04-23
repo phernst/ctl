@@ -1,15 +1,9 @@
-#include "io/den/denfileio.h"
-#include "io/den/den_utils.h"
-#include "io/nrrd/nrrdfileio.h"
-#include "mat/matrix_utils.h"
-#include "processing/diff.h"
-#include "processing/volumeresampler.h"
-#include "processing/errormetrics.h"
-#include "app/registration/grangeatregistration2d3d.h"
+#include "ctl.h"
+#include "ctl_nlopt.h"
 
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QTime>
+#include <QElapsedTimer>
 
 static std::unique_ptr<CTL::io::AbstractProjectionMatrixIO> projMatIO(const QString& fn);
 static std::unique_ptr<CTL::io::AbstractProjectionDataIO> projDataIO(const QString& fn);
@@ -106,7 +100,7 @@ int main(int argc, char *argv[])
     CTL::OCL::VolumeResampler radonSpaceSampler(radon3d);
 
     // Init optimizer
-    GrangeatRegistration2D3D reg;
+    CTL::NLOPT::GrangeatRegistration2D3D reg;
 
     //metric
     auto gmc = parser.isSet("m")
@@ -151,7 +145,7 @@ int main(int argc, char *argv[])
     // Optimization
     qInfo("Start optimization...");
     QVector<double> rot, transl;
-    QTime time; time.start();
+    QElapsedTimer time; time.start();
 
     for(uint v = 0; v < nbViews; ++v)
     {

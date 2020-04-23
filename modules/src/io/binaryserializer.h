@@ -19,7 +19,7 @@ class BinarySerializer : public AbstractSerializer
     public: std::unique_ptr<AbstractProjector> deserializeProjector(const QString& fileName) const override;
     public: std::unique_ptr<SerializationInterface> deserializeMiscObject(const QString& fileName) const override;
     public: std::unique_ptr<AcquisitionSetup> deserializeAquisitionSetup(const QString& fileName) const override;
-    public: std::unique_ptr<CTsystem> deserializeSystem(const QString& fileName) const override;
+    public: std::unique_ptr<CTSystem> deserializeSystem(const QString& fileName) const override;
 
 private:
     static QVariant variantFromBinaryFile(const QString& fileName);
