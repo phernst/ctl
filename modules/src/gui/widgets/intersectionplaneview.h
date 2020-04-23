@@ -105,6 +105,9 @@ public:
     explicit IntersectionPlaneView(QWidget* parent = nullptr,
                                    float visualScale = 50.0f);
 
+    void setData(const VoxelVolume<float>& volume,
+                 double azimuth, double polar, double distance);
+
     void setPlaneSize(double width, double height);
     void setPlaneSize(const QSizeF& size);
     void setVolumeDim(const VoxelVolume<float>& volume);

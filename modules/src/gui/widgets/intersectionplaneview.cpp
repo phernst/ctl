@@ -46,6 +46,23 @@ IntersectionPlaneView::IntersectionPlaneView(QWidget* parent, float visualScale)
 }
 
 /*!
+ * Convenience method providing a combination of setting the volume dimensions and the parameters
+ * of the intersection plane that shall be visualized.
+ *
+ * Same as:
+ * \code
+ * setVolumeDim(volume);
+ * setPlaneParameter(azimuth, polar, distance);
+ * \endcode
+ */
+void IntersectionPlaneView::setData(const VoxelVolume<float>& volume,
+                                    double azimuth, double polar, double distance)
+{
+    setVolumeDim(volume);
+    setPlaneParameter(azimuth, polar, distance);
+}
+
+/*!
  * Creates an IntersectionPlaneView for visualization of \a volume and the plane specified by the
  * spherical coordinate tuple (\a azimuth, \a polar, \a distance). Note that only the outer bounding
  * box of \a volume is visualized in the scene for means of simplicity.

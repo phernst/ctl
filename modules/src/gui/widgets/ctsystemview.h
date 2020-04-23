@@ -82,6 +82,7 @@ public:
     explicit CTSystemView(QWidget* parent = nullptr, float visualScale = 50.0f);
 
     void setCTSystem(const SimpleCTSystem& system);
+    void setData(const SimpleCTSystem& system);
 
     static void plot(const SimpleCTSystem& system, float visualScale = 50.0f);
 

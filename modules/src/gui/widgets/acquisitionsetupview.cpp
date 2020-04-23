@@ -45,6 +45,14 @@ void AcquisitionSetupView::setAcquisitionSetup(AcquisitionSetup acqSetup)
 }
 
 /*!
+ * Convenience overload. Same as setAcquisitionSetup(\a acqSetup).
+ */
+void AcquisitionSetupView::setData(AcquisitionSetup acqSetup)
+{
+    setAcquisitionSetup(acqSetup);
+}
+
+/*!
  * Creates an AcquisitionSetupView for visualization of \a setup and shows the window.
  *
  * The visualization will show a superposition of all views in \a setup. The total number of views

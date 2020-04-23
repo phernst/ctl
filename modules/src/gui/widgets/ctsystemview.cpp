@@ -85,6 +85,14 @@ void CTSystemView::setCTSystem(const SimpleCTSystem& system)
 }
 
 /*!
+ * Convenience overload. Same as setCTSystem(\a system).
+ */
+void CTSystemView::setData(const SimpleCTSystem& system)
+{
+    setCTSystem(system);
+}
+
+/*!
  * Adds a visualization of \a system to the scene of this instance.
  *
  * Example:

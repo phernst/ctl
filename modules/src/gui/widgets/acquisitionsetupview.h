@@ -71,6 +71,7 @@ public:
     explicit AcquisitionSetupView(QWidget* parent = nullptr, float visualScale = 50.0f);
 
     void setAcquisitionSetup(AcquisitionSetup acqSetup);
+    void setData(AcquisitionSetup acqSetup);
 
     static void plot(AcquisitionSetup setup, uint maxNbViews = 100, bool sourceOnly = false,
                      float visualScale = 50.0f);
