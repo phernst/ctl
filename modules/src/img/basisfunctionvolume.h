@@ -1,5 +1,5 @@
-#ifndef BASISFUNCTIONVOLUME_H
-#define BASISFUNCTIONVOLUME_H
+#ifndef CTL_BASISFUNCTIONVOLUME_H
+#define CTL_BASISFUNCTIONVOLUME_H
 
 #include "abstractdynamicvolumedata.h"
 
@@ -45,4 +45,4 @@ private:
 
 } // namespace CTL
 
-#endif // BASISFUNCTIONVOLUME_H
+#endif // CTL_BASISFUNCTIONVOLUME_H
