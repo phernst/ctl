@@ -504,11 +504,12 @@ void IntersectionPlaneView::redraw()
 
 QSizeF IntersectionPlaneView::planeSizeByVolDim()
 {
-    const auto maxDim = std::max(std::max(_volDim.x * _volVoxSize.x,
-                                          _volDim.y * _volVoxSize.y),
-                                 _volDim.z * _volVoxSize.z);
+    static const auto sqrt3 = std::sqrt(3.0f);
+    const auto maxDim = std::max({ static_cast<float>(_volDim.x) * _volVoxSize.x,
+                                   static_cast<float>(_volDim.y) * _volVoxSize.y,
+                                   static_cast<float>(_volDim.z) * _volVoxSize.z });
 
-    return { double(maxDim) * std::sqrt(3.0), double(maxDim) * std::sqrt(3.0) };
+    return { maxDim * sqrt3, maxDim * sqrt3 };
 }
 
 } // namespace gui
