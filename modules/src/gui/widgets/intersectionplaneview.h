@@ -157,7 +157,7 @@ private:
     void addVolume();
     void initializeView();
     void redraw();
-    QSizeF planeSizeByVolDim();
+    QSizeF planeSizeByVolDim() const;
 };
 
 } // namespace gui

@@ -502,7 +502,7 @@ void IntersectionPlaneView::redraw()
     addPlane();
 }
 
-QSizeF IntersectionPlaneView::planeSizeByVolDim()
+QSizeF IntersectionPlaneView::planeSizeByVolDim() const
 {
     static const auto sqrt3 = std::sqrt(3.0f);
     const auto maxDim = std::max({ static_cast<float>(_volDim.x) * _volVoxSize.x,
