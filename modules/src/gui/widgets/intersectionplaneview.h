@@ -35,7 +35,8 @@ namespace gui {
  *
  * This class can be used to visualize how a certain plane intersects a given volume. Specify the
  * plane parameters (in spherical coordinates) by setPlaneParameter(). The size of the visualized
- * plane is set by setPlaneSize().
+ * plane is set by setPlaneSize(). If not set explicitely, a default size will be used that
+ * represents a square with edge length of sqrt(3) times the largest edge length of the volume.
  *
  * Size and position of the volume can be defined by setVolumeDim(). This is done either from its
  * individual specifications (i.e. number of voxels, voxel size, and spatial position offset) with
