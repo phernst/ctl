@@ -66,31 +66,26 @@ ProjectionData RayCasterProjectorCPU::project(const VolumeData& volume)
 
     // projection dimensions
     const auto nbViews = _pMats.size();
+    // allocate projections
+    ret.allocateMemory(nbViews);
 
     // volume specs
     const auto& volDim = volume.dimensions();
     const auto& volOffset = volume.offset();
     const auto& voxelSize = volume.voxelSize();
 
-    // determine ray step length in mm
-    auto smallestVoxelSize = std::min( { voxelSize.x, voxelSize.y, voxelSize.z } );
-    auto increment_mm = smallestVoxelSize * _settings.raySampling;
-
     // Prepare input data
-    QPair<uint, uint> raysPerPixel { _settings.raysPerPixel[0], _settings.raysPerPixel[1] };
     auto volCorner = volumeCorner(volDim, voxelSize, volOffset);
 
-    // loop over all projections
+    // define projection task for each view
     ThreadPool tp;
-    ret.allocateMemory(nbViews);
-    auto threadTask = [&volume, &volDim, &voxelSize, &volCorner, &raysPerPixel, increment_mm,
-                       this](SingleViewData* proj, uint view) {
-        *proj = computeView(volume, view, volDim, voxelSize, volCorner, raysPerPixel, increment_mm);
+    auto threadTask = [&volume, &volCorner, this] (SingleViewData* proj, uint view) {
+        *proj = computeView(volume, volCorner, view);
     };
+    // loop over all views
     for(auto view = 0u; view < nbViews; ++view)
     {
         tp.enqueueThread(threadTask, &ret.view(view), view);
-
         emit notifier()->projectionFinished(int(view));
     }
 
@@ -98,13 +93,17 @@ ProjectionData RayCasterProjectorCPU::project(const VolumeData& volume)
 }
 
 SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
-                                                  uint view,
-                                                  const VoxelVolume<float>::Dimensions& volDim,
-                                                  const VoxelVolume<float>::VoxelSize& voxelSize_mm,
                                                   const mat::Matrix<3,1>& volumeCorner,
-                                                  QPair<uint,uint> raysPerPixel,
-                                                  float increment_mm) const
+                                                  uint view) const
 {
+    const auto& volDim = volume.dimensions();
+    const auto& voxelSize_mm = volume.voxelSize();
+    const QPair<uint, uint> raysPerPixel { _settings.raysPerPixel[0], _settings.raysPerPixel[1] };
+
+    // determine ray step length in mm
+    const auto smallestVoxelSize = std::min( { voxelSize_mm.x, voxelSize_mm.y, voxelSize_mm.z } );
+    const auto increment_mm = smallestVoxelSize * _settings.raySampling;
+
     const auto& currentViewPMats = _pMats.at(view);
     // all modules have same source position --> use first module PMat (arbitrary)
     auto sourcePosition = determineSource(currentViewPMats.first());

@@ -28,12 +28,8 @@ public:
 
 private:
     SingleViewData computeView(const VolumeData& volume,
-                               uint view,
-                               const VoxelVolume<float>::Dimensions& volDim,
-                               const VoxelVolume<float>::VoxelSize& voxelSize_mm,
                                const mat::Matrix<3,1>& volumeCorner,
-                               QPair<uint,uint> raysPerPixel,
-                               float increment_mm) const;
+                               uint view) const;
 };
 
 } // namespace CTL
