@@ -93,6 +93,7 @@
 #include "projectors/poissonnoiseextension.h"
 #include "projectors/projectionpipeline.h"
 #include "projectors/projectorextension.h"
+#include "projectors/raycasterprojectorcpu.h"
 #include "projectors/spectraleffectsextension.h"
 #endif // CTL_CORE_MODULE_AVAILABLE
 
