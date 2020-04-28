@@ -95,6 +95,11 @@
 #include "projectors/projectorextension.h"
 #include "projectors/raycasterprojectorcpu.h"
 #include "projectors/spectraleffectsextension.h"
+// Qt-free
+#include "mat/deg.h"
+#include "mat/matrix.h"
+#include "models/copyableuniqueptr.h"
+#include "processing/coordinates.h"
 #endif // CTL_CORE_MODULE_AVAILABLE
 
 #ifdef DEN_FILE_IO_MODULE_AVAILABLE
