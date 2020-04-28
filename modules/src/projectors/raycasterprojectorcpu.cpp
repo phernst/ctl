@@ -262,7 +262,7 @@ mat::Matrix<2,1> calculateIntersections(const mat::Matrix<3,1>& source,
     corner2 += EPS;
 
     // find the two intersections within the volume boundaries (entry/exit)
-    mat::Matrix<2,1> minMax(FLT_MAX, 0.0f);
+    mat::Matrix<2,1> minMax(std::numeric_limits<double>::max(), 0.0);
     mat::Matrix<2,1> hit;
 
     auto matrixSel = [] (const mat::Matrix<3,1>& mat, uint dim1, uint dim2)
