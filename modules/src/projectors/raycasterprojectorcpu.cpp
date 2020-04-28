@@ -142,28 +142,27 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
 
     auto greaterEqualZero = [] (const int& val) { return val >= 0; };
 
-    for(uint module = 0; module < detectorModules; ++module)
-        for(uint x = 0; x < detectorColumns; ++x)
+    for(auto module = 0u; module < detectorModules; ++module)
+        for(auto x = 0u; x < detectorColumns; ++x)
         {
-            for(uint y = 0; y < detectorRows; ++y)
+            for(auto y = 0u; y < detectorRows; ++y)
             {
-                const auto pixelCornerPlusOffset = mat::Matrix<2, 1>(static_cast<double>(x) - 0.5,
-                                                                     static_cast<double>(y) - 0.5)
+                const auto pixelCornerPlusOffset = mat::Matrix<2,1>(static_cast<double>(x) - 0.5,
+                                                                    static_cast<double>(y) - 0.5)
                                                    + 0.5 * intraPixelSpacing;
-
-                // helper variables
-                mat::Matrix<3,1> direction, position;
-                mat::Matrix<2,1> rayBounds, pixelCoord;
-                std::array<int,3> voxelIdx;
-
                 // resulting projection value
                 double projVal = 0.0;
-                for(uint rayX = 0; rayX < raysPerPixel.first; ++rayX)
-                    for(uint rayY = 0; rayY < raysPerPixel.second; ++rayY)
+
+                for(auto rayX = 0u; rayX < raysPerPixel.first; ++rayX)
+                    for(auto rayY = 0u; rayY < raysPerPixel.second; ++rayY)
                     {
+                        // helper variables
+                        mat::Matrix<3,1> direction;
+                        mat::Matrix<2,1> rayBounds, pixelCoord;
+
                         pixelCoord = pixelCornerPlusOffset
-                            + mat::Matrix<2, 1>(static_cast<double>(rayX) * intraPixelSpacing(0),
-                                                static_cast<double>(rayY) * intraPixelSpacing(1));
+                            + mat::Matrix<2,1>(static_cast<double>(rayX) * intraPixelSpacing(0),
+                                               static_cast<double>(rayY) * intraPixelSpacing(1));
 
                         direction = increment_mm * calculateDirection(pixelCoord(0),
                                                                       pixelCoord(1),
@@ -178,6 +177,10 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
                                  end = static_cast<uint>(rayBounds(1)) + 1;
                             i <= end; ++i)
                         {
+                            // position in volume
+                            mat::Matrix<3,1> position;
+                            std::array<int,3> voxelIdx;
+
                             position(0) = std::fma(static_cast<double>(i), direction(0), cornerToSourceVector(0));
                             position(1) = std::fma(static_cast<double>(i), direction(1), cornerToSourceVector(1));
                             position(2) = std::fma(static_cast<double>(i), direction(2), cornerToSourceVector(2));
