@@ -2,6 +2,7 @@
 #include "acquisition/geometryencoder.h"
 #include "components/abstractdetector.h"
 #include "mat/matrix_algorithm.h"
+#include "processing/threadpool.h"
 
 #include <array>
 
@@ -80,9 +81,16 @@ ProjectionData RayCasterProjectorCPU::project(const VolumeData& volume)
     auto volCorner = volumeCorner(volDim, voxelSize, volOffset);
 
     // loop over all projections
+    ThreadPool tp;
+    ret.allocateMemory(nbViews);
+    auto threadTask = [&volume, &volDim, &voxelSize, &volCorner, &raysPerPixel, increment_mm,
+                       this](SingleViewData* proj, uint view) {
+        *proj = computeView(volume, view, volDim, voxelSize, volCorner, raysPerPixel, increment_mm);
+    };
     for(auto view = 0u; view < nbViews; ++view)
     {
-        ret.append(computeView(volume, view, volDim, voxelSize, volCorner, raysPerPixel, increment_mm));
+        tp.enqueueThread(threadTask, &ret.view(view), view);
+
         emit notifier()->projectionFinished(int(view));
     }
 
