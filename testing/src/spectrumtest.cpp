@@ -16,13 +16,13 @@ void SpectrumTest::initTestCase()
 
     qsrand(uint(QTime::currentTime().msecsSinceStartOfDay()));
 
-    _m = float(qrand()) / RAND_MAX * 5.0f;
-    _n = float(qrand()) / RAND_MAX * 5.0f;
+    _m = static_cast<float>(qrand()) / static_cast<float>(RAND_MAX) * 5.0f;
+    _n = static_cast<float>(qrand()) / static_cast<float>(RAND_MAX) * 5.0f;
 
     QMap<float,float> table;
     for(int i=0; i<TABLE_SMPL; ++i)
     {
-        float randVal   = float(qrand()) / RAND_MAX ;
+        float randVal   = static_cast<float>(qrand()) / static_cast<float>(RAND_MAX);
         float energy    = randVal * (ENRG_MAX - ENRG_MIN) + ENRG_MIN;
         float intensity = calcIntensity(energy);
 
