@@ -29,7 +29,7 @@ mat::Matrix<2,1> checkFace(const mat::Matrix<2,1>& hit, const mat::Matrix<2,1>& 
                            const mat::Matrix<2,1>& corner2, float lambda,
                            const mat::Matrix<2,1>& minMax);
 
-}
+} // unnamed namespace
 
 /*!
  * Configures the projector. This extracts all information that is required for projecting with
@@ -106,7 +106,7 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
 
     const auto& currentViewPMats = _pMats.at(view);
     // all modules have same source position --> use first module PMat (arbitrary)
-    auto sourcePosition = determineSource(currentViewPMats.first());
+    const auto sourcePosition = determineSource(currentViewPMats.first());
     // individual module geometry: QR is only determined by M, where P=[M|p4]
     std::vector<mat::Matrix<4,4>> QRs(_viewDim.nbModules);
     for(auto module = 0u; module < _viewDim.nbModules; ++module)
@@ -121,7 +121,9 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
     projection.allocateMemory(detectorModules);
 
     // quantities normalized by the voxel size (units of "voxel numbers")
-    const mat::Matrix<3,1> volSize(double(volDim.x), double(volDim.y), double(volDim.z));
+    const mat::Matrix<3,1> volSize(static_cast<double>(volDim.x),
+                                   static_cast<double>(volDim.y),
+                                   static_cast<double>(volDim.z));
     const mat::Matrix<3,1> source(sourcePosition(0) / voxelSize_mm.x,
                                   sourcePosition(1) / voxelSize_mm.y,
                                   sourcePosition(2) / voxelSize_mm.z);
@@ -136,7 +138,7 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
     const mat::Matrix<2,1> intraPixelSpacing(1.0 / raysPerPixel.first,
                                              1.0 / raysPerPixel.second);
 
-    const auto totalRaysPerPixel = float(raysPerPixel.first * raysPerPixel.second);
+    const auto totalRaysPerPixel = static_cast<float>(raysPerPixel.first * raysPerPixel.second);
 
     auto greaterEqualZero = [] (const int& val) { return val >= 0; };
 
@@ -145,7 +147,9 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
         {
             for(uint y = 0; y < detectorRows; ++y)
             {
-                const mat::Matrix<2,1> pixelCornerPlusOffset = mat::Matrix<2,1>((double)x - 0.5, (double)y - 0.5) + 0.5 * intraPixelSpacing;
+                const auto pixelCornerPlusOffset = mat::Matrix<2, 1>(static_cast<double>(x) - 0.5,
+                                                                     static_cast<double>(y) - 0.5)
+                                                   + 0.5 * intraPixelSpacing;
 
                 // helper variables
                 mat::Matrix<3,1> direction, position;
@@ -157,8 +161,9 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
                 for(uint rayX = 0; rayX < raysPerPixel.first; ++rayX)
                     for(uint rayY = 0; rayY < raysPerPixel.second; ++rayY)
                     {
-                        pixelCoord = pixelCornerPlusOffset + mat::Matrix<2,1>((double)rayX * intraPixelSpacing(0),
-                                                                              (double)rayY * intraPixelSpacing(1));
+                        pixelCoord = pixelCornerPlusOffset
+                            + mat::Matrix<2, 1>(static_cast<double>(rayX) * intraPixelSpacing(0),
+                                                static_cast<double>(rayY) * intraPixelSpacing(1));
 
                         direction = increment_mm * calculateDirection(pixelCoord(0),
                                                                       pixelCoord(1),
@@ -169,28 +174,29 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
 
                         rayBounds = calculateIntersections(source, direction, volSize, volCorner);
 
-                        for(uint i = (uint)rayBounds(0), end = (uint)rayBounds(1)+1; i <= end; ++i)
+                        for(auto i   = static_cast<uint>(rayBounds(0)),
+                                 end = static_cast<uint>(rayBounds(1)) + 1;
+                            i <= end; ++i)
                         {
-                            position(0) = std::fma(double(i), direction(0), cornerToSourceVector(0));
-                            position(1) = std::fma(double(i), direction(1), cornerToSourceVector(1));
-                            position(2) = std::fma(double(i), direction(2), cornerToSourceVector(2));
+                            position(0) = std::fma(static_cast<double>(i), direction(0), cornerToSourceVector(0));
+                            position(1) = std::fma(static_cast<double>(i), direction(1), cornerToSourceVector(1));
+                            position(2) = std::fma(static_cast<double>(i), direction(2), cornerToSourceVector(2));
 
                             voxelIdx[0] = static_cast<int>(std::floor(position(0)));
                             voxelIdx[1] = static_cast<int>(std::floor(position(1)));
                             voxelIdx[2] = static_cast<int>(std::floor(position(2)));
 
                             if(std::all_of(voxelIdx.cbegin(), voxelIdx.cend(), greaterEqualZero) &&
-                                    uint(voxelIdx[0]) < volDim.x &&
-                                    uint(voxelIdx[1]) < volDim.y &&
-                                    uint(voxelIdx[2]) < volDim.z)
+                               static_cast<uint>(voxelIdx[0]) < volDim.x &&
+                               static_cast<uint>(voxelIdx[1]) < volDim.y &&
+                               static_cast<uint>(voxelIdx[2]) < volDim.z)
                             {
-                                projVal += (double)volume(voxelIdx[0], voxelIdx[1], voxelIdx[2]);
+                                projVal += static_cast<double>(volume(voxelIdx[0], voxelIdx[1], voxelIdx[2]));
                             }
-
                         }
                     }
 
-                projection.module(module)(x,y) = increment_mm * (float)projVal / totalRaysPerPixel;
+                projection.module(module)(x,y) = increment_mm * static_cast<float>(projVal) / totalRaysPerPixel;
 
             }
         }
@@ -229,9 +235,9 @@ mat::Matrix<3,1> volumeCorner(const VoxelVolume<float>::Dimensions& volDim,
                               const VoxelVolume<float>::VoxelSize& voxelSize,
                               const VoxelVolume<float>::Offset& volOffset)
 {
-    return { volOffset.x - 0.5f * float(volDim.x) * voxelSize.x,
-             volOffset.y - 0.5f * float(volDim.y) * voxelSize.y,
-             volOffset.z - 0.5f * float(volDim.z) * voxelSize.z };
+    return { volOffset.x - 0.5f * static_cast<float>(volDim.x) * voxelSize.x,
+             volOffset.y - 0.5f * static_cast<float>(volDim.y) * voxelSize.y,
+             volOffset.z - 0.5f * static_cast<float>(volDim.z) * voxelSize.z };
 }
 
 mat::Matrix<3,1> calculateDirection(double x, double y, const mat::Matrix<4,4>& QR)
@@ -326,6 +332,6 @@ mat::Matrix<2,1> checkFace(const mat::Matrix<2,1>& hit, const mat::Matrix<2,1>& 
              conditions2 ? lambda : minMax(1) };
 }
 
-} // namespace (anonymous)
+} // unnamed namespace
 
 } // namespace CTL
