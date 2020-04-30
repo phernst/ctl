@@ -6,6 +6,8 @@
 
 namespace CTL {
 
+DECLARE_SERIALIZABLE_TYPE(RayCasterProjectorCPU);
+
 namespace {
 // helper functions
 mat::Matrix<4,4> decomposeM(const Matrix3x3& M);
@@ -91,6 +93,38 @@ ProjectionData RayCasterProjectorCPU::project(const VolumeData& volume)
 RayCasterProjectorCPU::Settings& RayCasterProjectorCPU::settings()
 {
     return _settings;
+}
+
+// Use SerializationInterface::toVariant() documentation.
+QVariant RayCasterProjectorCPU::toVariant() const
+{
+    QVariantMap ret = AbstractProjector::toVariant().toMap();
+
+    ret.insert("#", "RayCasterProjectorCPU");
+
+    return ret;
+}
+
+QVariant RayCasterProjectorCPU::parameter() const
+{
+    QVariantMap ret = AbstractProjector::parameter().toMap();
+
+    ret.insert("Rays per pixel X", _settings.raysPerPixel[0]);
+    ret.insert("Rays per pixel Y", _settings.raysPerPixel[1]);
+    ret.insert("Ray sampling step length", _settings.raySampling);
+    ret.insert("Interpolate", _settings.interpolate);
+
+    return ret;
+}
+
+void RayCasterProjectorCPU::setParameter(const QVariant& parameter)
+{
+    QVariantMap map = parameter.toMap();
+
+    _settings.raysPerPixel[0] = map.value("Rays per pixel X", 1u).toUInt();
+    _settings.raysPerPixel[1] = map.value("Rays per pixel Y", 1u).toUInt();
+    _settings.raySampling = map.value("Ray sampling step length", 0.3f).toFloat();
+    _settings.interpolate = map.value("Interpolate", true).toBool();
 }
 
 SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,

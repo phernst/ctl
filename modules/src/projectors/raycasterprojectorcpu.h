@@ -10,6 +10,8 @@ namespace CTL {
 
 class RayCasterProjectorCPU : public AbstractProjector
 {
+    CTL_TYPE_ID(10)
+
     class Settings
     {
     public:
@@ -20,10 +22,15 @@ class RayCasterProjectorCPU : public AbstractProjector
 
 public:
     // AbstractProjector interface
-    void configure(const AcquisitionSetup &setup);
-    ProjectionData project(const VolumeData &volume);
+    void configure(const AcquisitionSetup &setup) override;
+    ProjectionData project(const VolumeData &volume) override;
 
     Settings& settings();
+
+    // SerializationInterface interface
+    QVariant toVariant() const override;
+    QVariant parameter() const override;
+    void setParameter(const QVariant& parameter) override;
 
 private:
     Settings _settings; //!< settings of the projector
