@@ -4,6 +4,8 @@
 #include "mat/matrix_algorithm.h"
 #include "processing/threadpool.h"
 
+#include <array>
+
 namespace CTL {
 
 DECLARE_SERIALIZABLE_TYPE(RayCasterProjectorCPU);
@@ -425,10 +427,10 @@ mat::Matrix<2,1> checkFace(const mat::Matrix<2,1>& hit, const mat::Matrix<3,1>& 
     const auto lambdaVal = lambda.get<orthoDim>();
 
     // basic condition: ray must hit the volume (must not pass by)
-    const std::vector<int> compares{ hit.get<0>() >= corner1.get<faceDim1>(),
-                                     hit.get<1>() >= corner1.get<faceDim2>(),
-                                     hit.get<0>() <= corner2.get<faceDim1>(),
-                                     hit.get<1>() <= corner2.get<faceDim2>() };
+    const std::array<int,4> compares{ hit.get<0>() >= corner1.get<faceDim1>(),
+                                      hit.get<1>() >= corner1.get<faceDim2>(),
+                                      hit.get<0>() <= corner2.get<faceDim1>(),
+                                      hit.get<1>() <= corner2.get<faceDim2>() };
     const int intersects = std::all_of(compares.cbegin(), compares.cend(), greaterThanZero);
 
     // check for intersection and if new `lambda` is less/greater then `minMax`
