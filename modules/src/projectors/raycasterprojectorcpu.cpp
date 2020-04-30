@@ -261,9 +261,9 @@ double nonInterpolate(const VolumeData& volume, const mat::Matrix<3, 1>& positio
        static_cast<uint>(voxelIdx[0]) < volDim.x &&
        static_cast<uint>(voxelIdx[1]) < volDim.y &&
        static_cast<uint>(voxelIdx[2]) < volDim.z)
+        return static_cast<double>(volume(voxelIdx[0], voxelIdx[1], voxelIdx[2]));
+    else
         return 0.0;
-
-    return static_cast<double>(volume(voxelIdx[0], voxelIdx[1], voxelIdx[2]));
 }
 
 
