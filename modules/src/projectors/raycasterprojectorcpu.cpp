@@ -203,7 +203,7 @@ double interpolate(const VolumeData& volume, const mat::Matrix<3, 1>& position)
     const auto& nbVoxels = volume.dimensions();
     std::array<int,3> vox;
 
-    if(position(0) < -0.5 || position(1) < -0.5 || position(2) < -0.5 ||
+    if(position(0) < -0.5           || position(1) < -0.5           || position(2) < -0.5 ||
        position(0) > nbVoxels.x+0.5 || position(1) > nbVoxels.y+0.5 || position(2) > nbVoxels.z+0.5)
         return 0.0;
 
@@ -249,21 +249,17 @@ double interpolate(const VolumeData& volume, const mat::Matrix<3, 1>& position)
 
 double nonInterpolate(const VolumeData& volume, const mat::Matrix<3, 1>& position)
 {
-    static auto greaterEqualZero = [] (const int& val) { return val >= 0; };
-
     const auto& volDim = volume.dimensions();
+    if(position(0) < 0.0      || position(1) < 0.0      || position(2) < 0.0 ||
+       position(0) > volDim.x || position(1) > volDim.y || position(2) > volDim.z)
+        return 0.0;
+
     std::array<int,3> voxelIdx;
     voxelIdx[0] = static_cast<int>(std::floor(position(0)));
     voxelIdx[1] = static_cast<int>(std::floor(position(1)));
     voxelIdx[2] = static_cast<int>(std::floor(position(2)));
 
-    if(std::all_of(voxelIdx.cbegin(), voxelIdx.cend(), greaterEqualZero) &&
-       static_cast<uint>(voxelIdx[0]) < volDim.x &&
-       static_cast<uint>(voxelIdx[1]) < volDim.y &&
-       static_cast<uint>(voxelIdx[2]) < volDim.z)
-        return static_cast<double>(volume(voxelIdx[0], voxelIdx[1], voxelIdx[2]));
-    else
-        return 0.0;
+    return static_cast<double>(volume(voxelIdx[0], voxelIdx[1], voxelIdx[2]));
 }
 
 
