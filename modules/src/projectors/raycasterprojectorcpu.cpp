@@ -17,7 +17,7 @@ mat::Matrix<2,1> calculateIntersections(const mat::Matrix<3,1>& source,
                                         const mat::Matrix<3,1>& direction,
                                         const mat::Matrix<3,1>& volSize,
                                         const mat::Matrix<3,1>& volCorner,
-                                        bool interpolatedRead);
+                                        bool interpolate);
 template<uint,uint>
 mat::Matrix<2,1> calculateHit(const mat::Matrix<3,1>& source, const mat::Matrix<3,1>& lambda,
                               const mat::Matrix<3,1>& direction);
@@ -96,23 +96,7 @@ RayCasterProjectorCPU::Settings& RayCasterProjectorCPU::settings()
 SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
                                                   const mat::Matrix<3,1>& volumeCorner,
                                                   uint view) const
-{
-    const auto& volDim = volume.dimensions();
-    const auto& voxelSize_mm = volume.voxelSize();
-    const std::array<uint,2> raysPerPixel { _settings.raysPerPixel[0], _settings.raysPerPixel[1] };
-
-    // determine ray step length in mm
-    const auto smallestVoxelSize = std::min( { voxelSize_mm.x, voxelSize_mm.y, voxelSize_mm.z } );
-    const auto increment_mm = smallestVoxelSize * _settings.raySampling;
-
-    const auto& currentViewPMats = _pMats.at(view);
-    // all modules have same source position --> use first module PMat (arbitrary)
-    const auto sourcePosition = currentViewPMats.first().sourcePosition();
-    // individual module geometry: QR is only determined by M, where P=[M|p4]
-    std::vector<mat::Matrix<4,4>> QRs(_viewDim.nbModules);
-    for(auto module = 0u; module < _viewDim.nbModules; ++module)
-        QRs[module] = decomposeM(currentViewPMats.at(module).M());
-
+{  
     // sizes
     const uint detectorColumns = _viewDim.nbChannels;
     const uint detectorRows = _viewDim.nbRows;
@@ -121,25 +105,41 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
     auto projection = SingleViewData(detectorColumns, detectorRows);
     projection.allocateMemory(detectorModules);
 
+    // determine ray step length in mm
+    const auto increment_mm = volume.smallestVoxelSize() * _settings.raySampling;
+
+    // geometry
+    const auto& currentViewPMats = _pMats.at(view);
+    // all modules have same source position --> use first module PMat (arbitrary)
+    const auto sourcePosition = currentViewPMats.first().sourcePosition();
+    // individual module geometry: QR is only determined by M, where P=[M|p4]
+    std::vector<mat::Matrix<4,4>> QRs(_viewDim.nbModules);
+    for(auto module = 0u; module < _viewDim.nbModules; ++module)
+        QRs[module] = decomposeM(currentViewPMats.at(module).M());
+
     // quantities normalized by the voxel size (units of "voxel numbers")
-    const mat::Matrix<3,1> volSize(static_cast<double>(volDim.x),
-                                   static_cast<double>(volDim.y),
-                                   static_cast<double>(volDim.z));
+    const auto& voxelSize_mm = volume.voxelSize();
+    const mat::Matrix<3,1> volSize(static_cast<double>(volume.dimensions().x),
+                                   static_cast<double>(volume.dimensions().y),
+                                   static_cast<double>(volume.dimensions().z));
     const mat::Matrix<3,1> source(sourcePosition(0) / voxelSize_mm.x,
                                   sourcePosition(1) / voxelSize_mm.y,
                                   sourcePosition(2) / voxelSize_mm.z);
     const mat::Matrix<3,1> volCorner(volumeCorner(0) / voxelSize_mm.x,
                                      volumeCorner(1) / voxelSize_mm.y,
                                      volumeCorner(2) / voxelSize_mm.z);
+    const mat::Matrix<3,1> increment_vox(increment_mm / voxelSize_mm.x,
+                                         increment_mm / voxelSize_mm.y,
+                                         increment_mm / voxelSize_mm.z);
 
     //const float3 cornerToSourceVector = source - volCorner;
     const mat::Matrix<3,1> cornerToSourceVector = source - volCorner;
 
     // quantities related to the projection image pixels
+    const std::array<uint,2> raysPerPixel { _settings.raysPerPixel[0], _settings.raysPerPixel[1] };
+    const auto totalRaysPerPixel = static_cast<float>(raysPerPixel[0] * raysPerPixel[1]);
     const mat::Matrix<2,1> intraPixelSpacing(1.0 / raysPerPixel[0],
                                              1.0 / raysPerPixel[1]);
-
-    const auto totalRaysPerPixel = static_cast<float>(raysPerPixel[0] * raysPerPixel[1]);
 
     // sampling method (interpolation on/off)
     float (*readValue)(const VolumeData&, const mat::Matrix<3,1>&);
@@ -170,9 +170,9 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
                                                static_cast<double>(rayY) * intraPixelSpacing(1));
 
                         direction = calculateDirection(pixelCoord(0), pixelCoord(1), QRs[module]);
-                        direction(0) *= (increment_mm / voxelSize_mm.x);
-                        direction(1) *= (increment_mm / voxelSize_mm.y);
-                        direction(2) *= (increment_mm / voxelSize_mm.z);
+                        direction(0) *= increment_vox(0);
+                        direction(1) *= increment_vox(1);
+                        direction(2) *= increment_vox(2);
 
                         rayBounds = calculateIntersections(source, direction, volSize, volCorner, _settings.interpolate);
 
