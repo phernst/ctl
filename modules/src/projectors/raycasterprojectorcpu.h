@@ -4,6 +4,8 @@
 #include "abstractprojector.h"
 #include "acquisition/viewgeometry.h"
 
+#include <array>
+
 namespace CTL {
 
 class RayCasterProjectorCPU : public AbstractProjector
@@ -21,12 +23,13 @@ public:
     void configure(const AcquisitionSetup &setup);
     ProjectionData project(const VolumeData &volume);
 
-    Settings _settings; //!< settings of the projector
-    SingleViewData::Dimensions _viewDim; //!< dimensions of a single view
-    uint _volDim[3]; //!< cache for volume dimensions
-    FullGeometry _pMats; //!< full set of projection matrices for all views and modules
+    Settings& settings();
 
 private:
+    Settings _settings; //!< settings of the projector
+    SingleViewData::Dimensions _viewDim; //!< dimensions of a single view
+    FullGeometry _pMats; //!< full set of projection matrices for all views and modules
+
     SingleViewData computeView(const VolumeData& volume,
                                const mat::Matrix<3,1>& volumeCorner,
                                uint view) const;
