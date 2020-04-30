@@ -4,8 +4,6 @@
 #include "abstractprojector.h"
 #include "acquisition/viewgeometry.h"
 
-#include <array>
-
 namespace CTL {
 
 class RayCasterProjectorCPU : public AbstractProjector
