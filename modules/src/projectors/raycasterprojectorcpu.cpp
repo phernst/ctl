@@ -9,7 +9,6 @@ namespace CTL {
 namespace {
 // helper functions
 mat::Matrix<4,4> decomposeM(const Matrix3x3& M);
-mat::Matrix<3,1> determineSource(const ProjectionMatrix& P);
 mat::Matrix<3,1> volumeCorner(const VoxelVolume<float>& volume);
 // normalized direction vector (world coord. frame) to detector pixel [x,y]
 mat::Matrix<3,1> calculateDirection(double x, double y, const mat::Matrix<4,4>& QR);
@@ -18,17 +17,21 @@ mat::Matrix<2,1> calculateIntersections(const mat::Matrix<3,1>& source,
                                         const mat::Matrix<3,1>& direction,
                                         const mat::Matrix<3,1>& volSize,
                                         const mat::Matrix<3,1>& volCorner,
-                                        bool interpolate);
+                                        bool interpolatedRead);
+template<uint,uint>
+mat::Matrix<2,1> calculateHit(const mat::Matrix<3,1>& source, const mat::Matrix<3,1>& lambda,
+                              const mat::Matrix<3,1>& direction);
 // helper for `calculateIntersections`: checks `lambda` as a candidate for a parameter of entry/exit
 // point compared to given `minMax` values for a certain face of the volume. `corner1` and `corner2`
 // are the corners of the 2d face and `hit` is the intersection of the ray with the face.
-mat::Matrix<2,1> checkFace(const mat::Matrix<2,1>& hit, const mat::Matrix<2,1>& corner1,
-                           const mat::Matrix<2,1>& corner2, float lambda,
+template<uint,uint>
+mat::Matrix<2,1> checkFace(const mat::Matrix<2,1>& hit, const mat::Matrix<3,1>& corner1,
+                           const mat::Matrix<3,1>& corner2, const mat::Matrix<3,1>& lambda,
                            const mat::Matrix<2,1>& minMax);
-double interpolate(const VolumeData& volume,
-                   const mat::Matrix<3,1>& position);
-double nonInterpolate(const VolumeData& volume,
-                      const mat::Matrix<3,1>& position);
+float interpolatedRead(const VolumeData& volume,
+                       const mat::Matrix<3,1>& position);
+float nonInterpolatedRead(const VolumeData& volume,
+                          const mat::Matrix<3,1>& position);
 
 } // unnamed namespace
 
@@ -96,7 +99,7 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
 {
     const auto& volDim = volume.dimensions();
     const auto& voxelSize_mm = volume.voxelSize();
-    const QPair<uint, uint> raysPerPixel { _settings.raysPerPixel[0], _settings.raysPerPixel[1] };
+    const std::array<uint,2> raysPerPixel { _settings.raysPerPixel[0], _settings.raysPerPixel[1] };
 
     // determine ray step length in mm
     const auto smallestVoxelSize = std::min( { voxelSize_mm.x, voxelSize_mm.y, voxelSize_mm.z } );
@@ -104,7 +107,7 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
 
     const auto& currentViewPMats = _pMats.at(view);
     // all modules have same source position --> use first module PMat (arbitrary)
-    const auto sourcePosition = determineSource(currentViewPMats.first());
+    const auto sourcePosition = currentViewPMats.first().sourcePosition();
     // individual module geometry: QR is only determined by M, where P=[M|p4]
     std::vector<mat::Matrix<4,4>> QRs(_viewDim.nbModules);
     for(auto module = 0u; module < _viewDim.nbModules; ++module)
@@ -133,18 +136,19 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
     const mat::Matrix<3,1> cornerToSourceVector = source - volCorner;
 
     // quantities related to the projection image pixels
-    const mat::Matrix<2,1> intraPixelSpacing(1.0 / raysPerPixel.first,
-                                             1.0 / raysPerPixel.second);
+    const mat::Matrix<2,1> intraPixelSpacing(1.0 / raysPerPixel[0],
+                                             1.0 / raysPerPixel[1]);
 
-    const auto totalRaysPerPixel = static_cast<float>(raysPerPixel.first * raysPerPixel.second);
+    const auto totalRaysPerPixel = static_cast<float>(raysPerPixel[0] * raysPerPixel[1]);
 
-    double (*readValue)(const VolumeData&, const mat::Matrix<3,1>&);
-    readValue = _settings.interpolate ? interpolate
-                                      : nonInterpolate;
+    // sampling method (interpolation on/off)
+    float (*readValue)(const VolumeData&, const mat::Matrix<3,1>&);
+    readValue = _settings.interpolate ? interpolatedRead
+                                      : nonInterpolatedRead;
 
+    // loop over all pixels of all modules
     for(auto module = 0u; module < detectorModules; ++module)
         for(auto x = 0u; x < detectorColumns; ++x)
-        {
             for(auto y = 0u; y < detectorRows; ++y)
             {
                 const auto pixelCornerPlusOffset = mat::Matrix<2,1>(static_cast<double>(x) - 0.5,
@@ -153,8 +157,9 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
                 // resulting projection value
                 double projVal = 0.0;
 
-                for(auto rayX = 0u; rayX < raysPerPixel.first; ++rayX)
-                    for(auto rayY = 0u; rayY < raysPerPixel.second; ++rayY)
+                // loop over sub-rays
+                for(auto rayX = 0u; rayX < raysPerPixel[0]; ++rayX)
+                    for(auto rayY = 0u; rayY < raysPerPixel[1]; ++rayY)
                     {
                         // helper variables
                         mat::Matrix<3,1> direction;
@@ -164,15 +169,14 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
                             + mat::Matrix<2,1>(static_cast<double>(rayX) * intraPixelSpacing(0),
                                                static_cast<double>(rayY) * intraPixelSpacing(1));
 
-                        direction = increment_mm * calculateDirection(pixelCoord(0),
-                                                                      pixelCoord(1),
-                                                                      QRs[module]);
-                        direction(0) /= voxelSize_mm.x;
-                        direction(1) /= voxelSize_mm.y;
-                        direction(2) /= voxelSize_mm.z;
+                        direction = calculateDirection(pixelCoord(0), pixelCoord(1), QRs[module]);
+                        direction(0) *= (increment_mm / voxelSize_mm.x);
+                        direction(1) *= (increment_mm / voxelSize_mm.y);
+                        direction(2) *= (increment_mm / voxelSize_mm.z);
 
                         rayBounds = calculateIntersections(source, direction, volSize, volCorner, _settings.interpolate);
 
+                        // trace the ray
                         for(auto i   = static_cast<uint>(rayBounds(0)),
                                  end = static_cast<uint>(rayBounds(1)) + 1;
                             i <= end; ++i)
@@ -184,82 +188,78 @@ SingleViewData RayCasterProjectorCPU::computeView(const VolumeData& volume,
                             position(1) = std::fma(static_cast<double>(i), direction(1), cornerToSourceVector(1));
                             position(2) = std::fma(static_cast<double>(i), direction(2), cornerToSourceVector(2));
 
-                            projVal += readValue(volume, position);
+                            projVal += static_cast<double>(readValue(volume, position));
                         }
                     }
 
                 projection.module(module)(x,y) = increment_mm * static_cast<float>(projVal) / totalRaysPerPixel;
-
             }
-        }
 
     return projection;
 }
 
 namespace {
 
-double interpolate(const VolumeData& volume, const mat::Matrix<3, 1>& position)
+float interpolatedRead(const VolumeData& volume, const mat::Matrix<3, 1>& position)
 {
     const auto& nbVoxels = volume.dimensions();
-    std::array<int,3> vox;
-
     if(position(0) < -0.5           || position(1) < -0.5           || position(2) < -0.5 ||
        position(0) > nbVoxels.x+0.5 || position(1) > nbVoxels.y+0.5 || position(2) > nbVoxels.z+0.5)
         return 0.0;
 
-    // voxel 000 (smallest indices)
-    vox[0] = static_cast<int>(std::floor(position(0) - 0.5));
-    vox[1] = static_cast<int>(std::floor(position(1) - 0.5));
-    vox[2] = static_cast<int>(std::floor(position(2) - 0.5));
+    // voxel 000 (smallest indices) -> subtract 0.5 to get "left-most, bottom voxel on the front"
+    const std::array<int,3> vox { static_cast<int>(std::floor(position(0) - 0.5)),
+                                  static_cast<int>(std::floor(position(1) - 0.5)),
+                                  static_cast<int>(std::floor(position(2) - 0.5)) };
 
-    std::array<bool, 3> borderIdxLow( { vox[0] < 0,
-                                        vox[1] < 0,
-                                        vox[2] < 0 } );
-    std::array<bool, 3> borderIdxHigh( { vox[0] >= int(nbVoxels.x) - 1,
-                                         vox[1] >= int(nbVoxels.y) - 1,
-                                         vox[2] >= int(nbVoxels.z) - 1  } );
+    // check if a border voxel is involved
+    const std::array<bool, 3> borderIdxLow( { vox[0] < 0,
+                                              vox[1] < 0,
+                                              vox[2] < 0 } );
+    const std::array<bool, 3> borderIdxHigh( { vox[0] >= int(nbVoxels.x) - 1,
+                                               vox[1] >= int(nbVoxels.y) - 1,
+                                               vox[2] >= int(nbVoxels.z) - 1  } );
 
-    mat::Matrix<3,1> weights(position(0) - (vox[0] + 0.5),
-                             position(1) - (vox[1] + 0.5),
-                             position(2) - (vox[2] + 0.5));
+    // compute weight factors
+    const std::array<float, 3> weights { float(position(0) - (vox[0] + 0.5)),
+                                         float(position(1) - (vox[1] + 0.5)),
+                                         float(position(2) - (vox[2] + 0.5)) };
 
-    const auto v000 = (borderIdxLow[0]  || borderIdxLow[1]  || borderIdxLow[2])  ? 0.0 : volume(vox[0],   vox[1],   vox[2]);
-    const auto v001 = (borderIdxLow[0]  || borderIdxLow[1]  || borderIdxHigh[2]) ? 0.0 : volume(vox[0],   vox[1],   vox[2]+1);
-    const auto v010 = (borderIdxLow[0]  || borderIdxHigh[1] || borderIdxLow[2])  ? 0.0 : volume(vox[0],   vox[1]+1, vox[2]);
-    const auto v011 = (borderIdxLow[0]  || borderIdxHigh[1] || borderIdxHigh[2]) ? 0.0 : volume(vox[0],   vox[1]+1, vox[2]+1);
-    const auto v100 = (borderIdxHigh[0] || borderIdxLow[1]  || borderIdxLow[2])  ? 0.0 : volume(vox[0]+1, vox[1],   vox[2]);
-    const auto v101 = (borderIdxHigh[0] || borderIdxLow[1]  || borderIdxHigh[2]) ? 0.0 : volume(vox[0]+1, vox[1],   vox[2]+1);
-    const auto v110 = (borderIdxHigh[0] || borderIdxHigh[1] || borderIdxLow[2])  ? 0.0 : volume(vox[0]+1, vox[1]+1, vox[2]);
-    const auto v111 = (borderIdxHigh[0] || borderIdxHigh[1] || borderIdxHigh[2]) ? 0.0 : volume(vox[0]+1, vox[1]+1, vox[2]+1);
+    // read out values of all 8 voxels (or assign zero if border)
+    const auto v000 = (borderIdxLow[0]  || borderIdxLow[1]  || borderIdxLow[2])  ? 0.0f : volume(vox[0],   vox[1],   vox[2]);
+    const auto v001 = (borderIdxLow[0]  || borderIdxLow[1]  || borderIdxHigh[2]) ? 0.0f : volume(vox[0],   vox[1],   vox[2]+1);
+    const auto v010 = (borderIdxLow[0]  || borderIdxHigh[1] || borderIdxLow[2])  ? 0.0f : volume(vox[0],   vox[1]+1, vox[2]);
+    const auto v011 = (borderIdxLow[0]  || borderIdxHigh[1] || borderIdxHigh[2]) ? 0.0f : volume(vox[0],   vox[1]+1, vox[2]+1);
+    const auto v100 = (borderIdxHigh[0] || borderIdxLow[1]  || borderIdxLow[2])  ? 0.0f : volume(vox[0]+1, vox[1],   vox[2]);
+    const auto v101 = (borderIdxHigh[0] || borderIdxLow[1]  || borderIdxHigh[2]) ? 0.0f : volume(vox[0]+1, vox[1],   vox[2]+1);
+    const auto v110 = (borderIdxHigh[0] || borderIdxHigh[1] || borderIdxLow[2])  ? 0.0f : volume(vox[0]+1, vox[1]+1, vox[2]);
+    const auto v111 = (borderIdxHigh[0] || borderIdxHigh[1] || borderIdxHigh[2]) ? 0.0f : volume(vox[0]+1, vox[1]+1, vox[2]+1);
 
-    const auto w0_opp = 1.0 - weights(0);
-    const auto c00 = w0_opp * v000 + weights(0) * v100;
-    const auto c01 = w0_opp * v001 + weights(0) * v101;
-    const auto c10 = w0_opp * v010 + weights(0) * v110;
-    const auto c11 = w0_opp * v011 + weights(0) * v111;
+    const auto w0_opp = 1.0f - weights[0];
+    const auto c00 = w0_opp * v000 + weights[0] * v100;
+    const auto c01 = w0_opp * v001 + weights[0] * v101;
+    const auto c10 = w0_opp * v010 + weights[0] * v110;
+    const auto c11 = w0_opp * v011 + weights[0] * v111;
 
+    const auto w1_opp = 1.0f - weights[1];
+    const auto c0 = c00 * w1_opp + c10 * weights[1];
+    const auto c1 = c01 * w1_opp + c11 * weights[1];
 
-    const auto c0 = c00 * (1.0 - weights(1)) + c10 * weights(1);
-    const auto c1 = c01 * (1.0 - weights(1)) + c11 * weights(1);
-
-    const auto ret = c0 * (1.0 - weights(2)) + c1 * weights(2);
-
-    return ret;
+    return c0 * (1.0f - weights[2]) + c1 * weights[2];
 }
 
-double nonInterpolate(const VolumeData& volume, const mat::Matrix<3, 1>& position)
+float nonInterpolatedRead(const VolumeData& volume, const mat::Matrix<3, 1>& position)
 {
     const auto& volDim = volume.dimensions();
     if(position(0) < 0.0      || position(1) < 0.0      || position(2) < 0.0 ||
        position(0) > volDim.x || position(1) > volDim.y || position(2) > volDim.z)
         return 0.0;
 
-    std::array<int,3> voxelIdx;
-    voxelIdx[0] = static_cast<int>(std::floor(position(0)));
-    voxelIdx[1] = static_cast<int>(std::floor(position(1)));
-    voxelIdx[2] = static_cast<int>(std::floor(position(2)));
+    const std::array<int,3> voxelIdx { static_cast<int>(std::floor(position(0))),
+                                       static_cast<int>(std::floor(position(1))),
+                                       static_cast<int>(std::floor(position(2))) };
 
-    return static_cast<double>(volume(voxelIdx[0], voxelIdx[1], voxelIdx[2]));
+    return volume(voxelIdx[0], voxelIdx[1], voxelIdx[2]);
 }
 
 
@@ -281,11 +281,6 @@ mat::Matrix<4,4> decomposeM(const Matrix3x3& M)
                                               R(2,2),
                                               0.0} ;
     return ret;
-}
-
-mat::Matrix<3,1> determineSource(const ProjectionMatrix& P)
-{
-    return P.sourcePosition();
 }
 
 mat::Matrix<3,1> volumeCorner(const VoxelVolume<float>& volume)
@@ -344,58 +339,71 @@ mat::Matrix<2,1> calculateIntersections(const mat::Matrix<3,1>& source,
     mat::Matrix<2,1> minMax(std::numeric_limits<double>::max(), 0.0);
     mat::Matrix<2,1> hit;
 
-    auto matrixSel = [] (const mat::Matrix<3,1>& mat, uint dim1, uint dim2)
-    { return mat::Matrix<2,1>{ mat(dim1), mat(dim2) }; };
-
     // # lambda1: faces around corner1
     // yz-face
-    hit = matrixSel(source, 1, 2) + lambda1(0) * matrixSel(direction, 1, 2);
-    minMax = checkFace(hit, matrixSel(corner1, 1, 2), matrixSel(corner2, 1, 2), lambda1(0), minMax);
+    hit = calculateHit<1,2>(source, lambda1, direction);
+    minMax = checkFace<1,2>(hit, corner1, corner2, lambda1, minMax);
 
     // xz-face
-    hit = matrixSel(source, 0, 2) + lambda1(1) * matrixSel(direction, 0, 2);
-    minMax = checkFace(hit, matrixSel(corner1, 0, 2), matrixSel(corner2, 0, 2), lambda1(1), minMax);
+    hit = calculateHit<0,2>(source, lambda1, direction);
+    minMax = checkFace<0,2>(hit, corner1, corner2, lambda1, minMax);
 
     // xy-face
-    hit = matrixSel(source, 0, 1) + lambda1(2) * matrixSel(direction, 0, 1);
-    minMax = checkFace(hit, matrixSel(corner1, 0, 1), matrixSel(corner2, 0, 1), lambda1(2), minMax);
+    hit = calculateHit<0,1>(source, lambda1, direction);
+    minMax = checkFace<0,1>(hit, corner1, corner2, lambda1, minMax);
 
     // # lambda2: faces around corner2
     // yz-face
-    hit = matrixSel(source, 1, 2) + lambda2(0) * matrixSel(direction, 1, 2);
-    minMax = checkFace(hit, matrixSel(corner1, 1, 2), matrixSel(corner2, 1, 2), lambda2(0), minMax);
+    hit = calculateHit<1,2>(source, lambda2, direction);
+    minMax = checkFace<1,2>(hit, corner1, corner2, lambda2, minMax);
 
     // xz-face
-    hit = matrixSel(source, 0, 2) + lambda2(1) * matrixSel(direction, 0, 2);
-    minMax = checkFace(hit, matrixSel(corner1, 0, 2), matrixSel(corner2, 0, 2), lambda2(1), minMax);
+    hit = calculateHit<0,2>(source, lambda2, direction);
+    minMax = checkFace<0,2>(hit, corner1, corner2, lambda2, minMax);
 
     // xy-face
-    hit = matrixSel(source, 0, 1) + lambda2(2) * matrixSel(direction, 0, 1);
-    minMax = checkFace(hit, matrixSel(corner1, 0, 1), matrixSel(corner2, 0, 1), lambda2(2), minMax);
+    hit = calculateHit<0,1>(source, lambda2, direction);
+    minMax = checkFace<0,1>(hit, corner1, corner2, lambda2, minMax);
 
     // enforce positivity (ray needs to start from the source)
-    return { std::max( { minMax(0), 0.0 } ),
-             std::max( { minMax(1), 0.0 } ) };
+    return { std::max( { minMax.get<0>(), 0.0 } ),
+             std::max( { minMax.get<1>(), 0.0 } ) };
 }
 
-mat::Matrix<2,1> checkFace(const mat::Matrix<2,1>& hit, const mat::Matrix<2,1>& corner1,
-                           const mat::Matrix<2,1>& corner2, float lambda,
+template<uint faceDim1, uint faceDim2>
+mat::Matrix<2,1> calculateHit(const mat::Matrix<3,1>& source, const mat::Matrix<3,1>& lambda,
+                              const mat::Matrix<3,1>& direction)
+{
+    constexpr auto orthoDim = 3u - faceDim1 - faceDim2;
+
+    return mat::Matrix<2,1>(source.get<faceDim1>() + lambda.get<orthoDim>() * direction.get<faceDim1>(),
+                            source.get<faceDim2>() + lambda.get<orthoDim>() * direction.get<faceDim2>());
+}
+
+template<uint faceDim1, uint faceDim2>
+mat::Matrix<2,1> checkFace(const mat::Matrix<2,1>& hit, const mat::Matrix<3,1>& corner1,
+                           const mat::Matrix<3,1>& corner2, const mat::Matrix<3,1>& lambda,
                            const mat::Matrix<2,1>& minMax)
 {
+    static auto greaterThanZero = [] (const int& val) { return val > 0; };
+
+    constexpr auto orthoDim = 3u - faceDim1 - faceDim2;
+    const auto lambdaVal = lambda.get<orthoDim>();
+
     // basic condition: ray must hit the volume (must not pass by)
-    const std::vector<int> compares{ hit(0) >= corner1(0),
-                                     hit(1) >= corner1(1),
-                                     hit(0) <= corner2(0),
-                                     hit(1) <= corner2(1) };
-    const int intersects = std::all_of(compares.cbegin(), compares.cend(), [] (const int& val) { return val > 0; } );
+    const std::vector<int> compares{ hit.get<0>() >= corner1.get<faceDim1>(),
+                                     hit.get<1>() >= corner1.get<faceDim2>(),
+                                     hit.get<0>() <= corner2.get<faceDim1>(),
+                                     hit.get<1>() <= corner2.get<faceDim2>() };
+    const int intersects = std::all_of(compares.cbegin(), compares.cend(), greaterThanZero);
 
     // check for intersection and if new `lambda` is less/greater then `minMax`
-    const bool conditions1 = intersects && lambda < minMax(0);
-    const bool conditions2 = intersects && lambda > minMax(1);
+    const bool conditions1 = intersects && lambdaVal < minMax.get<0>();
+    const bool conditions2 = intersects && lambdaVal > minMax.get<1>();
 
     // select new `lambda` if a condition is true, otherwise return old `minMax`
-    return { conditions1 ? lambda : minMax(0),
-             conditions2 ? lambda : minMax(1) };
+    return { conditions1 ? lambdaVal : minMax.get<0>(),
+             conditions2 ? lambdaVal : minMax.get<1>() };
 }
 
 } // unnamed namespace
