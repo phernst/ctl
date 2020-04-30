@@ -59,7 +59,7 @@ RayCasterProjector::RayCasterProjector()
 // Use SerializationInterface::toVariant() documentation.
 QVariant RayCasterProjector::toVariant() const
 {
-    QVariantMap ret = SerializationInterface::toVariant().toMap();
+    QVariantMap ret = AbstractProjector::toVariant().toMap();
 
     ret.insert("#", "RayCasterProjector");
 
