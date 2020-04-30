@@ -27,11 +27,6 @@ mat::Matrix<2,1> checkFace(const mat::Matrix<2,1>& hit, const mat::Matrix<2,1>& 
                            const mat::Matrix<2,1>& minMax);
 double interpolate(const VolumeData& volume,
                    const mat::Matrix<3,1>& position);
-double interpolateBorderCase(const VolumeData& volume,
-                             const mat::Matrix<3,1>& position,
-                             const std::array<int,3>& idx,
-                             const std::array<bool,3>& borderIdxLow,
-                             const std::array<bool,3>& borderIdxHigh);
 double nonInterpolate(const VolumeData& volume,
                       const mat::Matrix<3,1>& position);
 
@@ -224,46 +219,18 @@ double interpolate(const VolumeData& volume, const mat::Matrix<3, 1>& position)
                                          vox[1] >= int(nbVoxels.y) - 1,
                                          vox[2] >= int(nbVoxels.z) - 1  } );
 
-    if(std::any_of(borderIdxLow.cbegin(), borderIdxLow.cend(), [] (bool val) { return val; } ) ||
-       std::any_of(borderIdxHigh.cbegin(), borderIdxHigh.cend(), [] (bool val) { return val; } )     )
-        return interpolateBorderCase(volume, position, vox, borderIdxLow, borderIdxHigh);
-
-    // distance from center of voxel 000
     mat::Matrix<3,1> weights(position(0) - (vox[0] + 0.5),
                              position(1) - (vox[1] + 0.5),
                              position(2) - (vox[2] + 0.5));
 
-    const auto w0_opp = 1.0 - weights(0);
-    const auto c00 = w0_opp * volume(vox[0], vox[1],   vox[2])   + weights(0) * volume(vox[0]+1, vox[1],   vox[2]);
-    const auto c01 = w0_opp * volume(vox[0], vox[1],   vox[2]+1) + weights(0) * volume(vox[0]+1, vox[1],   vox[2]+1);
-    const auto c10 = w0_opp * volume(vox[0], vox[1]+1, vox[2])   + weights(0) * volume(vox[0]+1, vox[1]+1, vox[2]);
-    const auto c11 = w0_opp * volume(vox[0], vox[1]+1, vox[2]+1) + weights(0) * volume(vox[0]+1, vox[1]+1, vox[2]+1);
-
-    const auto c0 = c00 * (1.0 - weights(1)) + c10 * weights(1);
-    const auto c1 = c01 * (1.0 - weights(1)) + c11 * weights(1);
-
-    const auto ret = c0 * (1.0 - weights(2)) + c1 * weights(2);
-
-    return ret;
-}
-
-double interpolateBorderCase(const VolumeData& volume, const mat::Matrix<3, 1>& position,
-                                                   const std::array<int,3>& v, const std::array<bool, 3>& borderIdxLow,
-                                                    const std::array<bool, 3>& borderIdxHigh)
-{
-    mat::Matrix<3,1> weights(position(0) - (v[0] + 0.5),
-                             position(1) - (v[1] + 0.5),
-                             position(2) - (v[2] + 0.5));
-
-    const auto v000 = (borderIdxLow[0]  || borderIdxLow[1]  || borderIdxLow[2])  ? 0.0 : volume(v[0],   v[1],   v[2]);
-    const auto v001 = (borderIdxLow[0]  || borderIdxLow[1]  || borderIdxHigh[2]) ? 0.0 : volume(v[0],   v[1],   v[2]+1);
-    const auto v010 = (borderIdxLow[0]  || borderIdxHigh[1] || borderIdxLow[2])  ? 0.0 : volume(v[0],   v[1]+1, v[2]);
-    const auto v011 = (borderIdxLow[0]  || borderIdxHigh[1] || borderIdxHigh[2]) ? 0.0 : volume(v[0],   v[1]+1, v[2]+1);
-    const auto v100 = (borderIdxHigh[0] || borderIdxLow[1]  || borderIdxLow[2])  ? 0.0 : volume(v[0]+1, v[1],   v[2]);
-    const auto v101 = (borderIdxHigh[0] || borderIdxLow[1]  || borderIdxHigh[2]) ? 0.0 : volume(v[0]+1, v[1],   v[2]+1);
-    const auto v110 = (borderIdxHigh[0] || borderIdxHigh[1] || borderIdxLow[2])  ? 0.0 : volume(v[0]+1, v[1]+1, v[2]);
-    const auto v111 = (borderIdxHigh[0] || borderIdxHigh[1] || borderIdxHigh[2]) ? 0.0 : volume(v[0]+1, v[1]+1, v[2]+1);
-
+    const auto v000 = (borderIdxLow[0]  || borderIdxLow[1]  || borderIdxLow[2])  ? 0.0 : volume(vox[0],   vox[1],   vox[2]);
+    const auto v001 = (borderIdxLow[0]  || borderIdxLow[1]  || borderIdxHigh[2]) ? 0.0 : volume(vox[0],   vox[1],   vox[2]+1);
+    const auto v010 = (borderIdxLow[0]  || borderIdxHigh[1] || borderIdxLow[2])  ? 0.0 : volume(vox[0],   vox[1]+1, vox[2]);
+    const auto v011 = (borderIdxLow[0]  || borderIdxHigh[1] || borderIdxHigh[2]) ? 0.0 : volume(vox[0],   vox[1]+1, vox[2]+1);
+    const auto v100 = (borderIdxHigh[0] || borderIdxLow[1]  || borderIdxLow[2])  ? 0.0 : volume(vox[0]+1, vox[1],   vox[2]);
+    const auto v101 = (borderIdxHigh[0] || borderIdxLow[1]  || borderIdxHigh[2]) ? 0.0 : volume(vox[0]+1, vox[1],   vox[2]+1);
+    const auto v110 = (borderIdxHigh[0] || borderIdxHigh[1] || borderIdxLow[2])  ? 0.0 : volume(vox[0]+1, vox[1]+1, vox[2]);
+    const auto v111 = (borderIdxHigh[0] || borderIdxHigh[1] || borderIdxHigh[2]) ? 0.0 : volume(vox[0]+1, vox[1]+1, vox[2]+1);
 
     const auto w0_opp = 1.0 - weights(0);
     const auto c00 = w0_opp * v000 + weights(0) * v100;
