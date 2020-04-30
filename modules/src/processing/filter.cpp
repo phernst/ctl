@@ -17,7 +17,7 @@ namespace imgproc {
 // Implementation details
 // ----------------------
 
-// anonymous namespace
+// unnamed namespace
 namespace {
 
 // ## FIFO type buffer which caches number N of filter size elements ##
@@ -574,7 +574,7 @@ void filter_impl(VoxelVolume<T>& volume, int m)
         }
 }
 
-} // anonymous namespace
+} // unnamed namespace
 
 // Interface function definitions
 // ------------------------------

@@ -102,6 +102,7 @@ HEADERS += \
     $$PWD/../src/projectors/poissonnoiseextension.h \
     $$PWD/../src/projectors/projectionpipeline.h \
     $$PWD/../src/projectors/projectorextension.h \
+    $$PWD/../src/projectors/raycasterprojectorcpu.h \
     $$PWD/../src/projectors/spectraleffectsextension.h
 
 SOURCES += \
@@ -166,6 +167,7 @@ SOURCES += \
     $$PWD/../src/projectors/poissonnoiseextension.cpp \
     $$PWD/../src/projectors/projectionpipeline.cpp \
     $$PWD/../src/projectors/projectorextension.cpp \
+    $$PWD/../src/projectors/raycasterprojectorcpu.cpp \
     $$PWD/../src/projectors/spectraleffectsextension.cpp
 
 # Qt-free headers and sources

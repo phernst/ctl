@@ -175,3 +175,11 @@ analyze-loc:
   only:
     - master
   allow_failure: true
+
+# check header consistency
+
+header-consistency:
+  stage: build
+  script:
+    - cd modules
+    - ./.check_header_consistency.sh

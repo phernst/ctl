@@ -93,6 +93,7 @@
 #include "projectors/poissonnoiseextension.h"
 #include "projectors/projectionpipeline.h"
 #include "projectors/projectorextension.h"
+#include "projectors/raycasterprojectorcpu.h"
 #include "projectors/spectraleffectsextension.h"
 // Qt-free
 #include "mat/deg.h"
