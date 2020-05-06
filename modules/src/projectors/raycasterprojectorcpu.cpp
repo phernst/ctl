@@ -249,12 +249,12 @@ float interpolatedRead(const VolumeData& volume, const mat::Matrix<3, 1>& positi
                                   static_cast<int>(std::floor(position(2) - 0.5)) };
 
     // check if a border voxel is involved
-    const std::array<bool, 3> borderIdxLow( { vox[0] < 0,
-                                              vox[1] < 0,
-                                              vox[2] < 0 } );
-    const std::array<bool, 3> borderIdxHigh( { vox[0] >= int(nbVoxels.x) - 1,
-                                               vox[1] >= int(nbVoxels.y) - 1,
-                                               vox[2] >= int(nbVoxels.z) - 1  } );
+    const std::array<bool, 3> borderIdxLow { vox[0] < 0,
+                                             vox[1] < 0,
+                                             vox[2] < 0 };
+    const std::array<bool, 3> borderIdxHigh { vox[0] >= int(nbVoxels.x) - 1,
+                                              vox[1] >= int(nbVoxels.y) - 1,
+                                              vox[2] >= int(nbVoxels.z) - 1 };
 
     // compute weight factors
     const std::array<float, 3> weights { float(position(0) - (vox[0] + 0.5)),
