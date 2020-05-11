@@ -86,7 +86,7 @@ ProjectionData SpectralEffectsExtension::projectComposite(const CompositeVolume&
 {
     if(canBypassExtension(volume))
     {
-        qDebug() << "Bypassing SpectralEffectsExtension.";
+        qInfo() << "Bypassing SpectralEffectsExtension.";
         return ProjectorExtension::projectComposite(volume);
     }
 
